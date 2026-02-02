@@ -1,6 +1,6 @@
 'use client';
 
-import { getAggregatedPlayerStats } from "@/lib/data";
+import { calculateAggregatedStats } from "@/lib/data";
 import {
   Card,
   CardContent,
@@ -12,9 +12,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Zap, Crown } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import type { Player, Match } from "@/lib/definitions";
 
-export function PowerRanking() {
-  const playerStats = getAggregatedPlayerStats();
+interface PowerRankingProps {
+  players: Player[];
+  matches: Match[];
+}
+
+export function PowerRanking({ players, matches }: PowerRankingProps) {
+  const playerStats = calculateAggregatedStats(players, matches);
   const topRanking = [...playerStats]
     .sort((a, b) => b.powerPoints - a.powerPoints)
     .slice(0, 5);
@@ -60,6 +66,9 @@ export function PowerRanking() {
               </div>
             </div>
           ))}
+          {topRanking.length === 0 && (
+            <p className="text-sm text-muted-foreground text-center py-4">No hay datos suficientes aún.</p>
+          )}
         </div>
       </CardContent>
     </Card>

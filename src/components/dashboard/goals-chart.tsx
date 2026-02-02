@@ -1,6 +1,5 @@
 "use client";
 
-import { matches } from "@/lib/data";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
   Card,
@@ -17,6 +16,7 @@ import {
   ChartLegendContent,
 } from "../ui/chart";
 import type { ChartConfig } from "../ui/chart";
+import type { Match } from "@/lib/definitions";
 
 const chartConfig = {
   azul: {
@@ -29,8 +29,13 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function GoalsChart() {
-  const chartData = matches
+interface GoalsChartProps {
+  matches: Match[];
+}
+
+export function GoalsChart({ matches }: GoalsChartProps) {
+  const chartData = [...matches]
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     .map((match) => ({
       date: new Date(match.date).toLocaleDateString("es-ES", {
         month: "short",
@@ -39,13 +44,13 @@ export function GoalsChart() {
       azul: match.teamAScore,
       rojo: match.teamBScore,
     }))
-    .reverse();
+    .slice(-10); // Mostramos los últimos 10
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Rendimiento General</CardTitle>
-        <CardDescription>Goles por equipo en cada partido.</CardDescription>
+        <CardDescription>Goles por equipo en los últimos partidos.</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-80 w-full">
