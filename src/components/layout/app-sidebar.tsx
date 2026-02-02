@@ -1,4 +1,3 @@
-
 "use client";
 
 import { usePathname } from "next/navigation";
@@ -12,8 +11,6 @@ import {
 } from "../ui/sidebar";
 import { Goal, BarChart3, Users, LogOut } from "lucide-react";
 import { Fut7StatsLogo } from "@/components/icons";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { Button } from "../ui/button";
 import Link from "next/link";
 
 const menuItems = [
@@ -44,7 +41,7 @@ export function AppSidebar() {
           <Fut7StatsLogo className="h-8 w-8 text-primary" />
           <div className="flex flex-col">
             <h2 className="text-lg font-semibold">Fut7Stats</h2>
-            <p className="text-xs text-muted-foreground">Amigos de Martes</p>
+            <p className="text-xs text-muted-foreground">Gestión Deportiva</p>
           </div>
         </div>
       </SidebarHeader>

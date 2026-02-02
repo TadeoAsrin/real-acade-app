@@ -2,9 +2,7 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { matches, getPlayerById } from "@/lib/data";
 import { cn } from "@/lib/utils";
@@ -48,10 +46,10 @@ export default function MatchesPage() {
                     <span
                       className={cn(
                         "text-lg font-semibold",
-                        (draw || teamAWon) ? "text-foreground" : "text-muted-foreground"
+                        (draw || teamAWon) ? "text-primary" : "text-muted-foreground"
                       )}
                     >
-                      Amigos de Martes
+                      Azul
                     </span>
                     <span className="text-5xl font-bold text-primary">{match.teamAScore}</span>
                   </div>
@@ -62,10 +60,10 @@ export default function MatchesPage() {
                     <span
                       className={cn(
                         "text-lg font-semibold",
-                        (draw || teamBWon) ? "text-foreground" : "text-muted-foreground"
+                        (draw || teamBWon) ? "text-accent" : "text-muted-foreground"
                       )}
                     >
-                      Resto del Mundo
+                      Rojo
                     </span>
                     <span className="text-5xl font-bold text-accent">{match.teamBScore}</span>
                   </div>

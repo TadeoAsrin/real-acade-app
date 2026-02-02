@@ -19,12 +19,12 @@ import {
 import type { ChartConfig } from "../ui/chart";
 
 const chartConfig = {
-  amigos: {
-    label: "Amigos de Martes",
+  azul: {
+    label: "Equipo Azul",
     color: "hsl(var(--primary))",
   },
-  resto: {
-    label: "Resto del Mundo",
+  rojo: {
+    label: "Equipo Rojo",
     color: "hsl(var(--accent))",
   },
 } satisfies ChartConfig;
@@ -36,8 +36,8 @@ export function GoalsChart() {
         month: "short",
         day: "numeric",
       }),
-      amigos: match.teamAScore,
-      resto: match.teamBScore,
+      azul: match.teamAScore,
+      rojo: match.teamBScore,
     }))
     .reverse();
 
@@ -64,13 +64,13 @@ export function GoalsChart() {
             />
             <ChartLegend content={<ChartLegendContent />} />
             <Bar
-              dataKey="amigos"
-              fill="var(--color-amigos)"
+              dataKey="azul"
+              fill="var(--color-azul)"
               stackId="a"
             />
             <Bar
-              dataKey="resto"
-              fill="var(--color-resto)"
+              dataKey="rojo"
+              fill="var(--color-rojo)"
               radius={[4, 4, 0, 0]}
               stackId="a"
             />

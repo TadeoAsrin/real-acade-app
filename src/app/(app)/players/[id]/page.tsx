@@ -1,9 +1,7 @@
-
 import { getAggregatedStatsForPlayer, getMatchHistoryForPlayer, getPlayerById } from "@/lib/data";
 import { notFound } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Goal, Shield, Users, Trophy, Award, TrendingUp } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Link from "next/link";
@@ -29,7 +27,7 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
         </Avatar>
         <div className="pt-4 text-center md:text-left">
           <h1 className="text-4xl font-bold tracking-tight">{player.name}</h1>
-          <p className={player.team === 'Amigos de Martes' ? 'text-primary' : 'text-accent'}>{player.team}</p>
+          <p className="text-muted-foreground">Estadísticas Acumuladas</p>
         </div>
       </div>
 

@@ -76,8 +76,8 @@ export default function NewMatchPage() {
     }
   }, [currentUser, router]);
 
-  const teamAPlayers = players.filter((p) => p.team === "Amigos de Martes");
-  const teamBPlayers = players.filter((p) => p.team === "Resto del Mundo");
+  const teamAPlayers = players.filter((p) => p.team === "Azul");
+  const teamBPlayers = players.filter((p) => p.team === "Rojo");
   const allMatchPlayers = [...teamAPlayers, ...teamBPlayers];
 
   const defaultValues = {
@@ -261,7 +261,7 @@ export default function NewMatchPage() {
             <Accordion type="multiple" className="w-full" defaultValue={['team-a', 'team-b']}>
               <AccordionItem value="team-a">
                 <AccordionTrigger className="text-xl font-semibold text-primary">
-                  Amigos de Martes
+                  Azul
                 </AccordionTrigger>
                 <AccordionContent className="space-y-6 pt-4">
                   {renderCaptainSelector('A')}
@@ -273,7 +273,7 @@ export default function NewMatchPage() {
               </AccordionItem>
               <AccordionItem value="team-b">
                 <AccordionTrigger className="text-xl font-semibold text-accent">
-                  Resto del Mundo
+                  Rojo
                 </AccordionTrigger>
                 <AccordionContent className="space-y-6 pt-4">
                   {renderCaptainSelector('B')}

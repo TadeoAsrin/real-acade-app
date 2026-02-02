@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { cn } from '@/lib/utils';
 
 interface FieldViewProps {
-  team: 'Amigos de Martes' | 'Resto del Mundo';
+  team: 'Azul' | 'Rojo';
   players: Player[];
 }
 
@@ -27,32 +27,16 @@ const positionCoordinates: { [key: string]: { top: string; left: string; transfo
   FWD: { top: '80%', left: '50%', transform: 'translateX(-50%)' },
 };
 
-// This is a simplified mapping. A more robust solution would be needed
-// for dynamic formations or more players.
 const playerPositionMap: { [key: string]: keyof typeof positionCoordinates } = {
-  // Amigos de Martes
-  '1': 'FWD',   // Leandro
-  '2': 'MID_L', // Matias
-  '3': 'MID_R', // Juan
-  '4': 'MID_C', // Diego
-  '5': 'DEF_L', // Facundo
-  '6': 'DEF_R', // Sergio
-  '7': 'GK',    // Pablo
-  // Resto del Mundo
-  '8': 'FWD',   // Carlos
-  '9': 'MID_L', // Jorge
-  '10': 'MID_R',// Ricardo
-  '11': 'MID_C',// Fernando
-  '12': 'DEF_L',// Andres
-  '13': 'DEF_R',// Luis
-  '14': 'GK',   // Miguel
+  '1': 'FWD', '2': 'MID_L', '3': 'MID_R', '4': 'MID_C', '5': 'DEF_L', '6': 'DEF_R', '7': 'GK',
+  '8': 'FWD', '9': 'MID_L', '10': 'MID_R', '11': 'MID_C', '12': 'DEF_L', '13': 'DEF_R', '14': 'GK',
 };
 
-type PlayerPosition = { x: number; y: number }; // in percentages
+type PlayerPosition = { x: number; y: number };
 type PlayerPositions = { [playerId: string]: PlayerPosition };
 type DraggingState = {
   id: string;
-  offsetX: number; // offset from element's center to mouse pos
+  offsetX: number;
   offsetY: number;
 };
 
@@ -67,7 +51,6 @@ export function FieldView({ team, players }: FieldViewProps) {
       const positionKey = playerPositionMap[player.id];
       if (positionKey) {
         const coords = positionCoordinates[positionKey];
-        // Store initial percentages for center
         initialPositions[player.id] = {
           x: parseFloat(coords.left),
           y: parseFloat(coords.top),
@@ -83,38 +66,25 @@ export function FieldView({ team, players }: FieldViewProps) {
     e.preventDefault();
     const playerElement = playerRefs.current[playerId];
     if (!playerElement) return;
-
     const playerRect = playerElement.getBoundingClientRect();
-    
-    // Calculate offset from the center of the element to the mouse position
     const offsetX = e.clientX - (playerRect.left + playerRect.width / 2);
     const offsetY = e.clientY - (playerRect.top + playerRect.height / 2);
-
     setDraggingPlayer({ id: playerId, offsetX, offsetY });
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!draggingPlayer || !fieldRef.current) return;
-    
     e.preventDefault();
     const fieldRect = fieldRef.current.getBoundingClientRect();
     const playerElement = playerRefs.current[draggingPlayer.id];
     if (!playerElement) return;
-    
     const playerRect = playerElement.getBoundingClientRect();
-
-    // Calculate new center position in pixels relative to the field
     let newCenterX = e.clientX - fieldRect.left - draggingPlayer.offsetX;
     let newCenterY = e.clientY - fieldRect.top - draggingPlayer.offsetY;
-    
-    // Constrain center within field boundaries
     newCenterX = Math.max(playerRect.width / 2, Math.min(newCenterX, fieldRect.width - playerRect.width / 2));
     newCenterY = Math.max(playerRect.height / 2, Math.min(newCenterY, fieldRect.height - playerRect.height / 2));
-
-    // Convert to percentage for styling
     const xPercent = (newCenterX / fieldRect.width) * 100;
     const yPercent = (newCenterY / fieldRect.height) * 100;
-
     setPlayerPositions((prev) => ({
       ...prev,
       [draggingPlayer.id]: { x: xPercent, y: yPercent },
@@ -128,7 +98,7 @@ export function FieldView({ team, players }: FieldViewProps) {
   return (
     <Card>
         <CardHeader>
-            <CardTitle>{team}</CardTitle>
+            <CardTitle className={team === 'Azul' ? 'text-primary' : 'text-accent'}>Equipo {team}</CardTitle>
         </CardHeader>
         <CardContent>
             <div
@@ -141,7 +111,6 @@ export function FieldView({ team, players }: FieldViewProps) {
                     draggingPlayer ? "cursor-grabbing" : "cursor-grab"
                 )}
             >
-                {/* Field Markings */}
                 <div className="absolute top-1/2 left-1/2 h-32 w-32 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/30"></div>
                 <div className="absolute top-1/2 left-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/30"></div>
                 <div className="absolute top-1/2 left-0 h-[2px] w-full -translate-y-1/2 bg-white/30"></div>
@@ -152,7 +121,6 @@ export function FieldView({ team, players }: FieldViewProps) {
                     {teamPlayers.map((player) => {
                         const position = playerPositions[player.id];
                         if (!position) return null;
-
                         return (
                             <Tooltip key={player.id}>
                                 <TooltipTrigger asChild>
@@ -166,7 +134,7 @@ export function FieldView({ team, players }: FieldViewProps) {
                                             transform: 'translate(-50%, -50%)',
                                         }}
                                     >
-                                        <Avatar className="h-12 w-12 border-2 border-white shadow-lg">
+                                        <Avatar className={cn("h-12 w-12 border-2 shadow-lg", team === 'Azul' ? "border-primary" : "border-accent")}>
                                             <AvatarImage src={player.avatar} alt={player.name} />
                                             <AvatarFallback>{player.name.charAt(0)}</AvatarFallback>
                                         </Avatar>

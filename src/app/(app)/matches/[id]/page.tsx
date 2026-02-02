@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -122,7 +121,7 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
           <div className="flex items-center justify-around">
             <div className="flex flex-col items-center gap-2">
               <span className="text-xl font-semibold text-primary">
-                Amigos de Martes
+                Azul
               </span>
               <span className="text-6xl font-bold text-primary">
                 {match.teamAScore}
@@ -131,7 +130,7 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
             <div className="text-5xl font-light text-muted-foreground">vs</div>
             <div className="flex flex-col items-center gap-2">
               <span className="text-xl font-semibold text-accent">
-                Resto del Mundo
+                Rojo
               </span>
               <span className="text-6xl font-bold text-accent">
                 {match.teamBScore}
@@ -143,12 +142,12 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <PlayerStatsTable
-          title="Amigos de Martes"
+          title="Azul"
           stats={match.teamAPlayers}
           teamColor="primary"
         />
         <PlayerStatsTable
-          title="Resto del Mundo"
+          title="Rojo"
           stats={match.teamBPlayers}
           teamColor="accent"
         />

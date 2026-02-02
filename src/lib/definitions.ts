@@ -2,7 +2,7 @@ export type Player = {
   id: string;
   name: string;
   avatar: string;
-  team: 'Amigos de Martes' | 'Resto del Mundo';
+  team: 'Azul' | 'Rojo';
   role: 'admin' | 'player';
 };
 

@@ -89,8 +89,8 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-        <FieldView team="Amigos de Martes" players={players} />
-        <FieldView team="Resto del Mundo" players={players} />
+        <FieldView team="Azul" players={players} />
+        <FieldView team="Rojo" players={players} />
       </div>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">

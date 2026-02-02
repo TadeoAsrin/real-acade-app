@@ -55,7 +55,7 @@ export function Header() {
                 {currentUser?.name}
               </p>
               <p className="text-xs leading-none text-muted-foreground">
-                {currentUser?.team}
+                Perfil de Usuario
               </p>
             </div>
           </DropdownMenuLabel>
