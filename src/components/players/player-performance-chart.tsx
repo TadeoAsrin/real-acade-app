@@ -54,27 +54,25 @@ export function PlayerPerformanceChart({ matchHistory }: PerformanceChartProps) 
         <CardDescription>Goles en los últimos partidos.</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="h-80 w-full">
-          <ChartContainer config={chartConfig}>
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="date" tickLine={false} axisLine={false} />
-              <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
-              <ChartTooltip
-                content={<ChartTooltipContent indicator="dot" />}
-              />
-              <ChartLegend content={<ChartLegendContent />} />
-              <Line
-                type="monotone"
-                dataKey="Goles"
-                stroke="var(--color-Goles)"
-                strokeWidth={2}
-                dot={{ r: 4 }}
-                activeDot={{r: 6}}
-              />
-            </LineChart>
-          </ChartContainer>
-        </div>
+        <ChartContainer config={chartConfig} className="h-80 w-full">
+          <LineChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+            <XAxis dataKey="date" tickLine={false} axisLine={false} />
+            <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
+            <ChartTooltip
+              content={<ChartTooltipContent indicator="dot" />}
+            />
+            <ChartLegend content={<ChartLegendContent />} />
+            <Line
+              type="monotone"
+              dataKey="Goles"
+              stroke="var(--color-Goles)"
+              strokeWidth={2}
+              dot={{ r: 4 }}
+              activeDot={{r: 6}}
+            />
+          </LineChart>
+        </ChartContainer>
       </CardContent>
     </Card>
   );
