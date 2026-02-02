@@ -102,6 +102,8 @@ export const getAggregatedPlayerStats = (): AggregatedPlayerStats[] => {
       losses: 0,
       draws: 0,
       winPercentage: 0,
+      matchesAsBlue: 0,
+      matchesAsRed: 0,
     };
   });
 
@@ -119,6 +121,9 @@ export const getAggregatedPlayerStats = (): AggregatedPlayerStats[] => {
             if (isCaptain) stats.totalCaptaincies++;
             if (isMvp) stats.totalMvp++;
             if (hasBestGoal) stats.totalBestGoals++;
+
+            if (team === 'A') stats.matchesAsBlue++;
+            else stats.matchesAsRed++;
 
             if (draw) {
                 stats.draws++;
@@ -144,6 +149,20 @@ export const getAggregatedPlayerStats = (): AggregatedPlayerStats[] => {
   return Object.values(statsMap).sort((a, b) => b.totalGoals - a.totalGoals);
 };
 
+export const getTeamGlobalStats = () => {
+    let blueWins = 0;
+    let redWins = 0;
+    let draws = 0;
+
+    matches.forEach(match => {
+        if (match.teamAScore > match.teamBScore) blueWins++;
+        else if (match.teamBScore > match.teamAScore) redWins++;
+        else draws++;
+    });
+
+    return { blueWins, redWins, draws, total: matches.length };
+};
+
 export const getPlayerById = (id: string): Player | undefined => {
     return players.find(p => p.id === id);
 }
@@ -152,16 +171,16 @@ export const getAggregatedStatsForPlayer = (playerId: string): AggregatedPlayerS
     return getAggregatedPlayerStats().find(p => p.playerId === playerId);
 }
 
-export const getMatchHistoryForPlayer = (playerId: string): (PlayerStats & {matchId: string, date: string})[] => {
-    const history: (PlayerStats & {matchId: string, date: string})[] = [];
+export const getMatchHistoryForPlayer = (playerId: string): (PlayerStats & {matchId: string, date: string, team: 'Azul' | 'Rojo'})[] => {
+    const history: (PlayerStats & {matchId: string, date: string, team: 'Azul' | 'Rojo'})[] = [];
     matches.forEach(match => {
-        const playerStat = [...match.teamAPlayers, ...match.teamBPlayers].find(p => p.playerId === playerId);
-        if (playerStat) {
-            history.push({
-                ...playerStat,
-                matchId: match.id,
-                date: match.date,
-            });
+        const playerStatA = match.teamAPlayers.find(p => p.playerId === playerId);
+        const playerStatB = match.teamBPlayers.find(p => p.playerId === playerId);
+        
+        if (playerStatA) {
+            history.push({ ...playerStatA, matchId: match.id, date: match.date, team: 'Azul' });
+        } else if (playerStatB) {
+            history.push({ ...playerStatB, matchId: match.id, date: match.date, team: 'Rojo' });
         }
     });
     return history.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());

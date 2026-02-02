@@ -35,4 +35,6 @@ export type AggregatedPlayerStats = {
   losses: number;
   draws: number;
   winPercentage: number;
+  matchesAsBlue: number;
+  matchesAsRed: number;
 };
