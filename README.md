@@ -15,8 +15,9 @@
     *   Al terminar el despliegue (tarda unos 2-3 minutos), Firebase te dará una URL pública (ej: `https://real-acade.web.app`).
     *   ¡Esa es la que debes pasar por el grupo de WhatsApp!
 
-## 💡 Configuración Importante
-*   **Plan de Precios**: Cambia al **Plan Blaze** en la consola. Es necesario para que Next.js funcione, pero seguirás en el nivel **GRATUITO** mientras no superes los 2 millones de visitas al mes (algo casi imposible para un club de amigos).
+## 💡 Configuración Importante de Facturación (Plan Blaze)
+*   **¿Por qué pide tarjeta?**: App Hosting usa Google Cloud para que la IA funcione. Firebase requiere el **Plan Blaze** (pago por uso) para habilitar esta tecnología.
+*   **¿Es gratis?**: **SÍ**. Firebase tiene un nivel gratuito ("Free Tier") muy generoso. Para un club de fútbol, es prácticamente imposible superar los límites gratuitos. Seguirás pagando **$0.00** siempre que no tengas millones de visitas.
 *   **Modo Admin**: Una vez que entres a tu app desde el link, regístrate y pulsa el botón "Activar Modo Administrador" en el Dashboard. ¡Solo tú tendrás el control!
 
 ## 🛠️ Funciones para compartir
