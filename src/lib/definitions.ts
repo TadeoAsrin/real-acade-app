@@ -37,4 +37,5 @@ export type AggregatedPlayerStats = {
   winPercentage: number;
   matchesAsBlue: number;
   matchesAsRed: number;
+  powerPoints: number;
 };

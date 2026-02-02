@@ -20,11 +20,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { GoalsChart } from "@/components/dashboard/goals-chart";
 import { FieldView } from "@/components/dashboard/field-view";
+import { PowerRanking } from "@/components/dashboard/power-ranking";
 
 export default function DashboardPage() {
   const playerStats = getAggregatedPlayerStats();
   const teamStats = getTeamGlobalStats();
-  const currentUser = getPlayerById("1");
   const lastMatch = matches[0];
 
   const topScorers = [...playerStats]
@@ -99,7 +99,7 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-center text-primary">Formación Azul</h3>
           <FieldView team="Azul" players={lastMatchTeamAPlayers} />
@@ -107,6 +107,10 @@ export default function DashboardPage() {
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-center text-accent">Formación Rojo</h3>
           <FieldView team="Rojo" players={lastMatchTeamBPlayers} />
+        </div>
+        <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-center text-yellow-500">Elite del Club</h3>
+            <PowerRanking />
         </div>
       </div>
 
@@ -147,20 +151,6 @@ export default function DashboardPage() {
         </Card>
         <GoalsChart />
       </div>
-
-       {currentUser?.role === 'admin' && (
-            <Card>
-                <CardHeader className="pb-2">
-                    <CardTitle>Administración</CardTitle>
-                    <CardDescription>Gestión de datos del club.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Button size="sm" asChild>
-                        <Link href="/matches/new">Cargar Nuevo Partido</Link>
-                    </Button>
-                </CardContent>
-            </Card>
-        )}
     </div>
   );
 }

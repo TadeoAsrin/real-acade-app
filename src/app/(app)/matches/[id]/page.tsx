@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { BestGoalVote } from "@/components/matches/best-goal-vote";
 import { Award, Star } from "lucide-react";
+import { MatchAiSummary } from "@/components/matches/match-ai-summary";
 
 const PlayerStatsTable = ({
   title,
@@ -84,7 +85,7 @@ const PlayerStatsTable = ({
 
 export default function MatchDetailPage({ params }: { params: { id: string } }) {
   const match = getMatchById(params.id);
-  const currentUser = getPlayerById("1"); // In a real app, this would come from auth
+  const currentUser = getPlayerById("1");
 
   if (!match) {
     notFound();
@@ -100,67 +101,84 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
     })
     .filter(Boolean) as (Player & { goals: number })[];
 
+  const mvpStat = allPlayerStats.find(s => s.isMvp);
+  const bestGoalStat = allPlayerStats.find(s => s.hasBestGoal);
+
+  const matchSummaryData = {
+    date: match.date,
+    teamAScore: match.teamAScore,
+    teamBScore: match.teamBScore,
+    teamAPlayers: match.teamAPlayers.map(s => ({ name: getPlayerById(s.playerId)?.name || 'Desconocido', goals: s.goals })),
+    teamBPlayers: match.teamBPlayers.map(s => ({ name: getPlayerById(s.playerId)?.name || 'Desconocido', goals: s.goals })),
+    mvpName: mvpStat ? getPlayerById(mvpStat.playerId)?.name : undefined,
+    bestGoalName: bestGoalStat ? getPlayerById(bestGoalStat.playerId)?.name : undefined,
+  };
+
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">
-          Detalles del Partido
-        </h1>
-        <p className="text-muted-foreground">
-          {new Date(match.date).toLocaleDateString("es-ES", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })}
-        </p>
-      </div>
-
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-around">
-            <div className="flex flex-col items-center gap-2">
-              <span className="text-xl font-semibold text-primary">
-                Azul
-              </span>
-              <span className="text-6xl font-bold text-primary">
-                {match.teamAScore}
-              </span>
-            </div>
-            <div className="text-5xl font-light text-muted-foreground">vs</div>
-            <div className="flex flex-col items-center gap-2">
-              <span className="text-xl font-semibold text-accent">
-                Rojo
-              </span>
-              <span className="text-6xl font-bold text-accent">
-                {match.teamBScore}
-              </span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <PlayerStatsTable
-          title="Azul"
-          stats={match.teamAPlayers}
-          teamColor="primary"
-        />
-        <PlayerStatsTable
-          title="Rojo"
-          stats={match.teamBPlayers}
-          teamColor="accent"
-        />
-      </div>
-
-      <Separator />
-      
-      {currentUser?.role === 'player' && (
-        <div className="space-y-8">
-            <BestGoalVote scorers={scorers} />
+    <div className="space-y-8 max-w-5xl mx-auto">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+            <h1 className="text-4xl font-black tracking-tighter uppercase">Resumen del Partido</h1>
+            <p className="text-muted-foreground">
+            {new Date(match.date).toLocaleDateString("es-ES", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+            })}
+            </p>
         </div>
-      )}
+        <Badge variant="secondary" className="w-fit text-lg py-1 px-4 border-primary/20">Real Acade League</Badge>
+      </div>
 
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-8">
+            <Card className="bg-gradient-to-br from-background to-muted/50 border-none shadow-2xl overflow-hidden">
+                <CardContent className="p-12 relative">
+                    <div className="flex items-center justify-around relative z-10">
+                        <div className="flex flex-col items-center gap-4">
+                            <span className="text-2xl font-black text-primary uppercase tracking-widest">Azul</span>
+                            <span className="text-8xl font-black text-primary drop-shadow-[0_0_15px_rgba(var(--primary),0.3)]">
+                                {match.teamAScore}
+                            </span>
+                        </div>
+                        <div className="flex flex-col items-center">
+                            <div className="h-20 w-[2px] bg-muted-foreground/20 rotate-12"></div>
+                            <span className="text-3xl font-light text-muted-foreground/30 italic my-4">VS</span>
+                            <div className="h-20 w-[2px] bg-muted-foreground/20 -rotate-12"></div>
+                        </div>
+                        <div className="flex flex-col items-center gap-4">
+                            <span className="text-2xl font-black text-accent uppercase tracking-widest">Rojo</span>
+                            <span className="text-8xl font-black text-accent drop-shadow-[0_0_15px_rgba(var(--accent),0.3)]">
+                                {match.teamBScore}
+                            </span>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <PlayerStatsTable
+                title="Equipo Azul"
+                stats={match.teamAPlayers}
+                teamColor="primary"
+                />
+                <PlayerStatsTable
+                title="Equipo Rojo"
+                stats={match.teamBPlayers}
+                teamColor="accent"
+                />
+            </div>
+        </div>
+
+        <div className="space-y-8">
+            <MatchAiSummary matchData={matchSummaryData} />
+            
+            {currentUser?.role === 'player' && (
+                <BestGoalVote scorers={scorers} />
+            )}
+        </div>
+      </div>
     </div>
   );
 }

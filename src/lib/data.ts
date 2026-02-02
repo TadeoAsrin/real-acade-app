@@ -1,20 +1,16 @@
 import type { Player, Match, AggregatedPlayerStats, PlayerStats } from "./definitions";
 
 export const players: Player[] = [
-  { id: '1', name: 'Leandro', avatar: 'https://picsum.photos/seed/player1/200/200', role: 'admin' },
-  { id: '2', name: 'Matias', avatar: 'https://picsum.photos/seed/player2/200/200', role: 'player' },
-  { id: '3', name: 'Juan', avatar: 'https://picsum.photos/seed/player3/200/200', role: 'player' },
-  { id: '4', name: 'Diego', avatar: 'https://picsum.photos/seed/player4/200/200', role: 'player' },
-  { id: '5', name: 'Facundo', avatar: 'https://picsum.photos/seed/player5/200/200', role: 'player' },
-  { id: '6', name: 'Sergio', avatar: 'https://picsum.photos/seed/player6/200/200', role: 'player' },
-  { id: '7', name: 'Pablo', avatar: 'https://picsum.photos/seed/player7/200/200', role: 'player' },
-  { id: '8', name: 'Carlos', avatar: 'https://picsum.photos/seed/player8/200/200', role: 'player' },
-  { id: '9', name: 'Jorge', avatar: 'https://picsum.photos/seed/player9/200/200', role: 'player' },
-  { id: '10', name: 'Ricardo', avatar: 'https://picsum.photos/seed/player10/200/200', role: 'player' },
-  { id: '11', name: 'Fernando', avatar: 'https://picsum.photos/seed/player11/200/200', role: 'player' },
-  { id: '12', name: 'Andres', avatar: 'https://picsum.photos/seed/player12/200/200', role: 'player' },
-  { id: '13', name: 'Luis', avatar: 'https://picsum.photos/seed/player13/200/200', role: 'player' },
-  { id: '14', name: 'Miguel', avatar: 'https://picsum.photos/seed/player14/200/200', role: 'player' },
+  { id: '1', name: 'Leandro', avatar: 'https://images.unsplash.com/photo-1594672830234-ba4cfe1202dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bWFuJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzY5OTcxMTc1fDA&ixlib=rb-4.1.0&q=80&w=1080', role: 'admin' },
+  { id: '2', name: 'Matias', avatar: 'https://images.unsplash.com/photo-1557053910-d9eadeed1c58?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHx3b21hbiUyMHBvcnRyYWl0fGVufDB8fHx8MTc3MDAxODk3OXww&ixlib=rb-4.1.0&q=80&w=1080', role: 'player' },
+  { id: '3', name: 'Juan', avatar: 'https://images.unsplash.com/photo-1521119989659-a83eee488004?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NzAwMTIyNzd8MA&ixlib=rb-4.1.0&q=80&w=1080', role: 'player' },
+  { id: '4', name: 'Diego', avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtYW4lMjBwb3J0cmFpdHxlbnwwfHx8fDE3Njk5NzExNzV8MA&ixlib=rb-4.1.0&q=80&w=1080', role: 'player' },
+  { id: '5', name: 'Facundo', avatar: 'https://images.unsplash.com/photo-1557053910-d9eadeed1c58?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHx3b21hbiUyMHBvcnRyYWl0fGVufDB8fHx8MTc3MDAxODk3OXww&ixlib=rb-4.1.0&q=80&w=1080', role: 'player' },
+  { id: '6', name: 'Sergio', avatar: 'https://images.unsplash.com/flagged/photo-1595514191830-3e96a518989b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8cGVyc29uJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzcwMDEyMjc3fDA&ixlib=rb-4.1.0&q=80&w=1080', role: 'player' },
+  { id: '7', name: 'Pablo', avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtYW4lMjBwb3J0cmFpdHxlbnwwfHx8fDE3Njk5NzExNzV8MA&ixlib=rb-4.1.0&q=80&w=1080', role: 'player' },
+  { id: '8', name: 'Carlos', avatar: 'https://images.unsplash.com/photo-1614283233556-f35b0c801ef1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8d29tYW4lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NzAwMTg5Nzl8MA&ixlib=rb-4.1.0&q=80&w=1080', role: 'player' },
+  { id: '9', name: 'Jorge', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NzAwMTIyNzd8MA&ixlib=rb-4.1.0&q=80&w=1080', role: 'player' },
+  { id: '10', name: 'Ricardo', avatar: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxtYW4lMjBwb3J0cmFpdHxlbnwwfHx8fDE3Njk5NzExNzV8MA&ixlib=rb-4.1.0&q=80&w=1080', role: 'player' },
 ];
 
 export const matches: Match[] = [
@@ -28,18 +24,11 @@ export const matches: Match[] = [
       { playerId: '2', goals: 1, hasBestGoal: true },
       { playerId: '3', goals: 1},
       { playerId: '4', goals: 1},
-      { playerId: '5', goals: 0},
-      { playerId: '6', goals: 0},
-      { playerId: '7', goals: 0},
     ],
     teamBPlayers: [
       { playerId: '8', goals: 1, isCaptain: true },
       { playerId: '9', goals: 1},
       { playerId: '10', goals: 1},
-      { playerId: '11', goals: 0},
-      { playerId: '12', goals: 0},
-      { playerId: '13', goals: 0},
-      { playerId: '14', goals: 0},
     ],
   },
   {
@@ -50,20 +39,11 @@ export const matches: Match[] = [
     teamAPlayers: [
       { playerId: '1', goals: 1 },
       { playerId: '2', goals: 1, isCaptain: true },
-      { playerId: '3', goals: 0 },
-      { playerId: '4', goals: 0 },
-      { playerId: '5', goals: 0 },
-      { playerId: '6', goals: 0 },
-      { playerId: '7', goals: 0 },
     ],
     teamBPlayers: [
       { playerId: '8', goals: 2, isCaptain: true, isMvp: true, hasBestGoal: true },
       { playerId: '9', goals: 1 },
       { playerId: '10', goals: 1 },
-      { playerId: '11', goals: 0 },
-      { playerId: '12', goals: 0 },
-      { playerId: '13', goals: 0 },
-      { playerId: '14', goals: 0 },
     ],
   },
   {
@@ -75,7 +55,6 @@ export const matches: Match[] = [
         { playerId: '1', goals: 3, isCaptain: true, isMvp: true },
         { playerId: '2', goals: 2 },
         { playerId: '3', goals: 1 },
-        { playerId: '4', goals: 0 },
     ],
     teamBPlayers: [
         { playerId: '8', goals: 4, isCaptain: true, hasBestGoal: true },
@@ -84,6 +63,14 @@ export const matches: Match[] = [
     ]
   }
 ];
+
+const POINTS = {
+  WIN: 10,
+  DRAW: 5,
+  GOAL: 2,
+  MVP: 15,
+  BEST_GOAL: 5,
+};
 
 export const getAggregatedPlayerStats = (): AggregatedPlayerStats[] => {
   const statsMap: { [key: string]: AggregatedPlayerStats } = {};
@@ -104,6 +91,7 @@ export const getAggregatedPlayerStats = (): AggregatedPlayerStats[] => {
       winPercentage: 0,
       matchesAsBlue: 0,
       matchesAsRed: 0,
+      powerPoints: 0,
     };
   });
 
@@ -118,17 +106,27 @@ export const getAggregatedPlayerStats = (): AggregatedPlayerStats[] => {
             const stats = statsMap[playerId];
             stats.matchesPlayed++;
             stats.totalGoals += goals;
+            stats.powerPoints += goals * POINTS.GOAL;
+
             if (isCaptain) stats.totalCaptaincies++;
-            if (isMvp) stats.totalMvp++;
-            if (hasBestGoal) stats.totalBestGoals++;
+            if (isMvp) {
+              stats.totalMvp++;
+              stats.powerPoints += POINTS.MVP;
+            }
+            if (hasBestGoal) {
+              stats.totalBestGoals++;
+              stats.powerPoints += POINTS.BEST_GOAL;
+            }
 
             if (team === 'A') stats.matchesAsBlue++;
             else stats.matchesAsRed++;
 
             if (draw) {
                 stats.draws++;
+                stats.powerPoints += POINTS.DRAW;
             } else if ((team === 'A' && teamAWon) || (team === 'B' && teamBWon)) {
                 stats.wins++;
+                stats.powerPoints += POINTS.WIN;
             } else {
                 stats.losses++;
             }
@@ -146,7 +144,7 @@ export const getAggregatedPlayerStats = (): AggregatedPlayerStats[] => {
       }
   }
 
-  return Object.values(statsMap).sort((a, b) => b.totalGoals - a.totalGoals);
+  return Object.values(statsMap);
 };
 
 export const getTeamGlobalStats = () => {
