@@ -53,8 +53,14 @@ const formSchema = z.object({
   date: z.date({
     required_error: "Se requiere una fecha para el partido.",
   }),
-  teamAPlayerIds: z.array(z.string()).min(1, "Selecciona al menos un jugador para el equipo Azul"),
-  teamBPlayerIds: z.array(z.string()).min(1, "Selecciona al menos un jugador para el equipo Rojo"),
+  teamAPlayerIds: z
+    .array(z.string())
+    .min(1, "Selecciona al menos un jugador para el equipo Azul")
+    .max(7, "El equipo Azul no puede tener más de 7 jugadores"),
+  teamBPlayerIds: z
+    .array(z.string())
+    .min(1, "Selecciona al menos un jugador para el equipo Rojo")
+    .max(7, "El equipo Rojo no puede tener más de 7 jugadores"),
   teamAStats: z.record(playerStatsSchema),
   teamBStats: z.record(playerStatsSchema),
   teamACaptainId: z.string({ required_error: "Selecciona un capitán para el equipo Azul" }),
@@ -106,7 +112,7 @@ export default function NewMatchPage() {
 
   async function onSubmit(data: FormValues) {
     setIsLoading(true);
-    // En una app real, aquí mapearíamos data a nuestra estructura de Firestore/backend
+    // Simulación de guardado
     await new Promise((resolve) => setTimeout(resolve, 1500));
     setIsLoading(false);
     
@@ -119,12 +125,17 @@ export default function NewMatchPage() {
 
   const renderPlayerListSelection = (team: "A" | "B") => {
     const fieldName = team === "A" ? "teamAPlayerIds" : "teamBPlayerIds";
+    const currentTeamIds = team === "A" ? watchedTeamAPlayerIds : watchedTeamBPlayerIds;
     const otherTeamIds = team === "A" ? watchedTeamBPlayerIds : watchedTeamAPlayerIds;
+    const isTeamFull = currentTeamIds.length >= 7;
 
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 border rounded-lg bg-muted/50">
         {players.map((player) => {
-          const isDisabled = otherTeamIds.includes(player.id);
+          const isSelectedInOtherTeam = otherTeamIds.includes(player.id);
+          const isSelectedInThisTeam = currentTeamIds.includes(player.id);
+          const isDisabled = isSelectedInOtherTeam || (isTeamFull && !isSelectedInThisTeam);
+          
           return (
             <FormField
               key={player.id}
@@ -146,12 +157,15 @@ export default function NewMatchPage() {
                       }}
                     />
                   </FormControl>
-                  <FormLabel className={cn("flex items-center gap-2 font-normal cursor-pointer", isDisabled && "opacity-40 cursor-not-allowed")}>
+                  <FormLabel className={cn(
+                    "flex items-center gap-2 font-normal cursor-pointer", 
+                    isDisabled && "opacity-40 cursor-not-allowed"
+                  )}>
                     <Avatar className="h-6 w-6">
                       <AvatarImage src={player.avatar} alt={player.name} />
                       <AvatarFallback>{player.name.charAt(0)}</AvatarFallback>
                     </Avatar>
-                    <span className={isDisabled ? "text-muted-foreground line-through" : ""}>
+                    <span className={cn(isSelectedInOtherTeam && "text-muted-foreground line-through")}>
                       {player.name}
                     </span>
                   </FormLabel>
@@ -178,11 +192,14 @@ export default function NewMatchPage() {
           name={captainField}
           render={({ field }) => (
             <FormItem className="space-y-3">
-              <FormLabel className="text-base font-semibold">¿Quién es el Capitán?</FormLabel>
+              <div className="flex items-center justify-between">
+                <FormLabel className="text-base font-semibold">¿Quién es el Capitán?</FormLabel>
+                <span className="text-xs text-muted-foreground">{selectedIds.length}/7 jugadores</span>
+              </div>
               <FormControl>
                 <RadioGroup
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
+                  value={field.value}
                   className="grid grid-cols-1 md:grid-cols-2 gap-3"
                 >
                   {selectedIds.map(id => {
@@ -246,7 +263,7 @@ export default function NewMatchPage() {
       <Card className="border-t-4 border-t-primary">
         <CardHeader>
           <CardTitle className="text-2xl">Cargar Nuevo Partido</CardTitle>
-          <CardDescription>Ingresa los detalles del encuentro y los resultados individuales.</CardDescription>
+          <CardDescription>Ingresa los detalles del encuentro. Máximo 7 jugadores por equipo.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -273,6 +290,7 @@ export default function NewMatchPage() {
                           onSelect={(date) => { field.onChange(date); setIsCalendarOpen(false); }}
                           disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
                           locale={es}
+                          initialFocus
                         />
                       </PopoverContent>
                     </Popover>
@@ -287,7 +305,12 @@ export default function NewMatchPage() {
                     <AccordionTrigger className="text-xl font-bold text-primary hover:no-underline">Equipo Azul</AccordionTrigger>
                     <AccordionContent className="space-y-6">
                       <div className="space-y-4">
-                        <FormLabel className="text-base">Seleccionar Jugadores</FormLabel>
+                        <div className="flex items-center justify-between">
+                          <FormLabel className="text-base">Seleccionar Jugadores</FormLabel>
+                          <span className={cn("text-sm", watchedTeamAPlayerIds.length === 7 ? "text-primary font-bold" : "text-muted-foreground")}>
+                            {watchedTeamAPlayerIds.length}/7
+                          </span>
+                        </div>
                         {renderPlayerListSelection('A')}
                         <FormMessage>{form.formState.errors.teamAPlayerIds?.message}</FormMessage>
                       </div>
@@ -299,7 +322,12 @@ export default function NewMatchPage() {
                     <AccordionTrigger className="text-xl font-bold text-accent hover:no-underline">Equipo Rojo</AccordionTrigger>
                     <AccordionContent className="space-y-6">
                       <div className="space-y-4">
-                        <FormLabel className="text-base">Seleccionar Jugadores</FormLabel>
+                        <div className="flex items-center justify-between">
+                          <FormLabel className="text-base">Seleccionar Jugadores</FormLabel>
+                          <span className={cn("text-sm", watchedTeamBPlayerIds.length === 7 ? "text-accent font-bold" : "text-muted-foreground")}>
+                            {watchedTeamBPlayerIds.length}/7
+                          </span>
+                        </div>
                         {renderPlayerListSelection('B')}
                         <FormMessage>{form.formState.errors.teamBPlayerIds?.message}</FormMessage>
                       </div>
@@ -322,7 +350,7 @@ export default function NewMatchPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">Mejor Jugador (MVP)</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={allSelectedPlayerIds.length === 0}>
+                        <Select onValueChange={field.onChange} value={field.value} disabled={allSelectedPlayerIds.length === 0}>
                           <FormControl><SelectTrigger><SelectValue placeholder="Selecciona el MVP" /></SelectTrigger></FormControl>
                           <SelectContent>
                             {allSelectedPlayerIds.map(id => (
@@ -340,7 +368,7 @@ export default function NewMatchPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">Mejor Gol</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={scorers.length === 0}>
+                        <Select onValueChange={field.onChange} value={field.value} disabled={scorers.length === 0}>
                           <FormControl><SelectTrigger><SelectValue placeholder={scorers.length > 0 ? "Selecciona el mejor gol" : "Sin goleadores aún"} /></SelectTrigger></FormControl>
                           <SelectContent>
                             {scorers.map(player => (
