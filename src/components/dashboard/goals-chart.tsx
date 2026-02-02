@@ -1,15 +1,7 @@
 "use client";
 
 import { matches } from "@/lib/data";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
   Card,
   CardContent,
@@ -17,7 +9,19 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import { ChartTooltipContent } from "../ui/chart";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "../ui/chart";
+import type { ChartConfig } from "../ui/chart";
+
+const chartConfig = {
+  goals: {
+    label: "Goles",
+    color: "hsl(var(--primary))",
+  },
+} satisfies ChartConfig;
 
 export function GoalsChart() {
   const chartData = matches
@@ -38,18 +42,18 @@ export function GoalsChart() {
       </CardHeader>
       <CardContent>
         <div className="h-80 w-full">
-          <ResponsiveContainer>
-            <BarChart data={chartData}>
+          <ChartContainer config={chartConfig}>
+            <BarChart accessibilityLayer data={chartData}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis dataKey="date" tickLine={false} axisLine={false} />
               <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
-              <Tooltip
+              <ChartTooltip
                 cursor={{ fill: "hsl(var(--secondary))" }}
                 content={<ChartTooltipContent indicator="dot" />}
               />
-              <Bar dataKey="goals" fill="hsl(var(--primary))" radius={4} />
+              <Bar dataKey="goals" fill="var(--color-goals)" radius={4} />
             </BarChart>
-          </ResponsiveContainer>
+          </ChartContainer>
         </div>
       </CardContent>
     </Card>

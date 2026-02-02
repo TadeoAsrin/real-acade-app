@@ -5,11 +5,8 @@ import {
   Line,
   LineChart,
   CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
   XAxis,
   YAxis,
-  Legend,
 } from "recharts";
 import {
   Card,
@@ -18,11 +15,30 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import { ChartTooltipContent } from "../ui/chart";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+} from "../ui/chart";
+import type { ChartConfig } from "../ui/chart";
 
 type PerformanceChartProps = {
   matchHistory: (PlayerStats & { matchId: string; date: string })[];
 };
+
+const chartConfig = {
+  Goles: {
+    label: "Goles",
+    color: "hsl(var(--primary))",
+  },
+  Asistencias: {
+    label: "Asistencias",
+    color: "hsl(var(--accent))",
+  },
+} satisfies ChartConfig;
+
 
 export function PlayerPerformanceChart({ matchHistory }: PerformanceChartProps) {
   const chartData = matchHistory
@@ -44,31 +60,33 @@ export function PlayerPerformanceChart({ matchHistory }: PerformanceChartProps) 
       </CardHeader>
       <CardContent>
         <div className="h-80 w-full">
-          <ResponsiveContainer>
-            <LineChart data={chartData}>
+          <ChartContainer config={chartConfig}>
+            <LineChart accessibilityLayer data={chartData}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis dataKey="date" tickLine={false} axisLine={false} />
               <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
-              <Tooltip
+              <ChartTooltip
                 content={<ChartTooltipContent indicator="dot" />}
               />
-              <Legend />
+              <ChartLegend content={<ChartLegendContent />} />
               <Line
                 type="monotone"
                 dataKey="Goles"
-                stroke="hsl(var(--primary))"
+                stroke="var(--color-Goles)"
                 strokeWidth={2}
-                dot={{ fill: "hsl(var(--primary))", r: 4 }}
+                dot={{ r: 4 }}
+                activeDot={{r: 6}}
               />
               <Line
                 type="monotone"
                 dataKey="Asistencias"
-                stroke="hsl(var(--accent))"
+                stroke="var(--color-Asistencias)"
                 strokeWidth={2}
-                dot={{ fill: "hsl(var(--accent))", r: 4 }}
+                dot={{ r: 4 }}
+                activeDot={{r: 6}}
               />
             </LineChart>
-          </ResponsiveContainer>
+          </ChartContainer>
         </div>
       </CardContent>
     </Card>
