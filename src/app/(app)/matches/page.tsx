@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { ArrowRight, CalendarIcon, Plus, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc } from "@/firebase";
-import { collection, query, orderBy } from "firebase/firestore";
+import { collection, query, orderBy, doc } from "firebase/firestore";
 import type { Match } from "@/lib/definitions";
 
 export default function MatchesPage() {
@@ -22,19 +22,15 @@ export default function MatchesPage() {
     return query(collection(firestore, 'matches'), orderBy('date', 'desc'));
   }, [firestore]);
 
-  const { data: matchesData, isLoading } = useCollection<Match>(matchesQuery);
-  
-  // Verificamos si el usuario es admin
-  const adminRef = useMemoFirebase(() => {
+  const adminRoleRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
-    return collection(firestore, 'roles_admin').withConverter({
-        fromFirestore: (snapshot) => snapshot.data(),
-        toFirestore: (data) => data,
-    });
+    return doc(firestore, 'roles_admin', user.uid);
   }, [firestore, user]);
+
+  const { data: matchesData, isLoading } = useCollection<Match>(matchesQuery);
+  const { data: adminRole } = useDoc<{isAdmin: boolean}>(adminRoleRef);
   
-  const { data: adminRole } = useCollection<{isAdmin: boolean}>(adminRef);
-  const isAdmin = adminRole?.find(r => r.id === user?.uid)?.isAdmin;
+  const isAdmin = adminRole?.isAdmin;
 
   if (isLoading) {
     return (

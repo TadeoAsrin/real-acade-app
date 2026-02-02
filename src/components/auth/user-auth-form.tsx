@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -11,6 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { useAuth } from "@/firebase";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {
   mode: "login" | "register";
@@ -28,6 +31,7 @@ type UserFormValue = z.infer<typeof formSchema>;
 export function UserAuthForm({ className, mode, ...props }: UserAuthFormProps) {
   const router = useRouter();
   const { toast } = useToast();
+  const auth = useAuth();
   const [isLoading, setIsLoading] = React.useState(false);
 
   const {
@@ -40,23 +44,30 @@ export function UserAuthForm({ className, mode, ...props }: UserAuthFormProps) {
 
   const onSubmit = async (data: UserFormValue) => {
     setIsLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    setIsLoading(false);
-
-    if (mode === "login") {
-      toast({
-        title: "Inicio de sesión exitoso",
-        description: "Redirigiendo al panel...",
-      });
+    try {
+      if (mode === "login") {
+        await signInWithEmailAndPassword(auth, data.email, data.password);
+        toast({
+          title: "Inicio de sesión exitoso",
+          description: "Bienvenido a Real Acade.",
+        });
+      } else {
+        await createUserWithEmailAndPassword(auth, data.email, data.password);
+        toast({
+          title: "Registro exitoso",
+          description: "Tu cuenta ha sido creada correctamente.",
+        });
+      }
       router.push("/dashboard");
-    } else {
+    } catch (error: any) {
+      console.error(error);
       toast({
-        title: "Registro exitoso",
-        description: "Tu cuenta ha sido creada. Redirigiendo...",
+        variant: "destructive",
+        title: "Error de autenticación",
+        description: error.message || "Ocurrió un error al intentar acceder.",
       });
-      router.push("/dashboard");
+    } finally {
+      setIsLoading(false);
     }
   };
 
