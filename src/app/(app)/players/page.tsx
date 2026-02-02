@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -183,7 +182,6 @@ export default function PlayersPage() {
   const allPlayers = playersData || [];
   const allMatches = matchesData || [];
   
-  // Calcular y ordenar las estadísticas
   const playerStats = calculateAggregatedStats(allPlayers, allMatches).sort((a, b) => {
     const aValue = a[sortConfig.key];
     const bValue = b[sortConfig.key];
