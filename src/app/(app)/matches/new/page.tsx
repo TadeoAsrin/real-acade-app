@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -85,6 +86,10 @@ export default function NewMatchPage() {
       teamBPlayerIds: [],
       teamAStats: {},
       teamBStats: {},
+      teamACaptainId: "",
+      teamBCaptainId: "",
+      mvpPlayerId: "",
+      bestGoalPlayerId: "",
     },
   });
 
@@ -102,10 +107,10 @@ export default function NewMatchPage() {
   const scorers = React.useMemo(() => {
     const scorerIds = new Set<string>();
     Object.entries(watchedTeamAStats).forEach(([id, stat]) => {
-      if (watchedTeamAPlayerIds.includes(id) && stat.goals > 0) scorerIds.add(id);
+      if (watchedTeamAPlayerIds.includes(id) && stat?.goals > 0) scorerIds.add(id);
     });
     Object.entries(watchedTeamBStats).forEach(([id, stat]) => {
-      if (watchedTeamBPlayerIds.includes(id) && stat.goals > 0) scorerIds.add(id);
+      if (watchedTeamBPlayerIds.includes(id) && stat?.goals > 0) scorerIds.add(id);
     });
     return players.filter(p => scorerIds.has(p.id));
   }, [watchedTeamAStats, watchedTeamBStats, watchedTeamAPlayerIds, watchedTeamBPlayerIds]);
@@ -199,7 +204,7 @@ export default function NewMatchPage() {
               <FormControl>
                 <RadioGroup
                   onValueChange={field.onChange}
-                  value={field.value}
+                  value={field.value || ""}
                   className="grid grid-cols-1 md:grid-cols-2 gap-3"
                 >
                   {selectedIds.map(id => {
@@ -245,7 +250,15 @@ export default function NewMatchPage() {
                     name={`${teamKey}.${id}.goals`}
                     render={({ field }) => (
                       <FormItem className="w-20">
-                        <FormControl><Input type="number" min="0" {...field} className="h-8" /></FormControl>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            min="0" 
+                            {...field} 
+                            value={field.value ?? 0}
+                            className="h-8" 
+                          />
+                        </FormControl>
                       </FormItem>
                     )}
                   />
@@ -350,7 +363,7 @@ export default function NewMatchPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">Mejor Jugador (MVP)</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value} disabled={allSelectedPlayerIds.length === 0}>
+                        <Select onValueChange={field.onChange} value={field.value || ""}>
                           <FormControl><SelectTrigger><SelectValue placeholder="Selecciona el MVP" /></SelectTrigger></FormControl>
                           <SelectContent>
                             {allSelectedPlayerIds.map(id => (
@@ -368,7 +381,7 @@ export default function NewMatchPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">Mejor Gol</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value} disabled={scorers.length === 0}>
+                        <Select onValueChange={field.onChange} value={field.value || ""}>
                           <FormControl><SelectTrigger><SelectValue placeholder={scorers.length > 0 ? "Selecciona el mejor gol" : "Sin goleadores aún"} /></SelectTrigger></FormControl>
                           <SelectContent>
                             {scorers.map(player => (
