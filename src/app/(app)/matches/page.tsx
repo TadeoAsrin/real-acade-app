@@ -1,17 +1,50 @@
+
+'use client';
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
-import { matches, getPlayerById } from "@/lib/data";
 import { cn } from "@/lib/utils";
-import { ArrowRight, CalendarIcon, Plus } from "lucide-react";
+import { ArrowRight, CalendarIcon, Plus, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc } from "@/firebase";
+import { collection, query, orderBy } from "firebase/firestore";
+import type { Match } from "@/lib/definitions";
 
 export default function MatchesPage() {
-  const currentUser = getPlayerById("1"); // In a real app, this would come from auth
+  const firestore = useFirestore();
+  const { user } = useUser();
+
+  const matchesQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'matches'), orderBy('date', 'desc'));
+  }, [firestore]);
+
+  const { data: matchesData, isLoading } = useCollection<Match>(matchesQuery);
+  
+  // Verificamos si el usuario es admin
+  const adminRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return collection(firestore, 'roles_admin').withConverter({
+        fromFirestore: (snapshot) => snapshot.data(),
+        toFirestore: (data) => data,
+    });
+  }, [firestore, user]);
+  
+  const { data: adminRole } = useCollection<{isAdmin: boolean}>(adminRef);
+  const isAdmin = adminRole?.find(r => r.id === user?.uid)?.isAdmin;
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[50vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const allMatches = matchesData || [];
 
   return (
     <div className="flex flex-col gap-8 max-w-4xl mx-auto">
@@ -20,7 +53,7 @@ export default function MatchesPage() {
             <h1 className="text-3xl font-bold tracking-tight text-white">Historial de Partidos</h1>
             <p className="text-muted-foreground">Registro de todos los encuentros disputados.</p>
           </div>
-          {currentUser?.role === 'admin' && (
+          {isAdmin && (
             <Button asChild>
                 <Link href="/matches/new"><Plus className="mr-2 h-4 w-4" /> Cargar Partido</Link>
             </Button>
@@ -28,7 +61,7 @@ export default function MatchesPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-6">
-        {matches.map((match) => {
+        {allMatches.map((match) => {
           const teamAWon = match.teamAScore > match.teamBScore;
           const teamBWon = match.teamBScore > match.teamAScore;
           const draw = match.teamAScore === match.teamBScore;
@@ -93,6 +126,11 @@ export default function MatchesPage() {
             </Card>
           );
         })}
+        {allMatches.length === 0 && (
+            <div className="text-center py-12 border-2 border-dashed rounded-lg">
+                <p className="text-muted-foreground">No hay partidos registrados aún.</p>
+            </div>
+        )}
       </div>
     </div>
   );

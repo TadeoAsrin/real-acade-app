@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { players, getPlayerById } from "@/lib/data";
 import {
   Accordion,
   AccordionContent,
@@ -45,6 +44,9 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useCollection, useMemoFirebase, useFirestore, useUser } from "@/firebase";
+import { collection, doc, setDoc, serverTimestamp } from "firebase/firestore";
+import type { Player } from "@/lib/definitions";
 
 const playerStatsSchema = z.object({
   goals: z.coerce.number().min(0).default(0),
@@ -75,8 +77,18 @@ type FormValues = z.infer<typeof formSchema>;
 export default function NewMatchPage() {
   const { toast } = useToast();
   const router = useRouter();
+  const firestore = useFirestore();
+  const { user } = useUser();
   const [isLoading, setIsLoading] = React.useState(false);
   const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
+
+  const playersRef = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return collection(firestore, 'players');
+  }, [firestore]);
+
+  const { data: playersData, isLoading: playersLoading } = useCollection<Player>(playersRef);
+  const players = playersData || [];
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -113,19 +125,56 @@ export default function NewMatchPage() {
       if (watchedTeamBPlayerIds.includes(id) && stat?.goals > 0) scorerIds.add(id);
     });
     return players.filter(p => scorerIds.has(p.id));
-  }, [watchedTeamAStats, watchedTeamBStats, watchedTeamAPlayerIds, watchedTeamBPlayerIds]);
+  }, [watchedTeamAStats, watchedTeamBStats, watchedTeamAPlayerIds, watchedTeamBPlayerIds, players]);
 
   async function onSubmit(data: FormValues) {
+    if (!firestore) return;
     setIsLoading(true);
-    // Simulación de guardado
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsLoading(false);
     
-    toast({
-      title: "Partido Guardado",
-      description: "Las estadísticas del partido se han guardado correctamente.",
-    });
-    router.push("/matches");
+    try {
+        const matchId = crypto.randomUUID();
+        const teamAPlayers = data.teamAPlayerIds.map(id => ({
+            playerId: id,
+            goals: data.teamAStats[id]?.goals || 0,
+            isCaptain: data.teamACaptainId === id,
+            isMvp: data.mvpPlayerId === id,
+            hasBestGoal: data.bestGoalPlayerId === id
+        }));
+        const teamBPlayers = data.teamBPlayerIds.map(id => ({
+            playerId: id,
+            goals: data.teamBStats[id]?.goals || 0,
+            isCaptain: data.teamBCaptainId === id,
+            isMvp: data.mvpPlayerId === id,
+            hasBestGoal: data.bestGoalPlayerId === id
+        }));
+
+        const teamAScore = teamAPlayers.reduce((sum, p) => sum + p.goals, 0);
+        const teamBScore = teamBPlayers.reduce((sum, p) => sum + p.goals, 0);
+
+        await setDoc(doc(firestore, 'matches', matchId), {
+            date: data.date.toISOString(),
+            teamAScore,
+            teamBScore,
+            teamAPlayers,
+            teamBPlayers,
+            createdAt: serverTimestamp()
+        });
+
+        toast({
+          title: "Partido Guardado",
+          description: "Las estadísticas del partido se han guardado correctamente.",
+        });
+        router.push("/matches");
+    } catch (error) {
+        console.error("Error saving match:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "No se pudo guardar el partido.",
+        });
+    } finally {
+        setIsLoading(false);
+    }
   }
 
   const renderPlayerListSelection = (team: "A" | "B") => {
@@ -208,7 +257,7 @@ export default function NewMatchPage() {
                   className="grid grid-cols-1 md:grid-cols-2 gap-3"
                 >
                   {selectedIds.map(id => {
-                    const player = getPlayerById(id);
+                    const player = players.find(p => p.id === id);
                     if (!player) return null;
                     return (
                       <FormItem key={id} className="flex items-center space-x-3 space-y-0 border p-3 rounded-md hover:bg-accent/50 transition-colors cursor-pointer">
@@ -234,7 +283,7 @@ export default function NewMatchPage() {
           <FormLabel className="text-base font-semibold">Goles Marcados</FormLabel>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {selectedIds.map(id => {
-              const player = getPlayerById(id);
+              const player = players.find(p => p.id === id);
               if (!player) return null;
               return (
                 <div key={id} className="flex items-center justify-between p-3 border rounded-md bg-background shadow-sm">
@@ -270,6 +319,14 @@ export default function NewMatchPage() {
       </div>
     );
   };
+
+  if (playersLoading) {
+      return (
+          <div className="flex h-[50vh] items-center justify-center">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+      );
+  }
 
   return (
     <div className="max-w-4xl mx-auto pb-12">
@@ -366,9 +423,12 @@ export default function NewMatchPage() {
                         <Select onValueChange={field.onChange} value={field.value || ""}>
                           <FormControl><SelectTrigger><SelectValue placeholder="Selecciona el MVP" /></SelectTrigger></FormControl>
                           <SelectContent>
-                            {allSelectedPlayerIds.map(id => (
-                              <SelectItem key={id} value={id}>{getPlayerById(id)?.name}</SelectItem>
-                            ))}
+                            {allSelectedPlayerIds.map(id => {
+                                const player = players.find(p => p.id === id);
+                                return (
+                                    <SelectItem key={id} value={id}>{player?.name}</SelectItem>
+                                );
+                            })}
                           </SelectContent>
                         </Select>
                         <FormMessage />

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
@@ -12,8 +13,9 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { SidebarTrigger } from "../ui/sidebar";
-import { LogOut, User } from "lucide-react";
-import { getPlayerById } from "@/lib/data";
+import { LogOut, User, Loader2 } from "lucide-react";
+import { useUser, useFirestore, useMemoFirebase, useCollection } from "@/firebase";
+import type { Player } from "@/lib/definitions";
 
 const getPageTitle = (pathname: string) => {
   if (pathname.includes("/dashboard")) return "Panel de Control";
@@ -26,8 +28,16 @@ const getPageTitle = (pathname: string) => {
 export function Header() {
   const pathname = usePathname();
   const router = useRouter();
-  // In a real app, this would come from the auth context
-  const currentUser = getPlayerById("1");
+  const firestore = useFirestore();
+  const { user, isUserLoading } = useUser();
+
+  const playersRef = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return collection(firestore, 'players');
+  }, [firestore]);
+
+  const { data: players } = useCollection<Player>(playersRef);
+  const currentUser = players?.find(p => p.id === user?.uid);
 
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
@@ -42,17 +52,21 @@ export function Header() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-            <Avatar className="h-10 w-10">
-              <AvatarImage src={currentUser?.avatar} alt={currentUser?.name} />
-              <AvatarFallback>{currentUser?.name.charAt(0)}</AvatarFallback>
-            </Avatar>
+            {isUserLoading ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+                <Avatar className="h-10 w-10">
+                <AvatarImage src={currentUser?.avatar} alt={currentUser?.name || user?.email || ""} />
+                <AvatarFallback>{(currentUser?.name || user?.email || "U").charAt(0).toUpperCase()}</AvatarFallback>
+                </Avatar>
+            )}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56" align="end" forceMount>
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
               <p className="text-sm font-medium leading-none">
-                {currentUser?.name}
+                {currentUser?.name || user?.email || "Usuario"}
               </p>
               <p className="text-xs leading-none text-muted-foreground">
                 Perfil de Usuario
@@ -60,7 +74,7 @@ export function Header() {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => router.push(`/players/${currentUser?.id}`)}>
+          <DropdownMenuItem onClick={() => currentUser && router.push(`/players/${currentUser.id}`)}>
             <User className="mr-2 h-4 w-4" />
             <span>Perfil</span>
           </DropdownMenuItem>

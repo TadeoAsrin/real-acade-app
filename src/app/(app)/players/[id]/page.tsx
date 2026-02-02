@@ -1,21 +1,80 @@
-import { getAggregatedStatsForPlayer, getMatchHistoryForPlayer, getPlayerById } from "@/lib/data";
-import { notFound } from "next/navigation";
+
+'use client';
+
+import * as React from 'react';
+import { useParams } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Goal, Users, Trophy, Award, TrendingUp, History } from "lucide-react";
+import { Trophy, History, TrendingUp, Loader2 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Link from "next/link";
 import { PlayerPerformanceChart } from "@/components/players/player-performance-chart";
 import { Badge } from "@/components/ui/badge";
+import { useDoc, useCollection, useMemoFirebase, useFirestore } from "@/firebase";
+import { doc, collection, query, orderBy } from "firebase/firestore";
+import { calculateAggregatedStats } from "@/lib/data";
+import type { Player, Match, AggregatedPlayerStats } from "@/lib/definitions";
 
-export default function PlayerProfilePage({ params }: { params: { id: string } }) {
-  const player = getPlayerById(params.id);
-  const playerStats = getAggregatedStatsForPlayer(params.id);
-  const matchHistory = getMatchHistoryForPlayer(params.id);
+export default function PlayerProfilePage() {
+  const params = useParams();
+  const id = params.id as string;
+  const firestore = useFirestore();
 
-  if (!player || !playerStats) {
-    notFound();
+  const playerRef = useMemoFirebase(() => {
+    if (!firestore || !id) return null;
+    return doc(firestore, 'players', id);
+  }, [firestore, id]);
+
+  const matchesQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'matches'), orderBy('date', 'desc'));
+  }, [firestore]);
+
+  const playersQuery = useMemoFirebase(() => {
+      if (!firestore) return null;
+      return collection(firestore, 'players');
+  }, [firestore]);
+
+  const { data: player, isLoading: playerLoading } = useDoc<Player>(playerRef);
+  const { data: matches, isLoading: matchesLoading } = useCollection<Match>(matchesQuery);
+  const { data: allPlayers, isLoading: allPlayersLoading } = useCollection<Player>(playersQuery);
+
+  if (playerLoading || matchesLoading || allPlayersLoading) {
+    return (
+      <div className="flex h-[50vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
   }
+
+  if (!player) {
+    return <div className="text-center py-12">Jugador no encontrado.</div>;
+  }
+
+  const allMatches = matches || [];
+  const statsList = calculateAggregatedStats(allPlayers || [], allMatches);
+  const playerStats = statsList.find(s => s.playerId === id);
+
+  if (!playerStats) {
+      return <div className="text-center py-12">No hay estadísticas disponibles para este jugador.</div>;
+  }
+
+  const playerMatchHistory = allMatches
+    .filter(match => 
+        match.teamAPlayers.some(p => p.playerId === id) || 
+        match.teamBPlayers.some(p => p.playerId === id)
+    )
+    .map(match => {
+        const teamA = match.teamAPlayers.find(p => p.playerId === id);
+        const teamB = match.teamBPlayers.find(p => p.playerId === id);
+        const stats = teamA || teamB;
+        return {
+            ...stats!,
+            matchId: match.id,
+            date: match.date,
+            team: teamA ? 'Azul' : 'Rojo'
+        };
+    });
 
   return (
     <div className="space-y-8">
@@ -85,7 +144,7 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
         </Card>
       </div>
 
-       <PlayerPerformanceChart matchHistory={matchHistory} />
+       <PlayerPerformanceChart matchHistory={playerMatchHistory} />
 
       <Card>
         <CardHeader>
@@ -103,7 +162,7 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
               </TableRow>
             </TableHeader>
             <TableBody>
-              {matchHistory.map((match) => (
+              {playerMatchHistory.map((match) => (
                 <TableRow key={match.matchId}>
                   <TableCell>{new Date(match.date).toLocaleDateString('es-ES', { month: 'long', day: 'numeric', year: 'numeric' })}</TableCell>
                   <TableCell>
@@ -119,6 +178,13 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
                   </TableCell>
                 </TableRow>
               ))}
+              {playerMatchHistory.length === 0 && (
+                  <TableRow>
+                      <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                          No ha participado en partidos aún.
+                      </TableCell>
+                  </TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>

@@ -1,5 +1,8 @@
-import { getMatchById, getPlayerById } from "@/lib/data";
-import { notFound } from "next/navigation";
+
+'use client';
+
+import * as React from 'react';
+import { useParams } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -16,26 +19,29 @@ import {
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import type { Player, PlayerStats } from "@/lib/definitions";
+import type { Player, PlayerStats, Match } from "@/lib/definitions";
 import { cn } from "@/lib/utils";
-import { Separator } from "@/components/ui/separator";
 import { BestGoalVote } from "@/components/matches/best-goal-vote";
-import { Award, Star } from "lucide-react";
+import { Award, Star, Loader2 } from "lucide-react";
 import { MatchAiSummary } from "@/components/matches/match-ai-summary";
+import { useDoc, useCollection, useMemoFirebase, useFirestore, useUser } from "@/firebase";
+import { doc, collection } from "firebase/firestore";
 
 const PlayerStatsTable = ({
   title,
   stats,
   teamColor,
+  allPlayers,
 }: {
   title: string;
   stats: PlayerStats[];
   teamColor: "primary" | "accent";
+  allPlayers: Player[];
 }) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className={cn(`text-${teamColor}`)}>{title}</CardTitle>
+        <CardTitle className={cn(teamColor === 'primary' ? "text-primary" : "text-accent")}>{title}</CardTitle>
       </CardHeader>
       <CardContent>
         <Table>
@@ -47,7 +53,7 @@ const PlayerStatsTable = ({
           </TableHeader>
           <TableBody>
             {stats.map((stat) => {
-              const player = getPlayerById(stat.playerId);
+              const player = allPlayers.find(p => p.id === stat.playerId);
               if (!player) return null;
               return (
                 <TableRow key={player.id}>
@@ -83,20 +89,44 @@ const PlayerStatsTable = ({
   );
 };
 
-export default function MatchDetailPage({ params }: { params: { id: string } }) {
-  const match = getMatchById(params.id);
-  const currentUser = getPlayerById("1");
+export default function MatchDetailPage() {
+  const params = useParams();
+  const id = params.id as string;
+  const firestore = useFirestore();
+  const { user } = useUser();
 
-  if (!match) {
-    notFound();
+  const matchRef = useMemoFirebase(() => {
+    if (!firestore || !id) return null;
+    return doc(firestore, 'matches', id);
+  }, [firestore, id]);
+
+  const playersRef = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return collection(firestore, 'players');
+  }, [firestore]);
+
+  const { data: match, isLoading: matchLoading } = useDoc<Match>(matchRef);
+  const { data: players, isLoading: playersLoading } = useCollection<Player>(playersRef);
+
+  if (matchLoading || playersLoading) {
+    return (
+      <div className="flex h-[50vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
   }
 
+  if (!match) {
+    return <div className="text-center py-12">Partido no encontrado.</div>;
+  }
+
+  const allPlayers = players || [];
   const allPlayerStats = [...match.teamAPlayers, ...match.teamBPlayers];
   
   const scorers = allPlayerStats
     .filter(stat => stat.goals > 0)
     .map(stat => {
-      const player = getPlayerById(stat.playerId);
+      const player = allPlayers.find(p => p.id === stat.playerId);
       return player ? { ...player, goals: stat.goals } : null;
     })
     .filter(Boolean) as (Player & { goals: number })[];
@@ -108,11 +138,13 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
     date: match.date,
     teamAScore: match.teamAScore,
     teamBScore: match.teamBScore,
-    teamAPlayers: match.teamAPlayers.map(s => ({ name: getPlayerById(s.playerId)?.name || 'Desconocido', goals: s.goals })),
-    teamBPlayers: match.teamBPlayers.map(s => ({ name: getPlayerById(s.playerId)?.name || 'Desconocido', goals: s.goals })),
-    mvpName: mvpStat ? getPlayerById(mvpStat.playerId)?.name : undefined,
-    bestGoalName: bestGoalStat ? getPlayerById(bestGoalStat.playerId)?.name : undefined,
+    teamAPlayers: match.teamAPlayers.map(s => ({ name: allPlayers.find(p => p.id === s.playerId)?.name || 'Desconocido', goals: s.goals })),
+    teamBPlayers: match.teamBPlayers.map(s => ({ name: allPlayers.find(p => p.id === s.playerId)?.name || 'Desconocido', goals: s.goals })),
+    mvpName: mvpStat ? allPlayers.find(p => p.id === mvpStat.playerId)?.name : undefined,
+    bestGoalName: bestGoalStat ? allPlayers.find(p => p.id === bestGoalStat.playerId)?.name : undefined,
   };
+
+  const currentUser = allPlayers.find(p => p.id === user?.uid);
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto">
@@ -162,11 +194,13 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
                 title="Equipo Azul"
                 stats={match.teamAPlayers}
                 teamColor="primary"
+                allPlayers={allPlayers}
                 />
                 <PlayerStatsTable
                 title="Equipo Rojo"
                 stats={match.teamBPlayers}
                 teamColor="accent"
+                allPlayers={allPlayers}
                 />
             </div>
         </div>
