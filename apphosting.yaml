@@ -1,4 +1,4 @@
-# Configuración optimizada para el nivel gratuito
+# Configuración optimizada para el nivel gratuito de Firebase App Hosting
 runConfig:
   minInstances: 0
   maxInstances: 1
@@ -8,3 +8,5 @@ runConfig:
 env:
   - variable: NODE_ENV
     value: production
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: "studio-8891359241-1a978"
