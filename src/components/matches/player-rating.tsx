@@ -11,13 +11,12 @@ import { Loader2 } from 'lucide-react';
 
 type PlayerRatings = { [playerId: string]: number };
 
-export function PlayerRating({ players }: { players: Player[] }) {
+export function PlayerRating({ players, currentUser }: { players: Player[], currentUser?: Player }) {
     const [ratings, setRatings] = useState<PlayerRatings>({});
     const [isLoading, setIsLoading] = useState(false);
     const { toast } = useToast();
 
-    // In a real app, this would come from an auth context
-    const currentUserId = '1';
+    const currentUserId = currentUser?.id;
 
     const handleRatingChange = (playerId: string, value: number[]) => {
         setRatings(prev => ({ ...prev, [playerId]: value[0] }));
@@ -36,6 +35,10 @@ export function PlayerRating({ players }: { players: Player[] }) {
     };
     
     const playersToRate = players.filter(p => p.id !== currentUserId);
+
+    if(playersToRate.length === 0) {
+        return null;
+    }
 
     return (
         <Card>

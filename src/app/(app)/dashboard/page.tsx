@@ -1,4 +1,4 @@
-import { getAggregatedPlayerStats } from "@/lib/data";
+import { getAggregatedPlayerStats, getPlayerById } from "@/lib/data";
 import {
   Card,
   CardContent,
@@ -20,9 +20,11 @@ import { ArrowUpRight, BarChart3, Medal, Trophy } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { GoalsChart } from "@/components/dashboard/goals-chart";
+import { ChartContainer } from "@/components/ui/chart";
 
 export default function DashboardPage() {
   const playerStats = getAggregatedPlayerStats();
+  const currentUser = getPlayerById("1"); // In a real app, this would come from auth
 
   const topScorers = [...playerStats]
     .sort((a, b) => b.totalGoals - a.totalGoals)
@@ -76,17 +78,19 @@ export default function DashboardPage() {
             </p>
           </CardContent>
         </Card>
-        <Card>
-            <CardHeader className="pb-2">
-                <CardTitle>Cargar Partido</CardTitle>
-                <CardDescription>Añade los datos del último encuentro.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <Button size="sm" asChild>
-                    <Link href="/matches/new">Nuevo Partido</Link>
-                </Button>
-            </CardContent>
-        </Card>
+        {currentUser?.role === 'admin' && (
+            <Card>
+                <CardHeader className="pb-2">
+                    <CardTitle>Cargar Partido</CardTitle>
+                    <CardDescription>Añade los datos del último encuentro.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Button size="sm" asChild>
+                        <Link href="/matches/new">Nuevo Partido</Link>
+                    </Button>
+                </CardContent>
+            </Card>
+        )}
       </div>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
@@ -164,7 +168,9 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-      <GoalsChart />
+      <ChartContainer config={{}} className="h-80 w-full">
+        <GoalsChart />
+      </ChartContainer>
     </div>
   );
 }

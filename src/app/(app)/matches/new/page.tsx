@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { players } from "@/lib/data";
+import { players, getPlayerById } from "@/lib/data";
 import {
   Accordion,
   AccordionContent,
@@ -57,6 +57,13 @@ export default function NewMatchPage() {
   const { toast } = useToast();
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState(false);
+  const currentUser = getPlayerById("1"); // In a real app this would come from auth.
+
+  React.useEffect(() => {
+    if (currentUser?.role !== 'admin') {
+      router.replace('/dashboard');
+    }
+  }, [currentUser, router]);
 
   const teamAPlayers = players.filter((p) => p.team === "Amigos de Martes");
   const teamBPlayers = players.filter((p) => p.team === "Resto del Mundo");
@@ -86,6 +93,14 @@ export default function NewMatchPage() {
       description: "Las estadísticas del partido se han guardado correctamente.",
     });
     router.push("/matches");
+  }
+  
+  if (currentUser?.role !== 'admin') {
+    return (
+        <div className="flex h-full w-full items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+    );
   }
 
   const renderPlayerFields = (team: "A" | "B") => {

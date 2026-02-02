@@ -3,6 +3,7 @@ export type Player = {
   name: string;
   avatar: string;
   team: 'Amigos de Martes' | 'Resto del Mundo';
+  role: 'admin' | 'player';
 };
 
 export type PlayerStats = {

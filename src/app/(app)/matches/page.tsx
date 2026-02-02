@@ -12,13 +12,17 @@ import { ArrowUpRight, CalendarIcon } from "lucide-react";
 import Link from "next/link";
 
 export default function MatchesPage() {
+  const currentUser = getPlayerById("1"); // In a real app, this would come from auth
+
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold tracking-tight">Historial de Partidos</h1>
-          <Button asChild>
-              <Link href="/matches/new">Cargar Nuevo Partido</Link>
-          </Button>
+          {currentUser?.role === 'admin' && (
+            <Button asChild>
+                <Link href="/matches/new">Cargar Nuevo Partido</Link>
+            </Button>
+          )}
       </div>
 
       <div className="grid grid-cols-1 gap-6">

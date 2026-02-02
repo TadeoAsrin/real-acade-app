@@ -17,10 +17,11 @@ import {
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import type { PlayerStats } from "@/lib/definitions";
+import type { Player, PlayerStats } from "@/lib/definitions";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { PlayerRating } from "@/components/matches/player-rating";
+import { BestGoalVote } from "@/components/matches/best-goal-vote";
 
 const PlayerStatsTable = ({
   title,
@@ -93,12 +94,22 @@ const PlayerStatsTable = ({
 
 export default function MatchDetailPage({ params }: { params: { id: string } }) {
   const match = getMatchById(params.id);
+  const currentUser = getPlayerById("1"); // In a real app, this would come from auth
 
   if (!match) {
     notFound();
   }
 
-  const allPlayers = [...match.teamAPlayers, ...match.teamBPlayers];
+  const allPlayerStats = [...match.teamAPlayers, ...match.teamBPlayers];
+  const allPlayers = allPlayerStats.map(p => getPlayerById(p.playerId)).filter(Boolean) as Player[];
+  
+  const scorers = allPlayerStats
+    .filter(stat => stat.goals > 0)
+    .map(stat => {
+      const player = getPlayerById(stat.playerId);
+      return player ? { ...player, goals: stat.goals } : null;
+    })
+    .filter(Boolean) as (Player & { goals: number })[];
 
   return (
     <div className="space-y-8">
@@ -154,8 +165,13 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
       </div>
 
       <Separator />
-
-      <PlayerRating players={allPlayers.map(p => getPlayerById(p.playerId)).filter(Boolean) as any[]} />
+      
+      {currentUser?.role === 'player' && (
+        <div className="space-y-8">
+            <BestGoalVote scorers={scorers} />
+            <PlayerRating players={allPlayers} currentUser={currentUser} />
+        </div>
+      )}
 
     </div>
   );
