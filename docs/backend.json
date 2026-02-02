@@ -1,0 +1,245 @@
+{
+  "entities": {
+    "Player": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Player",
+      "type": "object",
+      "description": "Represents a player in the Fut7Stats application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Player entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The player's name."
+        },
+        "email": {
+          "type": "string",
+          "description": "The player's email address.",
+          "format": "email"
+        },
+        "dateOfBirth": {
+          "type": "string",
+          "description": "The player's date of birth.",
+          "format": "date"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "email"
+      ]
+    },
+    "Match": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Match",
+      "type": "object",
+      "description": "Represents a match in the Fut7Stats application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Match entity."
+        },
+        "date": {
+          "type": "string",
+          "description": "The date of the match.",
+          "format": "date-time"
+        },
+        "teamAScore": {
+          "type": "number",
+          "description": "The score of team A in the match."
+        },
+        "teamBScore": {
+          "type": "number",
+          "description": "The score of team B in the match."
+        },
+        "teamAPlayerIds": {
+          "type": "array",
+          "description": "References to Players in team A. (Relationship: Match 1:N Player)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "teamBPlayerIds": {
+          "type": "array",
+          "description": "References to Players in team B. (Relationship: Match 1:N Player)",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "date",
+        "teamAScore",
+        "teamBScore"
+      ]
+    },
+    "MatchEvent": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "MatchEvent",
+      "type": "object",
+      "description": "Represents an event that occurred during a match (e.g., goal, assist, foul).",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the MatchEvent entity."
+        },
+        "matchId": {
+          "type": "string",
+          "description": "Reference to Match. (Relationship: Match 1:N MatchEvent)"
+        },
+        "playerId": {
+          "type": "string",
+          "description": "Reference to Player. (Relationship: Player 1:N MatchEvent)"
+        },
+        "eventType": {
+          "type": "string",
+          "description": "The type of event that occurred (e.g., goal, assist, foul)."
+        },
+        "eventTime": {
+          "type": "number",
+          "description": "The time in the match when the event occurred (e.g., in minutes)."
+        }
+      },
+      "required": [
+        "id",
+        "matchId",
+        "playerId",
+        "eventType",
+        "eventTime"
+      ]
+    },
+    "PlayerMatchRating": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "PlayerMatchRating",
+      "type": "object",
+      "description": "Represents a player's rating for a specific match.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the PlayerMatchRating entity."
+        },
+        "matchId": {
+          "type": "string",
+          "description": "Reference to Match. (Relationship: Match 1:N PlayerMatchRating)"
+        },
+        "playerId": {
+          "type": "string",
+          "description": "Reference to Player. (Relationship: Player 1:N PlayerMatchRating)"
+        },
+        "rating": {
+          "type": "number",
+          "description": "The player's rating for the match (1-10)."
+        },
+        "raterPlayerId": {
+          "type": "string",
+          "description": "Reference to Player who rated this match. (Relationship: Player 1:N PlayerMatchRating)"
+        }
+      },
+      "required": [
+        "id",
+        "matchId",
+        "playerId",
+        "rating",
+        "raterPlayerId"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/roles_admin/{adminId}",
+        "definition": {
+          "entityName": "admin",
+          "schema": {
+            "$ref": "#/backend/entities/admin"
+          },
+          "description": "Collection to store admin roles. Existence of a document with the user's UID grants admin privileges.",
+          "params": [
+            {
+              "name": "adminId",
+              "description": "The UID of the administrator."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/players/{playerId}",
+        "definition": {
+          "entityName": "Player",
+          "schema": {
+            "$ref": "#/backend/entities/Player"
+          },
+          "description": "Collection to store player information.",
+          "params": [
+            {
+              "name": "playerId",
+              "description": "The unique identifier of the player."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/matches/{matchId}",
+        "definition": {
+          "entityName": "Match",
+          "schema": {
+            "$ref": "#/backend/entities/Match"
+          },
+          "description": "Collection to store match information.",
+          "params": [
+            {
+              "name": "matchId",
+              "description": "The unique identifier of the match."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/matches/{matchId}/match_events/{matchEventId}",
+        "definition": {
+          "entityName": "MatchEvent",
+          "schema": {
+            "$ref": "#/backend/entities/MatchEvent"
+          },
+          "description": "Subcollection to store events within a match.",
+          "params": [
+            {
+              "name": "matchId",
+              "description": "The unique identifier of the match."
+            },
+            {
+              "name": "matchEventId",
+              "description": "The unique identifier of the match event."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/player_match_ratings/{playerMatchRatingId}",
+        "definition": {
+          "entityName": "PlayerMatchRating",
+          "schema": {
+            "$ref": "#/backend/entities/PlayerMatchRating"
+          },
+          "description": "Collection to store the rate that a player has in a match.",
+          "params": [
+            {
+              "name": "playerMatchRatingId",
+              "description": "The unique identifier of the player match rating."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "Given the requirement for a single administrator to manage players and matches, I propose a structure that leverages a dedicated collection for admin role and path-based ownership to manage player and match data.\n\n**Authorization Independence:**\n\n*   The structure utilizes a dedicated `/roles_admin/{uid}` collection to store admin roles. This avoids the need for `get()` calls to parent documents to determine admin status.\n\n**Structural Segregation:**\n\n*   Players and matches are stored in dedicated collections.\n\n**Access Modeling:**\n\n*   **Global Roles (DBAC):** The `/roles_admin/{uid}` collection is used to grant admin privileges based on document existence.\n*   Data relating to matches is stored in the `/matches/{matchId}` and `/matches/{matchId}/match_events/{matchEventId}` paths. Player rating data is stored in `/player_match_ratings/{playerMatchRatingId}`.\n\n**QAPs Support:**\n\n*   `list` operations on `/players` and `/matches` can be secured by checking for admin privileges in the rules. This structure supports QAPs because authorization is based on role existence, not data content. The `list` operation will only return the data if the requesting user has admin privileges."
+  }
+}
