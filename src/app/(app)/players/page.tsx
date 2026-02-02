@@ -15,9 +15,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc } from "@/firebase";
-import { collection, doc, setDoc, deleteDoc, query, orderBy } from "firebase/firestore";
+import { collection, doc, setDoc, deleteDoc, updateDoc, query, orderBy } from "firebase/firestore";
 import type { Player, Match } from "@/lib/definitions";
-import { Loader2, UserPlus, Trash2 } from "lucide-react";
+import { Loader2, UserPlus, Trash2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -50,6 +50,10 @@ export default function PlayersPage() {
   const { toast } = useToast();
   const [isAddingPlayer, setIsAddingPlayer] = React.useState(false);
   const [newPlayerName, setNewPlayerName] = React.useState('');
+  
+  const [editingPlayerId, setEditingPlayerId] = React.useState<string | null>(null);
+  const [editPlayerName, setEditPlayerName] = React.useState('');
+  const [isUpdatingPlayer, setIsUpdatingPlayer] = React.useState(false);
 
   const playersQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -102,6 +106,32 @@ export default function PlayersPage() {
     }
   };
 
+  const handleUpdatePlayer = async () => {
+    if (!firestore || !editingPlayerId || !editPlayerName) return;
+    setIsUpdatingPlayer(true);
+    try {
+      await updateDoc(doc(firestore, 'players', editingPlayerId), {
+        name: editPlayerName
+      });
+
+      toast({
+        title: "Jugador Actualizado",
+        description: "El nombre ha sido modificado correctamente.",
+      });
+      setEditingPlayerId(null);
+      setEditPlayerName('');
+    } catch (error) {
+      console.error(error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No se pudo actualizar el jugador.",
+      });
+    } finally {
+      setIsUpdatingPlayer(false);
+    }
+  };
+
   const handleDeletePlayer = async (playerId: string) => {
     if (!firestore) return;
     try {
@@ -130,7 +160,6 @@ export default function PlayersPage() {
 
   const allPlayers = playersData || [];
   const allMatches = matchesData || [];
-  // Ordenamos los resultados finales por nombre para asegurar el orden alfabético
   const playerStats = calculateAggregatedStats(allPlayers, allMatches).sort((a, b) => a.name.localeCompare(b.name));
 
   return (
@@ -207,27 +236,68 @@ export default function PlayersPage() {
                           <TableCell className="text-center font-mono">{player.totalBestGoals}</TableCell>
                           {isAdmin && (
                             <TableCell className="text-right pr-6">
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>¿Eliminar a {player.name}?</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      Esto eliminará al jugador de la base de datos. Sus estadísticas históricas en los partidos registrados permanecerán pero no aparecerá más en esta lista.
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => handleDeletePlayer(player.playerId)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                                      Eliminar
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
+                              <div className="flex justify-end gap-2">
+                                <Dialog open={editingPlayerId === player.playerId} onOpenChange={(open) => {
+                                  if (open) {
+                                    setEditingPlayerId(player.playerId);
+                                    setEditPlayerName(player.name);
+                                  } else {
+                                    setEditingPlayerId(null);
+                                  }
+                                }}>
+                                  <DialogTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
+                                      <Pencil className="h-4 w-4" />
+                                    </Button>
+                                  </DialogTrigger>
+                                  <DialogContent>
+                                    <DialogHeader>
+                                      <DialogTitle>Editar Jugador</DialogTitle>
+                                      <DialogDescription>
+                                        Modifica el nombre de {player.name}.
+                                      </DialogDescription>
+                                    </DialogHeader>
+                                    <div className="grid gap-4 py-4">
+                                      <div className="grid gap-2">
+                                        <Label htmlFor="edit-name">Nombre Completo</Label>
+                                        <Input
+                                          id="edit-name"
+                                          value={editPlayerName}
+                                          onChange={(e) => setEditPlayerName(e.target.value)}
+                                        />
+                                      </div>
+                                    </div>
+                                    <DialogFooter>
+                                      <Button onClick={handleUpdatePlayer} disabled={isUpdatingPlayer || !editPlayerName}>
+                                        {isUpdatingPlayer && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                        Actualizar
+                                      </Button>
+                                    </DialogFooter>
+                                  </DialogContent>
+                                </Dialog>
+
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>¿Eliminar a {player.name}?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Esto eliminará al jugador de la base de datos. Sus estadísticas históricas en los partidos registrados permanecerán pero no aparecerá más en esta lista.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => handleDeletePlayer(player.playerId)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                        Eliminar
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </div>
                             </TableCell>
                           )}
                       </TableRow>
