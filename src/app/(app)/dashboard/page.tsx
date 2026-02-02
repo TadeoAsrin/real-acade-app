@@ -1,4 +1,4 @@
-import { getAggregatedPlayerStats, getPlayerById, matches } from "@/lib/data";
+import { getAggregatedPlayerStats, getPlayerById, matches, players } from "@/lib/data";
 import {
   Card,
   CardContent,
@@ -19,6 +19,7 @@ import { Award, Medal, Trophy, Users } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { GoalsChart } from "@/components/dashboard/goals-chart";
+import { FieldView } from "@/components/dashboard/field-view";
 
 export default function DashboardPage() {
   const playerStats = getAggregatedPlayerStats();
@@ -85,22 +86,14 @@ export default function DashboardPage() {
                 </p>
             </CardContent>
         </Card>
-        {currentUser?.role === 'admin' && (
-            <Card>
-                <CardHeader className="pb-2">
-                    <CardTitle>Cargar Partido</CardTitle>
-                    <CardDescription>Añade los datos del último encuentro.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Button size="sm" asChild>
-                        <Link href="/matches/new">Nuevo Partido</Link>
-                    </Button>
-                </CardContent>
-            </Card>
-        )}
       </div>
 
-      <div className="grid grid-cols-1 gap-8">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+        <FieldView team="Amigos de Martes" players={players} />
+        <FieldView team="Resto del Mundo" players={players} />
+      </div>
+
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Tabla de Goleadores</CardTitle>
@@ -139,8 +132,21 @@ export default function DashboardPage() {
             </Table>
           </CardContent>
         </Card>
+        <GoalsChart />
       </div>
-      <GoalsChart />
+       {currentUser?.role === 'admin' && (
+            <Card>
+                <CardHeader className="pb-2">
+                    <CardTitle>Cargar Partido</CardTitle>
+                    <CardDescription>Añade los datos del último encuentro.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Button size="sm" asChild>
+                        <Link href="/matches/new">Nuevo Partido</Link>
+                    </Button>
+                </CardContent>
+            </Card>
+        )}
     </div>
   );
 }

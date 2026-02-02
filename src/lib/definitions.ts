@@ -4,6 +4,8 @@ export type Player = {
   avatar: string;
   team: 'Amigos de Martes' | 'Resto del Mundo';
   role: 'admin' | 'player';
+  position: string;
+  positionName: string;
 };
 
 export type PlayerStats = {
