@@ -1,20 +1,20 @@
 import type { Player, Match, AggregatedPlayerStats, PlayerStats } from "./definitions";
 
 export const players: Player[] = [
-  { id: '1', name: 'Leandro', avatar: 'https://picsum.photos/seed/player1/200/200', team: 'Amigos de Martes', role: 'admin', position: 'FWD', positionName: 'Delantero' },
-  { id: '2', name: 'Matias', avatar: 'https://picsum.photos/seed/player2/200/200', team: 'Amigos de Martes', role: 'player', position: 'MID', positionName: 'Mediocampista' },
-  { id: '3', name: 'Juan', avatar: 'https://picsum.photos/seed/player3/200/200', team: 'Amigos de Martes', role: 'player', position: 'MID', positionName: 'Mediocampista' },
-  { id: '4', name: 'Diego', avatar: 'https://picsum.photos/seed/player4/200/200', team: 'Amigos de Martes', role: 'player', position: 'MID', positionName: 'Mediocampista' },
-  { id: '5', name: 'Facundo', avatar: 'https://picsum.photos/seed/player5/200/200', team: 'Amigos de Martes', role: 'player', position: 'DEF', positionName: 'Defensor' },
-  { id: '6', name: 'Sergio', avatar: 'https://picsum.photos/seed/player6/200/200', team: 'Amigos de Martes', role: 'player', position: 'DEF', positionName: 'Defensor' },
-  { id: '7', name: 'Pablo', avatar: 'https://picsum.photos/seed/player7/200/200', team: 'Amigos de Martes', role: 'player', position: 'GK', positionName: 'Arquero' },
-  { id: '8', name: 'Carlos', avatar: 'https://picsum.photos/seed/player8/200/200', team: 'Resto del Mundo', role: 'player', position: 'FWD', positionName: 'Delantero' },
-  { id: '9', name: 'Jorge', avatar: 'https://picsum.photos/seed/player9/200/200', team: 'Resto del Mundo', role: 'player', position: 'MID', positionName: 'Mediocampista' },
-  { id: '10', name: 'Ricardo', avatar: 'https://picsum.photos/seed/player10/200/200', team: 'Resto del Mundo', role: 'player', position: 'MID', positionName: 'Mediocampista' },
-  { id: '11', name: 'Fernando', avatar: 'https://picsum.photos/seed/player11/200/200', team: 'Resto del Mundo', role: 'player', position: 'MID', positionName: 'Mediocampista' },
-  { id: '12', name: 'Andres', avatar: 'https://picsum.photos/seed/player12/200/200', team: 'Resto del Mundo', role: 'player', position: 'DEF', positionName: 'Defensor' },
-  { id: '13', name: 'Luis', avatar: 'https://picsum.photos/seed/player13/200/200', team: 'Resto del Mundo', role: 'player', position: 'DEF', positionName: 'Defensor' },
-  { id: '14', name: 'Miguel', avatar: 'https://picsum.photos/seed/player14/200/200', team: 'Resto del Mundo', role: 'player', position: 'GK', positionName: 'Arquero' },
+  { id: '1', name: 'Leandro', avatar: 'https://picsum.photos/seed/player1/200/200', team: 'Amigos de Martes', role: 'admin' },
+  { id: '2', name: 'Matias', avatar: 'https://picsum.photos/seed/player2/200/200', team: 'Amigos de Martes', role: 'player' },
+  { id: '3', name: 'Juan', avatar: 'https://picsum.photos/seed/player3/200/200', team: 'Amigos de Martes', role: 'player' },
+  { id: '4', name: 'Diego', avatar: 'https://picsum.photos/seed/player4/200/200', team: 'Amigos de Martes', role: 'player' },
+  { id: '5', name: 'Facundo', avatar: 'https://picsum.photos/seed/player5/200/200', team: 'Amigos de Martes', role: 'player' },
+  { id: '6', name: 'Sergio', avatar: 'https://picsum.photos/seed/player6/200/200', team: 'Amigos de Martes', role: 'player' },
+  { id: '7', name: 'Pablo', avatar: 'https://picsum.photos/seed/player7/200/200', team: 'Amigos de Martes', role: 'player' },
+  { id: '8', name: 'Carlos', avatar: 'https://picsum.photos/seed/player8/200/200', team: 'Resto del Mundo', role: 'player' },
+  { id: '9', name: 'Jorge', avatar: 'https://picsum.photos/seed/player9/200/200', team: 'Resto del Mundo', role: 'player' },
+  { id: '10', name: 'Ricardo', avatar: 'https://picsum.photos/seed/player10/200/200', team: 'Resto del Mundo', role: 'player' },
+  { id: '11', name: 'Fernando', avatar: 'https://picsum.photos/seed/player11/200/200', team: 'Resto del Mundo', role: 'player' },
+  { id: '12', name: 'Andres', avatar: 'https://picsum.photos/seed/player12/200/200', team: 'Resto del Mundo', role: 'player' },
+  { id: '13', name: 'Luis', avatar: 'https://picsum.photos/seed/player13/200/200', team: 'Resto del Mundo', role: 'player' },
+  { id: '14', name: 'Miguel', avatar: 'https://picsum.photos/seed/player14/200/200', team: 'Resto del Mundo', role: 'player' },
 ];
 
 export const matches: Match[] = [

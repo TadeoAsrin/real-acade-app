@@ -30,7 +30,6 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
         <div className="pt-4 text-center md:text-left">
           <h1 className="text-4xl font-bold tracking-tight">{player.name}</h1>
           <p className={player.team === 'Amigos de Martes' ? 'text-primary' : 'text-accent'}>{player.team}</p>
-          <p className="text-muted-foreground">{player.positionName}</p>
         </div>
       </div>
 

@@ -177,7 +177,6 @@ export function FieldView({ team, players }: FieldViewProps) {
                                 </TooltipTrigger>
                                 <TooltipContent>
                                     <p className="font-bold">{player.name}</p>
-                                    <p className="text-muted-foreground">{player.positionName}</p>
                                 </TooltipContent>
                             </Tooltip>
                         );
