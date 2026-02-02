@@ -14,6 +14,9 @@ export type PlayerStats = {
   yellowCards: number;
   redCards: number;
   ratings?: PlayerRating[];
+  isCaptain?: boolean;
+  isMvp?: boolean;
+  hasBestGoal?: boolean;
 };
 
 export type PlayerRating = {
@@ -41,4 +44,7 @@ export type AggregatedPlayerStats = {
   totalYellowCards: number;
   totalRedCards: number;
   averageRating: number | null;
+  totalCaptaincies: number;
+  totalMvp: number;
+  totalBestGoals: number;
 };

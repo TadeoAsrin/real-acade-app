@@ -30,6 +30,9 @@ export default function PlayersPage() {
                     <TableHead className="text-center">Asistencias</TableHead>
                     <TableHead className="text-center">Faltas</TableHead>
                     <TableHead className="text-center">Rating</TableHead>
+                    <TableHead className="text-center">Capitán</TableHead>
+                    <TableHead className="text-center">MVP</TableHead>
+                    <TableHead className="text-center">Mejor Gol</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -49,6 +52,9 @@ export default function PlayersPage() {
                         <TableCell className="text-center font-mono">{player.totalAssists}</TableCell>
                         <TableCell className="text-center font-mono">{player.totalFouls}</TableCell>
                         <TableCell className="text-center font-mono">{player.averageRating ? player.averageRating.toFixed(1) : '-'}</TableCell>
+                        <TableCell className="text-center font-mono">{player.totalCaptaincies}</TableCell>
+                        <TableCell className="text-center font-mono">{player.totalMvp}</TableCell>
+                        <TableCell className="text-center font-mono">{player.totalBestGoals}</TableCell>
                     </TableRow>
                     ))}
                 </TableBody>
