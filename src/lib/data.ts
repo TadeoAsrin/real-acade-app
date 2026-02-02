@@ -150,7 +150,7 @@ export const getAggregatedPlayerStats = (): AggregatedPlayerStats[] => {
       }
   }
 
-  return Object.values(statsMap);
+  return Object.values(statsMap).sort((a, b) => b.totalGoals - a.totalGoals);
 };
 
 export const getPlayerById = (id: string): Player | undefined => {
