@@ -27,6 +27,7 @@ const positionCoordinates: { [key: string]: { top: string; left: string; transfo
   FWD: { top: '80%', left: '50%', transform: 'translateX(-50%)' },
 };
 
+// Mapa por defecto para distribuir jugadores si no tienen posición guardada
 const playerPositionMap: { [key: string]: keyof typeof positionCoordinates } = {
   '1': 'FWD', '2': 'MID_L', '3': 'MID_R', '4': 'MID_C', '5': 'DEF_L', '6': 'DEF_R', '7': 'GK',
   '8': 'FWD', '9': 'MID_L', '10': 'MID_R', '11': 'MID_C', '12': 'DEF_L', '13': 'DEF_R', '14': 'GK',
@@ -41,24 +42,25 @@ type DraggingState = {
 };
 
 export function FieldView({ team, players }: FieldViewProps) {
-  const teamPlayers = players.filter((p) => p.team === team);
   const fieldRef = React.useRef<HTMLDivElement>(null);
   const playerRefs = React.useRef<{ [key: string]: HTMLDivElement | null }>({});
 
-  const [playerPositions, setPlayerPositions] = React.useState<PlayerPositions>(() => {
+  const [playerPositions, setPlayerPositions] = React.useState<PlayerPositions>({});
+
+  // Inicializar posiciones cuando cambian los jugadores
+  React.useEffect(() => {
     const initialPositions: PlayerPositions = {};
-    teamPlayers.forEach((player) => {
-      const positionKey = playerPositionMap[player.id];
-      if (positionKey) {
-        const coords = positionCoordinates[positionKey];
-        initialPositions[player.id] = {
-          x: parseFloat(coords.left),
-          y: parseFloat(coords.top),
-        };
-      }
+    players.forEach((player, index) => {
+      // Intentamos usar el mapa por ID, o si no, distribuimos por el índice
+      const positionKey = playerPositionMap[player.id] || Object.keys(positionCoordinates)[index % Object.keys(positionCoordinates).length];
+      const coords = positionCoordinates[positionKey];
+      initialPositions[player.id] = {
+        x: parseFloat(coords.left),
+        y: parseFloat(coords.top),
+      };
     });
-    return initialPositions;
-  });
+    setPlayerPositions(initialPositions);
+  }, [players]);
 
   const [draggingPlayer, setDraggingPlayer] = React.useState<DraggingState | null>(null);
 
@@ -118,7 +120,7 @@ export function FieldView({ team, players }: FieldViewProps) {
                 <div className="absolute bottom-0 left-1/2 h-24 w-3/4 -translate-x-1/2 border-x-2 border-t-2 border-white/30 rounded-t-lg"></div>
                 
                 <TooltipProvider>
-                    {teamPlayers.map((player) => {
+                    {players.map((player) => {
                         const position = playerPositions[player.id];
                         if (!position) return null;
                         return (

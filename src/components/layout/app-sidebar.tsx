@@ -40,7 +40,7 @@ export function AppSidebar() {
         <div className="flex items-center gap-2">
           <Fut7StatsLogo className="h-8 w-8 text-primary" />
           <div className="flex flex-col">
-            <h2 className="text-lg font-semibold">Fut7Stats</h2>
+            <h2 className="text-lg font-semibold">Real Acade</h2>
             <p className="text-xs text-muted-foreground">Gestión Deportiva</p>
           </div>
         </div>

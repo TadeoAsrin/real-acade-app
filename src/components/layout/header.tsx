@@ -20,7 +20,7 @@ const getPageTitle = (pathname: string) => {
   if (pathname.includes("/matches/new")) return "Nuevo Partido";
   if (pathname.includes("/matches")) return "Historial de Partidos";
   if (pathname.includes("/players")) return "Jugadores";
-  return "Fut7Stats";
+  return "Real Acade";
 };
 
 export function Header() {

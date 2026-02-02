@@ -7,7 +7,7 @@ import { Toaster } from "@/components/ui/toaster";
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: "Fut7Stats",
+  title: "Real Acade",
   description: "Estadísticas de partidos de Futbol 7",
 };
 
