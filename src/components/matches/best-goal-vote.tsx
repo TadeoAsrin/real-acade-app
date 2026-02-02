@@ -12,6 +12,7 @@ import { Label } from "../ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { useFirestore, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
 import { doc, setDoc, collection } from "firebase/firestore";
+import { cn } from "@/lib/utils";
 
 interface GoalVoterProps {
   matchId: string;
@@ -72,7 +73,7 @@ export function BestGoalVote({ matchId, scorers }: GoalVoterProps) {
                 <CardTitle>Votar por el Mejor Gol</CardTitle>
             </CardHeader>
             <CardContent>
-                <p className="text-muted-foreground">No hubo goles en este partido.</p>
+                <p className="text-muted-foreground italic">No hubo goles en este partido para votar.</p>
             </CardContent>
         </Card>
     );
@@ -87,7 +88,7 @@ export function BestGoalVote({ matchId, scorers }: GoalVoterProps) {
             Voto Enviado
           </CardTitle>
           <CardDescription>
-            Ya has participado en la elección del mejor gol.
+            Ya has participado en la elección del mejor gol de este encuentro.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -106,7 +107,10 @@ export function BestGoalVote({ matchId, scorers }: GoalVoterProps) {
                             </Avatar>
                             <span className="font-medium">{scorer.name}</span>
                         </div>
-                        <span className="font-bold text-lg">{count}</span>
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs text-muted-foreground">votos</span>
+                            <span className="font-bold text-lg">{count}</span>
+                        </div>
                     </div>
                 );
             })}
@@ -120,7 +124,7 @@ export function BestGoalVote({ matchId, scorers }: GoalVoterProps) {
       <CardHeader>
         <CardTitle>Votar por el Mejor Gol</CardTitle>
         <CardDescription>
-          Elige el jugador que crees que marcó el mejor gol del partido.
+          Elige al jugador que crees que marcó el mejor gol del partido.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -135,7 +139,7 @@ export function BestGoalVote({ matchId, scorers }: GoalVoterProps) {
                     </Avatar>
                     <div className="flex flex-col">
                     <span className="font-medium">{scorer.name}</span>
-                    <span className="text-sm text-muted-foreground">{scorer.goals} {scorer.goals > 1 ? 'goles' : 'gol'}</span>
+                    <span className="text-sm text-muted-foreground">{scorer.goals} {scorer.goals > 1 ? 'goles' : 'gol'} marcados</span>
                     </div>
                 </Label>
             </div>

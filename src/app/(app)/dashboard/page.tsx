@@ -188,11 +188,19 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-center text-primary">Formación Azul</h3>
-          <FieldView team="Azul" players={lastMatchTeamAPlayers} />
+          {lastMatch ? (
+            <FieldView team="Azul" players={lastMatchTeamAPlayers} />
+          ) : (
+            <div className="h-[500px] border-2 border-dashed rounded-lg flex items-center justify-center text-muted-foreground italic">Esperando primer partido...</div>
+          )}
         </div>
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-center text-accent">Formación Rojo</h3>
-          <FieldView team="Rojo" players={lastMatchTeamBPlayers} />
+          {lastMatch ? (
+            <FieldView team="Rojo" players={lastMatchTeamBPlayers} />
+          ) : (
+            <div className="h-[500px] border-2 border-dashed rounded-lg flex items-center justify-center text-muted-foreground italic">Esperando primer partido...</div>
+          )}
         </div>
         <div className="space-y-4">
             <h3 className="text-lg font-semibold text-center text-yellow-500">Elite del Club</h3>
@@ -231,6 +239,11 @@ export default function DashboardPage() {
                     <TableCell className="text-right font-mono">{player.winPercentage}%</TableCell>
                   </TableRow>
                 ))}
+                {topScorers.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center py-8 text-muted-foreground italic">No hay datos de goleadores aún.</TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </CardContent>
