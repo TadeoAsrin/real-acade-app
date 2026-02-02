@@ -1,25 +1,26 @@
-# Real Acade - Gestión de Club
+# 🏆 Real Acade - Gestión de Club
 
-¡Bienvenido a la plataforma oficial de Real Acade! Esta aplicación está diseñada para gestionar las estadísticas de tus partidos de Fútbol 7 de forma profesional y gratuita.
+¡Tu aplicación está lista para el mundo real! Sigue estos 3 pasos para obtener tu link y compartirlo con el equipo.
 
-## 🚀 Guía para Despliegue GRATUITO
+## 🚀 Cómo obtener tu Link (Gratis)
 
-Para que tu aplicación esté activa sin costes, sigue estos pasos:
+1.  **Sube tu código a GitHub**: Si aún no lo has hecho, crea un repositorio en GitHub y sube este proyecto.
+2.  **Conecta con Firebase App Hosting**:
+    *   Ve a la [Consola de Firebase](https://console.firebase.google.com/).
+    *   Selecciona tu proyecto: `studio-8891359241-1a978`.
+    *   En el menú izquierdo, ve a **App Hosting** y dale a "Comenzar".
+    *   Conecta tu cuenta de GitHub y selecciona el repositorio de la app.
+    *   Firebase configurará todo automáticamente.
+3.  **¡Comparte la URL!**:
+    *   Al terminar el despliegue, Firebase te dará una URL pública (ej: `https://real-acade.web.app`).
+    *   ¡Pásala por el grupo de WhatsApp del equipo!
 
-1.  **Consola de Firebase**: Ve a [Firebase Console](https://console.firebase.google.com/).
-2.  **Plan de Precios**: Cambia al **Plan Blaze**. *Nota: Seguirá siendo $0 mientras no superes los 2 millones de visitas/mes, pero es necesario para ejecutar Next.js.*
-3.  **Habilitar Servicios**:
-    *   **Authentication**: Activa "Correo electrónico/contraseña".
-    *   **Firestore Database**: Crea la base de datos en "Modo producción" y elige una ubicación cercana (ej. `southamerica-east1` o `us-central`).
-4.  **IA Gratis (Opcional para Crónicas)**:
-    *   Obtén una clave gratuita en [Google AI Studio](https://aistudio.google.com/).
-    *   En la configuración de tu app en Firebase, añade esa clave como una variable de entorno llamada `GOOGLE_GENAI_API_KEY`.
-5.  **Despliegue con App Hosting**:
-    *   Conecta tu repositorio de GitHub a **Firebase App Hosting**.
-    *   Firebase detectará automáticamente que es una app de Next.js y te dará tu URL pública (ej. `https://real-acade.web.app`).
+## 💡 Configuración Importante
+*   **Plan de Precios**: Cambia al **Plan Blaze** en la consola. Es necesario para Next.js, pero seguirás en el nivel **GRATUITO** mientras no superes los 2 millones de visitas al mes.
+*   **Modo Admin**: Una vez que entres a tu app desplegada, regístrate y pulsa el botón "Activar Modo Administrador" en el Dashboard. ¡Solo tú tendrás ese poder!
 
-## 🛠️ Roles
-- **Admin**: El primer usuario que pulse "Activar Modo Administrador" en el Dashboard.
-- **Jugadores**: Pueden ver estadísticas, historial y votar por el mejor gol.
+## 🛠️ Funciones para compartir
+*   **Votaciones**: Tus amigos pueden votar por el mejor gol de cada partido.
+*   **Botón Compartir**: Dentro de cada partido, hay un botón para copiar el enlace directo y mandarlo por chat.
 
-¡Disfruta gestionando Real Acade!
+¡Disfruta de la mejor gestión para Real Acade!
