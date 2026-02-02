@@ -15,6 +15,7 @@ import {
 import { SidebarTrigger } from "../ui/sidebar";
 import { LogOut, User, Loader2 } from "lucide-react";
 import { useUser, useFirestore, useMemoFirebase, useCollection } from "@/firebase";
+import { collection } from "firebase/firestore";
 import type { Player } from "@/lib/definitions";
 
 const getPageTitle = (pathname: string) => {
