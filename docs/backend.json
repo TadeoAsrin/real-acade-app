@@ -63,6 +63,15 @@
       "schema": "#/entities/Match",
       "description": "Collection of match results."
     },
+    "/matches/{matchId}/votes/{userId}": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "votedPlayerId": { "type": "string" }
+        }
+      },
+      "description": "Votes for the best goal of a match."
+    },
     "/roles_admin/{userId}": {
       "schema": {
         "type": "object",

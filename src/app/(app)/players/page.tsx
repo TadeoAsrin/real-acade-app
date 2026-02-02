@@ -15,9 +15,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc } from "@/firebase";
-import { collection, doc, setDoc } from "firebase/firestore";
+import { collection, doc, setDoc, deleteDoc } from "firebase/firestore";
 import type { Player, Match } from "@/lib/definitions";
-import { Loader2, UserPlus } from "lucide-react";
+import { Loader2, UserPlus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -32,6 +32,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from '@/hooks/use-toast';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function PlayersPage() {
   const firestore = useFirestore();
@@ -66,7 +77,6 @@ export default function PlayersPage() {
     setIsAddingPlayer(true);
     try {
       const playerId = crypto.randomUUID();
-      // Usamos un avatar aleatorio de los placeholders
       const randomAvatar = PlaceHolderImages[Math.floor(Math.random() * PlaceHolderImages.length)].imageUrl;
       
       await setDoc(doc(firestore, 'players', playerId), {
@@ -89,6 +99,24 @@ export default function PlayersPage() {
       });
     } finally {
       setIsAddingPlayer(false);
+    }
+  };
+
+  const handleDeletePlayer = async (playerId: string) => {
+    if (!firestore) return;
+    try {
+      await deleteDoc(doc(firestore, 'players', playerId));
+      toast({
+        title: "Jugador Eliminado",
+        description: "El registro ha sido borrado del club.",
+      });
+    } catch (error) {
+      console.error(error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No se pudo eliminar el jugador.",
+      });
     }
   };
 
@@ -154,9 +182,9 @@ export default function PlayersPage() {
                       <TableHead className="text-center">Partidos</TableHead>
                       <TableHead className="text-center">Goles</TableHead>
                       <TableHead className="text-center">Efectividad</TableHead>
-                      <TableHead className="text-center">Capitán</TableHead>
                       <TableHead className="text-center">MVP</TableHead>
-                      <TableHead className="text-center pr-6">Mejor Gol</TableHead>
+                      <TableHead className="text-center">Mejor Gol</TableHead>
+                      {isAdmin && <TableHead className="text-right pr-6">Acciones</TableHead>}
                       </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -174,14 +202,38 @@ export default function PlayersPage() {
                           <TableCell className="text-center font-mono">{player.matchesPlayed}</TableCell>
                           <TableCell className="text-center font-mono">{player.totalGoals}</TableCell>
                           <TableCell className="text-center font-mono">{player.winPercentage}%</TableCell>
-                          <TableCell className="text-center font-mono">{player.totalCaptaincies}</TableCell>
                           <TableCell className="text-center font-mono">{player.totalMvp}</TableCell>
-                          <TableCell className="text-center font-mono pr-6">{player.totalBestGoals}</TableCell>
+                          <TableCell className="text-center font-mono">{player.totalBestGoals}</TableCell>
+                          {isAdmin && (
+                            <TableCell className="text-right pr-6">
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>¿Eliminar a {player.name}?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Esto eliminará al jugador de la base de datos. Sus estadísticas históricas en los partidos registrados permanecerán pero no aparecerá más en esta lista.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleDeletePlayer(player.playerId)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                      Eliminar
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </TableCell>
+                          )}
                       </TableRow>
                       ))}
                       {playerStats.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                          <TableCell colSpan={isAdmin ? 7 : 6} className="text-center py-8 text-muted-foreground">
                             No hay jugadores registrados.
                           </TableCell>
                         </TableRow>

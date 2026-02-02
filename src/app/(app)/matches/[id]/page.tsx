@@ -22,10 +22,12 @@ import { Badge } from "@/components/ui/badge";
 import type { Player, PlayerStats, Match } from "@/lib/definitions";
 import { cn } from "@/lib/utils";
 import { BestGoalVote } from "@/components/matches/best-goal-vote";
-import { Award, Star, Loader2 } from "lucide-react";
+import { Award, Star, Loader2, Share2 } from "lucide-react";
 import { MatchAiSummary } from "@/components/matches/match-ai-summary";
 import { useDoc, useCollection, useMemoFirebase, useFirestore, useUser } from "@/firebase";
 import { doc, collection } from "firebase/firestore";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 const PlayerStatsTable = ({
   title,
@@ -94,6 +96,7 @@ export default function MatchDetailPage() {
   const id = params.id as string;
   const firestore = useFirestore();
   const { user } = useUser();
+  const { toast } = useToast();
 
   const matchRef = useMemoFirebase(() => {
     if (!firestore || !id) return null;
@@ -107,6 +110,14 @@ export default function MatchDetailPage() {
 
   const { data: match, isLoading: matchLoading } = useDoc<Match>(matchRef);
   const { data: players, isLoading: playersLoading } = useCollection<Player>(playersRef);
+
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast({
+      title: "Enlace Copiado",
+      description: "El enlace al partido se ha copiado al portapapeles.",
+    });
+  };
 
   if (matchLoading || playersLoading) {
     return (
@@ -144,21 +155,24 @@ export default function MatchDetailPage() {
     bestGoalName: bestGoalStat ? allPlayers.find(p => p.id === bestGoalStat.playerId)?.name : undefined,
   };
 
-  const currentUser = allPlayers.find(p => p.id === user?.uid);
-
   return (
     <div className="space-y-8 max-w-5xl mx-auto">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
             <h1 className="text-4xl font-black tracking-tighter uppercase">Resumen del Partido</h1>
-            <p className="text-muted-foreground">
-            {new Date(match.date).toLocaleDateString("es-ES", {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-            })}
-            </p>
+            <div className="flex items-center gap-2">
+                <p className="text-muted-foreground">
+                {new Date(match.date).toLocaleDateString("es-ES", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                })}
+                </p>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleShare}>
+                    <Share2 className="h-4 w-4" />
+                </Button>
+            </div>
         </div>
         <Badge variant="secondary" className="w-fit text-lg py-1 px-4 border-primary/20">Real Acade League</Badge>
       </div>
@@ -208,9 +222,7 @@ export default function MatchDetailPage() {
         <div className="space-y-8">
             <MatchAiSummary matchData={matchSummaryData} />
             
-            {currentUser?.role === 'player' && (
-                <BestGoalVote scorers={scorers} />
-            )}
+            <BestGoalVote matchId={id} scorers={scorers} />
         </div>
       </div>
     </div>
