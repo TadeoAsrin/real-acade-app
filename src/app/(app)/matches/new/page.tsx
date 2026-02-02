@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -32,7 +31,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { CalendarIcon, Loader2, Award, Star, Users } from "lucide-react";
+import { CalendarIcon, Loader2, Award, Star } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -71,7 +70,6 @@ export default function NewMatchPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState(false);
   const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
-  const currentUser = getPlayerById("1");
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -84,7 +82,7 @@ export default function NewMatchPage() {
     },
   });
 
-  const { control, setValue } = form;
+  const { control } = form;
   const watchedTeamAPlayerIds = useWatch({ control, name: "teamAPlayerIds" }) || [];
   const watchedTeamBPlayerIds = useWatch({ control, name: "teamBPlayerIds" }) || [];
   const watchedTeamAStats = useWatch({ control, name: "teamAStats" }) || {};
@@ -108,6 +106,7 @@ export default function NewMatchPage() {
 
   async function onSubmit(data: FormValues) {
     setIsLoading(true);
+    // En una app real, aquí mapearíamos data a nuestra estructura de Firestore/backend
     await new Promise((resolve) => setTimeout(resolve, 1500));
     setIsLoading(false);
     
@@ -147,7 +146,7 @@ export default function NewMatchPage() {
                       }}
                     />
                   </FormControl>
-                  <FormLabel className="flex items-center gap-2 font-normal cursor-pointer">
+                  <FormLabel className={cn("flex items-center gap-2 font-normal cursor-pointer", isDisabled && "opacity-40 cursor-not-allowed")}>
                     <Avatar className="h-6 w-6">
                       <AvatarImage src={player.avatar} alt={player.name} />
                       <AvatarFallback>{player.name.charAt(0)}</AvatarFallback>
@@ -179,20 +178,20 @@ export default function NewMatchPage() {
           name={captainField}
           render={({ field }) => (
             <FormItem className="space-y-3">
-              <FormLabel className="text-base">Seleccionar Capitán</FormLabel>
+              <FormLabel className="text-base font-semibold">¿Quién es el Capitán?</FormLabel>
               <FormControl>
                 <RadioGroup
                   onValueChange={field.onChange}
                   defaultValue={field.value}
-                  className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                  className="grid grid-cols-1 md:grid-cols-2 gap-3"
                 >
                   {selectedIds.map(id => {
                     const player = getPlayerById(id);
                     if (!player) return null;
                     return (
-                      <FormItem key={id} className="flex items-center space-x-3 space-y-0 border p-3 rounded-md">
+                      <FormItem key={id} className="flex items-center space-x-3 space-y-0 border p-3 rounded-md hover:bg-accent/50 transition-colors cursor-pointer">
                         <FormControl><RadioGroupItem value={id} /></FormControl>
-                        <FormLabel className="font-normal flex items-center gap-2">
+                        <FormLabel className="font-normal flex items-center gap-2 cursor-pointer w-full">
                           <Avatar className="h-6 w-6">
                             <AvatarImage src={player.avatar} alt={player.name} />
                             <AvatarFallback>{player.name.charAt(0)}</AvatarFallback>
@@ -210,26 +209,26 @@ export default function NewMatchPage() {
         />
 
         <div className="space-y-4">
-          <FormLabel className="text-base">Goles Marcados</FormLabel>
+          <FormLabel className="text-base font-semibold">Goles Marcados</FormLabel>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {selectedIds.map(id => {
               const player = getPlayerById(id);
               if (!player) return null;
               return (
-                <div key={id} className="flex items-center justify-between p-3 border rounded-md">
+                <div key={id} className="flex items-center justify-between p-3 border rounded-md bg-background shadow-sm">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={player.avatar} alt={player.name} />
                       <AvatarFallback>{player.name.charAt(0)}</AvatarFallback>
                     </Avatar>
-                    <span className="font-medium">{player.name}</span>
+                    <span className="font-medium text-sm">{player.name}</span>
                   </div>
                   <FormField
                     control={form.control}
                     name={`${teamKey}.${id}.goals`}
                     render={({ field }) => (
                       <FormItem className="w-20">
-                        <FormControl><Input type="number" min="0" {...field} /></FormControl>
+                        <FormControl><Input type="number" min="0" {...field} className="h-8" /></FormControl>
                       </FormItem>
                     )}
                   />
@@ -243,11 +242,11 @@ export default function NewMatchPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <Card>
+    <div className="max-w-4xl mx-auto pb-12">
+      <Card className="border-t-4 border-t-primary">
         <CardHeader>
-          <CardTitle>Cargar Nuevo Partido</CardTitle>
-          <CardDescription>Completa la información del encuentro semanal.</CardDescription>
+          <CardTitle className="text-2xl">Cargar Nuevo Partido</CardTitle>
+          <CardDescription>Ingresa los detalles del encuentro y los resultados individuales.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -261,7 +260,7 @@ export default function NewMatchPage() {
                     <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                       <PopoverTrigger asChild>
                         <FormControl>
-                          <Button variant="outline" className={cn("w-[240px] pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
+                          <Button variant="outline" className={cn("w-full md:w-[240px] pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
                             {field.value ? format(field.value, "PPP", { locale: es }) : <span>Elige una fecha</span>}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
@@ -282,49 +281,56 @@ export default function NewMatchPage() {
                 )}
               />
 
-              <Accordion type="multiple" className="w-full" defaultValue={['team-a', 'team-b']}>
-                <AccordionItem value="team-a">
-                  <AccordionTrigger className="text-xl font-semibold text-primary">Equipo Azul</AccordionTrigger>
-                  <AccordionContent className="space-y-6">
-                    <div>
-                      <FormLabel className="mb-4 block">Seleccionar Jugadores</FormLabel>
-                      {renderPlayerListSelection('A')}
-                      <FormMessage>{form.formState.errors.teamAPlayerIds?.message}</FormMessage>
-                    </div>
-                    {renderTeamStatsEntry('A')}
-                  </AccordionContent>
-                </AccordionItem>
+              <div className="space-y-6">
+                <Accordion type="multiple" className="w-full space-y-4" defaultValue={['team-a', 'team-b']}>
+                  <AccordionItem value="team-a" className="border rounded-lg px-4 bg-primary/5">
+                    <AccordionTrigger className="text-xl font-bold text-primary hover:no-underline">Equipo Azul</AccordionTrigger>
+                    <AccordionContent className="space-y-6">
+                      <div className="space-y-4">
+                        <FormLabel className="text-base">Seleccionar Jugadores</FormLabel>
+                        {renderPlayerListSelection('A')}
+                        <FormMessage>{form.formState.errors.teamAPlayerIds?.message}</FormMessage>
+                      </div>
+                      {renderTeamStatsEntry('A')}
+                    </AccordionContent>
+                  </AccordionItem>
 
-                <AccordionItem value="team-b">
-                  <AccordionTrigger className="text-xl font-semibold text-accent">Equipo Rojo</AccordionTrigger>
-                  <AccordionContent className="space-y-6">
-                    <div>
-                      <FormLabel className="mb-4 block">Seleccionar Jugadores</FormLabel>
-                      {renderPlayerListSelection('B')}
-                      <FormMessage>{form.formState.errors.teamBPlayerIds?.message}</FormMessage>
-                    </div>
-                    {renderTeamStatsEntry('B')}
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
+                  <AccordionItem value="team-b" className="border rounded-lg px-4 bg-accent/5">
+                    <AccordionTrigger className="text-xl font-bold text-accent hover:no-underline">Equipo Rojo</AccordionTrigger>
+                    <AccordionContent className="space-y-6">
+                      <div className="space-y-4">
+                        <FormLabel className="text-base">Seleccionar Jugadores</FormLabel>
+                        {renderPlayerListSelection('B')}
+                        <FormMessage>{form.formState.errors.teamBPlayerIds?.message}</FormMessage>
+                      </div>
+                      {renderTeamStatsEntry('B')}
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </div>
 
-              <Card className="bg-muted/30">
-                <CardHeader><CardTitle className="text-lg flex items-center gap-2"><Award /> Premios del Partido</CardTitle></CardHeader>
+              <Card className="bg-muted/30 border-dashed">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Star className="text-yellow-500 h-5 w-5" /> Premios y Reconocimientos
+                  </CardTitle>
+                </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField
                     control={form.control}
                     name="mvpPlayerId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="flex items-center gap-2"><Star className="text-yellow-500"/> Mejor Jugador (MVP)</FormLabel>
+                        <FormLabel className="flex items-center gap-2">Mejor Jugador (MVP)</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value} disabled={allSelectedPlayerIds.length === 0}>
-                          <FormControl><SelectTrigger><SelectValue placeholder="Selecciona" /></SelectTrigger></FormControl>
+                          <FormControl><SelectTrigger><SelectValue placeholder="Selecciona el MVP" /></SelectTrigger></FormControl>
                           <SelectContent>
                             {allSelectedPlayerIds.map(id => (
                               <SelectItem key={id} value={id}>{getPlayerById(id)?.name}</SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -333,25 +339,29 @@ export default function NewMatchPage() {
                     name="bestGoalPlayerId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="flex items-center gap-2"><Award className="text-primary"/> Mejor Gol</FormLabel>
+                        <FormLabel className="flex items-center gap-2">Mejor Gol</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value} disabled={scorers.length === 0}>
-                          <FormControl><SelectTrigger><SelectValue placeholder={scorers.length > 0 ? "Selecciona" : "Sin goleadores"} /></SelectTrigger></FormControl>
+                          <FormControl><SelectTrigger><SelectValue placeholder={scorers.length > 0 ? "Selecciona el mejor gol" : "Sin goleadores aún"} /></SelectTrigger></FormControl>
                           <SelectContent>
                             {scorers.map(player => (
                               <SelectItem key={player.id} value={player.id}>{player.name}</SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
                 </CardContent>
               </Card>
 
-              <div className="flex justify-end">
-                <Button type="submit" size="lg" disabled={isLoading}>
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Guardar Resultados
+              <div className="flex justify-end pt-4">
+                <Button type="submit" size="lg" className="w-full md:w-auto" disabled={isLoading}>
+                  {isLoading ? (
+                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Guardando...</>
+                  ) : (
+                    "Finalizar y Guardar"
+                  )}
                 </Button>
               </div>
             </form>
