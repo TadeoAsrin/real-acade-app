@@ -28,7 +28,6 @@ export default function PlayersPage() {
                     <TableHead className="text-center">Partidos</TableHead>
                     <TableHead className="text-center">Goles</TableHead>
                     <TableHead className="text-center">Efectividad</TableHead>
-                    <TableHead className="text-center">Rating</TableHead>
                     <TableHead className="text-center">Capitán</TableHead>
                     <TableHead className="text-center">MVP</TableHead>
                     <TableHead className="text-center">Mejor Gol</TableHead>
@@ -49,7 +48,6 @@ export default function PlayersPage() {
                         <TableCell className="text-center font-mono">{player.matchesPlayed}</TableCell>
                         <TableCell className="text-center font-mono">{player.totalGoals}</TableCell>
                         <TableCell className="text-center font-mono">{player.winPercentage}%</TableCell>
-                        <TableCell className="text-center font-mono">{player.averageRating ? player.averageRating.toFixed(1) : '-'}</TableCell>
                         <TableCell className="text-center font-mono">{player.totalCaptaincies}</TableCell>
                         <TableCell className="text-center font-mono">{player.totalMvp}</TableCell>
                         <TableCell className="text-center font-mono">{player.totalBestGoals}</TableCell>

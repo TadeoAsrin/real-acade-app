@@ -20,7 +20,6 @@ import { Badge } from "@/components/ui/badge";
 import type { Player, PlayerStats } from "@/lib/definitions";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
-import { PlayerRating } from "@/components/matches/player-rating";
 import { BestGoalVote } from "@/components/matches/best-goal-vote";
 import { Award, Star } from "lucide-react";
 
@@ -93,7 +92,6 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
   }
 
   const allPlayerStats = [...match.teamAPlayers, ...match.teamBPlayers];
-  const allPlayers = allPlayerStats.map(p => getPlayerById(p.playerId)).filter(Boolean) as Player[];
   
   const scorers = allPlayerStats
     .filter(stat => stat.goals > 0)
@@ -161,7 +159,6 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
       {currentUser?.role === 'player' && (
         <div className="space-y-8">
             <BestGoalVote scorers={scorers} />
-            <PlayerRating players={allPlayers} currentUser={currentUser} />
         </div>
       )}
 

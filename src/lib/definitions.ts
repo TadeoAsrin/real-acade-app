@@ -11,16 +11,10 @@ export type Player = {
 export type PlayerStats = {
   playerId: string;
   goals: number;
-  ratings?: PlayerRating[];
   isCaptain?: boolean;
   isMvp?: boolean;
   hasBestGoal?: boolean;
 };
-
-export type PlayerRating = {
-  ratedBy: string; // playerId of the user who rated
-  rating: number; // 1-10
-}
 
 export type Match = {
   id: string;
@@ -37,7 +31,6 @@ export type AggregatedPlayerStats = {
   avatar: string;
   matchesPlayed: number;
   totalGoals: number;
-  averageRating: number | null;
   totalCaptaincies: number;
   totalMvp: number;
   totalBestGoals: number;
