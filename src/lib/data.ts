@@ -24,22 +24,22 @@ export const matches: Match[] = [
     teamAScore: 5,
     teamBScore: 3,
     teamAPlayers: [
-      { playerId: '1', goals: 2, yellowCards: 0, redCards: 0, ratings: [{ratedBy: '2', rating: 9}, {ratedBy: '3', rating: 8}], isCaptain: true, isMvp: true },
-      { playerId: '2', goals: 1, yellowCards: 0, redCards: 0, ratings: [{ratedBy: '1', rating: 8}], hasBestGoal: true },
-      { playerId: '3', goals: 1, yellowCards: 1, redCards: 0, ratings: []},
-      { playerId: '4', goals: 1, yellowCards: 0, redCards: 0, ratings: []},
-      { playerId: '5', goals: 0, yellowCards: 0, redCards: 0, ratings: []},
-      { playerId: '6', goals: 0, yellowCards: 0, redCards: 0, ratings: []},
-      { playerId: '7', goals: 0, yellowCards: 0, redCards: 0, ratings: []},
+      { playerId: '1', goals: 2, ratings: [{ratedBy: '2', rating: 9}, {ratedBy: '3', rating: 8}], isCaptain: true, isMvp: true },
+      { playerId: '2', goals: 1, ratings: [{ratedBy: '1', rating: 8}], hasBestGoal: true },
+      { playerId: '3', goals: 1, ratings: []},
+      { playerId: '4', goals: 1, ratings: []},
+      { playerId: '5', goals: 0, ratings: []},
+      { playerId: '6', goals: 0, ratings: []},
+      { playerId: '7', goals: 0, ratings: []},
     ],
     teamBPlayers: [
-      { playerId: '8', goals: 1, yellowCards: 0, redCards: 0, ratings: [], isCaptain: true },
-      { playerId: '9', goals: 1, yellowCards: 0, redCards: 0, ratings: []},
-      { playerId: '10', goals: 1, yellowCards: 1, redCards: 0, ratings: []},
-      { playerId: '11', goals: 0, yellowCards: 0, redCards: 0, ratings: []},
-      { playerId: '12', goals: 0, yellowCards: 0, redCards: 0, ratings: []},
-      { playerId: '13', goals: 0, yellowCards: 0, redCards: 0, ratings: []},
-      { playerId: '14', goals: 0, yellowCards: 0, redCards: 0, ratings: []},
+      { playerId: '8', goals: 1, ratings: [], isCaptain: true },
+      { playerId: '9', goals: 1, ratings: []},
+      { playerId: '10', goals: 1, ratings: []},
+      { playerId: '11', goals: 0, ratings: []},
+      { playerId: '12', goals: 0, ratings: []},
+      { playerId: '13', goals: 0, ratings: []},
+      { playerId: '14', goals: 0, ratings: []},
     ],
   },
   {
@@ -48,22 +48,22 @@ export const matches: Match[] = [
     teamAScore: 2,
     teamBScore: 4,
     teamAPlayers: [
-      { playerId: '1', goals: 1, yellowCards: 0, redCards: 0, ratings: [] },
-      { playerId: '2', goals: 1, yellowCards: 0, redCards: 0, ratings: [], isCaptain: true },
-      { playerId: '3', goals: 0, yellowCards: 0, redCards: 0, ratings: [] },
-      { playerId: '4', goals: 0, yellowCards: 1, redCards: 0, ratings: [] },
-      { playerId: '5', goals: 0, yellowCards: 0, redCards: 0, ratings: [] },
-      { playerId: '6', goals: 0, yellowCards: 0, redCards: 0, ratings: [] },
-      { playerId: '7', goals: 0, yellowCards: 0, redCards: 0, ratings: [] },
+      { playerId: '1', goals: 1, ratings: [] },
+      { playerId: '2', goals: 1, ratings: [], isCaptain: true },
+      { playerId: '3', goals: 0, ratings: [] },
+      { playerId: '4', goals: 0, ratings: [] },
+      { playerId: '5', goals: 0, ratings: [] },
+      { playerId: '6', goals: 0, ratings: [] },
+      { playerId: '7', goals: 0, ratings: [] },
     ],
     teamBPlayers: [
-      { playerId: '8', goals: 2, yellowCards: 0, redCards: 0, ratings: [], isCaptain: true, isMvp: true, hasBestGoal: true },
-      { playerId: '9', goals: 1, yellowCards: 0, redCards: 0, ratings: [] },
-      { playerId: '10', goals: 1, yellowCards: 0, redCards: 0, ratings: [] },
-      { playerId: '11', goals: 0, yellowCards: 0, redCards: 0, ratings: [] },
-      { playerId: '12', goals: 0, yellowCards: 1, redCards: 0, ratings: [] },
-      { playerId: '13', goals: 0, yellowCards: 0, redCards: 0, ratings: [] },
-      { playerId: '14', goals: 0, yellowCards: 0, redCards: 0, ratings: [] },
+      { playerId: '8', goals: 2, ratings: [], isCaptain: true, isMvp: true, hasBestGoal: true },
+      { playerId: '9', goals: 1, ratings: [] },
+      { playerId: '10', goals: 1, ratings: [] },
+      { playerId: '11', goals: 0, ratings: [] },
+      { playerId: '12', goals: 0, ratings: [] },
+      { playerId: '13', goals: 0, ratings: [] },
+      { playerId: '14', goals: 0, ratings: [] },
     ],
   },
   {
@@ -72,15 +72,15 @@ export const matches: Match[] = [
     teamAScore: 6,
     teamBScore: 6,
     teamAPlayers: [
-        { playerId: '1', goals: 3, yellowCards: 0, redCards: 0, ratings: [], isCaptain: true, isMvp: true },
-        { playerId: '2', goals: 2, yellowCards: 0, redCards: 0, ratings: [] },
-        { playerId: '3', goals: 1, yellowCards: 0, redCards: 0, ratings: [] },
-        { playerId: '4', goals: 0, yellowCards: 0, redCards: 0, ratings: [] },
+        { playerId: '1', goals: 3, ratings: [], isCaptain: true, isMvp: true },
+        { playerId: '2', goals: 2, ratings: [] },
+        { playerId: '3', goals: 1, ratings: [] },
+        { playerId: '4', goals: 0, ratings: [] },
     ],
     teamBPlayers: [
-        { playerId: '8', goals: 4, yellowCards: 0, redCards: 0, ratings: [], isCaptain: true, hasBestGoal: true },
-        { playerId: '9', goals: 1, yellowCards: 0, redCards: 0, ratings: [] },
-        { playerId: '10', goals: 1, yellowCards: 1, redCards: 0, ratings: [] },
+        { playerId: '8', goals: 4, ratings: [], isCaptain: true, hasBestGoal: true },
+        { playerId: '9', goals: 1, ratings: [] },
+        { playerId: '10', goals: 1, ratings: [] },
     ]
   }
 ];
@@ -96,8 +96,6 @@ export const getAggregatedPlayerStats = (): AggregatedPlayerStats[] => {
       avatar: player.avatar,
       matchesPlayed: 0,
       totalGoals: 0,
-      totalYellowCards: 0,
-      totalRedCards: 0,
       averageRating: null,
       totalCaptaincies: 0,
       totalMvp: 0,
@@ -115,13 +113,11 @@ export const getAggregatedPlayerStats = (): AggregatedPlayerStats[] => {
     const draw = match.teamAScore === match.teamBScore;
 
     const processPlayer = (playerStat: PlayerStats, team: 'A' | 'B') => {
-        const { playerId, goals, yellowCards, redCards, ratings, isCaptain, isMvp, hasBestGoal } = playerStat;
+        const { playerId, goals, ratings, isCaptain, isMvp, hasBestGoal } = playerStat;
         if (statsMap[playerId]) {
             const stats = statsMap[playerId];
             stats.matchesPlayed++;
             stats.totalGoals += goals;
-            stats.totalYellowCards += yellowCards ?? 0;
-            stats.totalRedCards += redCards ?? 0;
             if (isCaptain) stats.totalCaptaincies++;
             if (isMvp) stats.totalMvp++;
             if (hasBestGoal) stats.totalBestGoals++;

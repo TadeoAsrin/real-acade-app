@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { PlayerRating } from "@/components/matches/player-rating";
 import { BestGoalVote } from "@/components/matches/best-goal-vote";
+import { Award, Star } from "lucide-react";
 
 const PlayerStatsTable = ({
   title,
@@ -43,7 +44,6 @@ const PlayerStatsTable = ({
             <TableRow>
               <TableHead>Jugador</TableHead>
               <TableHead className="text-center">Goles</TableHead>
-              <TableHead className="text-center">Tarjetas</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -59,20 +59,20 @@ const PlayerStatsTable = ({
                         <AvatarFallback>{player.name.charAt(0)}</AvatarFallback>
                       </Avatar>
                       <span className="font-medium">{player.name}</span>
+                       {stat.isMvp && (
+                        <Badge variant="outline" className="border-yellow-400 text-yellow-400">
+                          <Star className="mr-1 h-3 w-3" /> MVP
+                        </Badge>
+                      )}
+                      {stat.hasBestGoal && (
+                        <Badge variant="outline" className="border-primary text-primary">
+                          <Award className="mr-1 h-3 w-3" /> Mejor Gol
+                        </Badge>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell className="text-center font-mono">
                     {stat.goals}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {stat.yellowCards > 0 && (
-                      <Badge className="bg-yellow-400 text-black">
-                        {stat.yellowCards}A
-                      </Badge>
-                    )}
-                    {stat.redCards > 0 && (
-                      <Badge variant="destructive">{stat.redCards}R</Badge>
-                    )}
                   </TableCell>
                 </TableRow>
               );
@@ -143,7 +143,7 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <PlayerStatsTable
           title="Amigos de Martes"
           stats={match.teamAPlayers}
