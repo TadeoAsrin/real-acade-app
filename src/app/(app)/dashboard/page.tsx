@@ -23,7 +23,8 @@ import { FieldView } from "@/components/dashboard/field-view";
 
 export default function DashboardPage() {
   const playerStats = getAggregatedPlayerStats();
-  const currentUser = getPlayerById("1"); // In a real app, this would come from auth
+  const currentUser = getPlayerById("1");
+  const lastMatch = matches[0]; // El partido más reciente
 
   const topScorers = [...playerStats]
     .sort((a, b) => b.totalGoals - a.totalGoals)
@@ -35,6 +36,10 @@ export default function DashboardPage() {
   const totalGoals = playerStats.reduce((sum, p) => sum + p.totalGoals, 0);
   const totalMatches = matches.length;
 
+  // Obtener los jugadores del último partido para la vista de campo
+  const lastMatchTeamAPlayers = lastMatch?.teamAPlayers.map(s => getPlayerById(s.playerId)).filter(Boolean) as any[] || [];
+  const lastMatchTeamBPlayers = lastMatch?.teamBPlayers.map(s => getPlayerById(s.playerId)).filter(Boolean) as any[] || [];
+
   return (
     <div className="flex flex-col gap-8">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -45,9 +50,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalMatches}</div>
-            <p className="text-xs text-muted-foreground">
-              Total de encuentros disputados
-            </p>
+            <p className="text-xs text-muted-foreground">Total de encuentros disputados</p>
           </CardContent>
         </Card>
         <Card>
@@ -57,9 +60,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalGoals}</div>
-            <p className="text-xs text-muted-foreground">
-              en {totalMatches} partidos
-            </p>
+            <p className="text-xs text-muted-foreground">en {totalMatches} partidos</p>
           </CardContent>
         </Card>
         <Card>
@@ -69,9 +70,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{topScorers[0].name}</div>
-            <p className="text-xs text-muted-foreground">
-              {topScorers[0].totalGoals} goles en {topScorers[0].matchesPlayed} partidos
-            </p>
+            <p className="text-xs text-muted-foreground">{topScorers[0].totalGoals} goles marcados</p>
           </CardContent>
         </Card>
         <Card>
@@ -81,25 +80,27 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
                 <div className="text-2xl font-bold">{topWinner.name}</div>
-                <p className="text-xs text-muted-foreground">
-                    {topWinner.wins} victorias ({topWinner.winPercentage}%)
-                </p>
+                <p className="text-xs text-muted-foreground">{topWinner.wins} victorias ({topWinner.winPercentage}%)</p>
             </CardContent>
         </Card>
       </div>
 
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-        <FieldView team="Azul" players={players} />
-        <FieldView team="Rojo" players={players} />
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-center">Formación Último Partido: Azul</h3>
+          <FieldView team="Azul" players={lastMatchTeamAPlayers} />
+        </div>
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-center">Formación Último Partido: Rojo</h3>
+          <FieldView team="Rojo" players={lastMatchTeamBPlayers} />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Tabla de Goleadores</CardTitle>
-            <CardDescription>
-              Top 5 jugadores con más goles.
-            </CardDescription>
+            <CardDescription>Top 5 jugadores con más goles.</CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
@@ -117,9 +118,7 @@ export default function DashboardPage() {
                       <div className="flex items-center gap-3">
                         <Avatar className="h-8 w-8">
                           <AvatarImage src={player.avatar} alt={player.name} />
-                          <AvatarFallback>
-                            {player.name.charAt(0)}
-                          </AvatarFallback>
+                          <AvatarFallback>{player.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <Link href={`/players/${player.playerId}`} className="font-medium hover:underline">{player.name}</Link>
                       </div>
@@ -134,15 +133,16 @@ export default function DashboardPage() {
         </Card>
         <GoalsChart />
       </div>
+
        {currentUser?.role === 'admin' && (
             <Card>
                 <CardHeader className="pb-2">
-                    <CardTitle>Cargar Partido</CardTitle>
-                    <CardDescription>Añade los datos del último encuentro.</CardDescription>
+                    <CardTitle>Administración</CardTitle>
+                    <CardDescription>Gestión de datos del club.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Button size="sm" asChild>
-                        <Link href="/matches/new">Nuevo Partido</Link>
+                        <Link href="/matches/new">Cargar Nuevo Partido</Link>
                     </Button>
                 </CardContent>
             </Card>
