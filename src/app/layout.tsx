@@ -9,8 +9,9 @@ import { FirebaseClientProvider } from "@/firebase";
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: "Real Acade",
-  description: "Estadísticas de partidos de Futbol 7",
+  title: "Real Acade | Club de Fútbol 7",
+  description: "Plataforma oficial de estadísticas, rankings y crónicas de Real Acade.",
+  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
 };
 
 export default function RootLayout({
@@ -28,7 +29,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className={cn("font-body antialiased", inter.variable)}>
+      <body className={cn("font-body antialiased selection:bg-primary/30", inter.variable)}>
         <FirebaseClientProvider>
           {children}
           <Toaster />

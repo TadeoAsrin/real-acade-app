@@ -1,7 +1,11 @@
+
 import { redirect } from "next/navigation";
 
+/**
+ * Página de entrada de la aplicación.
+ * Redirige automáticamente al login para asegurar que los usuarios se identifiquen
+ * antes de ver las estadísticas del club.
+ */
 export default function Home() {
-  // For this example, we redirect to the login page.
-  // In a real app, you'd check for an active session.
   redirect("/login");
 }
