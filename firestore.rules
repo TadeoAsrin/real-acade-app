@@ -1,114 +1,34 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    /**
-     * CORE PHILOSOPHY: Fut7Stats Admin-Controlled Model
-     * 
-     * This ruleset implements a centralized administrative security model for the Fut7Stats application. 
-     * A single source of truth for authorization is established through a dedicated `/roles_admin` collection. 
-     * 
-     * DATA STRUCTURE:
-     * - Admin authorization is managed via the existence of a document at `/roles_admin/{userId}`.
-     * - Primary entities (Players, Matches, Ratings) are stored in top-level collections for efficient querying.
-     * - Match Events are nested under Matches to maintain logical grouping and hierarchy.
-     * 
-     * KEY SECURITY DECISIONS:
-     * 1. ADMIN-ONLY WRITES: Following the requirement that only the administrator can manage data, 
-     *    all create, update, and delete operations across all collections are restricted to authenticated admins.
-     * 2. PUBLIC READ ACCESS: To allow players and viewers to see stats, matches, and ratings, 
-     *    read access (get and list) is granted to everyone.
-     * 3. ROLE-BASED ACCESS CONTROL (RBAC): Admin status is verified using a high-performance `exists()` check 
-     *    against the roles collection, avoiding complex logic within the data documents themselves.
-     * 4. PROTOTYPING FLEXIBILITY: While access is strictly controlled, data schemas are not 
-     *    enforced here, allowing the developer to iterate on the data model without changing rules.
-     */
-
     // --- HELPER FUNCTIONS ---
-
-    /** Checks if the request is from an authenticated user. */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /** 
-     * Verifies if the authenticated user is an administrator.
-     * Admin status is defined by the existence of a document with the user's UID in the roles_admin collection.
-     */
     function isAdmin() {
       return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
 
-    /** Combines admin verification with an existence check for destructive operations. */
-    function isExistingAdmin() {
-      return isAdmin() && resource != null;
-    }
-
-    // --- COLLECTION RULES ---
-
-    /**
-     * @description Authorization collection. Document existence indicates administrative privileges.
-     * @path /roles_admin/{adminId}
-     * @allow (get) Any authenticated user checking their own status.
-     * @deny (create, update, delete) Any user. Admin roles should be managed via Firebase Console or specialized script.
-     * @principle Restricts access to sensitive role metadata to prevent privilege escalation.
-     */
-    match /roles_admin/{adminId} {
-      allow get: if isSignedIn() && request.auth.uid == adminId;
-      allow list: if false;
-      allow create, update, delete: if false;
-    }
-
-    /**
-     * @description Global collection of players.
-     * @path /players/{playerId}
-     * @allow (get, list) Anyone.
-     * @allow (create, update, delete) Authenticated administrators.
-     * @principle Centralized administrative control for entity management.
-     */
+    // --- RULES ---
+    
+    // Players: Everyone can read, only admin can write
     match /players/{playerId} {
-      allow get, list: if true;
-      allow create: if isAdmin();
-      allow update, delete: if isExistingAdmin();
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
-    /**
-     * @description Collection of football matches.
-     * @path /matches/{matchId}
-     * @allow (get, list) Anyone.
-     * @allow (create, update, delete) Authenticated administrators.
-     * @principle Only the app owner can record or modify match results.
-     */
+    // Matches: Everyone can read, only admin can write
     match /matches/{matchId} {
-      allow get, list: if true;
-      allow create: if isAdmin();
-      allow update, delete: if isExistingAdmin();
-
-      /**
-       * @description Events (goals, fouls) happening within a specific match.
-       * @path /matches/{matchId}/match_events/{matchEventId}
-       * @allow (get, list) Anyone.
-       * @allow (create, update, delete) Authenticated administrators.
-       * @principle Inherits the parent match's security posture for sub-resource consistency.
-       */
-      match /match_events/{matchEventId} {
-        allow get, list: if true;
-        allow create: if isAdmin();
-        allow update, delete: if isExistingAdmin();
-      }
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
-    /**
-     * @description Collection storing performance ratings for players.
-     * @path /player_match_ratings/{playerMatchRatingId}
-     * @allow (get, list) Anyone.
-     * @allow (create, update, delete) Authenticated administrators.
-     * @principle Ensures ratings are official and managed exclusively by the administrator.
-     */
-    match /player_match_ratings/{playerMatchRatingId} {
-      allow get, list: if true;
-      allow create: if isAdmin();
-      allow update, delete: if isExistingAdmin();
+    // Admin Roles: Only authenticated users can see their own status
+    match /roles_admin/{userId} {
+      allow get: if isSignedIn() && request.auth.uid == userId;
+      allow list, write: if false; // Managed via console or script
     }
   }
 }

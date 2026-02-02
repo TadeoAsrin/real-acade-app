@@ -1,4 +1,7 @@
-import { getAggregatedPlayerStats, getPlayerById, getTeamGlobalStats, matches } from "@/lib/data";
+
+'use client';
+
+import { calculateAggregatedStats, getTeamGlobalStats } from "@/lib/data";
 import {
   Card,
   CardContent,
@@ -15,17 +18,45 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Award, Medal, Trophy, Users, Swords } from "lucide-react";
+import { Award, Medal, Trophy, Users, Swords, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { GoalsChart } from "@/components/dashboard/goals-chart";
 import { FieldView } from "@/components/dashboard/field-view";
 import { PowerRanking } from "@/components/dashboard/power-ranking";
+import { useCollection, useMemoFirebase, useFirestore } from "@/firebase";
+import { collection, query, orderBy, limit } from "firebase/firestore";
+import type { Match, Player } from "@/lib/definitions";
 
 export default function DashboardPage() {
-  const playerStats = getAggregatedPlayerStats();
-  const teamStats = getTeamGlobalStats();
-  const lastMatch = matches[0];
+  const firestore = useFirestore();
+
+  const playersQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return collection(firestore, 'players');
+  }, [firestore]);
+
+  const matchesQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'matches'), orderBy('date', 'desc'));
+  }, [firestore]);
+
+  const { data: playersData, isLoading: playersLoading } = useCollection<Player>(playersQuery);
+  const { data: matchesData, isLoading: matchesLoading } = useCollection<Match>(matchesQuery);
+
+  if (playersLoading || matchesLoading) {
+    return (
+      <div className="flex h-[50vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const allPlayers = playersData || [];
+  const allMatches = matchesData || [];
+  
+  const playerStats = calculateAggregatedStats(allPlayers, allMatches);
+  const teamStats = getTeamGlobalStats(allMatches);
+  const lastMatch = allMatches[0];
 
   const topScorers = [...playerStats]
     .sort((a, b) => b.totalGoals - a.totalGoals)
@@ -35,10 +66,10 @@ export default function DashboardPage() {
     .sort((a, b) => b.wins - a.wins)[0];
 
   const totalGoals = playerStats.reduce((sum, p) => sum + p.totalGoals, 0);
-  const totalMatches = matches.length;
+  const totalMatches = allMatches.length;
 
-  const lastMatchTeamAPlayers = lastMatch?.teamAPlayers.map(s => getPlayerById(s.playerId)).filter(Boolean) as any[] || [];
-  const lastMatchTeamBPlayers = lastMatch?.teamBPlayers.map(s => getPlayerById(s.playerId)).filter(Boolean) as any[] || [];
+  const lastMatchTeamAPlayers = lastMatch?.teamAPlayers.map(s => allPlayers.find(p => p.id === s.playerId)).filter(Boolean) as Player[] || [];
+  const lastMatchTeamBPlayers = lastMatch?.teamBPlayers.map(s => allPlayers.find(p => p.id === s.playerId)).filter(Boolean) as Player[] || [];
 
   return (
     <div className="flex flex-col gap-8">
@@ -83,8 +114,8 @@ export default function DashboardPage() {
             <Medal className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold truncate">{topScorers[0].name}</div>
-            <p className="text-xs text-muted-foreground">{topScorers[0].totalGoals} goles</p>
+            <div className="text-2xl font-bold truncate">{topScorers[0]?.name || '-'}</div>
+            <p className="text-xs text-muted-foreground">{topScorers[0]?.totalGoals || 0} goles</p>
           </CardContent>
         </Card>
         <Card>
@@ -93,8 +124,8 @@ export default function DashboardPage() {
                 <Award className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold truncate">{topWinner.name}</div>
-                <p className="text-xs text-muted-foreground">{topWinner.wins} victorias</p>
+                <div className="text-2xl font-bold truncate">{topWinner?.name || '-'}</div>
+                <p className="text-xs text-muted-foreground">{topWinner?.wins || 0} victorias</p>
             </CardContent>
         </Card>
       </div>
@@ -110,7 +141,7 @@ export default function DashboardPage() {
         </div>
         <div className="space-y-4">
             <h3 className="text-lg font-semibold text-center text-yellow-500">Elite del Club</h3>
-            <PowerRanking />
+            <PowerRanking players={allPlayers} matches={allMatches} />
         </div>
       </div>
 
@@ -149,7 +180,7 @@ export default function DashboardPage() {
             </Table>
           </CardContent>
         </Card>
-        <GoalsChart />
+        <GoalsChart matches={allMatches} />
       </div>
     </div>
   );
