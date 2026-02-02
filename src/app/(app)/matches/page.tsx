@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { matches, getPlayerById } from "@/lib/data";
 import { cn } from "@/lib/utils";
-import { ArrowUpRight, CalendarIcon, Futbol } from "lucide-react";
+import { ArrowUpRight, CalendarIcon } from "lucide-react";
 import Link from "next/link";
 
 export default function MatchesPage() {

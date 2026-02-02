@@ -9,7 +9,7 @@ import {
   SidebarMenuButton,
   SidebarFooter,
 } from "../ui/sidebar";
-import { Futbol, BarChart3, Users, LogOut } from "lucide-react";
+import { SoccerBall, BarChart3, Users, LogOut } from "lucide-react";
 import { Fut7StatsLogo } from "@/components/icons";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
@@ -24,7 +24,7 @@ const menuItems = [
   {
     href: "/matches",
     label: "Partidos",
-    icon: Futbol,
+    icon: SoccerBall,
   },
   {
     href: "/players",
