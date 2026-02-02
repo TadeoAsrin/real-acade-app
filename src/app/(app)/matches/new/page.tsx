@@ -35,6 +35,7 @@ import { cn } from "@/lib/utils";
 import { CalendarIcon, Loader2, Award, Star } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
+import { es } from "date-fns/locale";
 import {
   Select,
   SelectContent,
@@ -79,6 +80,7 @@ export default function NewMatchPage() {
   const allMatchPlayers = [...teamAPlayers, ...teamBPlayers];
 
   const defaultValues = {
+    date: new Date(),
     teamAStats: Object.fromEntries(
       teamAPlayers.map((p) => [p.id, { goals: 0 }])
     ),
@@ -226,7 +228,7 @@ export default function NewMatchPage() {
                           )}
                         >
                           {field.value ? (
-                            format(field.value, "PPP")
+                            format(field.value, "PPP", { locale: es })
                           ) : (
                             <span>Elige una fecha</span>
                           )}

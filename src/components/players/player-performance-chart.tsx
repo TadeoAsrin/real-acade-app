@@ -56,7 +56,7 @@ export function PlayerPerformanceChart({ matchHistory }: PerformanceChartProps) 
       <CardContent>
         <div className="h-80 w-full">
           <ChartContainer config={chartConfig}>
-            <LineChart accessibilityLayer data={chartData}>
+            <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis dataKey="date" tickLine={false} axisLine={false} />
               <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
