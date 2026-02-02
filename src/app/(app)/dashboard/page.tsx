@@ -1,4 +1,4 @@
-import { getAggregatedPlayerStats, getPlayerById } from "@/lib/data";
+import { getAggregatedPlayerStats, getPlayerById, matches } from "@/lib/data";
 import {
   Card,
   CardContent,
@@ -15,8 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { ArrowUpRight, Medal, Trophy } from "lucide-react";
+import { Award, Medal, Trophy, Users } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { GoalsChart } from "@/components/dashboard/goals-chart";
@@ -28,13 +27,28 @@ export default function DashboardPage() {
   const topScorers = [...playerStats]
     .sort((a, b) => b.totalGoals - a.totalGoals)
     .slice(0, 5);
+  
+  const topWinner = [...playerStats]
+    .sort((a, b) => b.wins - a.wins)[0];
 
   const totalGoals = playerStats.reduce((sum, p) => sum + p.totalGoals, 0);
-  const totalMatches = 3; // Hardcoded from mock data
+  const totalMatches = matches.length;
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Partidos Jugados</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalMatches}</div>
+            <p className="text-xs text-muted-foreground">
+              Total de encuentros disputados
+            </p>
+          </CardContent>
+        </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Goles Totales</CardTitle>
@@ -58,6 +72,18 @@ export default function DashboardPage() {
               {topScorers[0].totalGoals} goles en {topScorers[0].matchesPlayed} partidos
             </p>
           </CardContent>
+        </Card>
+        <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Máximo Ganador</CardTitle>
+                <Award className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">{topWinner.name}</div>
+                <p className="text-xs text-muted-foreground">
+                    {topWinner.wins} victorias ({topWinner.winPercentage}%)
+                </p>
+            </CardContent>
         </Card>
         {currentUser?.role === 'admin' && (
             <Card>
@@ -87,7 +113,8 @@ export default function DashboardPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Jugador</TableHead>
-                  <TableHead className="text-right">Goles</TableHead>
+                  <TableHead className="text-center">Goles</TableHead>
+                  <TableHead className="text-right">Efectividad</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -104,7 +131,8 @@ export default function DashboardPage() {
                         <Link href={`/players/${player.playerId}`} className="font-medium hover:underline">{player.name}</Link>
                       </div>
                     </TableCell>
-                    <TableCell className="text-right font-mono">{player.totalGoals}</TableCell>
+                    <TableCell className="text-center font-mono">{player.totalGoals}</TableCell>
+                    <TableCell className="text-right font-mono">{player.winPercentage}%</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
