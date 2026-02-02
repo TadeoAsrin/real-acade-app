@@ -14,9 +14,11 @@ import {
 } from "../ui/dropdown-menu";
 import { SidebarTrigger } from "../ui/sidebar";
 import { LogOut, User, Loader2 } from "lucide-react";
-import { useUser, useFirestore, useMemoFirebase, useCollection } from "@/firebase";
+import { useUser, useFirestore, useMemoFirebase, useCollection, useAuth } from "@/firebase";
 import { collection } from "firebase/firestore";
+import { signOut } from "firebase/auth";
 import type { Player } from "@/lib/definitions";
+import { useToast } from "@/hooks/use-toast";
 
 const getPageTitle = (pathname: string) => {
   if (pathname.includes("/dashboard")) return "Panel de Control";
@@ -29,8 +31,10 @@ const getPageTitle = (pathname: string) => {
 export function Header() {
   const pathname = usePathname();
   const router = useRouter();
+  const auth = useAuth();
   const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
+  const { toast } = useToast();
 
   const playersRef = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -39,6 +43,19 @@ export function Header() {
 
   const { data: players } = useCollection<Player>(playersRef);
   const currentUser = players?.find(p => p.id === user?.uid);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      toast({
+        title: "Sesión cerrada",
+        description: "Vuelve pronto a Real Acade.",
+      });
+      router.push("/login");
+    } catch (error) {
+      console.error("Logout error", error);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
@@ -70,17 +87,17 @@ export function Header() {
                 {currentUser?.name || user?.email || "Usuario"}
               </p>
               <p className="text-xs leading-none text-muted-foreground">
-                Perfil de Usuario
+                Perfil de {currentUser?.role === 'admin' ? 'Administrador' : 'Jugador'}
               </p>
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => currentUser && router.push(`/players/${currentUser.id}`)}>
             <User className="mr-2 h-4 w-4" />
-            <span>Perfil</span>
+            <span>Mi Perfil</span>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => router.push("/login")}>
+          <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
             <LogOut className="mr-2 h-4 w-4" />
             <span>Cerrar Sesión</span>
           </DropdownMenuItem>

@@ -1,6 +1,7 @@
+
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Sidebar,
   SidebarHeader,
@@ -12,6 +13,9 @@ import {
 import { Goal, BarChart3, Users, LogOut } from "lucide-react";
 import { Fut7StatsLogo } from "@/components/icons";
 import Link from "next/link";
+import { useAuth } from "@/firebase";
+import { signOut } from "firebase/auth";
+import { useToast } from "@/hooks/use-toast";
 
 const menuItems = [
   {
@@ -33,6 +37,22 @@ const menuItems = [
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const auth = useAuth();
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      toast({
+        title: "Sesión cerrada",
+        description: "Has salido de Real Acade correctamente.",
+      });
+      router.push("/login");
+    } catch (error) {
+      console.error("Logout error", error);
+    }
+  };
 
   return (
     <Sidebar>
@@ -66,11 +86,12 @@ export function AppSidebar() {
       </SidebarMenu>
       <SidebarFooter className="p-4 border-t border-sidebar-border">
          <SidebarMenuItem>
-            <SidebarMenuButton asChild className="text-muted-foreground hover:text-destructive">
-              <Link href="/login">
-                <LogOut />
-                <span>Cerrar Sesión</span>
-              </Link>
+            <SidebarMenuButton 
+              onClick={handleLogout}
+              className="text-muted-foreground hover:text-destructive w-full justify-start"
+            >
+              <LogOut />
+              <span>Cerrar Sesión</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
       </SidebarFooter>
