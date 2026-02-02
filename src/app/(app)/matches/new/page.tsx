@@ -67,6 +67,7 @@ export default function NewMatchPage() {
   const { toast } = useToast();
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState(false);
+  const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
   const currentUser = getPlayerById("1"); // In a real app this would come from auth.
 
   React.useEffect(() => {
@@ -217,7 +218,7 @@ export default function NewMatchPage() {
               render={({ field }) => (
                 <FormItem className="flex flex-col">
                   <FormLabel>Fecha del Partido</FormLabel>
-                  <Popover>
+                  <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
@@ -240,7 +241,10 @@ export default function NewMatchPage() {
                       <Calendar
                         mode="single"
                         selected={field.value}
-                        onSelect={field.onChange}
+                        onSelect={(date) => {
+                          field.onChange(date);
+                          setIsCalendarOpen(false);
+                        }}
                         disabled={(date) =>
                           date > new Date() || date < new Date("1900-01-01")
                         }
