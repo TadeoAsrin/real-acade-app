@@ -22,12 +22,13 @@ import { Badge } from "@/components/ui/badge";
 import type { Player, PlayerStats, Match } from "@/lib/definitions";
 import { cn } from "@/lib/utils";
 import { BestGoalVote } from "@/components/matches/best-goal-vote";
-import { Award, Star, Loader2, Share2 } from "lucide-react";
+import { Award, Star, Loader2, Share2, Pencil } from "lucide-react";
 import { MatchAiSummary } from "@/components/matches/match-ai-summary";
 import { useDoc, useCollection, useMemoFirebase, useFirestore, useUser } from "@/firebase";
 import { doc, collection } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import Link from "next/link";
 
 const PlayerStatsTable = ({
   title,
@@ -108,8 +109,16 @@ export default function MatchDetailPage() {
     return collection(firestore, 'players');
   }, [firestore]);
 
+  const adminRoleRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'roles_admin', user.uid);
+  }, [firestore, user]);
+
   const { data: match, isLoading: matchLoading } = useDoc<Match>(matchRef);
   const { data: players, isLoading: playersLoading } = useCollection<Player>(playersRef);
+  const { data: adminRole } = useDoc<{isAdmin: boolean}>(adminRoleRef);
+
+  const isAdmin = adminRole?.isAdmin;
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -169,9 +178,16 @@ export default function MatchDetailPage() {
                     day: "numeric",
                 })}
                 </p>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleShare}>
-                    <Share2 className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center gap-1">
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleShare}>
+                        <Share2 className="h-4 w-4" />
+                    </Button>
+                    {isAdmin && (
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" asChild>
+                            <Link href={`/matches/${id}/edit`}><Pencil className="h-4 w-4" /></Link>
+                        </Button>
+                    )}
+                </div>
             </div>
         </div>
         <Badge variant="secondary" className="w-fit text-lg py-1 px-4 border-primary/20">Real Acade League</Badge>

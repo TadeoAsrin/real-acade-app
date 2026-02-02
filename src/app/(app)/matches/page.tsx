@@ -7,7 +7,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { ArrowRight, CalendarIcon, Plus, Loader2, Trash2 } from "lucide-react";
+import { ArrowRight, CalendarIcon, Plus, Loader2, Trash2, Pencil } from "lucide-react";
 import Link from "next/link";
 import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc } from "@/firebase";
 import { collection, query, orderBy, doc, deleteDoc } from "firebase/firestore";
@@ -147,27 +147,32 @@ export default function MatchesPage() {
 
                   <div className="flex items-center gap-2">
                       {isAdmin && (
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>¿Eliminar este partido?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Esta acción no se puede deshacer. Se borrarán todos los datos y votos asociados.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDeleteMatch(match.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                                Eliminar permanentemente
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
+                        <>
+                          <Button variant="ghost" size="icon" asChild className="text-muted-foreground hover:text-primary">
+                            <Link href={`/matches/${match.id}/edit`}><Pencil className="h-4 w-4" /></Link>
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>¿Eliminar este partido?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Esta acción no se puede deshacer. Se borrarán todos los datos y votos asociados.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDeleteMatch(match.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                  Eliminar permanentemente
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </>
                       )}
                       <Button variant="outline" size="icon" asChild className="group-hover:bg-primary group-hover:border-primary group-hover:text-primary-foreground">
                         <Link href={`/matches/${match.id}`}><ArrowRight className="h-5 w-5" /></Link>
