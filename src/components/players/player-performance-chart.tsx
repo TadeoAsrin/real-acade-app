@@ -33,10 +33,6 @@ const chartConfig = {
     label: "Goles",
     color: "hsl(var(--primary))",
   },
-  Asistencias: {
-    label: "Asistencias",
-    color: "hsl(var(--accent))",
-  },
 } satisfies ChartConfig;
 
 
@@ -48,7 +44,6 @@ export function PlayerPerformanceChart({ matchHistory }: PerformanceChartProps) 
         day: "numeric",
       }),
       Goles: match.goals,
-      Asistencias: match.assists,
     }))
     .reverse();
 
@@ -56,7 +51,7 @@ export function PlayerPerformanceChart({ matchHistory }: PerformanceChartProps) 
     <Card>
       <CardHeader>
         <CardTitle>Rendimiento por Partido</CardTitle>
-        <CardDescription>Goles y asistencias en los últimos partidos.</CardDescription>
+        <CardDescription>Goles en los últimos partidos.</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="h-80 w-full">
@@ -73,14 +68,6 @@ export function PlayerPerformanceChart({ matchHistory }: PerformanceChartProps) 
                 type="monotone"
                 dataKey="Goles"
                 stroke="var(--color-Goles)"
-                strokeWidth={2}
-                dot={{ r: 4 }}
-                activeDot={{r: 6}}
-              />
-              <Line
-                type="monotone"
-                dataKey="Asistencias"
-                stroke="var(--color-Asistencias)"
                 strokeWidth={2}
                 dot={{ r: 4 }}
                 activeDot={{r: 6}}

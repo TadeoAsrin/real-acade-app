@@ -9,8 +9,6 @@ export type Player = {
 export type PlayerStats = {
   playerId: string;
   goals: number;
-  assists: number;
-  fouls: number;
   yellowCards: number;
   redCards: number;
   ratings?: PlayerRating[];
@@ -39,12 +37,14 @@ export type AggregatedPlayerStats = {
   avatar: string;
   matchesPlayed: number;
   totalGoals: number;
-  totalAssists: number;
-  totalFouls: number;
   totalYellowCards: number;
   totalRedCards: number;
   averageRating: number | null;
   totalCaptaincies: number;
   totalMvp: number;
   totalBestGoals: number;
+  wins: number;
+  losses: number;
+  draws: number;
+  winPercentage: number;
 };

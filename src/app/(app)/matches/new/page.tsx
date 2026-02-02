@@ -39,8 +39,6 @@ import { format } from "date-fns";
 
 const playerStatsSchema = z.object({
   goals: z.coerce.number().min(0).default(0),
-  assists: z.coerce.number().min(0).default(0),
-  fouls: z.coerce.number().min(0).default(0),
 });
 
 const formSchema = z.object({
@@ -70,10 +68,10 @@ export default function NewMatchPage() {
 
   const defaultValues = {
     teamAStats: Object.fromEntries(
-      teamAPlayers.map((p) => [p.id, { goals: 0, assists: 0, fouls: 0 }])
+      teamAPlayers.map((p) => [p.id, { goals: 0 }])
     ),
     teamBStats: Object.fromEntries(
-      teamBPlayers.map((p) => [p.id, { goals: 0, assists: 0, fouls: 0 }])
+      teamBPlayers.map((p) => [p.id, { goals: 0 }])
     ),
   };
 
@@ -124,30 +122,6 @@ export default function NewMatchPage() {
             render={({ field }) => (
               <FormItem className="w-20">
                 <FormLabel>Goles</FormLabel>
-                <FormControl>
-                  <Input type="number" min="0" {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name={`${teamKey}.${player.id}.assists`}
-            render={({ field }) => (
-              <FormItem className="w-20">
-                <FormLabel>Asist.</FormLabel>
-                <FormControl>
-                  <Input type="number" min="0" {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name={`${teamKey}.${player.id}.fouls`}
-            render={({ field }) => (
-              <FormItem className="w-20">
-                <FormLabel>Faltas</FormLabel>
                 <FormControl>
                   <Input type="number" min="0" {...field} />
                 </FormControl>

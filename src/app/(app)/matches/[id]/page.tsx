@@ -43,8 +43,6 @@ const PlayerStatsTable = ({
             <TableRow>
               <TableHead>Jugador</TableHead>
               <TableHead className="text-center">Goles</TableHead>
-              <TableHead className="text-center">Asist.</TableHead>
-              <TableHead className="text-center">Faltas</TableHead>
               <TableHead className="text-center">Tarjetas</TableHead>
             </TableRow>
           </TableHeader>
@@ -65,12 +63,6 @@ const PlayerStatsTable = ({
                   </TableCell>
                   <TableCell className="text-center font-mono">
                     {stat.goals}
-                  </TableCell>
-                  <TableCell className="text-center font-mono">
-                    {stat.assists}
-                  </TableCell>
-                  <TableCell className="text-center font-mono">
-                    {stat.fouls}
                   </TableCell>
                   <TableCell className="text-center">
                     {stat.yellowCards > 0 && (
