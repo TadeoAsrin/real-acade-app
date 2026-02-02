@@ -124,8 +124,9 @@ export default function MatchesPage() {
                             (draw || teamAWon) ? "text-primary" : "text-muted-foreground/50"
                           )}>Azul</span>
                           <span className={cn(
-                            "text-4xl font-black",
-                            teamAWon ? "text-primary scale-110" : "text-white/80"
+                            "text-4xl font-black transition-all",
+                            "text-primary",
+                            teamAWon ? "scale-110 drop-shadow-[0_0_8px_rgba(var(--primary),0.5)]" : "opacity-80"
                           )}>{match.teamAScore}</span>
                         </div>
                         
@@ -137,8 +138,9 @@ export default function MatchesPage() {
                             (draw || teamBWon) ? "text-accent" : "text-muted-foreground/50"
                           )}>Rojo</span>
                           <span className={cn(
-                            "text-4xl font-black",
-                            teamBWon ? "text-accent scale-110" : "text-white/80"
+                            "text-4xl font-black transition-all",
+                            "text-accent",
+                            teamBWon ? "scale-110 drop-shadow-[0_0_8px_rgba(var(--accent),0.5)]" : "opacity-80"
                           )}>{match.teamBScore}</span>
                         </div>
                       </div>
