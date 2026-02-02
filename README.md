@@ -15,13 +15,14 @@
     *   Al terminar el despliegue (tarda unos 2-3 minutos), Firebase te dará una URL pública (ej: `https://real-acade.web.app`).
     *   ¡Esa es la que debes pasar por el grupo de WhatsApp!
 
-## 💡 Configuración Importante de Facturación (Plan Blaze)
+## 💡 Configuración de Facturación (Plan Blaze)
 *   **¿Por qué pide tarjeta?**: App Hosting usa Google Cloud para que la IA funcione. Firebase requiere el **Plan Blaze** (pago por uso) para habilitar esta tecnología.
-*   **¿Es gratis?**: **SÍ**. Firebase tiene un nivel gratuito ("Free Tier") muy generoso. Para un club de fútbol, es prácticamente imposible superar los límites gratuitos. Seguirás pagando **$0.00** siempre que no tengas millones de visitas.
-*   **Modo Admin**: Una vez que entres a tu app desde el link, regístrate y pulsa el botón "Activar Modo Administrador" en el Dashboard. ¡Solo tú tendrás el control!
+*   **¿Es realmente gratis?**: **SÍ**. Firebase tiene un nivel gratuito ("Free Tier") muy generoso. Para un club de fútbol de amigos, es prácticamente imposible superar los límites gratuitos. Seguirás pagando **$0.00**.
+*   **¿Puedo cancelarlo?**: Sí, puedes volver al plan gratuito o borrar el proyecto en cualquier momento sin penalizaciones ni cargos ocultos.
 
 ## 🛠️ Funciones para compartir
 *   **Votaciones**: Tus amigos pueden votar por el mejor gol de cada partido.
+*   **Edición Admin**: Como administrador, puedes corregir nombres de jugadores y datos de partidos sin borrarlos.
 *   **Botón Compartir**: Dentro de cada partido, hay un botón para copiar el enlace directo.
 
 ¡Disfruta de Real Acade!
