@@ -12,14 +12,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import { useAuth } from "@/firebase";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { useAuth, useFirestore } from "@/firebase";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
+import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {
   mode: "login" | "register";
 }
 
 const formSchema = z.object({
+  name: z.string().min(2, { message: "El nombre debe tener al menos 2 caracteres." }).optional(),
   email: z.string().email({ message: "Por favor ingresa un email válido." }),
   password: z
     .string()
@@ -32,6 +35,7 @@ export function UserAuthForm({ className, mode, ...props }: UserAuthFormProps) {
   const router = useRouter();
   const { toast } = useToast();
   const auth = useAuth();
+  const firestore = useFirestore();
   const [isLoading, setIsLoading] = React.useState(false);
 
   const {
@@ -52,7 +56,26 @@ export function UserAuthForm({ className, mode, ...props }: UserAuthFormProps) {
           description: "Bienvenido a Real Acade.",
         });
       } else {
-        await createUserWithEmailAndPassword(auth, data.email, data.password);
+        const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+        const user = userCredential.user;
+        
+        // Asignar un avatar aleatorio
+        const randomAvatar = PlaceHolderImages[Math.floor(Math.random() * PlaceHolderImages.length)].imageUrl;
+        
+        // Actualizar perfil de Firebase Auth
+        await updateProfile(user, {
+          displayName: data.name,
+          photoURL: randomAvatar
+        });
+
+        // Crear documento de jugador en Firestore
+        await setDoc(doc(firestore, 'players', user.uid), {
+          name: data.name || user.email?.split('@')[0],
+          avatar: randomAvatar,
+          email: user.email,
+          role: 'player'
+        });
+
         toast({
           title: "Registro exitoso",
           description: "Tu cuenta ha sido creada correctamente.",
@@ -75,6 +98,24 @@ export function UserAuthForm({ className, mode, ...props }: UserAuthFormProps) {
     <div className={cn("grid gap-6", className)} {...props}>
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="grid gap-4">
+          {mode === "register" && (
+            <div className="grid gap-2">
+              <Label htmlFor="name">Nombre Completo</Label>
+              <Input
+                id="name"
+                placeholder="Juan Pérez"
+                type="text"
+                autoCapitalize="words"
+                disabled={isLoading}
+                {...register("name")}
+              />
+              {errors?.name && (
+                <p className="px-1 text-xs text-destructive">
+                  {errors.name.message}
+                </p>
+              )}
+            </div>
+          )}
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
             <Input

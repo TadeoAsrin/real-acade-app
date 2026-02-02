@@ -16,7 +16,7 @@ service cloud.firestore {
     // Players: Everyone can read, only admin can write
     match /players/{playerId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAdmin() || (isSignedIn() && request.auth.uid == playerId);
     }
 
     // Matches: Everyone can read, only admin can write
@@ -25,10 +25,11 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Admin Roles: Only authenticated users can see their own status
+    // Admin Roles: Permite que el usuario cree su propio registro inicial para el setup
     match /roles_admin/{userId} {
       allow get: if isSignedIn() && request.auth.uid == userId;
-      allow list, write: if false; // Managed via console or script
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update, delete, list: if false;
     }
   }
 }

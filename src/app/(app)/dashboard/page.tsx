@@ -1,6 +1,7 @@
 
 'use client';
 
+import * as React from 'react';
 import { calculateAggregatedStats, getTeamGlobalStats } from "@/lib/data";
 import {
   Card,
@@ -18,17 +19,22 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Award, Medal, Trophy, Users, Swords, Loader2 } from "lucide-react";
+import { Award, Medal, Trophy, Users, Swords, Loader2, ShieldCheck, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { GoalsChart } from "@/components/dashboard/goals-chart";
 import { FieldView } from "@/components/dashboard/field-view";
 import { PowerRanking } from "@/components/dashboard/power-ranking";
-import { useCollection, useMemoFirebase, useFirestore } from "@/firebase";
-import { collection, query, orderBy, limit } from "firebase/firestore";
+import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc } from "@/firebase";
+import { collection, query, orderBy, doc, setDoc } from "firebase/firestore";
 import type { Match, Player } from "@/lib/definitions";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 export default function DashboardPage() {
   const firestore = useFirestore();
+  const { user } = useUser();
+  const { toast } = useToast();
+  const [isSettingUp, setIsSettingUp] = React.useState(false);
 
   const playersQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -40,8 +46,37 @@ export default function DashboardPage() {
     return query(collection(firestore, 'matches'), orderBy('date', 'desc'));
   }, [firestore]);
 
+  const adminRoleRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'roles_admin', user.uid);
+  }, [firestore, user]);
+
   const { data: playersData, isLoading: playersLoading } = useCollection<Player>(playersQuery);
   const { data: matchesData, isLoading: matchesLoading } = useCollection<Match>(matchesQuery);
+  const { data: adminRole } = useDoc<{isAdmin: boolean}>(adminRoleRef);
+
+  const handleClaimAdmin = async () => {
+    if (!firestore || !user) return;
+    setIsSettingUp(true);
+    try {
+      await setDoc(doc(firestore, 'roles_admin', user.uid), {
+        isAdmin: true
+      });
+      toast({
+        title: "¡Eres Administrador!",
+        description: "Ahora tienes permisos para gestionar jugadores y partidos.",
+      });
+    } catch (error) {
+      console.error(error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No se pudo activar el modo administrador.",
+      });
+    } finally {
+      setIsSettingUp(false);
+    }
+  };
 
   if (playersLoading || matchesLoading) {
     return (
@@ -73,6 +108,26 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-8">
+      {user && !adminRole?.isAdmin && (
+        <Card className="border-primary bg-primary/5 border-dashed">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-primary" />
+              Configuración Inicial
+            </CardTitle>
+            <CardDescription>
+              Parece que eres un usuario nuevo. Pulsa el botón para convertirte en el administrador del club.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button onClick={handleClaimAdmin} disabled={isSettingUp}>
+              {isSettingUp && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Activar Modo Administrador para mi cuenta
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
