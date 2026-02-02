@@ -45,7 +45,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useDoc, useCollection, useMemoFirebase, useFirestore } from "@/firebase";
-import { collection, doc, updateDoc } from "firebase/firestore";
+import { collection, doc, updateDoc, query, orderBy } from "firebase/firestore";
 import type { Player, Match } from "@/lib/definitions";
 import Link from "next/link";
 
@@ -91,7 +91,7 @@ export default function EditMatchPage() {
 
   const playersRef = useMemoFirebase(() => {
     if (!firestore) return null;
-    return collection(firestore, 'players');
+    return query(collection(firestore, 'players'), orderBy('name', 'asc'));
   }, [firestore]);
 
   const { data: match, isLoading: matchLoading } = useDoc<Match>(matchRef);

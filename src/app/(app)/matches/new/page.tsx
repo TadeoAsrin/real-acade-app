@@ -45,7 +45,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useCollection, useMemoFirebase, useFirestore, useUser } from "@/firebase";
-import { collection, doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { collection, doc, setDoc, serverTimestamp, query, orderBy } from "firebase/firestore";
 import type { Player } from "@/lib/definitions";
 
 const playerStatsSchema = z.object({
@@ -84,7 +84,7 @@ export default function NewMatchPage() {
 
   const playersRef = useMemoFirebase(() => {
     if (!firestore) return null;
-    return collection(firestore, 'players');
+    return query(collection(firestore, 'players'), orderBy('name', 'asc'));
   }, [firestore]);
 
   const { data: playersData, isLoading: playersLoading } = useCollection<Player>(playersRef);

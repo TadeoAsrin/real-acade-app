@@ -15,7 +15,7 @@ import {
 import { SidebarTrigger } from "../ui/sidebar";
 import { LogOut, User, Loader2 } from "lucide-react";
 import { useUser, useFirestore, useMemoFirebase, useCollection, useAuth } from "@/firebase";
-import { collection } from "firebase/firestore";
+import { collection, query, orderBy } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import type { Player } from "@/lib/definitions";
 import { useToast } from "@/hooks/use-toast";
@@ -38,7 +38,7 @@ export function Header() {
 
   const playersRef = useMemoFirebase(() => {
     if (!firestore) return null;
-    return collection(firestore, 'players');
+    return query(collection(firestore, 'players'), orderBy('name', 'asc'));
   }, [firestore]);
 
   const { data: players } = useCollection<Player>(playersRef);

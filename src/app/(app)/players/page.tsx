@@ -15,7 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc } from "@/firebase";
-import { collection, doc, setDoc, deleteDoc } from "firebase/firestore";
+import { collection, doc, setDoc, deleteDoc, query, orderBy } from "firebase/firestore";
 import type { Player, Match } from "@/lib/definitions";
 import { Loader2, UserPlus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -53,7 +53,7 @@ export default function PlayersPage() {
 
   const playersQuery = useMemoFirebase(() => {
     if (!firestore) return null;
-    return collection(firestore, 'players');
+    return query(collection(firestore, 'players'), orderBy('name', 'asc'));
   }, [firestore]);
 
   const matchesQuery = useMemoFirebase(() => {
@@ -130,7 +130,8 @@ export default function PlayersPage() {
 
   const allPlayers = playersData || [];
   const allMatches = matchesData || [];
-  const playerStats = calculateAggregatedStats(allPlayers, allMatches);
+  // Ordenamos los resultados finales por nombre para asegurar el orden alfabético
+  const playerStats = calculateAggregatedStats(allPlayers, allMatches).sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <div className="space-y-6">
