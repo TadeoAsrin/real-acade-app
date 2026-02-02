@@ -1,9 +1,10 @@
+
 import { getAggregatedStatsForPlayer, getMatchHistoryForPlayer, getPlayerById } from "@/lib/data";
 import { notFound } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Futbol, Star, Shield, Handshake } from "lucide-react";
+import { Football, Star, Shield, Handshake } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Link from "next/link";
 import { PlayerPerformanceChart } from "@/components/players/player-performance-chart";
@@ -36,7 +37,7 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Partidos Jugados</CardTitle>
-            <Futbol className="h-4 w-4 text-muted-foreground" />
+            <Football className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{playerStats.matchesPlayed}</div>
@@ -45,7 +46,7 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Goles Totales</CardTitle>
-            <Futbol className="h-4 w-4 text-primary" />
+            <Football className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{playerStats.totalGoals}</div>
