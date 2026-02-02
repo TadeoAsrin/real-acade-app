@@ -13,11 +13,11 @@ import {
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc } from "@/firebase";
 import { collection, doc, setDoc, deleteDoc, updateDoc, query, orderBy } from "firebase/firestore";
-import type { Player, Match } from "@/lib/definitions";
-import { Loader2, UserPlus, Trash2, Pencil } from "lucide-react";
+import type { Player, Match, AggregatedPlayerStats } from "@/lib/definitions";
+import { Loader2, UserPlus, Trash2, Pencil, ArrowUpDown, ChevronUp, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -43,6 +43,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { cn } from '@/lib/utils';
+
+type SortConfig = {
+  key: keyof AggregatedPlayerStats;
+  direction: 'asc' | 'desc';
+};
 
 export default function PlayersPage() {
   const firestore = useFirestore();
@@ -54,6 +60,9 @@ export default function PlayersPage() {
   const [editingPlayerId, setEditingPlayerId] = React.useState<string | null>(null);
   const [editPlayerName, setEditPlayerName] = React.useState('');
   const [isUpdatingPlayer, setIsUpdatingPlayer] = React.useState(false);
+
+  // Estado para el ordenamiento
+  const [sortConfig, setSortConfig] = React.useState<SortConfig>({ key: 'name', direction: 'asc' });
 
   const playersQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -150,6 +159,19 @@ export default function PlayersPage() {
     }
   };
 
+  const handleSort = (key: keyof AggregatedPlayerStats) => {
+    let direction: 'asc' | 'desc' = 'desc';
+    if (sortConfig.key === key && sortConfig.direction === 'desc') {
+      direction = 'asc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const getSortIcon = (key: keyof AggregatedPlayerStats) => {
+    if (sortConfig.key !== key) return <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />;
+    return sortConfig.direction === 'asc' ? <ChevronUp className="ml-2 h-4 w-4 text-primary" /> : <ChevronDown className="ml-2 h-4 w-4 text-primary" />;
+  };
+
   if (playersLoading || matchesLoading) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
@@ -160,7 +182,24 @@ export default function PlayersPage() {
 
   const allPlayers = playersData || [];
   const allMatches = matchesData || [];
-  const playerStats = calculateAggregatedStats(allPlayers, allMatches).sort((a, b) => a.name.localeCompare(b.name));
+  
+  // Calcular y ordenar las estadísticas
+  const playerStats = calculateAggregatedStats(allPlayers, allMatches).sort((a, b) => {
+    const aValue = a[sortConfig.key];
+    const bValue = b[sortConfig.key];
+
+    if (typeof aValue === 'string' && typeof bValue === 'string') {
+      return sortConfig.direction === 'asc' 
+        ? aValue.localeCompare(bValue)
+        : bValue.localeCompare(aValue);
+    }
+
+    if (typeof aValue === 'number' && typeof bValue === 'number') {
+      return sortConfig.direction === 'asc' ? aValue - bValue : bValue - aValue;
+    }
+
+    return 0;
+  });
 
   return (
     <div className="space-y-6">
@@ -207,13 +246,43 @@ export default function PlayersPage() {
           <CardContent className="p-0">
               <Table>
                   <TableHeader>
-                      <TableRow>
-                      <TableHead className="pl-6">Jugador</TableHead>
-                      <TableHead className="text-center">Partidos</TableHead>
-                      <TableHead className="text-center">Goles</TableHead>
-                      <TableHead className="text-center">Efectividad</TableHead>
-                      <TableHead className="text-center">MVP</TableHead>
-                      <TableHead className="text-center">Mejor Gol</TableHead>
+                      <TableRow className="bg-muted/30">
+                      <TableHead 
+                        className="pl-6 cursor-pointer hover:text-primary transition-colors"
+                        onClick={() => handleSort('name')}
+                      >
+                        <div className="flex items-center">Jugador {getSortIcon('name')}</div>
+                      </TableHead>
+                      <TableHead 
+                        className="text-center cursor-pointer hover:text-primary transition-colors"
+                        onClick={() => handleSort('matchesPlayed')}
+                      >
+                        <div className="flex items-center justify-center">Partidos {getSortIcon('matchesPlayed')}</div>
+                      </TableHead>
+                      <TableHead 
+                        className="text-center cursor-pointer hover:text-primary transition-colors"
+                        onClick={() => handleSort('totalGoals')}
+                      >
+                        <div className="flex items-center justify-center">Goles {getSortIcon('totalGoals')}</div>
+                      </TableHead>
+                      <TableHead 
+                        className="text-center cursor-pointer hover:text-primary transition-colors"
+                        onClick={() => handleSort('winPercentage')}
+                      >
+                        <div className="flex items-center justify-center">Efectividad {getSortIcon('winPercentage')}</div>
+                      </TableHead>
+                      <TableHead 
+                        className="text-center cursor-pointer hover:text-primary transition-colors"
+                        onClick={() => handleSort('totalMvp')}
+                      >
+                        <div className="flex items-center justify-center">MVP {getSortIcon('totalMvp')}</div>
+                      </TableHead>
+                      <TableHead 
+                        className="text-center cursor-pointer hover:text-primary transition-colors"
+                        onClick={() => handleSort('totalBestGoals')}
+                      >
+                        <div className="flex items-center justify-center">Mejor Gol {getSortIcon('totalBestGoals')}</div>
+                      </TableHead>
                       {isAdmin && <TableHead className="text-right pr-6">Acciones</TableHead>}
                       </TableRow>
                   </TableHeader>
