@@ -9,7 +9,8 @@ import {
   SidebarMenuButton,
   SidebarFooter,
 } from "../ui/sidebar";
-import { Futbol, BarChart3, Users, LogOut, Fut7StatsLogo } from "lucide-react";
+import { Futbol, BarChart3, Users, LogOut } from "lucide-react";
+import { Fut7StatsLogo } from "@/components/icons";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import Link from "next/link";
