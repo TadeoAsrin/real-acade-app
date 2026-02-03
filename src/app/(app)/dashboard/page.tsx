@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Medal, Loader2, Zap, Calendar, Users, Brain, Heart, Crown, ArrowUpRight, ArrowDownRight, Minus, Link as LinkIcon, Flame } from "lucide-react";
+import { Medal, Loader2, Zap, Calendar, Users, Brain, Heart, Crown, Link as LinkIcon, Flame, Target, Trophy } from "lucide-react";
 import Link from "next/link";
 import { FieldView } from "@/components/dashboard/field-view";
 import { PowerRanking } from "@/components/dashboard/power-ranking";
@@ -71,7 +71,7 @@ export default function DashboardPage() {
           const rateB = b.matchesPlayed / totalMatches;
           return rateB - rateA || b.matchesPlayed - a.matchesPlayed;
         });
-        const maxRate = leaders[0].matchesPlayed / totalMatches;
+        const maxRate = (leaders[0]?.matchesPlayed || 0) / totalMatches;
         return leaders.filter(p => (p.matchesPlayed / totalMatches) === maxRate);
       })()
     : [];
@@ -86,86 +86,137 @@ export default function DashboardPage() {
   const lastMatchTeamBPlayers = lastMatch?.teamBPlayers.map(s => allPlayers.find(p => p.id === s.playerId)).filter(Boolean) as Player[] || [];
 
   return (
-    <div className="flex flex-col gap-6 lg:gap-10 pb-10">
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        <Link href="/matches" className="col-span-1">
-          <Card className="glass-card hover:translate-y-[-4px] transition-all duration-300 cursor-pointer h-full border-white/5">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-              <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Partidos</CardTitle>
-              <Calendar className="h-3 w-3 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl lg:text-3xl font-black tracking-tighter">{allMatches.length}</div>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href="/players?sort=totalGoals" className="col-span-1">
-          <Card className="glass-card hover:translate-y-[-4px] transition-all duration-300 cursor-pointer h-full border-white/5">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-              <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Goles</CardTitle>
-              <Zap className="h-3 w-3 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl lg:text-3xl font-black tracking-tighter">{totalGoals}</div>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href={topScorer ? `/players/${topScorer.playerId}` : "/players"} className="col-span-1">
-          <Card className="glass-card card-gold hover:translate-y-[-4px] transition-all duration-300 cursor-pointer h-full bg-gradient-to-br from-card/60 to-yellow-500/10 border-yellow-500/30">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-              <CardTitle className="text-[10px] font-black uppercase tracking-widest text-yellow-500">Pichichi</CardTitle>
-              <Medal className="h-4 w-4 text-yellow-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-xl lg:text-2xl font-black tracking-tighter text-yellow-500 truncate">
-                {topScorer?.name || '-'}
+    <div className="flex flex-col gap-8 lg:gap-12 pb-20 max-w-7xl mx-auto">
+      
+      {/* SECCIÓN 1: EL OLIMPO (MÉTRICAS REINA) */}
+      <section className="space-y-4">
+        <h2 className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground/50 px-1">Líderes de la Academia</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Pichichi Hero Card */}
+          <Link href={topScorer ? `/players/${topScorer.playerId}` : "/players"} className="md:col-span-2 lg:col-span-1">
+            <Card className="glass-card card-gold hover:translate-y-[-4px] transition-all duration-300 cursor-pointer h-full bg-gradient-to-br from-card/60 to-yellow-500/10 overflow-hidden group relative">
+              <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform duration-500">
+                <Medal className="h-32 w-32 text-yellow-500" />
               </div>
-              <div className="flex items-baseline gap-1 mt-1">
-                <span className="text-lg font-black text-yellow-500/90">{topScorer?.totalGoals || 0} G</span>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs font-black uppercase tracking-widest text-yellow-500 flex items-center gap-2">
+                  <Trophy className="h-3 w-3" /> Máximo Goleador
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-16 w-16 border-4 border-yellow-500/30">
+                    <AvatarFallback className="bg-yellow-500/10 text-yellow-500 text-2xl font-black">{getInitials(topScorer?.name || "?")}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <div className="text-3xl lg:text-4xl font-black tracking-tighter text-white uppercase leading-none">
+                      {topScorer?.name || '-'}
+                    </div>
+                    <p className="text-sm font-bold text-yellow-500/60 uppercase italic">Dueño de las redes</p>
+                  </div>
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-5xl font-black text-yellow-500 italic leading-none">{topScorer?.totalGoals || 0}</span>
+                  <span className="text-sm font-black text-yellow-500/50 uppercase tracking-widest">Goles Totales</span>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
 
-        <Link href="/players" className="col-span-1">
-          <Card className="glass-card hover:translate-y-[-4px] transition-all duration-300 cursor-pointer h-full border-emerald-500/30 bg-emerald-500/5">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-              <CardTitle className="text-[10px] font-black uppercase tracking-widest text-emerald-500">Asistencia</CardTitle>
-              <Users className="h-4 w-4 text-emerald-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-xl lg:text-2xl font-black tracking-tighter text-emerald-500">
-                {attendanceRate}%
+          {/* Influencer Hero Card */}
+          <Link href="/pulse/influencer" className="lg:col-span-1">
+            <Card className="glass-card border-primary/30 hover:translate-y-[-4px] transition-all duration-300 cursor-pointer h-full bg-gradient-to-br from-card/60 to-primary/10 overflow-hidden group relative">
+              <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform duration-500">
+                <Brain className="h-32 w-32 text-primary" />
               </div>
-              <div className="flex items-baseline gap-1 mt-1">
-                <span className="text-lg font-black text-emerald-500/90">{attendanceLeaders[0]?.matchesPlayed || 0}</span>
-                <span className="text-[10px] text-emerald-500/60 font-bold uppercase ml-1">Partidos</span>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-      </div>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                  <Crown className="h-3 w-3" /> Jugador más Influyente
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-16 w-16 border-4 border-primary/30">
+                    <AvatarFallback className="bg-primary/10 text-primary text-2xl font-black">{getInitials(influencer?.name || "?")}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <div className="text-3xl lg:text-4xl font-black tracking-tighter text-white uppercase leading-none">
+                      {influencer?.name || '-'}
+                    </div>
+                    <p className="text-sm font-bold text-primary/60 uppercase italic">Factor de victoria</p>
+                  </div>
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-5xl font-black text-primary italic leading-none">{influencer?.winPercentage || 0}%</span>
+                  <span className="text-sm font-black text-primary/50 uppercase tracking-widest">Efectividad</span>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <div className="order-2 lg:order-1">
-          <FieldView team="Azul" players={lastMatchTeamAPlayers} topScorerId={topScorer?.playerId} date={lastMatch?.date} />
-        </div>
-        <div className="order-3 lg:order-2">
-          <FieldView team="Rojo" players={lastMatchTeamBPlayers} topScorerId={topScorer?.playerId} date={lastMatch?.date} />
-        </div>
-        
-        <div className="flex flex-col gap-6 order-1 lg:order-3">
+          {/* Power Ranking Column */}
+          <div className="lg:col-span-1">
             <PowerRanking players={allPlayers} matches={allMatches} />
+          </div>
         </div>
-      </div>
+      </section>
 
-      <div className="space-y-4">
-        <h2 className="text-2xl font-black uppercase tracking-tighter italic text-white flex items-center gap-3">
-            <Zap className="h-6 w-6 text-primary fill-primary" />
-            Pulso de la Liga
-        </h2>
+      {/* SECCIÓN 2: EL MOTOR DEL CLUB (RENDIMIENTO INDIVIDUAL Y TÁCTICO) */}
+      <section className="space-y-4">
+        <h2 className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground/50 px-1">Acción en la Cancha</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Quick Stats Grid */}
+          <div className="lg:col-span-1 grid grid-cols-2 lg:grid-cols-1 gap-4">
+            <Link href="/matches">
+              <Card className="glass-card hover:bg-white/5 transition-all h-full border-white/5">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+                  <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Partidos</CardTitle>
+                  <Calendar className="h-3 w-3 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-black tracking-tighter">{allMatches.length}</div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/players?sort=totalGoals">
+              <Card className="glass-card hover:bg-white/5 transition-all h-full border-white/5">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+                  <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Goles</CardTitle>
+                  <Target className="h-3 w-3 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-black tracking-tighter">{totalGoals}</div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/players" className="col-span-2 lg:col-span-1">
+              <Card className="glass-card hover:bg-emerald-500/10 transition-all h-full border-emerald-500/20 bg-emerald-500/5">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+                  <CardTitle className="text-[10px] font-black uppercase tracking-widest text-emerald-500">Asistencia Media</CardTitle>
+                  <Users className="h-4 w-4 text-emerald-500" />
+                </CardHeader>
+                <CardContent className="flex items-end justify-between">
+                  <div className="text-3xl font-black tracking-tighter text-emerald-500">{attendanceRate}%</div>
+                  <div className="text-[10px] font-bold text-emerald-500/60 uppercase mb-1">Presencia Real</div>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+
+          {/* Field Views */}
+          <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FieldView team="Azul" players={lastMatchTeamAPlayers} topScorerId={topScorer?.playerId} date={lastMatch?.date} />
+            <FieldView team="Rojo" players={lastMatchTeamBPlayers} topScorerId={topScorer?.playerId} date={lastMatch?.date} />
+          </div>
+        </div>
+      </section>
+
+      {/* SECCIÓN 3: EL PULSO SOCIAL (INSIGHTS) */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-3">
+          <Zap className="h-5 w-5 text-primary fill-primary" />
+          <h2 className="text-2xl font-black uppercase tracking-tighter italic text-white">Pulso de la Liga</h2>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Link href="/pulse/influencer">
                 <Card className="glass-card border-primary/20 hover:border-primary/50 transition-all group overflow-hidden cursor-pointer h-full">
@@ -174,8 +225,8 @@ export default function DashboardPage() {
                     </div>
                     <CardHeader>
                         <CardTitle className="text-xs font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                            <Crown className="h-3 w-3" />
-                            Más Influyente
+                            <Zap className="h-3 w-3" />
+                            Top Factor
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -185,21 +236,10 @@ export default function DashboardPage() {
                             </Avatar>
                             <div className="flex flex-col">
                                 <span className="text-lg font-black tracking-tight leading-none group-hover:text-primary transition-colors">{influencer?.name || '-'}</span>
-                                <span className="text-[10px] uppercase font-bold text-muted-foreground">Victoria asegurada</span>
+                                <span className="text-[10px] uppercase font-bold text-muted-foreground">Efectividad Bruta</span>
                             </div>
                         </div>
-                        <div className="flex items-end justify-between">
-                            <div className="flex flex-col">
-                                <span className="text-3xl font-black italic text-white">{influencer?.winPercentage || 0}%</span>
-                                <span className="text-[8px] uppercase font-black text-muted-foreground">Win Rate (mín. 3 PJ)</span>
-                            </div>
-                            <div className={cn(
-                                "px-2 py-1 rounded text-[10px] font-bold",
-                                influencer ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
-                            )}>
-                                {influencer ? "Top Factor" : "Faltan datos"}
-                            </div>
-                        </div>
+                        <div className="text-3xl font-black italic text-white">{influencer?.winPercentage || 0}%</div>
                     </CardContent>
                 </Card>
             </Link>
@@ -216,21 +256,13 @@ export default function DashboardPage() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="flex items-baseline justify-between">
-                            <div className="flex flex-col">
-                                <span className="text-5xl font-black italic text-white">{spiciestMatch ? spiciestMatch.teamAScore + spiciestMatch.teamBScore : 0}</span>
-                                <span className="text-[8px] uppercase font-black text-muted-foreground">Goles Totales</span>
-                            </div>
-                            <div className="bg-orange-500/10 px-2 py-1 rounded text-[8px] font-black text-orange-500 uppercase tracking-tighter">
-                                🔥 Récord histórico
-                            </div>
+                        <div className="flex flex-col">
+                            <span className="text-5xl font-black italic text-white leading-none">{spiciestMatch ? spiciestMatch.teamAScore + spiciestMatch.teamBScore : 0}</span>
+                            <span className="text-[10px] uppercase font-black text-orange-500 tracking-widest">Goles Totales</span>
                         </div>
                         <div className="bg-white/5 p-2 rounded-xl border border-white/5">
-                            <p className="text-[10px] font-bold text-white uppercase tracking-tighter">
+                            <p className="text-[10px] font-bold text-white uppercase tracking-tighter truncate">
                                 {spiciestMatch ? `Azul ${spiciestMatch.teamAScore} - ${spiciestMatch.teamBScore} Rojo` : 'Sin registros'}
-                            </p>
-                            <p className="text-[8px] text-muted-foreground uppercase font-medium">
-                                {spiciestMatch ? new Date(spiciestMatch.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}
                             </p>
                         </div>
                     </CardContent>
@@ -263,7 +295,7 @@ export default function DashboardPage() {
                         </div>
                         <div className="pt-2">
                             <div className="flex justify-between text-[10px] font-black uppercase mb-1">
-                                <span className="text-muted-foreground italic">Efectividad Dupla</span>
+                                <span className="text-muted-foreground italic">Química</span>
                                 <span className="text-primary italic">{topChemistry ? Math.round((topChemistry.wins / topChemistry.matches) * 100) : 0}%</span>
                             </div>
                             <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
@@ -277,7 +309,7 @@ export default function DashboardPage() {
                 </Card>
             </Link>
         </div>
-      </div>
+      </section>
     </div>
   );
 }
