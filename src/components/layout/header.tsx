@@ -22,7 +22,7 @@ import { getInitials } from "@/lib/utils";
 import Link from "next/link";
 
 const getPageTitle = (pathname: string) => {
-  if (pathname.includes("/dashboard")) return "Dashboard";
+  if (pathname.includes("/dashboard")) return "Real Acade";
   if (pathname.includes("/matches/new")) return "Nuevo Partido";
   if (pathname.includes("/matches")) return "Partidos";
   if (pathname.includes("/players")) return "Jugadores";

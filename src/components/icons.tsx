@@ -14,12 +14,28 @@ export function Fut7StatsLogo(props: SVGProps<SVGSVGElement>) {
       strokeLinejoin="round"
       {...props}
     >
-      <title>Real Acade Soccer Ball</title>
+      <title>Real Acade Soccer Ball Pro</title>
+      {/* Círculo exterior del balón */}
       <circle cx="12" cy="12" r="10" />
-      <path d="m12 12-4 3 1 4h6l1-4-4-3Z" />
-      <path d="M12 2v3.5l3.5 1.5M12 22v-3.5L8.5 17" />
-      <path d="M22 12h-3.5l-1.5-3.5M2 12h3.5l1.5 3.5" />
-      <path d="M17.5 5.5 15 8l-3-1M6.5 18.5 9 16l3 1" />
+      
+      {/* Pentágono central */}
+      <path d="M12 8l3 2v4l-3 2-3-2v-4z" fill="currentColor" fillOpacity="0.2" />
+      
+      {/* Costuras y paneles clásicos */}
+      <path d="M12 8V2" />
+      <path d="M15 10l5-2" />
+      <path d="M15 14l5 2" />
+      <path d="M12 16v6" />
+      <path d="M9 14l-5 2" />
+      <path d="M9 10l-5-2" />
+      
+      {/* Detalles de los paneles laterales */}
+      <path d="M12 8l-3 2" />
+      <path d="M12 8l3 2" />
+      <path d="M15 10v4" />
+      <path d="M15 14l-3 2" />
+      <path d="M12 16l-3-2" />
+      <path d="M9 14v-4" />
     </svg>
   );
 }
