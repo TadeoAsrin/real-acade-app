@@ -137,10 +137,12 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
             backgroundSize: '100% 100%, 100% 80px'
           }}
         >
+          {/* Pitch markings */}
           <div className="absolute inset-4 border-2 border-white/20 rounded-lg pointer-events-none" />
           <div className="absolute top-1/2 left-1/2 h-32 w-32 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/20" />
           <div className="absolute top-1/2 left-0 w-full h-[2px] bg-white/20 -translate-y-1/2" />
           
+          {/* Areas */}
           <div className={cn(
             "absolute top-4 left-1/2 h-24 w-48 -translate-x-1/2 border-2 border-t-0 border-white/30 rounded-b-xl transition-all duration-300",
             draggingPlayer && isPlayerInGKZone(playerPositions[draggingPlayer.id] || {x:0, y:100}) 
