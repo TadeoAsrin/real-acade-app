@@ -1,13 +1,9 @@
+
 "use client";
 
+import * as React from 'react';
+import dynamic from 'next/dynamic';
 import type { PlayerStats } from "@/lib/definitions";
-import {
-  Line,
-  LineChart,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-} from "recharts";
 import {
   Card,
   CardContent,
@@ -15,14 +11,19 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  ChartLegend,
-  ChartLegendContent,
-} from "../ui/chart";
-import type { ChartConfig } from "../ui/chart";
+
+// Importación dinámica de Recharts para evitar errores en el build de producción (SSR)
+const LineChart = dynamic(() => import('recharts').then((mod) => mod.LineChart), { ssr: false });
+const Line = dynamic(() => import('recharts').then((mod) => mod.Line), { ssr: false });
+const XAxis = dynamic(() => import('recharts').then((mod) => mod.XAxis), { ssr: false });
+const YAxis = dynamic(() => import('recharts').then((mod) => mod.YAxis), { ssr: false });
+const CartesianGrid = dynamic(() => import('recharts').then((mod) => mod.CartesianGrid), { ssr: false });
+
+const ChartContainer = dynamic(() => import('../ui/chart').then((mod) => mod.ChartContainer), { ssr: false });
+const ChartTooltip = dynamic(() => import('../ui/chart').then((mod) => mod.ChartTooltip), { ssr: false });
+const ChartTooltipContent = dynamic(() => import('../ui/chart').then((mod) => mod.ChartTooltipContent), { ssr: false });
+const ChartLegend = dynamic(() => import('../ui/chart').then((mod) => mod.ChartLegend), { ssr: false });
+const ChartLegendContent = dynamic(() => import('../ui/chart').then((mod) => mod.ChartLegendContent), { ssr: false });
 
 type PerformanceChartProps = {
   matchHistory: (PlayerStats & { matchId: string; date: string })[];
@@ -33,19 +34,37 @@ const chartConfig = {
     label: "Goles",
     color: "hsl(var(--primary))",
   },
-} satisfies ChartConfig;
-
+};
 
 export function PlayerPerformanceChart({ matchHistory }: PerformanceChartProps) {
-  const chartData = matchHistory
-    .map((match) => ({
-      date: new Date(match.date).toLocaleDateString("es-ES", {
-        month: "short",
-        day: "numeric",
-      }),
-      Goles: match.goals,
-    }))
-    .reverse();
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const chartData = React.useMemo(() => {
+    return matchHistory
+      .map((match) => ({
+        date: new Date(match.date).toLocaleDateString("es-ES", {
+          month: "short",
+          day: "numeric",
+        }),
+        Goles: match.goals,
+      }))
+      .reverse();
+  }, [matchHistory]);
+
+  if (!isMounted) {
+    return (
+      <Card className="h-80 w-full animate-pulse bg-muted/10">
+        <CardHeader>
+          <CardTitle>Rendimiento por Partido</CardTitle>
+          <CardDescription>Cargando gráfico...</CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
 
   return (
     <Card>

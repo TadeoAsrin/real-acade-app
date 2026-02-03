@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from 'react';
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import dynamic from 'next/dynamic';
 import {
   Card,
   CardContent,
@@ -10,15 +10,20 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  ChartLegend,
-  ChartLegendContent,
-} from "../ui/chart";
-import type { ChartConfig } from "../ui/chart";
 import type { Match } from "@/lib/definitions";
+
+// Importación dinámica de Recharts para evitar errores en el build de producción (SSR)
+const BarChart = dynamic(() => import('recharts').then((mod) => mod.BarChart), { ssr: false });
+const Bar = dynamic(() => import('recharts').then((mod) => mod.Bar), { ssr: false });
+const XAxis = dynamic(() => import('recharts').then((mod) => mod.XAxis), { ssr: false });
+const YAxis = dynamic(() => import('recharts').then((mod) => mod.YAxis), { ssr: false });
+const CartesianGrid = dynamic(() => import('recharts').then((mod) => mod.CartesianGrid), { ssr: false });
+
+const ChartContainer = dynamic(() => import('../ui/chart').then((mod) => mod.ChartContainer), { ssr: false });
+const ChartTooltip = dynamic(() => import('../ui/chart').then((mod) => mod.ChartTooltip), { ssr: false });
+const ChartTooltipContent = dynamic(() => import('../ui/chart').then((mod) => mod.ChartTooltipContent), { ssr: false });
+const ChartLegend = dynamic(() => import('../ui/chart').then((mod) => mod.ChartLegend), { ssr: false });
+const ChartLegendContent = dynamic(() => import('../ui/chart').then((mod) => mod.ChartLegendContent), { ssr: false });
 
 const chartConfig = {
   azul: {
@@ -29,7 +34,7 @@ const chartConfig = {
     label: "Equipo Rojo",
     color: "hsl(var(--accent))",
   },
-} satisfies ChartConfig;
+};
 
 interface GoalsChartProps {
   matches: Match[];
@@ -42,6 +47,20 @@ export function GoalsChart({ matches }: GoalsChartProps) {
     setIsMounted(true);
   }, []);
 
+  const chartData = React.useMemo(() => {
+    return [...matches]
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .map((match) => ({
+        date: new Date(match.date).toLocaleDateString("es-ES", {
+          month: "short",
+          day: "numeric",
+        }),
+        azul: match.teamAScore,
+        rojo: match.teamBScore,
+      }))
+      .slice(-10);
+  }, [matches]);
+
   if (!isMounted) {
     return (
       <Card className="h-80 w-full animate-pulse bg-muted/10">
@@ -52,18 +71,6 @@ export function GoalsChart({ matches }: GoalsChartProps) {
       </Card>
     );
   }
-
-  const chartData = [...matches]
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-    .map((match) => ({
-      date: new Date(match.date).toLocaleDateString("es-ES", {
-        month: "short",
-        day: "numeric",
-      }),
-      azul: match.teamAScore,
-      rojo: match.teamBScore,
-    }))
-    .slice(-10);
 
   return (
     <Card>
