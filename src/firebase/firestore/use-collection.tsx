@@ -50,18 +50,14 @@ export function useCollection<T = any>(
         setError(null);
         setIsLoading(false);
       },
-      (err: FirestoreError) => {
+      async (err: FirestoreError) => {
         let path = 'unknown';
         try {
-          // Intento seguro de obtener la ruta para el error contextual
-          if ((memoizedTargetRefOrQuery as any).path) {
+          // Intentar obtener la ruta de forma segura sin acceder a propiedades privadas
+          if ('path' in memoizedTargetRefOrQuery) {
             path = (memoizedTargetRefOrQuery as any).path;
-          } else if ((memoizedTargetRefOrQuery as any)._query?.path) {
-            path = (memoizedTargetRefOrQuery as any)._query.path.canonicalString();
           }
-        } catch (e) {
-          // Fallback silencioso si las propiedades internas no son accesibles
-        }
+        } catch (e) {}
 
         const contextualError = new FirestorePermissionError({
           operation: 'list',

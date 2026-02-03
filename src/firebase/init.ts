@@ -1,25 +1,24 @@
 'use client';
 
+import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
+import { getAuth, Auth } from 'firebase/auth';
+import { getFirestore, Firestore } from 'firebase/firestore';
 import { firebaseConfig } from '@/firebase/config';
 
 /**
- * Hardened Firebase initialization for Next.js 15 environments.
- * Uses dynamic requires to prevent SDK evaluation during static analysis/build.
+ * Inicialización de Firebase optimizada para Next.js 15.
+ * Asegura que los servicios solo se instancien en el cliente y maneja la idempotencia.
  */
 export function initializeFirebase() {
   if (typeof window === 'undefined') {
     return {
-      firebaseApp: null as any,
-      auth: null as any,
-      firestore: null as any
+      firebaseApp: null as unknown as FirebaseApp,
+      auth: null as unknown as Auth,
+      firestore: null as unknown as Firestore
     };
   }
 
-  const { initializeApp, getApps, getApp } = require('firebase/app');
-  const { getAuth } = require('firebase/auth');
-  const { getFirestore } = require('firebase/firestore');
-
-  let firebaseApp;
+  let firebaseApp: FirebaseApp;
   if (!getApps().length) {
     firebaseApp = initializeApp(firebaseConfig);
   } else {
