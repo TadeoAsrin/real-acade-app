@@ -60,7 +60,7 @@ export default function DashboardPage() {
 
   const sortedByGoals = [...playerStats].sort((a, b) => b.totalGoals - a.totalGoals || b.goalsPerMatch - a.goalsPerMatch);
   
-  // New Influence Logic: Min 3 matches + Tie breakers (Win% > Matches > PowerPoints > Goals)
+  // Influencia: Mín 3 partidos + Desempates (Win% > Partidos > PowerPoints > Goles)
   const sortedByInfluence = [...playerStats]
     .filter(p => p.matchesPlayed >= 3)
     .sort((a, b) => {
@@ -159,7 +159,7 @@ export default function DashboardPage() {
         </Link>
       </div>
 
-      {/* Main Grid: Pitch and Social Analytics */}
+      {/* Main Grid: Pitch and Power Ranking */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         <div className="order-2 lg:order-1">
           <FieldView team="Azul" players={lastMatchTeamAPlayers} topScorerId={topScorer?.playerId} date={lastMatch?.date} />
@@ -170,44 +170,10 @@ export default function DashboardPage() {
         
         <div className="flex flex-col gap-6 order-1 lg:order-3">
             <PowerRanking players={allPlayers} matches={allMatches} />
-            
-            <Card className="glass-card border-white/5">
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <Heart className="h-6 w-6 text-accent fill-accent animate-pulse" />
-                        <span className="font-black uppercase tracking-tighter italic text-xl lg:text-2xl text-accent">Química</span>
-                    </CardTitle>
-                    <CardDescription className="text-xs">La dupla con más victorias (mín. 2 partidos).</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    {topChemistry ? (
-                        <div className="flex items-center justify-around gap-2 p-3 bg-accent/10 rounded-2xl border border-accent/20">
-                            <div className="flex flex-col items-center gap-1">
-                                <Avatar className="h-10 w-10 lg:h-14 lg:w-14 ring-2 ring-accent/30">
-                                    <AvatarFallback className="text-xs lg:text-lg font-black">{getInitials(topChemistry.player1.name)}</AvatarFallback>
-                                </Avatar>
-                                <span className="text-[10px] font-bold truncate max-w-[60px]">{topChemistry.player1.name.split(' ')[0]}</span>
-                            </div>
-                            <div className="flex flex-col items-center">
-                                <span className="text-xl lg:text-2xl font-black text-accent italic">+{topChemistry.wins}V</span>
-                                <span className="text-[8px] uppercase font-black text-muted-foreground">Juntos</span>
-                            </div>
-                            <div className="flex flex-col items-center gap-1">
-                                <Avatar className="h-10 w-10 lg:h-14 lg:w-14 ring-2 ring-accent/30">
-                                    <AvatarFallback className="text-xs lg:text-lg font-black">{getInitials(topChemistry.player2.name)}</AvatarFallback>
-                                </Avatar>
-                                <span className="text-[10px] font-bold truncate max-w-[60px]">{topChemistry.player2.name.split(' ')[0]}</span>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="text-center py-4 text-muted-foreground italic text-xs">Aún no hay parejas estables.</div>
-                    )}
-                </CardContent>
-            </Card>
         </div>
       </div>
 
-      {/* PULSO DE LA LIGA - Engaging Section */}
+      {/* PULSO DE LA LIGA */}
       <div className="space-y-4">
         <h2 className="text-2xl font-black uppercase tracking-tighter italic text-white flex items-center gap-3">
             <Zap className="h-6 w-6 text-primary fill-primary" />
