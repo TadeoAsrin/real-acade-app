@@ -4,41 +4,54 @@
 
 @layer base {
   :root {
-    --background: 231 15% 18%;
+    --background: 231 20% 12%;
     --foreground: 0 0% 98%;
-    --card: 231 15% 22%;
+    --card: 231 20% 16%;
     --card-foreground: 0 0% 98%;
-    --popover: 231 15% 18%;
+    --popover: 231 20% 14%;
     --popover-foreground: 0 0% 98%;
-    --primary: 221.2 83.2% 53.3%;
+    --primary: 217 91% 60%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 231 15% 28%;
+    --secondary: 231 20% 22%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 231 15% 28%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 72.2% 50.6%;
+    --muted: 231 20% 22%;
+    --muted-foreground: 0 0% 65%;
+    --accent: 346 84% 61%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 231 15% 28%;
-    --input: 231 15% 28%;
-    --ring: 221.2 83.2% 53.3%;
-    --chart-1: 221 83% 53%;
-    --chart-2: 0 72% 51%;
-    --radius: 0.5rem;
+    --border: 231 20% 22%;
+    --input: 231 20% 22%;
+    --ring: 217 91% 60%;
+    --radius: 0.75rem;
 
-    --sidebar-background: 231 15% 14%;
+    --sidebar-background: 231 25% 10%;
     --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 221.2 83.2% 53.3%;
+    --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 210 40% 98%;
-    --sidebar-accent: 231 15% 22%;
+    --sidebar-accent: 231 20% 18%;
     --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 231 15% 22%;
-    --sidebar-ring: 221.2 83.2% 53.3%;
+    --sidebar-border: 231 20% 16%;
+    --sidebar-ring: 217 91% 60%;
   }
 }
 
 @layer base {
   * { @apply border-border; }
-  body { @apply bg-background text-foreground antialiased; }
+  body { 
+    @apply bg-background text-foreground antialiased;
+    background-image: 
+      radial-gradient(at 0% 0%, hsla(217, 91%, 60%, 0.05) 0, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(346, 84%, 61%, 0.05) 0, transparent 50%),
+      radial-gradient(circle at center, transparent 0%, hsla(231, 20%, 8%, 0.4) 100%);
+  }
+}
+
+.glass-card {
+  @apply bg-card/60 backdrop-blur-md border-white/5;
+}
+
+.bg-dot-pattern {
+  background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.05) 1px, transparent 0);
+  background-size: 24px 24px;
 }

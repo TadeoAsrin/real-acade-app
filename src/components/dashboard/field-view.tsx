@@ -27,10 +27,8 @@ const positionCoordinates: { [key: string]: { top: string; left: string; transfo
   FWD: { top: '80%', left: '50%', transform: 'translateX(-50%)' },
 };
 
-// Mapa por defecto para distribuir jugadores si no tienen posición guardada
 const playerPositionMap: { [key: string]: keyof typeof positionCoordinates } = {
   '1': 'FWD', '2': 'MID_L', '3': 'MID_R', '4': 'MID_C', '5': 'DEF_L', '6': 'DEF_R', '7': 'GK',
-  '8': 'FWD', '9': 'MID_L', '10': 'MID_R', '11': 'MID_C', '12': 'DEF_L', '13': 'DEF_R', '14': 'GK',
 };
 
 type PlayerPosition = { x: number; y: number };
@@ -44,14 +42,12 @@ type DraggingState = {
 export function FieldView({ team, players }: FieldViewProps) {
   const fieldRef = React.useRef<HTMLDivElement>(null);
   const playerRefs = React.useRef<{ [key: string]: HTMLDivElement | null }>({});
-
   const [playerPositions, setPlayerPositions] = React.useState<PlayerPositions>({});
+  const [draggingPlayer, setDraggingPlayer] = React.useState<DraggingState | null>(null);
 
-  // Inicializar posiciones cuando cambian los jugadores
   React.useEffect(() => {
     const initialPositions: PlayerPositions = {};
     players.forEach((player, index) => {
-      // Intentamos usar el mapa por ID, o si no, distribuimos por el índice
       const positionKey = playerPositionMap[player.id] || Object.keys(positionCoordinates)[index % Object.keys(positionCoordinates).length];
       const coords = positionCoordinates[positionKey];
       initialPositions[player.id] = {
@@ -61,8 +57,6 @@ export function FieldView({ team, players }: FieldViewProps) {
     });
     setPlayerPositions(initialPositions);
   }, [players]);
-
-  const [draggingPlayer, setDraggingPlayer] = React.useState<DraggingState | null>(null);
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>, playerId: string) => {
     e.preventDefault();
@@ -85,75 +79,87 @@ export function FieldView({ team, players }: FieldViewProps) {
     let newCenterY = e.clientY - fieldRect.top - draggingPlayer.offsetY;
     newCenterX = Math.max(playerRect.width / 2, Math.min(newCenterX, fieldRect.width - playerRect.width / 2));
     newCenterY = Math.max(playerRect.height / 2, Math.min(newCenterY, fieldRect.height - playerRect.height / 2));
-    const xPercent = (newCenterX / fieldRect.width) * 100;
-    const yPercent = (newCenterY / fieldRect.height) * 100;
     setPlayerPositions((prev) => ({
       ...prev,
-      [draggingPlayer.id]: { x: xPercent, y: yPercent },
+      [draggingPlayer.id]: { x: (newCenterX / fieldRect.width) * 100, y: (newCenterY / fieldRect.height) * 100 },
     }));
   };
 
-  const handleMouseUpOrLeave = () => {
-    setDraggingPlayer(null);
-  };
-
   return (
-    <Card>
-        <CardHeader>
-            <CardTitle className={team === 'Azul' ? 'text-primary' : 'text-accent'}>Equipo {team}</CardTitle>
-        </CardHeader>
-        <CardContent>
-            <div
-                ref={fieldRef}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUpOrLeave}
-                onMouseLeave={handleMouseUpOrLeave}
-                className={cn(
-                    "relative mx-auto h-[500px] w-full max-w-sm rounded-lg bg-green-800/70 border-4 border-white/30 overflow-hidden touch-none select-none",
-                    draggingPlayer ? "cursor-grabbing" : "cursor-grab"
-                )}
-            >
-                <div className="absolute top-1/2 left-1/2 h-32 w-32 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/30"></div>
-                <div className="absolute top-1/2 left-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/30"></div>
-                <div className="absolute top-1/2 left-0 h-[2px] w-full -translate-y-1/2 bg-white/30"></div>
-                <div className="absolute top-0 left-1/2 h-24 w-3/4 -translate-x-1/2 border-x-2 border-b-2 border-white/30 rounded-b-lg"></div>
-                <div className="absolute bottom-0 left-1/2 h-24 w-3/4 -translate-x-1/2 border-x-2 border-t-2 border-white/30 rounded-t-lg"></div>
-                
-                <TooltipProvider>
-                    {players.map((player) => {
-                        const position = playerPositions[player.id];
-                        if (!position) return null;
-                        return (
-                            <Tooltip key={player.id}>
-                                <TooltipTrigger asChild>
-                                    <div
-                                        ref={(el) => (playerRefs.current[player.id] = el)}
-                                        onMouseDown={(e) => handleMouseDown(e, player.id)}
-                                        className="absolute transition-transform hover:scale-110 hover:z-10"
-                                        style={{
-                                            top: `${position.y}%`,
-                                            left: `${position.x}%`,
-                                            transform: 'translate(-50%, -50%)',
-                                        }}
-                                    >
-                                        <Avatar className={cn("h-12 w-12 border-2 shadow-lg", team === 'Azul' ? "border-primary" : "border-accent")}>
-                                            <AvatarImage src={player.avatar} alt={player.name} />
-                                            <AvatarFallback>{player.name.charAt(0)}</AvatarFallback>
-                                        </Avatar>
-                                        <p className="mt-1 text-center text-xs font-semibold text-white bg-black/50 rounded-full px-1.5 py-0.5">
-                                            {player.name.split(' ')[0]}
-                                        </p>
-                                    </div>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    <p className="font-bold">{player.name}</p>
-                                </TooltipContent>
-                            </Tooltip>
-                        );
-                    })}
-                </TooltipProvider>
-            </div>
-        </CardContent>
+    <Card className="glass-card overflow-hidden">
+      <CardHeader className="pb-2">
+        <CardTitle className={cn("text-lg font-black uppercase tracking-widest", team === 'Azul' ? 'text-primary' : 'text-accent')}>
+          11 Inicial {team}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-4">
+        <div
+          ref={fieldRef}
+          onMouseMove={handleMouseMove}
+          onMouseUp={() => setDraggingPlayer(null)}
+          onMouseLeave={() => setDraggingPlayer(null)}
+          className={cn(
+            "relative mx-auto h-[480px] w-full max-w-sm rounded-xl border-4 border-white/20 overflow-hidden touch-none select-none shadow-2xl bg-emerald-900",
+            draggingPlayer ? "cursor-grabbing" : "cursor-grab"
+          )}
+          style={{
+            backgroundImage: `
+              repeating-linear-gradient(0deg, #065f46 0px, #065f46 60px, #064e3b 60px, #064e3b 120px)
+            `
+          }}
+        >
+          {/* Líneas del campo */}
+          <div className="absolute inset-0 border-[2px] border-white/30 m-2 rounded-lg pointer-events-none" />
+          <div className="absolute top-1/2 left-0 h-[2px] w-full -translate-y-1/2 bg-white/30" />
+          <div className="absolute top-1/2 left-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/30" />
+          <div className="absolute top-1/2 left-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/30" />
+          
+          {/* Áreas */}
+          <div className="absolute top-2 left-1/2 h-20 w-48 -translate-x-1/2 border-2 border-t-0 border-white/30" />
+          <div className="absolute bottom-2 left-1/2 h-20 w-48 -translate-x-1/2 border-2 border-b-0 border-white/30" />
+          
+          <TooltipProvider>
+            {players.map((player) => {
+              const pos = playerPositions[player.id];
+              if (!pos) return null;
+              return (
+                <Tooltip key={player.id}>
+                  <TooltipTrigger asChild>
+                    <div
+                      ref={(el) => (playerRefs.current[player.id] = el)}
+                      onMouseDown={(e) => handleMouseDown(e, player.id)}
+                      className="absolute transition-transform hover:scale-125 hover:z-20 active:scale-110"
+                      style={{
+                        top: `${pos.y}%`,
+                        left: `${pos.x}%`,
+                        transform: 'translate(-50%, -50%)',
+                      }}
+                    >
+                      <div className="relative group">
+                        <Avatar className={cn(
+                          "h-12 w-12 border-2 shadow-xl ring-4 ring-black/20",
+                          team === 'Azul' ? "border-primary bg-primary/20" : "border-accent bg-accent/20"
+                        )}>
+                          <AvatarImage src={player.avatar} alt={player.name} />
+                          <AvatarFallback className="bg-muted text-xs">{player.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-sm border border-white/10 rounded-full px-2 py-0.5 whitespace-nowrap shadow-lg">
+                          <p className="text-[10px] font-bold text-white uppercase tracking-tighter">
+                            {player.name.split(' ')[0]}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">
+                    <p className="text-xs font-black uppercase">{player.name}</p>
+                  </TooltipContent>
+                </Tooltip>
+              );
+            })}
+          </TooltipProvider>
+        </div>
+      </CardContent>
     </Card>
   );
 }

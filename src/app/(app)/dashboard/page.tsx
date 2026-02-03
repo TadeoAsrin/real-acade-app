@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -19,7 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Award, Medal, Trophy, Users, Swords, Loader2, ShieldCheck, Sparkles } from "lucide-react";
+import { Award, Medal, Trophy, Users, Swords, Loader2, ShieldCheck, Sparkles, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { GoalsChart } from "@/components/dashboard/goals-chart";
 import { FieldView } from "@/components/dashboard/field-view";
@@ -59,20 +58,10 @@ export default function DashboardPage() {
     if (!firestore || !user) return;
     setIsSettingUp(true);
     try {
-      await setDoc(doc(firestore, 'roles_admin', user.uid), {
-        isAdmin: true
-      });
-      toast({
-        title: "¡Eres Administrador!",
-        description: "Ahora tienes permisos para gestionar jugadores y partidos.",
-      });
+      await setDoc(doc(firestore, 'roles_admin', user.uid), { isAdmin: true });
+      toast({ title: "¡Eres Administrador!", description: "Ahora puedes gestionar el club." });
     } catch (error) {
-      console.error(error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "No se pudo activar el modo administrador.",
-      });
+      toast({ variant: "destructive", title: "Error", description: "No se pudo activar el modo admin." });
     } finally {
       setIsSettingUp(false);
     }
@@ -81,167 +70,112 @@ export default function DashboardPage() {
   if (playersLoading || matchesLoading) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
       </div>
     );
   }
 
   const allPlayers = playersData || [];
   const allMatches = matchesData || [];
-  
   const playerStats = calculateAggregatedStats(allPlayers, allMatches);
   const teamStats = getTeamGlobalStats(allMatches);
   const lastMatch = allMatches[0];
 
-  const topScorers = [...playerStats]
-    .sort((a, b) => b.totalGoals - a.totalGoals)
-    .slice(0, 5);
-  
-  const topWinner = [...playerStats]
-    .sort((a, b) => b.wins - a.wins)[0];
-
+  const topScorers = [...playerStats].sort((a, b) => b.totalGoals - a.totalGoals).slice(0, 5);
+  const topWinner = [...playerStats].sort((a, b) => b.wins - a.wins)[0];
   const totalGoals = playerStats.reduce((sum, p) => sum + p.totalGoals, 0);
-  const totalMatches = allMatches.length;
 
   const lastMatchTeamAPlayers = lastMatch?.teamAPlayers.map(s => allPlayers.find(p => p.id === s.playerId)).filter(Boolean) as Player[] || [];
   const lastMatchTeamBPlayers = lastMatch?.teamBPlayers.map(s => allPlayers.find(p => p.id === s.playerId)).filter(Boolean) as Player[] || [];
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-10">
       {user && !adminRole?.isAdmin && (
-        <Card className="border-primary bg-primary/5 border-dashed">
+        <Card className="glass-card border-primary/40 bg-primary/5 border-dashed overflow-hidden relative group">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-primary" />
-              Configuración Inicial
+            <CardTitle className="flex items-center gap-3">
+              <ShieldCheck className="h-6 w-6 text-primary animate-pulse" />
+              Acceso de Gestión
             </CardTitle>
-            <CardDescription>
-              Parece que eres un usuario nuevo. Pulsa el botón para convertirte en el administrador del club.
-            </CardDescription>
+            <CardDescription className="text-base">¿Eres el responsable del club? Activa el panel de administración.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={handleClaimAdmin} disabled={isSettingUp}>
-              {isSettingUp && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Activar Modo Administrador para mi cuenta
+            <Button onClick={handleClaimAdmin} disabled={isSettingUp} size="lg" className="relative z-10 shadow-lg shadow-primary/20">
+              {isSettingUp ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+              Activar Modo Administrador
             </Button>
           </CardContent>
         </Card>
       )}
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Historial Global</CardTitle>
-            <Swords className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold flex gap-2">
-              <span className="text-primary">{teamStats.blueWins}</span>
-              <span className="text-muted-foreground">-</span>
-              <span className="text-accent">{teamStats.redWins}</span>
-            </div>
-            <p className="text-xs text-muted-foreground">{teamStats.draws} empates</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Partidos</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalMatches}</div>
-            <p className="text-xs text-muted-foreground">Encuentros disputados</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Goles</CardTitle>
-            <Trophy className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalGoals}</div>
-            <p className="text-xs text-muted-foreground">Total marcados</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Goleador</CardTitle>
-            <Medal className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold truncate">{topScorers[0]?.name || '-'}</div>
-            <p className="text-xs text-muted-foreground">{topScorers[0]?.totalGoals || 0} goles</p>
-          </CardContent>
-        </Card>
-        <Card>
+      {/* Hero Stats Section */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
+        {[
+          { label: "Global", val: `${teamStats.blueWins}-${teamStats.redWins}`, sub: `${teamStats.draws} empates`, icon: Swords, color: "text-white" },
+          { label: "Partidos", val: allMatches.length, sub: "Encuentros", icon: Users, color: "text-white" },
+          { label: "Goles", val: totalGoals, sub: "Anotados", icon: Trophy, color: "text-white" },
+          { label: "Goleador", val: topScorers[0]?.name || '-', sub: `${topScorers[0]?.totalGoals || 0} goles`, icon: Medal, color: "text-primary" },
+          { label: "Victorioso", val: topWinner?.name || '-', sub: `${topWinner?.wins || 0} victorias`, icon: Award, color: "text-accent" },
+        ].map((item, i) => (
+          <Card key={i} className="glass-card overflow-hidden hover:translate-y-[-4px] transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Ganador</CardTitle>
-                <Award className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{item.label}</CardTitle>
+              <item.icon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold truncate">{topWinner?.name || '-'}</div>
-                <p className="text-xs text-muted-foreground">{topWinner?.wins || 0} victorias</p>
+              <div className={cn("text-3xl font-black tracking-tighter", item.color)}>{item.val}</div>
+              <p className="text-xs text-muted-foreground font-medium mt-1">{item.sub}</p>
             </CardContent>
-        </Card>
+          </Card>
+        ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-center text-primary">Formación Azul</h3>
-          {lastMatch ? (
-            <FieldView team="Azul" players={lastMatchTeamAPlayers} />
-          ) : (
-            <div className="h-[500px] border-2 border-dashed rounded-lg flex items-center justify-center text-muted-foreground italic">Esperando primer partido...</div>
-          )}
-        </div>
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-center text-accent">Formación Rojo</h3>
-          {lastMatch ? (
-            <FieldView team="Rojo" players={lastMatchTeamBPlayers} />
-          ) : (
-            <div className="h-[500px] border-2 border-dashed rounded-lg flex items-center justify-center text-muted-foreground italic">Esperando primer partido...</div>
-          )}
-        </div>
-        <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-center text-yellow-500">Elite del Club</h3>
-            <PowerRanking players={allPlayers} matches={allMatches} />
-        </div>
+      <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-3">
+        <FieldView team="Azul" players={lastMatchTeamAPlayers} />
+        <FieldView team="Rojo" players={lastMatchTeamBPlayers} />
+        <PowerRanking players={allPlayers} matches={allMatches} />
       </div>
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-        <Card>
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
+        <Card className="glass-card">
           <CardHeader>
-            <CardTitle>Tabla de Goleadores</CardTitle>
-            <CardDescription>Top 5 jugadores con más goles.</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-xl font-black uppercase tracking-tight">Top Goleadores</CardTitle>
+                <CardDescription>Máxima efectividad frente al arco.</CardDescription>
+              </div>
+              <TrendingUp className="h-6 w-6 text-primary" />
+            </div>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>Jugador</TableHead>
-                  <TableHead className="text-center">Goles</TableHead>
-                  <TableHead className="text-right">Efectividad</TableHead>
+                <TableRow className="hover:bg-transparent border-white/5">
+                  <TableHead className="font-black uppercase text-[10px] tracking-widest">Jugador</TableHead>
+                  <TableHead className="text-center font-black uppercase text-[10px] tracking-widest">Goles</TableHead>
+                  <TableHead className="text-right font-black uppercase text-[10px] tracking-widest">Ratio</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {topScorers.map((player) => (
-                  <TableRow key={player.playerId}>
+                  <TableRow key={player.playerId} className="border-white/5 group">
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <Avatar className="h-8 w-8">
+                        <Avatar className="h-10 w-10 ring-2 ring-transparent group-hover:ring-primary/40 transition-all">
                           <AvatarImage src={player.avatar} alt={player.name} />
                           <AvatarFallback>{player.name.charAt(0)}</AvatarFallback>
                         </Avatar>
-                        <Link href={`/players/${player.playerId}`} className="font-medium hover:underline">{player.name}</Link>
+                        <Link href={`/players/${player.playerId}`} className="font-bold text-sm hover:text-primary transition-colors">{player.name}</Link>
                       </div>
                     </TableCell>
-                    <TableCell className="text-center font-mono">{player.totalGoals}</TableCell>
-                    <TableCell className="text-right font-mono">{player.winPercentage}%</TableCell>
+                    <TableCell className="text-center font-black text-lg">{player.totalGoals}</TableCell>
+                    <TableCell className="text-right font-mono text-sm text-primary">{player.winPercentage}%</TableCell>
                   </TableRow>
                 ))}
                 {topScorers.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={3} className="text-center py-8 text-muted-foreground italic">No hay datos de goleadores aún.</TableCell>
+                    <TableCell colSpan={3} className="text-center py-10 text-muted-foreground italic">Esperando datos...</TableCell>
                   </TableRow>
                 )}
               </TableBody>
