@@ -1,8 +1,7 @@
-
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Button } from "../ui/button";
 import {
   DropdownMenu,
@@ -19,12 +18,16 @@ import { collection, query, orderBy } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import type { Player } from "@/lib/definitions";
 import { useToast } from "@/hooks/use-toast";
+import { getInitials } from "@/lib/utils";
 
 const getPageTitle = (pathname: string) => {
   if (pathname.includes("/dashboard")) return "Panel de Control";
   if (pathname.includes("/matches/new")) return "Nuevo Partido";
   if (pathname.includes("/matches")) return "Historial de Partidos";
   if (pathname.includes("/players")) return "Jugadores";
+  if (pathname.includes("/compare")) return "Comparador";
+  if (pathname.includes("/generator")) return "Equilibrador Pro";
+  if (pathname.includes("/standings")) return "Clasificación";
   return "Real Acade";
 };
 
@@ -47,10 +50,7 @@ export function Header() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      toast({
-        title: "Sesión cerrada",
-        description: "Vuelve pronto a Real Acade.",
-      });
+      toast({ title: "Sesión cerrada", description: "Vuelve pronto a Real Acade." });
       router.push("/login");
     } catch (error) {
       console.error("Logout error", error);
@@ -73,9 +73,10 @@ export function Header() {
             {isUserLoading ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
-                <Avatar className="h-10 w-10">
-                <AvatarImage src={currentUser?.avatar} alt={currentUser?.name || user?.email || ""} />
-                <AvatarFallback>{(currentUser?.name || user?.email || "U").charAt(0).toUpperCase()}</AvatarFallback>
+                <Avatar className="h-10 w-10 border-2 border-primary/20">
+                <AvatarFallback className="bg-primary/10 text-primary font-black">
+                    {getInitials(currentUser?.name || user?.email || "U")}
+                </AvatarFallback>
                 </Avatar>
             )}
           </Button>
@@ -86,8 +87,8 @@ export function Header() {
               <p className="text-sm font-medium leading-none">
                 {currentUser?.name || user?.email || "Usuario"}
               </p>
-              <p className="text-xs leading-none text-muted-foreground">
-                Perfil de {currentUser?.role === 'admin' ? 'Administrador' : 'Jugador'}
+              <p className="text-xs leading-none text-muted-foreground uppercase tracking-widest font-bold mt-1">
+                {currentUser?.role === 'admin' ? 'Administrador' : 'Jugador'}
               </p>
             </div>
           </DropdownMenuLabel>

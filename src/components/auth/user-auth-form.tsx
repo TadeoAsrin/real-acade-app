@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -15,7 +14,6 @@ import { Loader2 } from "lucide-react";
 import { useAuth, useFirestore } from "@/firebase";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {
   mode: "login" | "register";
@@ -51,43 +49,26 @@ export function UserAuthForm({ className, mode, ...props }: UserAuthFormProps) {
     try {
       if (mode === "login") {
         await signInWithEmailAndPassword(auth, data.email, data.password);
-        toast({
-          title: "Inicio de sesión exitoso",
-          description: "Bienvenido a Real Acade.",
-        });
+        toast({ title: "Inicio de sesión exitoso", description: "Bienvenido a Real Acade." });
       } else {
         const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
         const user = userCredential.user;
         
-        // Seleccionar una leyenda aleatoria
-        const randomLegend = PlaceHolderImages[Math.floor(Math.random() * PlaceHolderImages.length)];
-        const avatarUrl = randomLegend.imageUrl;
-        
         await updateProfile(user, {
           displayName: data.name,
-          photoURL: avatarUrl
         });
 
         await setDoc(doc(firestore, 'players', user.uid), {
           name: data.name || user.email?.split('@')[0],
-          avatar: avatarUrl,
           email: user.email,
           role: 'player'
         });
 
-        toast({
-          title: "Registro exitoso",
-          description: "Tu cuenta ha sido creada y se te ha asignado una leyenda del fútbol como avatar.",
-        });
+        toast({ title: "Registro exitoso", description: "Tu cuenta ha sido creada." });
       }
       router.push("/dashboard");
     } catch (error: any) {
-      console.error(error);
-      toast({
-        variant: "destructive",
-        title: "Error de autenticación",
-        description: error.message || "Ocurrió un error al intentar acceder.",
-      });
+      toast({ variant: "destructive", title: "Error", description: error.message });
     } finally {
       setIsLoading(false);
     }
@@ -100,56 +81,19 @@ export function UserAuthForm({ className, mode, ...props }: UserAuthFormProps) {
           {mode === "register" && (
             <div className="grid gap-2">
               <Label htmlFor="name">Nombre Completo</Label>
-              <Input
-                id="name"
-                placeholder="Juan Pérez"
-                type="text"
-                autoCapitalize="words"
-                disabled={isLoading}
-                {...register("name")}
-              />
-              {errors?.name && (
-                <p className="px-1 text-xs text-destructive">
-                  {errors.name.message}
-                </p>
-              )}
+              <Input id="name" placeholder="Juan Pérez" type="text" disabled={isLoading} {...register("name")} />
+              {errors?.name && <p className="px-1 text-xs text-destructive">{errors.name.message}</p>}
             </div>
           )}
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              placeholder="nombre@ejemplo.com"
-              type="email"
-              autoCapitalize="none"
-              autoComplete="email"
-              autoCorrect="off"
-              disabled={isLoading}
-              {...register("email")}
-            />
-            {errors?.email && (
-              <p className="px-1 text-xs text-destructive">
-                {errors.email.message}
-              </p>
-            )}
+            <Input id="email" placeholder="nombre@ejemplo.com" type="email" disabled={isLoading} {...register("email")} />
+            {errors?.email && <p className="px-1 text-xs text-destructive">{errors.email.message}</p>}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="password">Contraseña</Label>
-            <Input
-              id="password"
-              placeholder="••••••••"
-              type="password"
-              autoCapitalize="none"
-              autoComplete="current-password"
-              autoCorrect="off"
-              disabled={isLoading}
-              {...register("password")}
-            />
-            {errors?.password && (
-              <p className="px-1 text-xs text-destructive">
-                {errors.password.message}
-              </p>
-            )}
+            <Input id="password" placeholder="••••••••" type="password" disabled={isLoading} {...register("password")} />
+            {errors?.password && <p className="px-1 text-xs text-destructive">{errors.password.message}</p>}
           </div>
           <Button disabled={isLoading}>
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

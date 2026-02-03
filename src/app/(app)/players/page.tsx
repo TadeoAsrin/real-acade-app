@@ -11,13 +11,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc } from "@/firebase";
 import { collection, doc, setDoc, deleteDoc, updateDoc, query, orderBy } from "firebase/firestore";
 import type { Player, Match, AggregatedPlayerStats } from "@/lib/definitions";
-import { Loader2, UserPlus, Trash2, Pencil, ArrowUpDown, ChevronUp, ChevronDown, Sparkles } from "lucide-react";
+import { Loader2, UserPlus, Trash2, Pencil, ArrowUpDown, ChevronUp, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -31,7 +31,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from '@/hooks/use-toast';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -43,7 +42,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { cn } from '@/lib/utils';
+import { cn, getInitials } from '@/lib/utils';
 
 type SortConfig = {
   key: keyof AggregatedPlayerStats;
@@ -55,7 +54,6 @@ export default function PlayersPage() {
   const firestore = useFirestore();
   const { user } = useUser();
   const { toast } = useToast();
-  const [isAddingPlayer, setIsAddingPlayer] = React.useState(false);
   const [newPlayerName, setNewPlayerName] = React.useState('');
   
   const [editingPlayerId, setEditingPlayerId] = React.useState<string | null>(null);
@@ -64,7 +62,6 @@ export default function PlayersPage() {
 
   const [sortConfig, setSortConfig] = React.useState<SortConfig>({ key: 'name', direction: 'asc' });
 
-  // Manejar ordenamiento inicial por parámetros de búsqueda
   React.useEffect(() => {
     const sortParam = searchParams.get('sort');
     if (sortParam === 'totalGoals') {
@@ -95,31 +92,23 @@ export default function PlayersPage() {
 
   const handleAddPlayer = async () => {
     if (!firestore || !newPlayerName) return;
-    setIsAddingPlayer(true);
+    setIsUpdatingPlayer(true);
     try {
       const playerId = crypto.randomUUID();
-      const randomLegend = PlaceHolderImages[Math.floor(Math.random() * PlaceHolderImages.length)];
-      
       await setDoc(doc(firestore, 'players', playerId), {
         name: newPlayerName,
-        avatar: randomLegend.imageUrl,
         role: 'player'
       });
 
       toast({
         title: "Jugador Creado",
-        description: `${newPlayerName} ha sido añadido con el avatar de ${randomLegend.description}.`,
+        description: `${newPlayerName} ha sido añadido al club.`,
       });
       setNewPlayerName('');
     } catch (error) {
-      console.error(error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "No se pudo crear el jugador.",
-      });
+      toast({ variant: "destructive", title: "Error", description: "No se pudo crear el jugador." });
     } finally {
-      setIsAddingPlayer(false);
+      setIsUpdatingPlayer(false);
     }
   };
 
@@ -138,32 +127,7 @@ export default function PlayersPage() {
       setEditingPlayerId(null);
       setEditPlayerName('');
     } catch (error) {
-      console.error(error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "No se pudo actualizar el jugador.",
-      });
-    } finally {
-      setIsUpdatingPlayer(false);
-    }
-  };
-
-  const handleRegenerateAvatar = async (playerId: string) => {
-    if (!firestore) return;
-    setIsUpdatingPlayer(true);
-    try {
-      const randomLegend = PlaceHolderImages[Math.floor(Math.random() * PlaceHolderImages.length)];
-      await updateDoc(doc(firestore, 'players', playerId), {
-        avatar: randomLegend.imageUrl
-      });
-      toast({
-        title: "Avatar Legendario Asignado",
-        description: `Ahora este jugador es ${randomLegend.description}.`,
-      });
-    } catch (error) {
-      console.error(error);
-      toast({ variant: "destructive", title: "Error", description: "No se pudo actualizar el avatar." });
+      toast({ variant: "destructive", title: "Error", description: "No se pudo actualizar el jugador." });
     } finally {
       setIsUpdatingPlayer(false);
     }
@@ -173,17 +137,9 @@ export default function PlayersPage() {
     if (!firestore) return;
     try {
       await deleteDoc(doc(firestore, 'players', playerId));
-      toast({
-        title: "Jugador Eliminado",
-        description: "El registro ha sido borrado del club.",
-      });
+      toast({ title: "Jugador Eliminado", description: "El registro ha sido borrado del club." });
     } catch (error) {
-      console.error(error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "No se pudo eliminar el jugador.",
-      });
+      toast({ variant: "destructive", title: "Error", description: "No se pudo eliminar el jugador." });
     }
   };
 
@@ -216,9 +172,7 @@ export default function PlayersPage() {
     const bValue = b[sortConfig.key];
 
     if (typeof aValue === 'string' && typeof bValue === 'string') {
-      return sortConfig.direction === 'asc' 
-        ? aValue.localeCompare(bValue)
-        : bValue.localeCompare(aValue);
+      return sortConfig.direction === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
     }
 
     if (typeof aValue === 'number' && typeof bValue === 'number') {
@@ -243,9 +197,7 @@ export default function PlayersPage() {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Añadir Nuevo Jugador</DialogTitle>
-                <DialogDescription>
-                  Ingresa el nombre del jugador. Se le asignará una leyenda aleatoria.
-                </DialogDescription>
+                <DialogDescription>Ingresa el nombre del jugador para darlo de alta.</DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
@@ -259,8 +211,8 @@ export default function PlayersPage() {
                 </div>
               </div>
               <DialogFooter>
-                <Button onClick={handleAddPlayer} disabled={isAddingPlayer || !newPlayerName}>
-                  {isAddingPlayer && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Button onClick={handleAddPlayer} disabled={isUpdatingPlayer || !newPlayerName}>
+                  {isUpdatingPlayer && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Guardar Jugador
                 </Button>
               </DialogFooter>
@@ -280,22 +232,13 @@ export default function PlayersPage() {
                       >
                         <div className="flex items-center">Jugador {getSortIcon('name')}</div>
                       </TableHead>
-                      <TableHead 
-                        className="text-center cursor-pointer hover:text-primary transition-colors"
-                        onClick={() => handleSort('matchesPlayed')}
-                      >
+                      <TableHead className="text-center cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('matchesPlayed')}>
                         <div className="flex items-center justify-center">Partidos {getSortIcon('matchesPlayed')}</div>
                       </TableHead>
-                      <TableHead 
-                        className="text-center cursor-pointer hover:text-primary transition-colors"
-                        onClick={() => handleSort('totalGoals')}
-                      >
+                      <TableHead className="text-center cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('totalGoals')}>
                         <div className="flex items-center justify-center">Goles {getSortIcon('totalGoals')}</div>
                       </TableHead>
-                      <TableHead 
-                        className="text-center cursor-pointer hover:text-primary transition-colors"
-                        onClick={() => handleSort('winPercentage')}
-                      >
+                      <TableHead className="text-center cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('winPercentage')}>
                         <div className="flex items-center justify-center">Efectividad {getSortIcon('winPercentage')}</div>
                       </TableHead>
                       {isAdmin && <TableHead className="text-right pr-6">Acciones</TableHead>}
@@ -307,8 +250,7 @@ export default function PlayersPage() {
                           <TableCell className="pl-6">
                           <div className="flex items-center gap-3">
                               <Avatar className="h-9 w-9">
-                              <AvatarImage src={player.avatar} alt={player.name} data-ai-hint="football player" />
-                              <AvatarFallback>{player.name.charAt(0)}</AvatarFallback>
+                                <AvatarFallback className="bg-primary/20 text-primary font-black">{getInitials(player.name)}</AvatarFallback>
                               </Avatar>
                               <Link href={`/players/${player.playerId}`} className="font-medium hover:underline">{player.name}</Link>
                           </div>
@@ -335,29 +277,12 @@ export default function PlayersPage() {
                                   <DialogContent>
                                     <DialogHeader>
                                       <DialogTitle>Editar Jugador</DialogTitle>
-                                      <DialogDescription>
-                                        Modifica los datos de {player.name} sin perder su historial.
-                                      </DialogDescription>
+                                      <DialogDescription>Modifica los datos de {player.name} sin perder su historial.</DialogDescription>
                                     </DialogHeader>
                                     <div className="grid gap-4 py-4">
                                       <div className="grid gap-2">
                                         <Label htmlFor="edit-name">Nombre Completo</Label>
-                                        <Input
-                                          id="edit-name"
-                                          value={editPlayerName}
-                                          onChange={(e) => setEditPlayerName(e.target.value)}
-                                        />
-                                      </div>
-                                      <div className="pt-2">
-                                        <Button 
-                                            variant="outline" 
-                                            className="w-full border-primary/20 hover:bg-primary/10" 
-                                            onClick={() => handleRegenerateAvatar(player.playerId)}
-                                            disabled={isUpdatingPlayer}
-                                        >
-                                            <Sparkles className="mr-2 h-4 w-4 text-primary" />
-                                            Asignar Avatar de Leyenda
-                                        </Button>
+                                        <Input id="edit-name" value={editPlayerName} onChange={(e) => setEditPlayerName(e.target.value)} />
                                       </div>
                                     </div>
                                     <DialogFooter>
@@ -378,9 +303,7 @@ export default function PlayersPage() {
                                   <AlertDialogContent>
                                     <AlertDialogHeader>
                                       <AlertDialogTitle>¿Eliminar a {player.name}?</AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        Atención: Si eliminas al jugador, sus datos se perderán en los partidos pasados. Es mejor Editar su avatar arriba.
-                                      </AlertDialogDescription>
+                                      <AlertDialogDescription>Atención: Si eliminas al jugador, sus datos se perderán en los partidos pasados.</AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
                                       <AlertDialogCancel>Cancelar</AlertDialogCancel>
@@ -395,13 +318,6 @@ export default function PlayersPage() {
                           )}
                       </TableRow>
                       ))}
-                      {playerStats.length === 0 && (
-                        <TableRow>
-                          <TableCell colSpan={isAdmin ? 5 : 4} className="text-center py-8 text-muted-foreground">
-                            No hay jugadores registrados.
-                          </TableCell>
-                        </TableRow>
-                      )}
                   </TableBody>
               </Table>
           </CardContent>

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { calculateAggregatedStats } from "@/lib/data";
@@ -9,10 +8,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Flame, Crown } from "lucide-react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { cn, getInitials } from "@/lib/utils";
 import type { Player, Match } from "@/lib/definitions";
 
 interface PowerRankingProps {
@@ -22,7 +21,6 @@ interface PowerRankingProps {
 
 export function PowerRanking({ players, matches }: PowerRankingProps) {
   const playerStats = calculateAggregatedStats(players, matches);
-  // Sort by Power Points (calculated in data.ts)
   const topRanking = [...playerStats]
     .sort((a, b) => b.powerPoints - a.powerPoints)
     .slice(0, 5);
@@ -46,8 +44,7 @@ export function PowerRanking({ players, matches }: PowerRankingProps) {
                         "h-12 w-12 border-2",
                         index === 0 ? "border-yellow-500 shadow-lg shadow-yellow-500/20" : "border-muted"
                     )}>
-                    <AvatarImage src={player.avatar} alt={player.name} />
-                    <AvatarFallback>{player.name.charAt(0)}</AvatarFallback>
+                    <AvatarFallback className="bg-muted text-lg font-black">{getInitials(player.name)}</AvatarFallback>
                     </Avatar>
                     {index === 0 && (
                         <div className="absolute -top-3 -right-2 rotate-12">
@@ -68,9 +65,6 @@ export function PowerRanking({ players, matches }: PowerRankingProps) {
               </div>
             </div>
           ))}
-          {topRanking.length === 0 && (
-            <p className="text-sm text-muted-foreground text-center py-4">No hay datos suficientes aún.</p>
-          )}
         </div>
       </CardContent>
     </Card>

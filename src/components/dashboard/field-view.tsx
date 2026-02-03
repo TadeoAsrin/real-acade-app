@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { Player } from '@/lib/definitions';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   Tooltip,
   TooltipContent,
@@ -10,7 +10,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { cn } from '@/lib/utils';
+import { cn, getInitials } from '@/lib/utils';
 import { Trophy } from 'lucide-react';
 
 interface FieldViewProps {
@@ -19,7 +19,6 @@ interface FieldViewProps {
   topScorerId?: string;
 }
 
-// Icono de Guantes de Portero Personalizado
 const GlovesIcon = ({ className }: { className?: string }) => (
   <svg 
     viewBox="0 0 24 24" 
@@ -37,15 +36,14 @@ const GlovesIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-// Formación Táctica 3-2-1 (El 1 del portero es implícito)
 const formationCoordinates: { top: string; left: string }[] = [
-  { top: '15%', left: '50%' }, // Portero (GK Zone)
-  { top: '38%', left: '22%' }, // Defensor Izquierdo
-  { top: '38%', left: '50%' }, // Defensor Central
-  { top: '38%', left: '78%' }, // Defensor Derecho
-  { top: '68%', left: '35%' }, // Mediocampista Izquierdo
-  { top: '68%', left: '65%' }, // Mediocampista Derecho
-  { top: '88%', left: '50%' }, // Delantero Centro
+  { top: '15%', left: '50%' },
+  { top: '38%', left: '22%' },
+  { top: '38%', left: '50%' },
+  { top: '38%', left: '78%' },
+  { top: '68%', left: '35%' },
+  { top: '68%', left: '65%' },
+  { top: '88%', left: '50%' },
 ];
 
 export function FieldView({ team, players, topScorerId }: FieldViewProps) {
@@ -53,7 +51,6 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
   const [playerPositions, setPlayerPositions] = React.useState<{ [key: string]: { x: number; y: number } }>({});
   const [draggingPlayer, setDraggingPlayer] = React.useState<{ id: string; startX: number; startY: number } | null>(null);
 
-  // Inicializar posiciones tácticas
   React.useEffect(() => {
     const initialPositions: { [key: string]: { x: number; y: number } } = {};
     players.forEach((player, index) => {
@@ -69,7 +66,6 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
   }, [players]);
 
   const handlePointerDown = (e: React.PointerEvent, playerId: string) => {
-    e.preventDefault();
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     setDraggingPlayer({ 
       id: playerId, 
@@ -115,7 +111,7 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
         )}>
           <span>Último Partido {team}</span>
           <span className="text-[10px] font-bold text-muted-foreground/50 bg-black/40 px-2 py-0.5 rounded-full not-italic">
-            Táctica 3-2-1
+            3-2-1
           </span>
         </CardTitle>
       </CardHeader>
@@ -136,12 +132,10 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
             backgroundSize: '100% 100%, 100% 80px'
           }}
         >
-          {/* Líneas de Cal del Campo */}
           <div className="absolute inset-4 border-2 border-white/30 rounded-lg pointer-events-none" />
           <div className="absolute top-1/2 left-1/2 h-32 w-32 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/30" />
           <div className="absolute top-1/2 left-0 w-full h-[2px] bg-white/30 -translate-y-1/2" />
           
-          {/* Área de Portería Dinámica */}
           <div className={cn(
             "absolute top-4 left-1/2 h-28 w-56 -translate-x-1/2 border-2 border-t-0 border-white/40 rounded-b-2xl transition-all duration-300",
             draggingPlayer && isPlayerInGKZone(playerPositions[draggingPlayer.id] || {x:0, y:100}) 
@@ -149,7 +143,6 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
               : "bg-white/5"
           )} />
           
-          {/* Área Grande Inferior */}
           <div className="absolute bottom-4 left-1/2 h-28 w-56 -translate-x-1/2 border-2 border-b-0 border-white/30 rounded-t-2xl" />
           
           <TooltipProvider>
@@ -181,9 +174,9 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
                       <div className="flex flex-col items-center gap-1.5">
                         <div className="relative">
                           <Avatar className={cn(
-                            "h-12 w-12 border-[3px] shadow-2xl ring-2 ring-black/30 transition-all duration-300",
+                            "h-11 w-11 border-[3px] shadow-2xl ring-2 ring-black/30 transition-all duration-300",
                             isGK 
-                              ? "border-orange-500 bg-orange-600/40 scale-105" 
+                              ? "border-orange-500 bg-orange-600/40" 
                               : isPichichi 
                                 ? "border-yellow-400 shadow-yellow-500/40 ring-yellow-400/20" 
                                 : team === 'Azul' 
@@ -191,8 +184,12 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
                                   : "border-accent bg-accent/20",
                             isDragging && "ring-white/50 opacity-90 shadow-white/20"
                           )}>
-                            <AvatarImage src={player.avatar} alt={player.name} className="object-cover" />
-                            <AvatarFallback className="bg-muted text-[10px] font-black">{player.name.charAt(0)}</AvatarFallback>
+                            <AvatarFallback className={cn(
+                                "text-[10px] font-black",
+                                isGK ? "bg-orange-500 text-white" : isPichichi ? "bg-yellow-400 text-black" : team === 'Azul' ? "bg-primary text-white" : "bg-accent text-white"
+                            )}>
+                                {getInitials(player.name)}
+                            </AvatarFallback>
                           </Avatar>
                           
                           {isPichichi && (
