@@ -59,26 +59,25 @@ export function UserAuthForm({ className, mode, ...props }: UserAuthFormProps) {
         const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
         const user = userCredential.user;
         
-        // Asignar un avatar aleatorio
-        const randomAvatar = PlaceHolderImages[Math.floor(Math.random() * PlaceHolderImages.length)].imageUrl;
+        // Seleccionar una leyenda aleatoria
+        const randomLegend = PlaceHolderImages[Math.floor(Math.random() * PlaceHolderImages.length)];
+        const avatarUrl = randomLegend.imageUrl;
         
-        // Actualizar perfil de Firebase Auth
         await updateProfile(user, {
           displayName: data.name,
-          photoURL: randomAvatar
+          photoURL: avatarUrl
         });
 
-        // Crear documento de jugador en Firestore
         await setDoc(doc(firestore, 'players', user.uid), {
           name: data.name || user.email?.split('@')[0],
-          avatar: randomAvatar,
+          avatar: avatarUrl,
           email: user.email,
           role: 'player'
         });
 
         toast({
           title: "Registro exitoso",
-          description: "Tu cuenta ha sido creada correctamente.",
+          description: "Tu cuenta ha sido creada y se te ha asignado una leyenda del fútbol como avatar.",
         });
       }
       router.push("/dashboard");

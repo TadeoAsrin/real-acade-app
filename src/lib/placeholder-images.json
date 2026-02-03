@@ -3,37 +3,37 @@
     {
       "id": "pele",
       "description": "Pelé - O Rei",
-      "imageUrl": "https://images.unsplash.com/photo-1590179400482-1fd88a562fc0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxmb290YmFsbCUyMHBlbGV8ZW58MHx8fHwxNzcwMDg4MzEwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1587103365297-77661edc549d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxmb290YmFsbCUyMHBlbGV8ZW58MHx8fHwxNzcwMDg4MzEwfDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "football pele"
     },
     {
       "id": "maradona",
       "description": "Diego Maradona - El Pibe de Oro",
-      "imageUrl": "https://images.unsplash.com/photo-1605002713581-123e77bcf83d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxmb290YmFsbCUyMG1hcmFkb25hfGVufDB8fHx8MTc3MDA4ODMxMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1634931538113-538f0a15a33c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxmb290YmFsbCUyMG1hcmFkb25hfGVufDB8fHx8MTc3MDA4ODMxMHww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "football maradona"
     },
     {
       "id": "messi",
       "description": "Lionel Messi - La Pulga",
-      "imageUrl": "https://images.unsplash.com/photo-1686168523188-8949907234a5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxmb290YmFsbCUyMG1lc3NpfGVufDB8fHx8MTc3MDA4ODMxMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1667983090870-38b3a9ad3d06?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxmb290YmFsbCUyMG1lc3NpfGVufDB8fHx8MTc3MDA4ODMxMHww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "football messi"
     },
     {
       "id": "cr7",
       "description": "Cristiano Ronaldo - El Bicho",
-      "imageUrl": "https://images.unsplash.com/photo-1724064710352-3cbcee4bc3a8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxmb290YmFsbCUyMHJvbmFsZG98ZW58MHx8fHwxNzcwMDg4MzEwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1649771543037-916e2702008a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxmb290YmFsbCUyMHJvbmFsZG98ZW58MHx8fHwxNzcwMDg4MzEwfDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "football ronaldo"
     },
     {
       "id": "zidane",
       "description": "Zinedine Zidane - Zizou",
-      "imageUrl": "https://images.unsplash.com/flagged/photo-1552987246-c68926651688?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxmb290YmFsbCUyMHppZGFuZXxlbnwwfHx8fDE3NzAwODgzMTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1604331546936-ba127df7370e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxmb290YmFsbCUyMHppZGFuZXxlbnwwfHx8fDE3NzAwODgzMTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "football zidane"
     },
     {
       "id": "cruyff",
       "description": "Johan Cruyff - El Holandés Volador",
-      "imageUrl": "https://images.unsplash.com/photo-1717942669436-9116c552efe4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxmb290YmFsbCUyMGNydXlmZnxlbnwwfHx8fDE3NzAwODgzMTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1726361614810-2617ca12cff6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxmb290YmFsbCUyMGNydXlmZnxlbnwwfHx8fDE3NzAwODgzMTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "football cruyff"
     },
     {
@@ -63,7 +63,7 @@
     {
       "id": "puskas",
       "description": "Ferenc Puskás - Cañoncito Pum",
-      "imageUrl": "https://images.unsplash.com/photo-1764863747272-dd01488d460a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxmb290YmFsbCUyMHB1c2thc3xlbnwwfHx8fDE3NzAwODgzMTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1587103365297-77661edc549d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxmb290YmFsbCUyMHB1c2thc3xlbnwwfHx8fDE3NzAwODgzMTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "football puskas"
     },
     {
@@ -81,7 +81,7 @@
     {
       "id": "yashin",
       "description": "Lev Yashin - La Araña Negra",
-      "imageUrl": "https://images.unsplash.com/photo-1587103365297-77661edc549d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxmb290YmFsbCUyMHlhc2hpbnxlbnwwfHx8fDE3NzAwODgzMTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1760890518049-47b9822e1c89?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxmb290YmFsbCUyMHlhc2hpbnxlbnwwfHx8fDE3NzAwODgzMTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "football yashin"
     }
   ]

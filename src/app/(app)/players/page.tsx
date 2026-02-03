@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -60,7 +61,6 @@ export default function PlayersPage() {
   const [editPlayerName, setEditPlayerName] = React.useState('');
   const [isUpdatingPlayer, setIsUpdatingPlayer] = React.useState(false);
 
-  // Estado para el ordenamiento
   const [sortConfig, setSortConfig] = React.useState<SortConfig>({ key: 'name', direction: 'asc' });
 
   const playersQuery = useMemoFirebase(() => {
@@ -89,17 +89,18 @@ export default function PlayersPage() {
     setIsAddingPlayer(true);
     try {
       const playerId = crypto.randomUUID();
-      const randomAvatar = PlaceHolderImages[Math.floor(Math.random() * PlaceHolderImages.length)].imageUrl;
+      // Elegir leyenda aleatoria
+      const randomLegend = PlaceHolderImages[Math.floor(Math.random() * PlaceHolderImages.length)];
       
       await setDoc(doc(firestore, 'players', playerId), {
         name: newPlayerName,
-        avatar: randomAvatar,
+        avatar: randomLegend.imageUrl,
         role: 'player'
       });
 
       toast({
         title: "Jugador Creado",
-        description: `${newPlayerName} ha sido añadido al club.`,
+        description: `${newPlayerName} ha sido añadido con el avatar de ${randomLegend.description}.`,
       });
       setNewPlayerName('');
     } catch (error) {
@@ -215,7 +216,7 @@ export default function PlayersPage() {
               <DialogHeader>
                 <DialogTitle>Añadir Nuevo Jugador</DialogTitle>
                 <DialogDescription>
-                  Ingresa el nombre del jugador para registrarlo en el sistema.
+                  Ingresa el nombre del jugador. Se le asignará una leyenda aleatoria.
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
@@ -290,7 +291,7 @@ export default function PlayersPage() {
                           <TableCell className="pl-6">
                           <div className="flex items-center gap-3">
                               <Avatar className="h-9 w-9">
-                              <AvatarImage src={player.avatar} alt={player.name} />
+                              <AvatarImage src={player.avatar} alt={player.name} data-ai-hint="football player" />
                               <AvatarFallback>{player.name.charAt(0)}</AvatarFallback>
                               </Avatar>
                               <Link href={`/players/${player.playerId}`} className="font-medium hover:underline">{player.name}</Link>
@@ -353,7 +354,7 @@ export default function PlayersPage() {
                                     <AlertDialogHeader>
                                       <AlertDialogTitle>¿Eliminar a {player.name}?</AlertDialogTitle>
                                       <AlertDialogDescription>
-                                        Esto eliminará al jugador de la base de datos. Sus estadísticas históricas en los partidos registrados permanecerán pero no aparecerá más en esta lista.
+                                        Esto eliminará al jugador de la base de datos.
                                       </AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
