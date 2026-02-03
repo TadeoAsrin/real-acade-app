@@ -25,17 +25,14 @@ import { GoalsChart } from "@/components/dashboard/goals-chart";
 import { FieldView } from "@/components/dashboard/field-view";
 import { PowerRanking } from "@/components/dashboard/power-ranking";
 import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc } from "@/firebase";
-import { collection, query, orderBy, doc, setDoc } from "firebase/firestore";
+import { collection, query, orderBy, doc } from "firebase/firestore";
 import type { Match, Player } from "@/lib/definitions";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 export default function DashboardPage() {
   const firestore = useFirestore();
   const { user } = useUser();
-  const { toast } = useToast();
-  const [isSettingUp, setIsSettingUp] = React.useState(false);
 
   const playersQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -47,27 +44,8 @@ export default function DashboardPage() {
     return query(collection(firestore, 'matches'), orderBy('date', 'desc'));
   }, [firestore]);
 
-  const adminRoleRef = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
-    return doc(firestore, 'roles_admin', user.uid);
-  }, [firestore, user]);
-
   const { data: playersData, isLoading: playersLoading } = useCollection<Player>(playersQuery);
   const { data: matchesData, isLoading: matchesLoading } = useCollection<Match>(matchesQuery);
-  const { data: adminRole } = useDoc<{isAdmin: boolean}>(adminRoleRef);
-
-  const handleClaimAdmin = async () => {
-    if (!firestore || !user) return;
-    setIsSettingUp(true);
-    try {
-      await setDoc(doc(firestore, 'roles_admin', user.uid), { isAdmin: true });
-      toast({ title: "¡Eres Administrador!", description: "Ahora puedes gestionar el club." });
-    } catch (error) {
-      toast({ variant: "destructive", title: "Error", description: "No se pudo activar el modo admin." });
-    } finally {
-      setIsSettingUp(false);
-    }
-  };
 
   if (playersLoading || matchesLoading) {
     return (
@@ -110,25 +88,6 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-10">
-      {user && !adminRole?.isAdmin && (
-        <Card className="glass-card border-primary/40 bg-primary/5 border-dashed overflow-hidden relative group">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-          <CardHeader>
-            <CardTitle className="flex items-center gap-3">
-              <ShieldCheck className="h-6 w-6 text-primary animate-pulse" />
-              Acceso de Gestión
-            </CardTitle>
-            <CardDescription className="text-base text-muted-foreground">¿Eres el responsable del club? Activa el panel de administración.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button onClick={handleClaimAdmin} disabled={isSettingUp} size="lg" className="relative z-10 shadow-lg shadow-primary/20">
-              {isSettingUp ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-              Activar Modo Administrador
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
         <Link href="/matches">
           <Card className="glass-card overflow-hidden hover:translate-y-[-4px] transition-all duration-300 hover:border-primary/50 cursor-pointer h-full">

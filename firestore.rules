@@ -31,10 +31,10 @@ service cloud.firestore {
       }
     }
 
-    // Admin Roles: Permite que el usuario cree su propio registro inicial para el setup
+    // Admin Roles: Solo lectura para el propio usuario. Creación deshabilitada momentáneamente.
     match /roles_admin/{userId} {
       allow get: if isSignedIn() && request.auth.uid == userId;
-      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow create: if false; // Deshabilitado para evitar nuevos admins por el momento
       allow update, delete, list: if false;
     }
   }
