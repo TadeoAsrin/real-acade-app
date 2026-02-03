@@ -38,16 +38,17 @@ const GlovesIcon = ({ className }: { className?: string }) => (
 
 const formationCoordinates: { top: string; left: string }[] = [
   { top: '12%', left: '50%' }, // 0: GK (1)
-  { top: '35%', left: '22%' }, // 1: Def L (3)
+  { top: '35%', left: '22%' }, // 1: Def L (Ahora será 4)
   { top: '35%', left: '50%' }, // 2: Def C (2)
-  { top: '35%', left: '78%' }, // 3: Def R (4)
+  { top: '35%', left: '78%' }, // 3: Def R (Ahora será 3)
   { top: '65%', left: '35%' }, // 4: Mid L (8)
   { top: '65%', left: '65%' }, // 5: Mid R (10)
   { top: '85%', left: '50%' }, // 6: Fwd (9)
 ];
 
 const getTacticalNumber = (index: number): string => {
-  const numbers = ["1", "3", "2", "4", "8", "10", "9"];
+  // Invertimos 3 y 4 en el array de números tácticos
+  const numbers = ["1", "4", "2", "3", "8", "10", "9"];
   return numbers[index] || "";
 };
 
