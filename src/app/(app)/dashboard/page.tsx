@@ -60,7 +60,9 @@ export default function DashboardPage() {
       return b.totalGoals - a.totalGoals;
     });
 
-  const topScorer = sortedByGoals[0];
+  const topScorers = sortedByGoals.slice(0, 3);
+  const topScorer = topScorers[0];
+  const runnersUp = topScorers.slice(1);
   const influencer = sortedByInfluence[0];
 
   const totalMatches = allMatches.length;
@@ -92,36 +94,61 @@ export default function DashboardPage() {
       <section className="space-y-4">
         <h2 className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground/50 px-1">Líderes de la Academia</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Pichichi Hero Card */}
-          <Link href={topScorer ? `/players/${topScorer.playerId}` : "/players"} className="md:col-span-2 lg:col-span-1">
-            <Card className="glass-card card-gold hover:translate-y-[-4px] transition-all duration-300 cursor-pointer h-full bg-gradient-to-br from-card/60 to-yellow-500/10 overflow-hidden group relative">
-              <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform duration-500">
-                <Medal className="h-32 w-32 text-yellow-500" />
-              </div>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xs font-black uppercase tracking-widest text-yellow-500 flex items-center gap-2">
-                  <Trophy className="h-3 w-3" /> Máximo Goleador
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+          {/* Pichichi Hero Card - Podio Completo */}
+          <Card className="md:col-span-2 lg:col-span-1 glass-card card-gold bg-gradient-to-br from-card/60 to-yellow-500/10 overflow-hidden relative flex flex-col h-full">
+            <div className="absolute top-0 right-0 p-6 opacity-10">
+              <Medal className="h-32 w-32 text-yellow-500" />
+            </div>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs font-black uppercase tracking-widest text-yellow-500 flex items-center gap-2">
+                <Trophy className="h-3 w-3" /> Carrera por el Pichichi
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6 flex-1 flex flex-col">
+              {/* LÍDER (REINA) */}
+              <Link href={topScorer ? `/players/${topScorer.playerId}` : "/players"} className="group">
                 <div className="flex items-center gap-4">
-                  <Avatar className="h-16 w-16 border-4 border-yellow-500/30">
+                  <Avatar className="h-16 w-16 border-4 border-yellow-500/30 group-hover:scale-105 transition-transform">
                     <AvatarFallback className="bg-yellow-500/10 text-yellow-500 text-2xl font-black">{getInitials(topScorer?.name || "?")}</AvatarFallback>
                   </Avatar>
                   <div>
-                    <div className="text-3xl lg:text-4xl font-black tracking-tighter text-white uppercase leading-none">
+                    <div className="text-3xl lg:text-4xl font-black tracking-tighter text-white uppercase leading-none group-hover:text-yellow-500 transition-colors">
                       {topScorer?.name || '-'}
                     </div>
-                    <p className="text-sm font-bold text-yellow-500/60 uppercase italic">Dueño de las redes</p>
+                    <p className="text-xs font-bold text-yellow-500/60 uppercase italic">Líder Actual</p>
                   </div>
                 </div>
-                <div className="flex items-baseline gap-2">
+                <div className="mt-4 flex items-baseline gap-2">
                   <span className="text-5xl font-black text-yellow-500 italic leading-none">{topScorer?.totalGoals || 0}</span>
                   <span className="text-sm font-black text-yellow-500/50 uppercase tracking-widest">Goles Totales</span>
                 </div>
-              </CardContent>
-            </Card>
-          </Link>
+              </Link>
+
+              {/* PERSEGUIDORES (EN LA MIRA) */}
+              {runnersUp.length > 0 && (
+                <div className="mt-auto pt-6 border-t border-yellow-500/10 space-y-3">
+                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-yellow-500/40">En la mira</p>
+                  <div className="space-y-3">
+                    {runnersUp.map((runner, idx) => (
+                      <Link key={runner.playerId} href={`/players/${runner.playerId}`} className="flex items-center justify-between group/runner">
+                        <div className="flex items-center gap-3">
+                          <span className="text-[10px] font-black text-yellow-500/30 italic">#{idx + 2}</span>
+                          <Avatar className="h-8 w-8 border border-white/5">
+                            <AvatarFallback className="text-[10px] font-black bg-muted">{getInitials(runner.name)}</AvatarFallback>
+                          </Avatar>
+                          <span className="text-sm font-bold text-muted-foreground group-hover/runner:text-white transition-colors">{runner.name}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg font-black italic text-white/80">{runner.totalGoals}</span>
+                          <span className="text-[8px] font-bold text-yellow-500/40 uppercase">(-{topScorer.totalGoals - runner.totalGoals})</span>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Influencer Hero Card */}
           <Link href="/pulse/influencer" className="lg:col-span-1">
@@ -165,7 +192,7 @@ export default function DashboardPage() {
       <section className="space-y-6">
         <h2 className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground/50 px-1">Acción en la Cancha</h2>
         
-        {/* Quick Stats Grid - Horizontal Row on Desktop */}
+        {/* Quick Stats Grid - Top Row */}
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
           <Link href="/matches">
             <Card className="glass-card hover:bg-white/5 transition-all border-white/5 overflow-hidden">
@@ -196,7 +223,7 @@ export default function DashboardPage() {
                 <Users className="h-4 w-4 text-emerald-500" />
               </CardHeader>
               <CardContent className="px-4 pb-4">
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2 min-w-0">
                   <div className="flex items-baseline justify-between">
                     <div className="text-3xl font-black tracking-tighter text-emerald-500">{attendanceRate}%</div>
                     <div className="text-[10px] font-bold text-emerald-500/60 uppercase">Asistencia</div>
