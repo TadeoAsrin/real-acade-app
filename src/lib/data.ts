@@ -114,7 +114,9 @@ export const getTeamGlobalStats = (allMatches: Match[]) => {
 };
 
 export const balanceTeams = (selectedPlayers: AggregatedPlayerStats[]) => {
-  const sorted = [...selectedPlayers].sort((a, b) => b.powerPoints - a.powerPoints);
+  // Separar porteros del resto para asegurar reparto equitativo
+  const goalkeepers = selectedPlayers.filter(p => p.position === 'Arquero');
+  const outfieldPlayers = selectedPlayers.filter(p => p.position !== 'Arquero');
   
   const teamA: AggregatedPlayerStats[] = [];
   const teamB: AggregatedPlayerStats[] = [];
@@ -122,7 +124,21 @@ export const balanceTeams = (selectedPlayers: AggregatedPlayerStats[]) => {
   let scoreA = 0;
   let scoreB = 0;
 
-  sorted.forEach((player) => {
+  // Repartir porteros primero
+  const sortedGKs = [...goalkeepers].sort((a, b) => b.powerPoints - a.powerPoints);
+  sortedGKs.forEach(gk => {
+    if (scoreA <= scoreB) {
+      teamA.push(gk);
+      scoreA += gk.powerPoints;
+    } else {
+      teamB.push(gk);
+      scoreB += gk.powerPoints;
+    }
+  });
+
+  // Repartir el resto por Power Points (método serpiente)
+  const sortedOutfield = [...outfieldPlayers].sort((a, b) => b.powerPoints - a.powerPoints);
+  sortedOutfield.forEach((player) => {
     if (scoreA <= scoreB) {
       teamA.push(player);
       scoreA += player.powerPoints;
