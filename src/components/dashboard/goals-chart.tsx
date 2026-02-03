@@ -1,5 +1,7 @@
+
 "use client";
 
+import * as React from 'react';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
   Card,
@@ -34,6 +36,23 @@ interface GoalsChartProps {
 }
 
 export function GoalsChart({ matches }: GoalsChartProps) {
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return (
+      <Card className="h-80 w-full animate-pulse bg-muted/10">
+        <CardHeader>
+          <CardTitle>Rendimiento General</CardTitle>
+          <CardDescription>Cargando estadísticas...</CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
   const chartData = [...matches]
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     .map((match) => ({
@@ -44,7 +63,7 @@ export function GoalsChart({ matches }: GoalsChartProps) {
       azul: match.teamAScore,
       rojo: match.teamBScore,
     }))
-    .slice(-10); // Mostramos los últimos 10
+    .slice(-10);
 
   return (
     <Card>

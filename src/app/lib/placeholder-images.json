@@ -1,0 +1,89 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "messi",
+      "description": "Lionel Messi",
+      "imageUrl": "https://images.unsplash.com/photo-1552318975-2758c95c11bc?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "football portrait messi"
+    },
+    {
+      "id": "cr7",
+      "description": "Cristiano Ronaldo",
+      "imageUrl": "https://images.unsplash.com/photo-1518604666860-9ed391f76460?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "football portrait ronaldo"
+    },
+    {
+      "id": "pele",
+      "description": "Pelé",
+      "imageUrl": "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "football legend portrait"
+    },
+    {
+      "id": "maradona",
+      "description": "Diego Maradona",
+      "imageUrl": "https://images.unsplash.com/photo-1529900948632-58674ba19306?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "soccer portrait legend"
+    },
+    {
+      "id": "zidane",
+      "description": "Zinedine Zidane",
+      "imageUrl": "https://images.unsplash.com/photo-1606925797300-0b35e9d1741e?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "footballer portrait"
+    },
+    {
+      "id": "ronaldinho",
+      "description": "Ronaldinho",
+      "imageUrl": "https://images.unsplash.com/photo-1551958219-acbc608c6377?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "smiling footballer portrait"
+    },
+    {
+      "id": "r9",
+      "description": "Ronaldo Nazário",
+      "imageUrl": "https://images.unsplash.com/photo-1628891435222-065925dcb365?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "striker portrait"
+    },
+    {
+      "id": "cruyff",
+      "description": "Johan Cruyff",
+      "imageUrl": "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "vintage footballer portrait"
+    },
+    {
+      "id": "beckenbauer",
+      "description": "Franz Beckenbauer",
+      "imageUrl": "https://images.unsplash.com/photo-1517466787929-bc90951d0974?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "defender football portrait"
+    },
+    {
+      "id": "maldini",
+      "description": "Paolo Maldini",
+      "imageUrl": "https://images.unsplash.com/photo-1551288049-bbbda536ad0a?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "captain football portrait"
+    },
+    {
+      "id": "yashin",
+      "description": "Lev Yashin",
+      "imageUrl": "https://images.unsplash.com/photo-1510298737750-5ca07c13414d?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "goalkeeper football portrait"
+    },
+    {
+      "id": "puskas",
+      "description": "Ferenc Puskás",
+      "imageUrl": "https://images.unsplash.com/photo-1624891151634-1929c367752e?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "soccer legend portrait"
+    },
+    {
+      "id": "henry",
+      "description": "Thierry Henry",
+      "imageUrl": "https://images.unsplash.com/photo-1431324155629-1a6eda1eed2d?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "fast footballer portrait"
+    },
+    {
+      "id": "iniesta",
+      "description": "Andrés Iniesta",
+      "imageUrl": "https://images.unsplash.com/photo-1516567727245-ad8c68f3ec93?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "midfielder football portrait"
+    }
+  ]
+}
