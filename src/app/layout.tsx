@@ -34,7 +34,7 @@ export default function RootLayout({
         />
       </head>
       <body className={cn("font-body antialiased selection:bg-primary/30", inter.variable, inter.className)}>
-        <FirebaseClientProvider>
+        <FirebaseClientProvider { ...{ children } }>
           {children}
           <Toaster />
         </FirebaseClientProvider>
