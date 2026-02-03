@@ -203,7 +203,7 @@ export default function DashboardPage() {
                 "text-2xl font-black tracking-tighter truncate drop-shadow-[0_0_8px_rgba(16,185,129,0.3)]",
                 isVictoriaPeleada ? "text-orange-400 italic" : "text-emerald-500"
               )}>
-                {isVictoriaPeleada ? "Peleado" : (topWinner?.name || '-')}
+                {isVictoriaPeleada ? "+ de 1" : (topWinner?.name || '-')}
               </div>
               <div className="flex items-baseline gap-1 mt-1">
                 <span className="text-xl font-black text-emerald-500/90">{topWinner?.wins || 0}V</span>
