@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -14,6 +15,13 @@ import { Loader2 } from "lucide-react";
 import { useAuth, useFirestore } from "@/firebase";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {
   mode: "login" | "register";
@@ -25,9 +33,12 @@ const formSchema = z.object({
   password: z
     .string()
     .min(6, { message: "La contraseña debe tener al menos 6 caracteres." }),
+  position: z.string().optional(),
 });
 
 type UserFormValue = z.infer<typeof formSchema>;
+
+const POSITIONS = ["Arquero", "Lateral Derecho", "Defensor Central", "Lateral Izquierdo", "Mediocampista", "Delantero"];
 
 export function UserAuthForm({ className, mode, ...props }: UserAuthFormProps) {
   const router = useRouter();
@@ -39,6 +50,7 @@ export function UserAuthForm({ className, mode, ...props }: UserAuthFormProps) {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<UserFormValue>({
     resolver: zodResolver(formSchema),
@@ -61,6 +73,7 @@ export function UserAuthForm({ className, mode, ...props }: UserAuthFormProps) {
         await setDoc(doc(firestore, 'players', user.uid), {
           name: data.name || user.email?.split('@')[0],
           email: user.email,
+          position: data.position || null,
           role: 'player'
         });
 
@@ -79,11 +92,26 @@ export function UserAuthForm({ className, mode, ...props }: UserAuthFormProps) {
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="grid gap-4">
           {mode === "register" && (
-            <div className="grid gap-2">
-              <Label htmlFor="name">Nombre Completo</Label>
-              <Input id="name" placeholder="Juan Pérez" type="text" disabled={isLoading} {...register("name")} />
-              {errors?.name && <p className="px-1 text-xs text-destructive">{errors.name.message}</p>}
-            </div>
+            <>
+                <div className="grid gap-2">
+                    <Label htmlFor="name">Nombre Completo</Label>
+                    <Input id="name" placeholder="Juan Pérez" type="text" disabled={isLoading} {...register("name")} />
+                    {errors?.name && <p className="px-1 text-xs text-destructive">{errors.name.message}</p>}
+                </div>
+                <div className="grid gap-2">
+                    <Label htmlFor="position">Posición Principal</Label>
+                    <Select onValueChange={(val) => setValue("position", val)} disabled={isLoading}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Selecciona tu posición" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {POSITIONS.map(pos => (
+                                <SelectItem key={pos} value={pos}>{pos}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+            </>
           )}
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>

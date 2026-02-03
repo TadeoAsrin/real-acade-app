@@ -1,3 +1,4 @@
+
 import type { Player, Match, AggregatedPlayerStats, PlayerStats } from "./definitions";
 
 const POINTS = {
@@ -16,6 +17,7 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
       playerId: player.id,
       name: player.name,
       avatar: player.avatar,
+      position: player.position,
       matchesPlayed: 0,
       totalGoals: 0,
       totalCaptaincies: 0,

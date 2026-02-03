@@ -1,8 +1,12 @@
+
+export type PlayerPosition = 'Arquero' | 'Lateral Derecho' | 'Defensor Central' | 'Lateral Izquierdo' | 'Mediocampista' | 'Delantero';
+
 export type Player = {
   id: string;
   name: string;
-  avatar: string;
+  avatar?: string;
   role: 'admin' | 'player';
+  position?: PlayerPosition;
 };
 
 export type PlayerStats = {
@@ -25,7 +29,8 @@ export type Match = {
 export type AggregatedPlayerStats = {
   playerId: string;
   name: string;
-  avatar: string;
+  avatar?: string;
+  position?: PlayerPosition;
   matchesPlayed: number;
   totalGoals: number;
   totalCaptaincies: number;

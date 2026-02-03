@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -16,8 +17,8 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc } from "@/firebase";
 import { collection, doc, setDoc, deleteDoc, updateDoc, query, orderBy } from "firebase/firestore";
-import type { Player, Match, AggregatedPlayerStats } from "@/lib/definitions";
-import { Loader2, UserPlus, Trash2, Pencil, ArrowUpDown, ChevronUp, ChevronDown } from "lucide-react";
+import type { Player, Match, AggregatedPlayerStats, PlayerPosition } from "@/lib/definitions";
+import { Loader2, UserPlus, Trash2, Pencil, ArrowUpDown, ChevronUp, ChevronDown, Shield, Target, Footprints, Users as UsersIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -42,22 +43,35 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn, getInitials } from '@/lib/utils';
+import { Badge } from "@/components/ui/badge";
 
 type SortConfig = {
   key: keyof AggregatedPlayerStats;
   direction: 'asc' | 'desc';
 };
 
+const POSITIONS: PlayerPosition[] = ["Arquero", "Lateral Derecho", "Defensor Central", "Lateral Izquierdo", "Mediocampista", "Delantero"];
+
 export default function PlayersPage() {
   const searchParams = useSearchParams();
   const firestore = useFirestore();
   const { user } = useUser();
   const { toast } = useToast();
+  
   const [newPlayerName, setNewPlayerName] = React.useState('');
+  const [newPlayerPosition, setNewPlayerPosition] = React.useState<PlayerPosition | ''>('');
   
   const [editingPlayerId, setEditingPlayerId] = React.useState<string | null>(null);
   const [editPlayerName, setEditPlayerName] = React.useState('');
+  const [editPlayerPosition, setEditPlayerPosition] = React.useState<PlayerPosition | ''>('');
   const [isUpdatingPlayer, setIsUpdatingPlayer] = React.useState(false);
 
   const [sortConfig, setSortConfig] = React.useState<SortConfig>({ key: 'name', direction: 'asc' });
@@ -97,6 +111,7 @@ export default function PlayersPage() {
       const playerId = crypto.randomUUID();
       await setDoc(doc(firestore, 'players', playerId), {
         name: newPlayerName,
+        position: newPlayerPosition || null,
         role: 'player'
       });
 
@@ -105,6 +120,7 @@ export default function PlayersPage() {
         description: `${newPlayerName} ha sido añadido al club.`,
       });
       setNewPlayerName('');
+      setNewPlayerPosition('');
     } catch (error) {
       toast({ variant: "destructive", title: "Error", description: "No se pudo crear el jugador." });
     } finally {
@@ -117,15 +133,17 @@ export default function PlayersPage() {
     setIsUpdatingPlayer(true);
     try {
       await updateDoc(doc(firestore, 'players', editingPlayerId), {
-        name: editPlayerName
+        name: editPlayerName,
+        position: editPlayerPosition || null
       });
 
       toast({
         title: "Jugador Actualizado",
-        description: "El nombre ha sido modificado correctamente.",
+        description: "Los datos han sido modificados correctamente.",
       });
       setEditingPlayerId(null);
       setEditPlayerName('');
+      setEditPlayerPosition('');
     } catch (error) {
       toast({ variant: "destructive", title: "Error", description: "No se pudo actualizar el jugador." });
     } finally {
@@ -187,7 +205,7 @@ export default function PlayersPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Jugadores</h1>
-          <p className="text-muted-foreground">Estadísticas acumuladas de todos los miembros.</p>
+          <p className="text-muted-foreground">Estadísticas y roles tácticos de todos los miembros.</p>
         </div>
         {isAdmin && (
           <Dialog>
@@ -197,7 +215,7 @@ export default function PlayersPage() {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Añadir Nuevo Jugador</DialogTitle>
-                <DialogDescription>Ingresa el nombre del jugador para darlo de alta.</DialogDescription>
+                <DialogDescription>Ingresa los datos para darlo de alta en el club.</DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
@@ -208,6 +226,19 @@ export default function PlayersPage() {
                     onChange={(e) => setNewPlayerName(e.target.value)}
                     placeholder="Ej. Juan Pérez"
                   />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="position">Posición</Label>
+                  <Select onValueChange={(val) => setNewPlayerPosition(val as PlayerPosition)} value={newPlayerPosition}>
+                    <SelectTrigger>
+                        <SelectValue placeholder="Selecciona una posición" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {POSITIONS.map(pos => (
+                            <SelectItem key={pos} value={pos}>{pos}</SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <DialogFooter>
@@ -232,6 +263,7 @@ export default function PlayersPage() {
                       >
                         <div className="flex items-center">Jugador {getSortIcon('name')}</div>
                       </TableHead>
+                      <TableHead className="text-center">Posición</TableHead>
                       <TableHead className="text-center cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('matchesPlayed')}>
                         <div className="flex items-center justify-center">Partidos {getSortIcon('matchesPlayed')}</div>
                       </TableHead>
@@ -255,6 +287,15 @@ export default function PlayersPage() {
                               <Link href={`/players/${player.playerId}`} className="font-medium hover:underline">{player.name}</Link>
                           </div>
                           </TableCell>
+                          <TableCell className="text-center">
+                            {player.position ? (
+                                <Badge variant="outline" className="font-medium text-[10px] uppercase tracking-wider">
+                                    {player.position}
+                                </Badge>
+                            ) : (
+                                <span className="text-muted-foreground text-xs italic">Sin asignar</span>
+                            )}
+                          </TableCell>
                           <TableCell className="text-center font-mono">{player.matchesPlayed}</TableCell>
                           <TableCell className="text-center font-mono">{player.totalGoals}</TableCell>
                           <TableCell className="text-center font-mono">{player.winPercentage}%</TableCell>
@@ -265,6 +306,7 @@ export default function PlayersPage() {
                                   if (open) {
                                     setEditingPlayerId(player.playerId);
                                     setEditPlayerName(player.name);
+                                    setEditPlayerPosition(player.position || '');
                                   } else {
                                     setEditingPlayerId(null);
                                   }
@@ -277,18 +319,31 @@ export default function PlayersPage() {
                                   <DialogContent>
                                     <DialogHeader>
                                       <DialogTitle>Editar Jugador</DialogTitle>
-                                      <DialogDescription>Modifica los datos de {player.name} sin perder su historial.</DialogDescription>
+                                      <DialogDescription>Modifica los datos de {player.name}.</DialogDescription>
                                     </DialogHeader>
                                     <div className="grid gap-4 py-4">
                                       <div className="grid gap-2">
                                         <Label htmlFor="edit-name">Nombre Completo</Label>
                                         <Input id="edit-name" value={editPlayerName} onChange={(e) => setEditPlayerName(e.target.value)} />
                                       </div>
+                                      <div className="grid gap-2">
+                                        <Label htmlFor="edit-position">Posición</Label>
+                                        <Select onValueChange={(val) => setEditPlayerPosition(val as PlayerPosition)} value={editPlayerPosition}>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Selecciona una posición" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {POSITIONS.map(pos => (
+                                                    <SelectItem key={pos} value={pos}>{pos}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                      </div>
                                     </div>
                                     <DialogFooter>
                                       <Button onClick={handleUpdatePlayer} disabled={isUpdatingPlayer || !editPlayerName}>
                                         {isUpdatingPlayer && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                        Actualizar Nombre
+                                        Guardar Cambios
                                       </Button>
                                     </DialogFooter>
                                   </DialogContent>
@@ -308,7 +363,7 @@ export default function PlayersPage() {
                                     <AlertDialogFooter>
                                       <AlertDialogCancel>Cancelar</AlertDialogCancel>
                                       <AlertDialogAction onClick={() => handleDeletePlayer(player.playerId)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                                        Eliminar de todos modos
+                                        Eliminar permanentemente
                                       </AlertDialogAction>
                                     </AlertDialogFooter>
                                   </AlertDialogContent>

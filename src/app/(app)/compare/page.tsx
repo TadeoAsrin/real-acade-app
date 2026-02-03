@@ -6,12 +6,13 @@ import { calculateAggregatedStats } from "@/lib/data";
 import { useCollection, useMemoFirebase, useFirestore } from "@/firebase";
 import { collection } from "firebase/firestore";
 import type { Player, Match, AggregatedPlayerStats } from "@/lib/definitions";
-import { Loader2, ArrowLeftRight, Trophy, Zap, Shield, Target, TrendingUp } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Loader2, ArrowLeftRight, Trophy, Zap, Shield, Target, TrendingUp, MapPin } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
+import { cn, getInitials } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 
 export default function ComparePage() {
   const firestore = useFirestore();
@@ -107,13 +108,20 @@ export default function ComparePage() {
             </CardHeader>
             <CardContent className="flex flex-col items-center gap-4 py-6">
                 <Avatar className="h-32 w-32 border-4 border-primary shadow-2xl shadow-primary/20">
-                    <AvatarImage src={p1?.avatar} alt={p1?.name} />
-                    <AvatarFallback className="text-4xl">{p1?.name.charAt(0)}</AvatarFallback>
+                    <AvatarFallback className="text-4xl bg-primary/20 text-primary font-black">{getInitials(p1?.name || "P1")}</AvatarFallback>
                 </Avatar>
                 {p1 && (
-                    <div className="text-center">
-                        <h3 className="text-2xl font-black italic text-primary uppercase">{p1.name}</h3>
-                        <p className="text-xs font-bold text-muted-foreground tracking-widest uppercase">Nivel: {p1.powerPoints} PTS</p>
+                    <div className="text-center space-y-2">
+                        <h3 className="text-2xl font-black italic text-primary uppercase leading-tight">{p1.name}</h3>
+                        <div className="flex flex-col items-center gap-1">
+                            {p1.position && (
+                                <div className="flex items-center gap-1.5 text-[10px] font-black uppercase text-primary bg-primary/10 px-3 py-1 rounded-full">
+                                    <MapPin className="h-3 w-3" />
+                                    {p1.position}
+                                </div>
+                            )}
+                            <p className="text-[10px] font-bold text-muted-foreground tracking-widest uppercase">Poder: {p1.powerPoints} PTS</p>
+                        </div>
                     </div>
                 )}
             </CardContent>
@@ -134,13 +142,20 @@ export default function ComparePage() {
             </CardHeader>
             <CardContent className="flex flex-col items-center gap-4 py-6">
                 <Avatar className="h-32 w-32 border-4 border-accent shadow-2xl shadow-accent/20">
-                    <AvatarImage src={p2?.avatar} alt={p2?.name} />
-                    <AvatarFallback className="text-4xl">{p2?.name.charAt(0)}</AvatarFallback>
+                    <AvatarFallback className="text-4xl bg-accent/20 text-accent font-black">{getInitials(p2?.name || "P2")}</AvatarFallback>
                 </Avatar>
                 {p2 && (
-                    <div className="text-center">
-                        <h3 className="text-2xl font-black italic text-accent uppercase">{p2.name}</h3>
-                        <p className="text-xs font-bold text-muted-foreground tracking-widest uppercase">Nivel: {p2.powerPoints} PTS</p>
+                    <div className="text-center space-y-2">
+                        <h3 className="text-2xl font-black italic text-accent uppercase leading-tight">{p2.name}</h3>
+                        <div className="flex flex-col items-center gap-1">
+                            {p2.position && (
+                                <div className="flex items-center gap-1.5 text-[10px] font-black uppercase text-accent bg-accent/10 px-3 py-1 rounded-full">
+                                    <MapPin className="h-3 w-3" />
+                                    {p2.position}
+                                </div>
+                            )}
+                            <p className="text-[10px] font-bold text-muted-foreground tracking-widest uppercase">Poder: {p2.powerPoints} PTS</p>
+                        </div>
                     </div>
                 )}
             </CardContent>

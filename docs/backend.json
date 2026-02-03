@@ -9,9 +9,14 @@
         "name": { "type": "string" },
         "avatar": { "type": "string" },
         "email": { "type": "string", "format": "email" },
-        "role": { "type": "string", "enum": ["admin", "player"] }
+        "role": { "type": "string", "enum": ["admin", "player"] },
+        "position": { 
+          "type": "string", 
+          "enum": ["Arquero", "Lateral Derecho", "Defensor Central", "Lateral Izquierdo", "Mediocampista", "Delantero"],
+          "description": "The primary tactical position of the player."
+        }
       },
-      "required": ["name", "avatar"]
+      "required": ["name"]
     },
     "Match": {
       "title": "Match",

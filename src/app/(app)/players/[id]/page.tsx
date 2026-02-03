@@ -1,10 +1,11 @@
+
 'use client';
 
 import * as React from 'react';
 import { useParams } from "next/navigation";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Trophy, History, TrendingUp, Loader2 } from "lucide-react";
+import { Trophy, History, TrendingUp, Loader2, MapPin } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Link from "next/link";
 import { PlayerPerformanceChart } from "@/components/players/player-performance-chart";
@@ -78,15 +79,25 @@ export default function PlayerProfilePage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col items-center gap-4 md:flex-row md:items-start">
+      <div className="flex flex-col items-center gap-6 md:flex-row md:items-start">
         <Avatar className="h-32 w-32 border-4 border-primary shadow-2xl shadow-primary/20">
           <AvatarFallback className="text-4xl bg-primary/10 text-primary font-black">
             {getInitials(player.name)}
           </AvatarFallback>
         </Avatar>
-        <div className="pt-4 text-center md:text-left">
+        <div className="pt-4 text-center md:text-left space-y-2">
           <h1 className="text-4xl font-bold tracking-tight">{player.name}</h1>
-          <p className="text-muted-foreground">Estadísticas Acumuladas</p>
+          <div className="flex items-center justify-center md:justify-start gap-2">
+            <Badge variant="secondary" className="px-3 py-1 uppercase tracking-widest text-[10px] font-black">
+                {player.role === 'admin' ? 'Administrador' : 'Jugador Oficial'}
+            </Badge>
+            {player.position && (
+                <div className="flex items-center gap-1.5 text-primary bg-primary/10 px-3 py-1 rounded-full">
+                    <MapPin className="h-3 w-3" />
+                    <span className="text-[10px] font-black uppercase tracking-wider">{player.position}</span>
+                </div>
+            )}
+          </div>
         </div>
       </div>
 
