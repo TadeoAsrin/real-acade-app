@@ -29,7 +29,6 @@ import { collection, query, orderBy, doc, setDoc } from "firebase/firestore";
 import type { Match, Player } from "@/lib/definitions";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
 
 export default function DashboardPage() {
   const firestore = useFirestore();
@@ -85,10 +84,12 @@ export default function DashboardPage() {
 
   const topScorers = [...playerStats].sort((a, b) => b.totalGoals - a.totalGoals).slice(0, 5);
   
-  // Mejora de lógica: Desempate por winPercentage si tienen las mismas victorias
+  // Lógica de desempate avanzada: Victorias > % Efectividad > Goles Totales > Partidos Jugados
   const topWinner = [...playerStats].sort((a, b) => {
     if (b.wins !== a.wins) return b.wins - a.wins;
-    return b.winPercentage - a.winPercentage;
+    if (b.winPercentage !== a.winPercentage) return b.winPercentage - a.winPercentage;
+    if (b.totalGoals !== a.totalGoals) return b.totalGoals - a.totalGoals;
+    return b.matchesPlayed - a.matchesPlayed;
   })[0];
   
   const totalGoals = playerStats.reduce((sum, p) => sum + p.totalGoals, 0);
@@ -204,7 +205,7 @@ export default function DashboardPage() {
                 <TableRow className="hover:bg-transparent border-white/5">
                   <TableHead className="font-black uppercase text-[10px] tracking-widest">Jugador</TableHead>
                   <TableHead className="text-center font-black uppercase text-[10px] tracking-widest">Goles</TableHead>
-                  <TableHead className="text-right font-black uppercase text-[10px] tracking-widest">Ratio</TableHead>
+                  <TableHead className="text-right font-black uppercase text-[10px] tracking-widest">Efectividad</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
