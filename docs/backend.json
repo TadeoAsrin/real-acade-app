@@ -1,153 +1,288 @@
 {
   "entities": {
-    "Player": {
-      "title": "Player",
-      "description": "Represents a football player in the club.",
+    "Match": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Match",
       "type": "object",
+      "description": "Represents a single soccer match between two teams.",
       "properties": {
-        "name": {
-          "type": "string"
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Match entity."
         },
-        "avatar": {
-          "type": "string"
+        "team1Id": {
+          "type": "string",
+          "description": "Reference to Team 1. (Relationship: Team 1:N Match)"
+        },
+        "team2Id": {
+          "type": "string",
+          "description": "Reference to Team 2. (Relationship: Team 1:N Match)"
+        },
+        "matchDate": {
+          "type": "string",
+          "description": "The date and time the match was played.",
+          "format": "date-time"
+        },
+        "location": {
+          "type": "string",
+          "description": "The location where the match was played."
+        },
+        "team1Score": {
+          "type": "number",
+          "description": "The final score of Team 1 in the match."
+        },
+        "team2Score": {
+          "type": "number",
+          "description": "The final score of Team 2 in the match."
+        }
+      },
+      "required": [
+        "id",
+        "team1Id",
+        "team2Id",
+        "matchDate",
+        "location",
+        "team1Score",
+        "team2Score"
+      ]
+    },
+    "Team": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Team",
+      "type": "object",
+      "description": "Represents a soccer team.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Team entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the team."
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of the team."
+        },
+        "playerIds": {
+          "type": "array",
+          "description": "References to Players in the Team. (Relationship: Team 1:N Player)",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description"
+      ]
+    },
+    "Player": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Player",
+      "type": "object",
+      "description": "Represents a soccer player.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Player entity."
+        },
+        "firstName": {
+          "type": "string",
+          "description": "The first name of the player."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "The last name of the player."
         },
         "email": {
           "type": "string",
+          "description": "The email address of the player.",
           "format": "email"
-        },
-        "role": {
-          "type": "string",
-          "enum": [
-            "admin",
-            "player"
-          ]
         },
         "position": {
           "type": "string",
-          "enum": [
-            "Arquero",
-            "Lateral Derecho",
-            "Defensor Central",
-            "Lateral Izquierdo",
-            "Mediocampista",
-            "Delantero"
-          ],
-          "description": "The primary tactical position of the player."
+          "description": "The player's position on the field."
         }
       },
       "required": [
-        "name"
+        "id",
+        "firstName",
+        "lastName",
+        "email",
+        "position"
       ]
     },
-    "Match": {
-      "title": "Match",
-      "description": "Represents a football match played by the club.",
+    "MatchEvent": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "MatchEvent",
       "type": "object",
+      "description": "Represents an event during a match (e.g., goal, assist, foul).",
       "properties": {
-        "date": {
+        "id": {
           "type": "string",
+          "description": "Unique identifier for the MatchEvent entity."
+        },
+        "matchId": {
+          "type": "string",
+          "description": "Reference to the Match this event belongs to. (Relationship: Match 1:N MatchEvent)"
+        },
+        "playerId": {
+          "type": "string",
+          "description": "Reference to the Player involved in the event. (Relationship: Player 1:N MatchEvent)"
+        },
+        "eventType": {
+          "type": "string",
+          "description": "The type of event (e.g., 'goal', 'assist', 'foul')."
+        },
+        "eventTime": {
+          "type": "string",
+          "description": "The time the event occurred during the match.",
           "format": "date-time"
         },
-        "teamAScore": {
-          "type": "number"
-        },
-        "teamBScore": {
-          "type": "number"
-        },
-        "teamAPlayers": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "playerId": {
-                "type": "string"
-              },
-              "goals": {
-                "type": "number"
-              },
-              "isCaptain": {
-                "type": "boolean"
-              },
-              "isMvp": {
-                "type": "boolean"
-              },
-              "hasBestGoal": {
-                "type": "boolean"
-              }
-            }
-          }
-        },
-        "teamBPlayers": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "playerId": {
-                "type": "string"
-              },
-              "goals": {
-                "type": "number"
-              },
-              "isCaptain": {
-                "type": "boolean"
-              },
-              "isMvp": {
-                "type": "boolean"
-              },
-              "hasBestGoal": {
-                "type": "boolean"
-              }
-            }
-          }
+        "description": {
+          "type": "string",
+          "description": "A more detailed description of the event."
         }
       },
       "required": [
-        "date",
-        "teamAScore",
-        "teamBScore"
+        "id",
+        "matchId",
+        "playerId",
+        "eventType",
+        "eventTime"
+      ]
+    },
+    "PlayerRating": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "PlayerRating",
+      "type": "object",
+      "description": "Represents a player rating given after a match.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the PlayerRating entity."
+        },
+        "matchId": {
+          "type": "string",
+          "description": "Reference to the Match the rating is for. (Relationship: Match 1:N PlayerRating)"
+        },
+        "ratedPlayerId": {
+          "type": "string",
+          "description": "Reference to the Player being rated. (Relationship: Player 1:N PlayerRating (as Rated))"
+        },
+        "ratingUserId": {
+          "type": "string",
+          "description": "Reference to the User giving the rating. (Relationship: User 1:N PlayerRating (as Rater))"
+        },
+        "ratingValue": {
+          "type": "number",
+          "description": "The rating value (1-10)."
+        },
+        "comment": {
+          "type": "string",
+          "description": "Optional comments about the player's performance."
+        }
+      },
+      "required": [
+        "id",
+        "matchId",
+        "ratedPlayerId",
+        "ratingUserId",
+        "ratingValue"
       ]
     }
   },
   "auth": {
     "providers": [
       "password",
-      "google.com"
+      "anonymous"
     ]
   },
   "firestore": {
-    "/players/{playerId}": {
-      "schema": {
-        "$ref": "#/entities/Player"
-      },
-      "description": "Collection of players."
-    },
-    "/matches/{matchId}": {
-      "schema": {
-        "$ref": "#/entities/Match"
-      },
-      "description": "Collection of match results."
-    },
-    "/matches/{matchId}/votes/{userId}": {
-      "schema": {
-        "type": "object",
-        "properties": {
-          "votedPlayerId": {
-            "type": "string"
-          }
+    "structure": [
+      {
+        "path": "/teams/{teamId}",
+        "definition": {
+          "entityName": "Team",
+          "schema": {
+            "$ref": "#/backend/entities/Team"
+          },
+          "description": "Stores team information. Includes team details, and playerIds.",
+          "params": [
+            {
+              "name": "teamId",
+              "description": "The unique identifier for the team."
+            }
+          ]
         }
       },
-      "description": "Votes for the best goal of a match."
-    },
-    "/roles_admin/{userId}": {
-      "schema": {
-        "type": "object",
-        "properties": {
-          "isAdmin": {
-            "type": "boolean"
-          }
+      {
+        "path": "/players/{playerId}",
+        "definition": {
+          "entityName": "Player",
+          "schema": {
+            "$ref": "#/backend/entities/Player"
+          },
+          "description": "Stores player information.",
+          "params": [
+            {
+              "name": "playerId",
+              "description": "The unique identifier for the player."
+            }
+          ]
         }
       },
-      "description": "Collection to define administrative roles."
-    }
+      {
+        "path": "/matches/{matchId}",
+        "definition": {
+          "entityName": "Match",
+          "schema": {
+            "$ref": "#/backend/entities/Match"
+          },
+          "description": "Stores match data.",
+          "params": [
+            {
+              "name": "matchId",
+              "description": "The unique identifier for the match."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/matchevents/{matchEventId}",
+        "definition": {
+          "entityName": "MatchEvent",
+          "schema": {
+            "$ref": "#/backend/entities/MatchEvent"
+          },
+          "description": "Stores individual match events. Each event belongs to a specific match and involves a specific player.",
+          "params": [
+            {
+              "name": "matchEventId",
+              "description": "The unique identifier for the match event."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/playerRatings/{playerRatingId}",
+        "definition": {
+          "entityName": "PlayerRating",
+          "schema": {
+            "$ref": "#/backend/entities/PlayerRating"
+          },
+          "description": "Stores player ratings given after a match. Includes denormalized 'ratingUserId' for authorization independence.",
+          "params": [
+            {
+              "name": "playerRatingId",
+              "description": "The unique identifier for the player rating."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore data structure is designed to support the Fut7Stats application, focusing on secure and efficient data access for match statistics and player performance tracking. The design emphasizes authorization independence by denormalizing necessary data, which eliminates the need for `get()` calls in security rules, thereby improving performance and security.\n\n*   **Authorization Independence:** All security rules will rely solely on the `request.auth.uid` and data within the document itself, avoiding hierarchical dependencies.  Ownership and membership are explicitly stored within documents to avoid fetching parent data.\n\n*   **Structural Segregation:** Data with different access requirements are stored in separate collections to simplify security rules.  For instance, `Player` data is segregated into a top-level collection.\n\n*   **Access Modeling:** The design uses path-based ownership for private user data (e.g., `/users/{userId}/playerRatings/{playerRatingId}`) and membership maps for collaborative entities (not explicitly used in the current feature set, but ready for extension).\n\n*   **QAPs (Rules Are Not Filters):** The structure facilitates secure `list` operations by ensuring each collection has a homogeneous security posture. Path-based ownership and denormalization ensure that listing can be done securely without filtering based on document content.\n\n*   **Denormalization Strategy:** The `PlayerRating` collection includes the `ratingUserId` to directly associate the rating with the user who created it. The `Match` collection can include denormalized team member ids for easy access control if needed in the future."
   }
 }

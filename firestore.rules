@@ -1,41 +1,128 @@
+/**
+ * Fut7Stats Security Rules
+ *
+ * Core Philosophy: 
+ * This ruleset implements an authorization model focused on "Authorization Independence." 
+ * It relies on denormalized ownership fields (like `ratingUserId`) to make local authorization 
+ * decisions without requiring expensive cross-document lookups (get() calls). This ensures 
+ * high performance and scalability for match statistics and player tracking.
+ *
+ * Data Structure:
+ * The data is organized into top-level collections: /teams, /players, /matches, 
+ * /matchevents, and /playerRatings. This flat structure, combined with denormalized 
+ * relationship IDs, allows for efficient querying and granular security.
+ *
+ * Key Security Decisions:
+ * 1. Public Read/Restricted Write: General entities (Teams, Players, Matches, Events) 
+ *    are publicly readable to support app browsing but restricted for writes.
+ * 2. User Ownership for Ratings: Player ratings are owned by the user who created 
+ *    them, verified via the `ratingUserId` field.
+ * 3. Prototyping Flexibility: Rules enforce strict identity and ownership for writes 
+ *    but do not strictly validate data types or optional fields, allowing for rapid 
+ *    schema iteration.
+ * 4. Relational Integrity: On creation of ratings, the rules enforce that the 
+ *    `ratingUserId` matches the authenticated user's UID.
+ */
 
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // --- HELPER FUNCTIONS ---
+
+    // --- Helper Functions ---
+
+    /**
+     * @description Checks if the request is coming from an authenticated user.
+     */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    function isAdmin() {
-      return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    /**
+     * @description Checks if the provided UID matches the authenticated user's UID.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
     }
 
-    // --- RULES ---
-    
-    // Players: Everyone can read, only admin can write
+    /**
+     * @description Checks if the user is the owner of the existing document.
+     * Used for update and delete operations.
+     */
+    function isExistingOwner(userId) {
+      return resource != null && isOwner(userId);
+    }
+
+    // --- Collection Rules ---
+
+    /**
+     * @description Rules for the Teams collection. Teams are public for reading.
+     * @path /teams/{teamId}
+     * @allow (get, list) if true;
+     * @deny (create, update, delete) if no ownership field is present in schema.
+     * @principle Public consumption with restricted administrative writes.
+     */
+    match /teams/{teamId} {
+      allow get, list: if true;
+      // CRITICAL: Cannot implement owner-only writes. The 'Team' entity is missing an 'ownerId' or 'adminId' field.
+      allow create, update, delete: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
+    }
+
+    /**
+     * @description Rules for the Players collection. Player profiles are public.
+     * @path /players/{playerId}
+     * @allow (get, list) if true;
+     * @deny (write) if unauthorized or if ownership cannot be verified.
+     * @principle Structural segregation of public entities.
+     */
     match /players/{playerId} {
-      allow read: if true;
-      allow write: if isAdmin() || (isSignedIn() && request.auth.uid == playerId);
+      allow get, list: if true;
+      // CRITICAL: Cannot implement owner-only writes. The 'Player' entity is missing an 'ownerId' or 'userId' field.
+      allow create, update, delete: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
     }
 
-    // Matches: Everyone can read, only admin can write
+    /**
+     * @description Rules for the Matches collection. Match data is public.
+     * @path /matches/{matchId}
+     * @allow (get, list) if true;
+     * @deny (write) without administrative or ownership context.
+     * @principle Public read with restricted writes.
+     */
     match /matches/{matchId} {
-      allow read: if true;
-      allow write: if isAdmin();
-      
-      // Votes subcollection
-      match /votes/{userId} {
-        allow read: if true;
-        allow write: if isSignedIn() && request.auth.uid == userId;
-      }
+      allow get, list: if true;
+      // CRITICAL: Cannot implement owner-only writes. The 'Match' entity is missing an 'authorId' or 'managerId' field.
+      allow create, update, delete: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
     }
 
-    // Admin Roles: Solo lectura para el propio usuario. Creación deshabilitada momentáneamente.
-    match /roles_admin/{userId} {
-      allow get: if isSignedIn() && request.auth.uid == userId;
-      allow create: if false; // Deshabilitado para evitar nuevos admins por el momento
-      allow update, delete, list: if false;
+    /**
+     * @description Rules for individual match events (goals, fouls, etc).
+     * @path /matchevents/{matchEventId}
+     * @allow (get, list) if true;
+     * @deny (write) without administrative or ownership context.
+     * @principle Maintains visibility of game data while protecting integrity.
+     */
+    match /matchevents/{matchEventId} {
+      allow get, list: if true;
+      // CRITICAL: Cannot implement owner-only writes. The 'MatchEvent' entity is missing an 'authorId' or 'refereeId' field.
+      allow create, update, delete: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
+    }
+
+    /**
+     * @description Rules for player ratings. Users can rate players and manage their own ratings.
+     * @path /playerRatings/{playerRatingId}
+     * @allow (get, list) if true;
+     * @allow (create) if the user is signed in and provides their own UID as ratingUserId.
+     * @allow (update, delete) if the user is the owner of the rating.
+     * @deny (update) if the user attempts to change the ratingUserId (immutability).
+     * @principle Pattern 5: Public Read with Owner-Only Writes.
+     */
+    match /playerRatings/{playerRatingId} {
+      allow get, list: if true;
+      
+      allow create: if isSignedIn() && request.resource.data.ratingUserId == request.auth.uid;
+      
+      allow update: if isExistingOwner(resource.data.ratingUserId) && request.resource.data.ratingUserId == resource.data.ratingUserId;
+      
+      allow delete: if isExistingOwner(resource.data.ratingUserId);
     }
   }
 }
