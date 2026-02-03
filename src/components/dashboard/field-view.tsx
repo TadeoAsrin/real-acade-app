@@ -11,12 +11,13 @@ import {
 } from '@/components/ui/tooltip';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { cn } from '@/lib/utils';
-import { Trophy } from 'lucide-react';
+import { Trophy, Calendar } from 'lucide-react';
 
 interface FieldViewProps {
   team: 'Azul' | 'Rojo';
   players: Player[];
   topScorerId?: string;
+  date?: string;
 }
 
 const GlovesIcon = ({ className }: { className?: string }) => (
@@ -47,15 +48,15 @@ const formationCoordinates: { top: string; left: string }[] = [
 ];
 
 const getTacticalNumber = (index: number): string => {
-  // Invertimos 3 y 4 en el array de números tácticos
   const numbers = ["1", "4", "2", "3", "8", "10", "9"];
   return numbers[index] || "";
 };
 
-export function FieldView({ team, players, topScorerId }: FieldViewProps) {
+export function FieldView({ team, players, topScorerId, date }: FieldViewProps) {
   const fieldRef = React.useRef<HTMLDivElement>(null);
   const [playerPositions, setPlayerPositions] = React.useState<{ [key: string]: { x: number; y: number } }>({});
   const [draggingPlayer, setDraggingPlayer] = React.useState<{ id: string; startX: number; startY: number } | null>(null);
+  const [formattedDate, setFormattedDate] = React.useState<string>("");
 
   React.useEffect(() => {
     const initialPositions: { [key: string]: { x: number; y: number } } = {};
@@ -69,7 +70,11 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
       }
     });
     setPlayerPositions(initialPositions);
-  }, [players]);
+
+    if (date) {
+      setFormattedDate(new Date(date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }));
+    }
+  }, [players, date]);
 
   const handlePointerDown = (e: React.PointerEvent, playerId: string) => {
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
@@ -112,13 +117,21 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
     <Card className="glass-card overflow-hidden border-white/5 bg-black/20 shadow-2xl">
       <CardHeader className="p-4 lg:pb-4">
         <CardTitle className={cn(
-          "text-sm lg:text-lg font-black uppercase tracking-tighter italic flex items-center justify-between", 
+          "text-sm lg:text-lg font-black uppercase tracking-tighter italic flex flex-col items-start gap-1", 
           team === 'Azul' ? 'text-primary' : 'text-accent'
         )}>
-          <span>Equipo {team}</span>
-          <span className="text-[8px] lg:text-[10px] font-bold text-muted-foreground/50 bg-black/40 px-2 py-0.5 rounded-full not-italic">
-            3-2-1
-          </span>
+          <div className="flex items-center justify-between w-full">
+            <span>Último Partido: {team}</span>
+            <span className="text-[8px] lg:text-[10px] font-bold text-muted-foreground/50 bg-black/40 px-2 py-0.5 rounded-full not-italic">
+              3-2-1
+            </span>
+          </div>
+          {formattedDate && (
+            <div className="flex items-center gap-1.5 text-[10px] not-italic font-bold text-muted-foreground lowercase tracking-normal bg-white/5 px-2 py-0.5 rounded-md">
+              <Calendar className="h-3 w-3" />
+              {formattedDate}
+            </div>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="p-2 lg:p-4">

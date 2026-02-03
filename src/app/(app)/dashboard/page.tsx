@@ -216,10 +216,10 @@ export default function DashboardPage() {
       {/* Main Grid: Pitch and Social Analytics - Stacked on Mobile */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         <div className="order-2 lg:order-1">
-          <FieldView team="Azul" players={lastMatchTeamAPlayers} topScorerId={topScorer?.playerId} />
+          <FieldView team="Azul" players={lastMatchTeamAPlayers} topScorerId={topScorer?.playerId} date={lastMatch?.date} />
         </div>
         <div className="order-3 lg:order-2">
-          <FieldView team="Rojo" players={lastMatchTeamBPlayers} topScorerId={topScorer?.playerId} />
+          <FieldView team="Rojo" players={lastMatchTeamBPlayers} topScorerId={topScorer?.playerId} date={lastMatch?.date} />
         </div>
         
         <div className="flex flex-col gap-6 order-1 lg:order-3">
