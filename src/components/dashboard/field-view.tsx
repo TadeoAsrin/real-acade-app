@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/tooltip';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { cn } from '@/lib/utils';
-import { Trophy, ShieldCheck } from 'lucide-react';
+import { Trophy } from 'lucide-react';
 
 interface FieldViewProps {
   team: 'Azul' | 'Rojo';
@@ -37,7 +37,7 @@ const GlovesIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-// Formación Táctica 1-3-2-1
+// Formación Táctica 3-2-1 (El 1 del portero es implícito)
 const formationCoordinates: { top: string; left: string }[] = [
   { top: '15%', left: '50%' }, // Portero (GK Zone)
   { top: '38%', left: '22%' }, // Defensor Izquierdo
@@ -115,7 +115,7 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
         )}>
           <span>Último Partido {team}</span>
           <span className="text-[10px] font-bold text-muted-foreground/50 bg-black/40 px-2 py-0.5 rounded-full not-italic">
-            Táctica 1-3-2-1
+            Táctica 3-2-1
           </span>
         </CardTitle>
       </CardHeader>
