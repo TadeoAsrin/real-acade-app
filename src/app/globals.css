@@ -33,6 +33,10 @@
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-border: 231 20% 16%;
     --sidebar-ring: 217 91% 60%;
+
+    /* Colores Temáticos Adicionales */
+    --gold: 45 93% 47%;
+    --success: 142 71% 45%;
   }
 }
 
@@ -55,4 +59,14 @@
 .bg-dot-pattern {
   background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.05) 1px, transparent 0);
   background-size: 24px 24px;
+}
+
+.card-gold {
+  border-color: hsl(var(--gold) / 0.5);
+  box-shadow: 0 0 20px -5px hsl(var(--gold) / 0.3);
+}
+
+.card-success {
+  border-color: hsl(var(--success) / 0.5);
+  box-shadow: 0 0 20px -5px hsl(var(--success) / 0.3);
 }
