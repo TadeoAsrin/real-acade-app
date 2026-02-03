@@ -1,4 +1,3 @@
-import { UserAuthForm } from "@/components/auth/user-auth-form";
 import { Fut7StatsLogo } from "@/components/icons";
 import {
   Card,
@@ -7,30 +6,29 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { ShieldAlert } from "lucide-react";
 
 export default function RegisterPage() {
   return (
-    <Card className="w-full max-w-sm">
+    <Card className="w-full max-w-sm glass-card border-orange-500/20">
       <CardHeader className="text-center">
          <div className="mb-4 flex justify-center">
-            <Fut7StatsLogo className="h-12 w-12 text-primary" />
+            <ShieldAlert className="h-12 w-12 text-orange-500" />
         </div>
-        <CardTitle>Crear una cuenta</CardTitle>
+        <CardTitle className="text-2xl font-black italic uppercase tracking-tighter text-orange-500">Registro Cerrado</CardTitle>
         <CardDescription>
-          Ingresa tu email para crear tu cuenta
+          La creación de nuevas cuentas está deshabilitada por el momento.
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <UserAuthForm mode="register" />
-        <p className="px-8 text-center text-sm text-muted-foreground">
-          <Link
-            href="/login"
-            className="hover:text-brand underline underline-offset-4"
-          >
-            ¿Ya tienes una cuenta? Inicia sesión
-          </Link>
+      <CardContent className="space-y-4">
+        <p className="text-sm text-center text-muted-foreground">
+          Esta aplicación es de uso exclusivo para los miembros oficiales de <strong>Real Acade</strong>.
         </p>
+        <Button asChild className="w-full" variant="outline">
+          <Link href="/dashboard">Volver al Dashboard</Link>
+        </Button>
       </CardContent>
     </Card>
   );

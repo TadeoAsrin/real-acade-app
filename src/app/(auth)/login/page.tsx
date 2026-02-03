@@ -7,30 +7,26 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import Link from "next/link";
 
 export default function LoginPage() {
   return (
-    <Card className="w-full max-w-sm">
+    <Card className="w-full max-w-sm glass-card border-white/10">
       <CardHeader className="text-center">
         <div className="mb-4 flex justify-center">
             <Fut7StatsLogo className="h-12 w-12 text-primary" />
         </div>
-        <CardTitle>Bienvenido de vuelta</CardTitle>
+        <CardTitle className="text-2xl font-black italic uppercase tracking-tighter">Acceso Miembros</CardTitle>
         <CardDescription>
-          Ingresa tus credenciales para acceder a tu cuenta
+          Ingresa tus credenciales para gestionar el club.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <UserAuthForm mode="login" />
-        <p className="px-8 text-center text-sm text-muted-foreground">
-          <Link
-            href="/register"
-            className="hover:text-brand underline underline-offset-4"
-          >
-            ¿No tienes una cuenta? Regístrate
-          </Link>
-        </p>
+        <div className="mt-6 text-center">
+          <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
+            App en fase privada - Real Acade
+          </p>
+        </div>
       </CardContent>
     </Card>
   );

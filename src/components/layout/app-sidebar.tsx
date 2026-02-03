@@ -1,4 +1,3 @@
-
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
@@ -45,7 +44,7 @@ const menuItems = [
   },
   {
     href: "/compare",
-    label: "Comparador",
+    label: "Versus",
     icon: ArrowLeftRight,
   },
 ];
@@ -138,7 +137,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-4 border-t border-white/5 bg-black/20">
-         {user ? (
+         {!isUserLoading && user ? (
            <div className="flex flex-col gap-4">
               <div className="flex items-center gap-3 px-2 py-1">
                 <Avatar className={cn("h-10 w-10 border-2", isAdmin ? "border-yellow-500 shadow-lg shadow-yellow-500/20" : "border-primary/20")}>
@@ -175,7 +174,7 @@ export function AppSidebar() {
                 </SidebarMenuItem>
               </SidebarMenu>
            </div>
-         ) : (
+         ) : !isUserLoading ? (
            <SidebarMenuItem>
               <SidebarMenuButton 
                 asChild
@@ -187,6 +186,11 @@ export function AppSidebar() {
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
+         ) : (
+           <div className="flex items-center gap-3 px-2 py-4">
+             <div className="h-8 w-8 animate-pulse bg-white/5 rounded-full" />
+             <div className="h-4 w-24 animate-pulse bg-white/5 rounded" />
+           </div>
          )}
       </SidebarFooter>
     </Sidebar>
