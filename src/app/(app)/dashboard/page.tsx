@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -83,6 +82,7 @@ export default function DashboardPage() {
   const teamStats = getTeamGlobalStats(allMatches);
   const lastMatch = allMatches[0];
 
+  // Lógica de desempate refinada: Victorias > % Efectividad > Goles > Partidos
   const sortedByWins = [...playerStats].sort((a, b) => {
     if (b.wins !== a.wins) return b.wins - a.wins;
     if (b.winPercentage !== a.winPercentage) return b.winPercentage - a.winPercentage;

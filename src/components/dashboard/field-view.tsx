@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -12,7 +11,7 @@ import {
 } from '@/components/ui/tooltip';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { cn } from '@/lib/utils';
-import { Trophy, ShieldAlert } from 'lucide-react';
+import { Trophy, ShieldCheck } from 'lucide-react';
 
 interface FieldViewProps {
   team: 'Azul' | 'Rojo';
@@ -20,15 +19,16 @@ interface FieldViewProps {
   topScorerId?: string;
 }
 
-const positionCoordinates: { [key: string]: { top: string; left: string } } = {
-  GK: { top: '10%', left: '50%' },
-  DEF_L: { top: '30%', left: '25%' },
-  DEF_R: { top: '30%', left: '75%' },
-  MID_C: { top: '50%', left: '50%' },
-  MID_L: { top: '70%', left: '20%' },
-  MID_R: { top: '70%', left: '80%' },
-  FWD: { top: '88%', left: '50%' },
-};
+// Formación Táctica 1-3-2-1
+const formationCoordinates: { top: string; left: string }[] = [
+  { top: '10%', left: '50%' }, // Portero
+  { top: '30%', left: '20%' }, // Defensor Izquierdo
+  { top: '30%', left: '50%' }, // Defensor Central
+  { top: '30%', left: '80%' }, // Defensor Derecho
+  { top: '60%', left: '30%' }, // Mediocampista Izquierdo
+  { top: '60%', left: '70%' }, // Mediocampista Derecho
+  { top: '85%', left: '50%' }, // Delantero Centro
+];
 
 export function FieldView({ team, players, topScorerId }: FieldViewProps) {
   const fieldRef = React.useRef<HTMLDivElement>(null);
@@ -37,13 +37,14 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
 
   React.useEffect(() => {
     const initialPositions: { [key: string]: { x: number; y: number } } = {};
-    const coordsKeys = Object.keys(positionCoordinates);
     players.forEach((player, index) => {
-      const coords = positionCoordinates[coordsKeys[index % coordsKeys.length]];
-      initialPositions[player.id] = {
-        x: parseFloat(coords.left),
-        y: parseFloat(coords.top),
-      };
+      if (index < formationCoordinates.length) {
+        const coords = formationCoordinates[index];
+        initialPositions[player.id] = {
+          x: parseFloat(coords.left),
+          y: parseFloat(coords.top),
+        };
+      }
     });
     setPlayerPositions(initialPositions);
   }, [players]);
@@ -51,6 +52,7 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
   const handlePointerDown = (e: React.PointerEvent, playerId: string) => {
     e.preventDefault();
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    // Centrar el arrastre en el punto donde se hizo click
     setDraggingPlayer({ 
       id: playerId, 
       startX: e.clientX - rect.left - rect.width / 2,
@@ -66,6 +68,7 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
     let newX = ((e.clientX - fieldRect.left - draggingPlayer.startX) / fieldRect.width) * 100;
     let newY = ((e.clientY - fieldRect.top - draggingPlayer.startY) / fieldRect.height) * 100;
     
+    // Límites para que no se salgan del campo
     newX = Math.max(5, Math.min(95, newX));
     newY = Math.max(5, Math.min(95, newY));
 
@@ -109,6 +112,7 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
             backgroundSize: '100% 100%, 100% 80px'
           }}
         >
+          {/* Líneas de Cal del Campo */}
           <div className="absolute inset-4 border-2 border-white/30 rounded-lg pointer-events-none" />
           <div className="absolute top-1/2 left-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/30" />
           <div className="absolute top-1/2 left-0 w-full h-[2px] bg-white/30 -translate-y-1/2" />
@@ -119,9 +123,10 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
             {players.map((player, index) => {
               const pos = playerPositions[player.id];
               if (!pos) return null;
+              
               const isDragging = draggingPlayer?.id === player.id;
               const isPichichi = player.id === topScorerId;
-              const isGK = index === 0;
+              const isGK = index === 0; // El primero de la lista siempre es el Portero en la carga
 
               return (
                 <div
@@ -143,11 +148,11 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
                       <div className="flex flex-col items-center gap-1.5">
                         <div className="relative">
                           <Avatar className={cn(
-                            "h-12 w-12 border-[3px] shadow-xl ring-2 ring-black/30 transition-all",
+                            "h-11 w-11 border-[3px] shadow-xl ring-2 ring-black/30 transition-all",
                             isGK 
-                              ? "border-orange-500 bg-orange-500/20"
+                              ? "border-orange-500 bg-orange-500/30" // Portero en Naranja
                               : isPichichi 
-                                ? "border-yellow-400 shadow-yellow-400/30" 
+                                ? "border-yellow-400 shadow-yellow-400/40 ring-yellow-400/20" // Pichichi Dorado
                                 : team === 'Azul' 
                                   ? "border-primary bg-primary/20 shadow-primary/20" 
                                   : "border-accent bg-accent/20 shadow-accent/20",
@@ -158,14 +163,14 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
                           </Avatar>
                           
                           {isPichichi && (
-                            <div className="absolute -top-1.5 -right-1.5 bg-yellow-400 rounded-full p-1 shadow-md border border-black/20">
+                            <div className="absolute -top-1.5 -right-1.5 bg-yellow-400 rounded-full p-1 shadow-md border border-black/20 animate-bounce">
                               <Trophy className="h-2.5 w-2.5 text-black" />
                             </div>
                           )}
                           
                           {isGK && (
                             <div className="absolute -bottom-1 -right-1 bg-orange-500 rounded-full p-0.5 shadow-md border border-white/20">
-                              <ShieldAlert className="h-2.5 w-2.5 text-white" />
+                              <ShieldCheck className="h-3 w-3 text-white" />
                             </div>
                           )}
                         </div>
@@ -186,7 +191,7 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
                     <TooltipContent side="top" className="bg-black border-white/20 text-white font-bold text-xs">
                       {player.name} 
                       {isPichichi && ' (Máximo Goleador)'}
-                      {isGK && ' (Portero)'}
+                      {isGK && ' (Arquero)'}
                     </TooltipContent>
                   </Tooltip>
                 </div>
