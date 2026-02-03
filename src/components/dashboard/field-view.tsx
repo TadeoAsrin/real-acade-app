@@ -109,23 +109,23 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
 
   return (
     <Card className="glass-card overflow-hidden border-white/5 bg-black/20 shadow-2xl">
-      <CardHeader className="pb-4">
+      <CardHeader className="p-4 lg:pb-4">
         <CardTitle className={cn(
-          "text-lg font-black uppercase tracking-tighter italic flex items-center justify-between", 
+          "text-sm lg:text-lg font-black uppercase tracking-tighter italic flex items-center justify-between", 
           team === 'Azul' ? 'text-primary' : 'text-accent'
         )}>
-          <span>Último Partido {team}</span>
-          <span className="text-[10px] font-bold text-muted-foreground/50 bg-black/40 px-2 py-0.5 rounded-full not-italic">
+          <span>Equipo {team}</span>
+          <span className="text-[8px] lg:text-[10px] font-bold text-muted-foreground/50 bg-black/40 px-2 py-0.5 rounded-full not-italic">
             3-2-1
           </span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-4">
+      <CardContent className="p-2 lg:p-4">
         <div
           ref={fieldRef}
           onPointerMove={handlePointerMove}
           className={cn(
-            "relative mx-auto h-[560px] w-full rounded-2xl border-[4px] border-white/20 overflow-hidden touch-none select-none shadow-2xl",
+            "relative mx-auto h-[400px] lg:h-[560px] w-full rounded-xl lg:rounded-2xl border-[3px] lg:border-[4px] border-white/20 overflow-hidden touch-none select-none shadow-2xl",
             "bg-emerald-800",
             draggingPlayer ? "cursor-grabbing" : "cursor-default"
           )}
@@ -138,19 +138,19 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
           }}
         >
           {/* Pitch markings */}
-          <div className="absolute inset-4 border-2 border-white/20 rounded-lg pointer-events-none" />
-          <div className="absolute top-1/2 left-1/2 h-32 w-32 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/20" />
-          <div className="absolute top-1/2 left-0 w-full h-[2px] bg-white/20 -translate-y-1/2" />
+          <div className="absolute inset-2 lg:inset-4 border-2 border-white/20 rounded-lg pointer-events-none" />
+          <div className="absolute top-1/2 left-1/2 h-20 w-20 lg:h-32 lg:w-32 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/20" />
+          <div className="absolute top-1/2 left-0 w-full h-[1px] lg:h-[2px] bg-white/20 -translate-y-1/2" />
           
           {/* Areas */}
           <div className={cn(
-            "absolute top-4 left-1/2 h-24 w-48 -translate-x-1/2 border-2 border-t-0 border-white/30 rounded-b-xl transition-all duration-300",
+            "absolute top-2 lg:top-4 left-1/2 h-16 lg:h-24 w-32 lg:w-48 -translate-x-1/2 border-2 border-t-0 border-white/30 rounded-b-lg lg:rounded-b-xl transition-all duration-300",
             draggingPlayer && isPlayerInGKZone(playerPositions[draggingPlayer.id] || {x:0, y:100}) 
               ? "bg-orange-500/20 border-orange-500 shadow-[0_0_30px_rgba(249,115,22,0.3)]" 
               : "bg-white/5"
           )} />
           
-          <div className="absolute bottom-4 left-1/2 h-24 w-48 -translate-x-1/2 border-2 border-b-0 border-white/30 rounded-t-xl" />
+          <div className="absolute bottom-2 lg:bottom-4 left-1/2 h-16 lg:h-24 w-32 lg:w-48 -translate-x-1/2 border-2 border-b-0 border-white/30 rounded-t-lg lg:rounded-t-xl" />
           
           <TooltipProvider>
             {players.map((player, index) => {
@@ -169,7 +169,7 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
                   onPointerUp={handlePointerUp}
                   className={cn(
                     "absolute transition-shadow duration-200 z-10",
-                    isDragging ? "scale-110 z-50 cursor-grabbing" : "cursor-grab hover:scale-110"
+                    isDragging ? "scale-110 z-50 cursor-grabbing" : "cursor-grab lg:hover:scale-110"
                   )}
                   style={{
                     top: `${pos.y}%`,
@@ -182,7 +182,7 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
                       <div className="flex flex-col items-center gap-1">
                         <div className="relative">
                           <Avatar className={cn(
-                            "h-11 w-11 border-[3px] shadow-2xl transition-all duration-300",
+                            "h-9 w-9 lg:h-11 lg:w-11 border-[2px] lg:border-[3px] shadow-2xl transition-all duration-300",
                             isGK 
                               ? "border-orange-500 bg-orange-600/40" 
                               : isPichichi 
@@ -193,7 +193,7 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
                             isDragging && "opacity-90 scale-105"
                           )}>
                             <AvatarFallback className={cn(
-                                "text-sm font-black italic",
+                                "text-xs lg:text-sm font-black italic",
                                 isGK ? "bg-orange-500 text-white" : isPichichi ? "bg-yellow-400 text-black" : team === 'Azul' ? "bg-primary text-white" : "bg-accent text-white"
                             )}>
                                 {tacticalNumber}
@@ -201,24 +201,24 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
                           </Avatar>
                           
                           {isPichichi && (
-                            <div className="absolute -top-1.5 -right-1.5 bg-yellow-400 rounded-full p-1 shadow-md border border-black/20 animate-bounce">
-                              <Trophy className="h-3 w-3 text-black" />
+                            <div className="absolute -top-1 -right-1 bg-yellow-400 rounded-full p-0.5 shadow-md border border-black/20">
+                              <Trophy className="h-2 w-2 lg:h-3 lg:w-3 text-black" />
                             </div>
                           )}
                           
                           {isGK && (
-                            <div className="absolute -bottom-1 -right-1 bg-orange-500 rounded-full p-1 shadow-md border border-white/40 animate-pulse">
-                              <GlovesIcon className="h-3.5 w-3.5 text-white" />
+                            <div className="absolute -bottom-1 -right-1 bg-orange-500 rounded-full p-0.5 shadow-md border border-white/40">
+                              <GlovesIcon className="h-2.5 w-2.5 lg:h-3.5 lg:w-3.5 text-white" />
                             </div>
                           )}
                         </div>
                         
                         <div className={cn(
-                          "backdrop-blur-md border border-white/20 rounded-full px-2.5 py-0.5 shadow-lg",
+                          "backdrop-blur-md border border-white/20 rounded-full px-1.5 lg:px-2.5 py-0.5 shadow-lg",
                           isPichichi ? "bg-yellow-400/90" : isGK ? "bg-orange-500/90" : "bg-black/80"
                         )}>
                           <p className={cn(
-                            "text-[10px] font-black uppercase tracking-tighter whitespace-nowrap",
+                            "text-[8px] lg:text-[10px] font-black uppercase tracking-tighter whitespace-nowrap",
                             (isPichichi || isGK) ? "text-black" : "text-white"
                           )}>
                             {player.name.split(' ')[0]}
@@ -229,8 +229,6 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
                     <TooltipContent side="top" className="bg-black border-white/20 text-white font-bold text-xs shadow-2xl">
                       <div className="flex flex-col gap-0.5">
                         <span>{player.name}</span>
-                        {isGK && <span className="text-orange-400 text-[10px] uppercase tracking-widest font-black">Guardián del Arco</span>}
-                        {isPichichi && <span className="text-yellow-400 text-[10px] uppercase tracking-widest font-black">Goleador de Élite</span>}
                       </div>
                     </TooltipContent>
                   </Tooltip>

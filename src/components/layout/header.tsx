@@ -1,4 +1,3 @@
-
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
@@ -23,13 +22,13 @@ import { getInitials } from "@/lib/utils";
 import Link from "next/link";
 
 const getPageTitle = (pathname: string) => {
-  if (pathname.includes("/dashboard")) return "Panel de Control";
+  if (pathname.includes("/dashboard")) return "Dashboard";
   if (pathname.includes("/matches/new")) return "Nuevo Partido";
-  if (pathname.includes("/matches")) return "Historial de Partidos";
+  if (pathname.includes("/matches")) return "Partidos";
   if (pathname.includes("/players")) return "Jugadores";
-  if (pathname.includes("/compare")) return "Comparador";
-  if (pathname.includes("/generator")) return "Equilibrador Pro";
-  if (pathname.includes("/standings")) return "Clasificación";
+  if (pathname.includes("/compare")) return "Versus";
+  if (pathname.includes("/generator")) return "Equilibrador";
+  if (pathname.includes("/standings")) return "Tabla";
   return "Real Acade";
 };
 
@@ -60,24 +59,24 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
-      <div className="md:hidden">
-        <SidebarTrigger />
-      </div>
-      <div className="flex-1">
-        <h1 className="text-lg font-semibold md:text-xl">
+    <header className="sticky top-0 z-20 flex h-14 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm md:h-16 md:px-6">
+      <div className="flex items-center gap-2">
+        <SidebarTrigger className="h-8 w-8" />
+        <h1 className="text-base font-black uppercase italic tracking-tight md:text-xl">
           {getPageTitle(pathname)}
         </h1>
       </div>
 
+      <div className="flex-1" />
+
       {isUserLoading ? (
-        <Loader2 className="h-5 w-5 animate-spin" />
+        <Loader2 className="h-4 w-4 animate-spin" />
       ) : user ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-              <Avatar className="h-10 w-10 border-2 border-primary/20">
-                <AvatarFallback className="bg-primary/10 text-primary font-black">
+            <Button variant="ghost" className="relative h-8 w-8 rounded-full md:h-10 md:w-10">
+              <Avatar className="h-8 w-8 border-2 border-primary/20 md:h-10 md:w-10">
+                <AvatarFallback className="bg-primary/10 text-primary font-black text-[10px] md:text-xs">
                   {getInitials(currentUser?.name || user?.email || "U")}
                 </AvatarFallback>
               </Avatar>
@@ -89,7 +88,7 @@ export function Header() {
                 <p className="text-sm font-medium leading-none">
                   {currentUser?.name || user?.email || "Usuario"}
                 </p>
-                <p className="text-xs leading-none text-muted-foreground uppercase tracking-widest font-bold mt-1">
+                <p className="text-[10px] leading-none text-muted-foreground uppercase tracking-widest font-bold mt-1">
                   {currentUser?.role === 'admin' ? 'Administrador' : 'Jugador'}
                 </p>
               </div>
@@ -107,10 +106,10 @@ export function Header() {
           </DropdownMenuContent>
         </DropdownMenu>
       ) : (
-        <Button asChild variant="outline" size="sm" className="gap-2 border-primary/20 hover:bg-primary/10">
+        <Button asChild variant="outline" size="sm" className="h-8 gap-2 border-primary/20 hover:bg-primary/10 text-[10px] md:text-xs">
           <Link href="/login">
-            <LogIn className="h-4 w-4" />
-            <span className="hidden sm:inline">Iniciar Sesión</span>
+            <LogIn className="h-3 w-3" />
+            <span>Acceder</span>
           </Link>
         </Button>
       )}
