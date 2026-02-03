@@ -19,7 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Award, Medal, Trophy, Users, Swords, Loader2, ShieldCheck, Sparkles, TrendingUp } from "lucide-react";
+import { Award, Medal, Trophy, Users, Swords, Loader2, ShieldCheck, Sparkles, TrendingUp, Flame } from "lucide-react";
 import Link from "next/link";
 import { GoalsChart } from "@/components/dashboard/goals-chart";
 import { FieldView } from "@/components/dashboard/field-view";
@@ -83,23 +83,22 @@ export default function DashboardPage() {
   const teamStats = getTeamGlobalStats(allMatches);
   const lastMatch = allMatches[0];
 
-  // Sorting for Pichichi (Goles > Eficacia > Partidos jugados asc)
-  const topScorers = [...playerStats].sort((a, b) => {
+  // Logic: Wins > Effective % > Goals > Matches (asc)
+  const sortedByWins = [...playerStats].sort((a, b) => {
+    if (b.wins !== a.wins) return b.wins - a.wins;
+    if (b.winPercentage !== a.winPercentage) return b.winPercentage - a.winPercentage;
+    if (b.totalGoals !== a.totalGoals) return b.totalGoals - a.totalGoals;
+    return a.matchesPlayed - b.matchesPlayed;
+  });
+
+  const sortedByGoals = [...playerStats].sort((a, b) => {
     if (b.totalGoals !== a.totalGoals) return b.totalGoals - a.totalGoals;
     if (b.winPercentage !== a.winPercentage) return b.winPercentage - a.winPercentage;
     return a.matchesPlayed - b.matchesPlayed;
   });
-  
-  // Sorting for Best Winner (Wins > % > Goals > Matches)
-  const topWinners = [...playerStats].sort((a, b) => {
-    if (b.wins !== a.wins) return b.wins - a.wins;
-    if (b.winPercentage !== a.winPercentage) return b.winPercentage - a.winPercentage;
-    if (b.totalGoals !== a.totalGoals) return b.totalGoals - a.totalGoals;
-    return b.matchesPlayed - a.matchesPlayed;
-  });
 
-  const topScorer = topScorers[0];
-  const topWinner = topWinners[0];
+  const topScorer = sortedByGoals[0];
+  const topWinner = sortedByWins[0];
   const totalGoals = playerStats.reduce((sum, p) => sum + p.totalGoals, 0);
 
   const lastMatchTeamAPlayers = lastMatch?.teamAPlayers.map(s => allPlayers.find(p => p.id === s.playerId)).filter(Boolean) as Player[] || [];
@@ -126,7 +125,7 @@ export default function DashboardPage() {
         </Card>
       )}
 
-      {/* Hero Stats Section */}
+      {/* Tarjetas Superiores */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
         <Card className="glass-card overflow-hidden hover:translate-y-[-4px] transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
@@ -134,9 +133,9 @@ export default function DashboardPage() {
             <Swords className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-black tracking-tighter flex items-center gap-1">
+            <div className="text-3xl font-black tracking-tighter flex items-center gap-2">
               <span className="text-primary">{teamStats.blueWins}</span>
-              <span className="text-muted-foreground/30">-</span>
+              <span className="text-muted-foreground/30 font-light">-</span>
               <span className="text-accent">{teamStats.redWins}</span>
             </div>
             <p className="text-[10px] text-muted-foreground font-medium mt-1 uppercase">{teamStats.draws} empates</p>
@@ -165,7 +164,8 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="glass-card card-gold overflow-hidden hover:translate-y-[-4px] transition-all duration-300 bg-gradient-to-br from-card/60 to-yellow-500/5">
+        {/* Pichichi Dorado */}
+        <Card className="glass-card card-gold overflow-hidden hover:translate-y-[-4px] transition-all duration-300 bg-gradient-to-br from-card/60 to-yellow-500/10 border-yellow-500/30">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
             <CardTitle className="text-[10px] font-black uppercase tracking-widest text-yellow-500">Pichichi</CardTitle>
             <Medal className="h-4 w-4 text-yellow-500" />
@@ -181,7 +181,8 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="glass-card card-success overflow-hidden hover:translate-y-[-4px] transition-all duration-300 bg-gradient-to-br from-card/60 to-emerald-500/5">
+        {/* Mejor Ganador Verde */}
+        <Card className="glass-card card-success overflow-hidden hover:translate-y-[-4px] transition-all duration-300 bg-gradient-to-br from-card/60 to-emerald-500/10 border-emerald-500/30">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
             <CardTitle className="text-[10px] font-black uppercase tracking-widest text-emerald-500">Victoria</CardTitle>
             <Award className="h-4 w-4 text-emerald-500" />
@@ -198,12 +199,14 @@ export default function DashboardPage() {
         </Card>
       </div>
 
+      {/* Formación y On Fire */}
       <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-3">
         <FieldView team="Azul" players={lastMatchTeamAPlayers} />
         <FieldView team="Rojo" players={lastMatchTeamBPlayers} />
         <PowerRanking players={allPlayers} matches={allMatches} />
       </div>
 
+      {/* Tabla y Gráfica */}
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
         <Card className="glass-card">
           <CardHeader>
@@ -221,11 +224,11 @@ export default function DashboardPage() {
                 <TableRow className="hover:bg-transparent border-white/5">
                   <TableHead className="font-black uppercase text-[10px] tracking-widest">Jugador</TableHead>
                   <TableHead className="text-center font-black uppercase text-[10px] tracking-widest">Goles</TableHead>
-                  <TableHead className="text-right font-black uppercase text-[10px] tracking-widest">Efectividad</TableHead>
+                  <TableHead className="text-right font-black uppercase text-[10px] tracking-widest">Partidos</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {topScorers.slice(0, 5).map((player) => (
+                {sortedByGoals.slice(0, 5).map((player) => (
                   <TableRow key={player.playerId} className="border-white/5 group">
                     <TableCell>
                       <div className="flex items-center gap-3">
@@ -237,7 +240,7 @@ export default function DashboardPage() {
                       </div>
                     </TableCell>
                     <TableCell className="text-center font-black text-lg">{player.totalGoals}</TableCell>
-                    <TableCell className="text-right font-mono text-sm text-primary">{player.winPercentage}%</TableCell>
+                    <TableCell className="text-right font-mono text-sm text-muted-foreground">{player.matchesPlayed}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

@@ -22,16 +22,17 @@ interface PowerRankingProps {
 
 export function PowerRanking({ players, matches }: PowerRankingProps) {
   const playerStats = calculateAggregatedStats(players, matches);
+  // Sort by Power Points (calculated in data.ts)
   const topRanking = [...playerStats]
     .sort((a, b) => b.powerPoints - a.powerPoints)
     .slice(0, 5);
 
   return (
-    <Card className="h-full glass-card">
+    <Card className="h-full glass-card border-orange-500/10">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Flame className="h-6 w-6 text-orange-500 fill-orange-500 animate-pulse" />
-          <span className="font-black uppercase tracking-tighter italic text-2xl">On Fire</span>
+          <span className="font-black uppercase tracking-tighter italic text-2xl text-orange-500">On Fire</span>
         </CardTitle>
         <CardDescription>Los mejores 5 jugadores según su rendimiento actual.</CardDescription>
       </CardHeader>
@@ -62,7 +63,7 @@ export function PowerRanking({ players, matches }: PowerRankingProps) {
                 </div>
               </div>
               <div className="flex flex-col items-end">
-                <span className="text-2xl font-black text-primary italic leading-none">{player.powerPoints}</span>
+                <span className="text-2xl font-black text-orange-500 italic leading-none">{player.powerPoints}</span>
                 <span className="text-[10px] text-muted-foreground uppercase font-black">Pts</span>
               </div>
             </div>
