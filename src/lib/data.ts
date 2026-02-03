@@ -116,7 +116,6 @@ export const getTopChemistry = (players: Player[], matches: Match[], minMatches 
   const statsMap: { [key: string]: { matches: number, wins: number } } = {};
   
   matches.forEach(match => {
-    // Analizar Equipo A
     for (let i = 0; i < match.teamAPlayers.length; i++) {
       for (let j = i + 1; j < match.teamAPlayers.length; j++) {
         const p1 = match.teamAPlayers[i].playerId;
@@ -127,7 +126,6 @@ export const getTopChemistry = (players: Player[], matches: Match[], minMatches 
         if (match.teamAScore > match.teamBScore) statsMap[key].wins++;
       }
     }
-    // Analizar Equipo B
     for (let i = 0; i < match.teamBPlayers.length; i++) {
       for (let j = i + 1; j < match.teamBPlayers.length; j++) {
         const p1 = match.teamBPlayers[i].playerId;
@@ -157,23 +155,14 @@ export const getTopChemistry = (players: Player[], matches: Match[], minMatches 
   return { player1, player2, wins: stats.wins, matches: stats.matches };
 };
 
-export const getLeaguePulseMetrics = (matches: Match[]) => {
+export const getSpiciestMatch = (matches: Match[]) => {
   if (matches.length === 0) return null;
-
-  const totalGoals = matches.reduce((sum, m) => sum + m.teamAScore + m.teamBScore, 0);
-  const avgGoals = Number((totalGoals / matches.length).toFixed(1));
-  
-  const recentMatches = matches.slice(0, 5);
-  const recentGoals = recentMatches.reduce((sum, m) => sum + m.teamAScore + m.teamBScore, 0);
-  const recentAvg = Number((recentGoals / recentMatches.length).toFixed(1));
-
-  let trend: 'up' | 'down' | 'stable' = 'stable';
-  if (recentAvg > avgGoals + 0.5) trend = 'up';
-  if (recentAvg < avgGoals - 0.5) trend = 'down';
-
-  const maxGoalsInMatch = Math.max(...matches.map(m => m.teamAScore + m.teamBScore));
-
-  return { avgGoals, trend, maxGoalsInMatch, recentAvg };
+  return [...matches].sort((a, b) => {
+    const totalA = a.teamAScore + a.teamBScore;
+    const totalB = b.teamAScore + b.teamBScore;
+    if (totalB !== totalA) return totalB - totalA;
+    return new Date(b.date).getTime() - new Date(a.date).getTime();
+  })[0];
 };
 
 export const balanceTeams = (selectedPlayers: AggregatedPlayerStats[]) => {

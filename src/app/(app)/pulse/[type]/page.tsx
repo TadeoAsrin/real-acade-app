@@ -2,15 +2,16 @@
 
 import * as React from 'react';
 import { useParams, useRouter } from "next/navigation";
-import { calculateAggregatedStats, getTopChemistry, getLeaguePulseMetrics } from "@/lib/data";
+import { calculateAggregatedStats, getTopChemistry, getSpiciestMatch } from "@/lib/data";
 import { useCollection, useMemoFirebase, useFirestore } from "@/firebase";
 import { collection, query, orderBy } from "firebase/firestore";
 import type { Match, Player } from "@/lib/definitions";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Brain, Activity, Link as LinkIcon, Trophy, Zap, Star, Target, Shield, ArrowUpRight, ArrowDownRight, Minus, Crown } from "lucide-react";
+import { ArrowLeft, Brain, Link as LinkIcon, Zap, Crown, Flame, Trophy, Calendar } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials, cn } from "@/lib/utils";
+import Link from "next/link";
 
 export default function PulseDetailPage() {
   const { type } = useParams();
@@ -34,12 +35,11 @@ export default function PulseDetailPage() {
   const allMatches = matchesData || [];
   const playerStats = calculateAggregatedStats(allPlayers, allMatches);
   const topChemistry = getTopChemistry(allPlayers, allMatches, 2);
-  const pulse = getLeaguePulseMetrics(allMatches);
+  const spiciestMatch = getSpiciestMatch(allMatches);
 
   if (playersLoading || matchesLoading) return <div className="flex h-screen items-center justify-center"><Zap className="animate-pulse text-primary h-12 w-12" /></div>;
 
   const renderInfluencer = () => {
-    // Advanced Logic: Min 3 matches + Layers of Tie-breakers
     const sorted = [...playerStats]
       .filter(p => p.matchesPlayed >= 3)
       .sort((a, b) => {
@@ -99,41 +99,60 @@ export default function PulseDetailPage() {
     );
   };
 
-  const renderLeaguePulse = () => {
+  const renderSpiciestMatch = () => {
     return (
       <div className="space-y-8 max-w-2xl mx-auto text-center">
         <div className="space-y-4">
-            <div className="mx-auto w-20 h-20 bg-accent/10 rounded-full flex items-center justify-center">
-                <Activity className="h-10 w-10 text-accent" />
+            <div className="mx-auto w-20 h-20 bg-orange-500/10 rounded-full flex items-center justify-center">
+                <Flame className="h-10 w-10 text-orange-500 fill-orange-500" />
             </div>
-            <h1 className="text-4xl font-black italic uppercase tracking-tighter">Termómetro de la Liga</h1>
-            <p className="text-muted-foreground italic">Estado actual del juego y ritmo de goles en Real Acade.</p>
+            <h1 className="text-4xl font-black italic uppercase tracking-tighter">Partido más picante</h1>
+            <p className="text-muted-foreground italic">El encuentro con mayor producción ofensiva registrado en la historia de Real Acade.</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="glass-card border-white/5 p-8 flex flex-col items-center">
-                <span className="text-6xl font-black italic text-white leading-none">{pulse?.avgGoals || 0}</span>
-                <span className="text-xs font-black uppercase text-accent mt-2 tracking-widest">Media de Goles</span>
-                <p className="text-[10px] text-muted-foreground mt-4 italic">Un ritmo {pulse?.avgGoals! > 8 ? "electrizante" : "estratégico"} para la liga.</p>
-            </Card>
-            <Card className="glass-card border-white/5 p-8 flex flex-col items-center">
-                <span className="text-6xl font-black italic text-white leading-none">{pulse?.maxGoalsInMatch || 0}</span>
-                <span className="text-xs font-black uppercase text-accent mt-2 tracking-widest">Récord Jornada</span>
-                <p className="text-[10px] text-muted-foreground mt-4 italic">El partido más abierto de la temporada.</p>
-            </Card>
-        </div>
+        {spiciestMatch ? (
+            <div className="space-y-6">
+                <Card className="glass-card border-orange-500/30 bg-gradient-to-br from-orange-500/10 to-transparent p-10">
+                    <div className="flex flex-col items-center gap-6">
+                        <div className="bg-orange-500 text-white px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest animate-pulse">
+                            🔥 Récord histórico
+                        </div>
+                        <span className="text-8xl font-black italic text-white leading-none drop-shadow-[0_0_20px_rgba(249,115,22,0.4)]">
+                            {spiciestMatch.teamAScore + spiciestMatch.teamBScore}
+                        </span>
+                        <span className="text-sm font-black uppercase text-orange-500 tracking-widest">Goles Totales</span>
+                        
+                        <div className="flex items-center gap-8 md:gap-16 pt-4 border-t border-white/10 w-full justify-center">
+                            <div className="flex flex-col items-center">
+                                <span className="text-xs font-black uppercase text-primary mb-1">Azul</span>
+                                <span className="text-4xl font-black">{spiciestMatch.teamAScore}</span>
+                            </div>
+                            <div className="text-2xl font-light text-muted-foreground/30 italic">VS</div>
+                            <div className="flex flex-col items-center">
+                                <span className="text-xs font-black uppercase text-accent mb-1">Rojo</span>
+                                <span className="text-4xl font-black">{spiciestMatch.teamBScore}</span>
+                            </div>
+                        </div>
+                    </div>
+                </Card>
 
-        <Card className="glass-card border-emerald-500/20 bg-emerald-500/5 p-6">
-            <div className="flex items-center justify-between">
-                <div className="text-left">
-                    <h3 className="font-black italic uppercase text-emerald-500">Tendencia Reciente</h3>
-                    <p className="text-xs text-muted-foreground">Promedio en los últimos 5 partidos: <span className="text-white font-bold">{pulse?.recentAvg} G</span></p>
-                </div>
-                <div className="bg-emerald-500/20 p-3 rounded-full">
-                    {pulse?.trend === 'up' ? <ArrowUpRight className="h-8 w-8 text-emerald-500" /> : pulse?.trend === 'down' ? <ArrowDownRight className="h-8 w-8 text-red-500" /> : <Minus className="h-8 w-8 text-orange-400" />}
+                <div className="flex flex-col md:flex-row gap-4 items-center justify-center">
+                    <div className="flex items-center gap-2 text-muted-foreground bg-white/5 px-4 py-2 rounded-full border border-white/5">
+                        <Calendar className="h-4 w-4" />
+                        <span className="text-xs font-bold uppercase tracking-tight">
+                            {new Date(spiciestMatch.date).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                        </span>
+                    </div>
+                    <Button asChild variant="outline" className="border-orange-500/20 hover:bg-orange-500/10">
+                        <Link href={`/matches/${spiciestMatch.id}`}>
+                            <Trophy className="mr-2 h-4 w-4" /> Ver Ficha Técnica
+                        </Link>
+                    </Button>
                 </div>
             </div>
-        </Card>
+        ) : (
+            <div className="h-64 border-2 border-dashed rounded-3xl flex items-center justify-center text-muted-foreground italic">No hay partidos registrados para calcular el récord.</div>
+        )}
       </div>
     );
   };
@@ -191,7 +210,7 @@ export default function PulseDetailPage() {
       </Button>
 
       {type === 'influencer' && renderInfluencer()}
-      {type === 'league' && renderLeaguePulse()}
+      {type === 'league' && renderSpiciestMatch()}
       {type === 'partnership' && renderPartnership()}
     </div>
   );

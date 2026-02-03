@@ -1,24 +1,15 @@
 'use client';
 
 import * as React from 'react';
-import { calculateAggregatedStats, getTopChemistry, getLeaguePulseMetrics } from "@/lib/data";
+import { calculateAggregatedStats, getTopChemistry, getSpiciestMatch } from "@/lib/data";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Medal, Trophy, Loader2, Sparkles, TrendingUp, Zap, Heart, Calendar, Users, Brain, Activity, Crown, ArrowUpRight, ArrowDownRight, Minus, Link as LinkIcon } from "lucide-react";
+import { Medal, Loader2, Zap, Calendar, Users, Brain, Heart, Crown, ArrowUpRight, ArrowDownRight, Minus, Link as LinkIcon, Flame } from "lucide-react";
 import Link from "next/link";
 import { FieldView } from "@/components/dashboard/field-view";
 import { PowerRanking } from "@/components/dashboard/power-ranking";
@@ -55,12 +46,11 @@ export default function DashboardPage() {
   const allMatches = matchesData || [];
   const playerStats = calculateAggregatedStats(allPlayers, allMatches);
   const topChemistry = getTopChemistry(allPlayers, allMatches, 2);
-  const pulse = getLeaguePulseMetrics(allMatches);
+  const spiciestMatch = getSpiciestMatch(allMatches);
   const lastMatch = allMatches[0];
 
   const sortedByGoals = [...playerStats].sort((a, b) => b.totalGoals - a.totalGoals || b.goalsPerMatch - a.goalsPerMatch);
   
-  // Influencia: Mín 3 partidos + Desempates (Win% > Partidos > PowerPoints > Goles)
   const sortedByInfluence = [...playerStats]
     .filter(p => p.matchesPlayed >= 3)
     .sort((a, b) => {
@@ -97,7 +87,6 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-6 lg:gap-10 pb-10">
-      {/* Metrics Row */}
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <Link href="/matches" className="col-span-1">
           <Card className="glass-card hover:translate-y-[-4px] transition-all duration-300 cursor-pointer h-full border-white/5">
@@ -159,7 +148,6 @@ export default function DashboardPage() {
         </Link>
       </div>
 
-      {/* Main Grid: Pitch and Power Ranking */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         <div className="order-2 lg:order-1">
           <FieldView team="Azul" players={lastMatchTeamAPlayers} topScorerId={topScorer?.playerId} date={lastMatch?.date} />
@@ -173,7 +161,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* PULSO DE LA LIGA */}
       <div className="space-y-4">
         <h2 className="text-2xl font-black uppercase tracking-tighter italic text-white flex items-center gap-3">
             <Zap className="h-6 w-6 text-primary fill-primary" />
@@ -218,34 +205,33 @@ export default function DashboardPage() {
             </Link>
 
             <Link href="/pulse/league">
-                <Card className="glass-card border-accent/20 hover:border-accent/50 transition-all group overflow-hidden cursor-pointer h-full">
+                <Card className="glass-card border-orange-500/20 hover:border-orange-500/50 transition-all group overflow-hidden cursor-pointer h-full bg-gradient-to-br from-card/60 to-orange-500/5">
                     <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                        <Activity className="h-24 w-24 text-accent" />
+                        <Flame className="h-24 w-24 text-orange-500" />
                     </div>
                     <CardHeader>
-                        <CardTitle className="text-xs font-black uppercase tracking-widest text-accent flex items-center gap-2">
-                            <Activity className="h-3 w-3" />
-                            Termómetro
+                        <CardTitle className="text-xs font-black uppercase tracking-widest text-orange-500 flex items-center gap-2">
+                            <Flame className="h-3 w-3 fill-orange-500" />
+                            Partido más picante
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-baseline justify-between">
                             <div className="flex flex-col">
-                                <span className="text-4xl font-black italic text-white">{pulse?.avgGoals || 0}</span>
-                                <span className="text-[8px] uppercase font-black text-muted-foreground">Goles / Partido</span>
+                                <span className="text-5xl font-black italic text-white">{spiciestMatch ? spiciestMatch.teamAScore + spiciestMatch.teamBScore : 0}</span>
+                                <span className="text-[8px] uppercase font-black text-muted-foreground">Goles Totales</span>
                             </div>
-                            <div className="flex flex-col items-center">
-                                {pulse?.trend === 'up' ? <ArrowUpRight className="h-8 w-8 text-emerald-500" /> : pulse?.trend === 'down' ? <ArrowDownRight className="h-8 w-8 text-red-500" /> : <Minus className="h-8 w-8 text-orange-400" />}
-                                <span className={cn(
-                                    "text-[8px] uppercase font-black",
-                                    pulse?.trend === 'up' ? "text-emerald-500" : pulse?.trend === 'down' ? "text-red-500" : "text-orange-400"
-                                )}>
-                                    {pulse?.trend === 'up' ? "En alza" : pulse?.trend === 'down' ? "En baja" : "Estable"}
-                                </span>
+                            <div className="bg-orange-500/10 px-2 py-1 rounded text-[8px] font-black text-orange-500 uppercase tracking-tighter">
+                                🔥 Récord histórico
                             </div>
                         </div>
                         <div className="bg-white/5 p-2 rounded-xl border border-white/5">
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">Récord Jornada: <span className="text-white font-black">{pulse?.maxGoalsInMatch || 0} Goles</span></p>
+                            <p className="text-[10px] font-bold text-white uppercase tracking-tighter">
+                                {spiciestMatch ? `Azul ${spiciestMatch.teamAScore} - ${spiciestMatch.teamBScore} Rojo` : 'Sin registros'}
+                            </p>
+                            <p className="text-[8px] text-muted-foreground uppercase font-medium">
+                                {spiciestMatch ? new Date(spiciestMatch.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}
+                            </p>
                         </div>
                     </CardContent>
                 </Card>
