@@ -19,15 +19,15 @@ interface FieldViewProps {
   topScorerId?: string;
 }
 
-// Formación Táctica 1-3-2-1
+// Formación Táctica inicial 1-3-2-1
 const formationCoordinates: { top: string; left: string }[] = [
-  { top: '10%', left: '50%' }, // Portero
-  { top: '30%', left: '20%' }, // Defensor Izquierdo
-  { top: '30%', left: '50%' }, // Defensor Central
-  { top: '30%', left: '80%' }, // Defensor Derecho
-  { top: '60%', left: '30%' }, // Mediocampista Izquierdo
-  { top: '60%', left: '70%' }, // Mediocampista Derecho
-  { top: '85%', left: '50%' }, // Delantero Centro
+  { top: '12%', left: '50%' }, // Portero
+  { top: '35%', left: '20%' }, // Defensor Izquierdo
+  { top: '35%', left: '50%' }, // Defensor Central
+  { top: '35%', left: '80%' }, // Defensor Derecho
+  { top: '65%', left: '35%' }, // Mediocampista Izquierdo
+  { top: '65%', left: '65%' }, // Mediocampista Derecho
+  { top: '88%', left: '50%' }, // Delantero Centro
 ];
 
 export function FieldView({ team, players, topScorerId }: FieldViewProps) {
@@ -35,6 +35,7 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
   const [playerPositions, setPlayerPositions] = React.useState<{ [key: string]: { x: number; y: number } }>({});
   const [draggingPlayer, setDraggingPlayer] = React.useState<{ id: string; startX: number; startY: number } | null>(null);
 
+  // Inicializar posiciones
   React.useEffect(() => {
     const initialPositions: { [key: string]: { x: number; y: number } } = {};
     players.forEach((player, index) => {
@@ -52,7 +53,6 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
   const handlePointerDown = (e: React.PointerEvent, playerId: string) => {
     e.preventDefault();
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    // Centrar el arrastre en el punto donde se hizo click
     setDraggingPlayer({ 
       id: playerId, 
       startX: e.clientX - rect.left - rect.width / 2,
@@ -68,7 +68,7 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
     let newX = ((e.clientX - fieldRect.left - draggingPlayer.startX) / fieldRect.width) * 100;
     let newY = ((e.clientY - fieldRect.top - draggingPlayer.startY) / fieldRect.height) * 100;
     
-    // Límites para que no se salgan del campo
+    // Límites del campo
     newX = Math.max(5, Math.min(95, newX));
     newY = Math.max(5, Math.min(95, newY));
 
@@ -85,14 +85,23 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
     }
   };
 
+  // Función para determinar si un jugador está en la "Zona de Portero"
+  const isPlayerInGKZone = (pos: { x: number; y: number }) => {
+    // Definimos el área pequeña como el 22% superior del campo y centralizado
+    return pos.y < 22 && pos.x > 30 && pos.x < 70;
+  };
+
   return (
-    <Card className="glass-card overflow-hidden border-white/5 bg-black/20">
+    <Card className="glass-card overflow-hidden border-white/5 bg-black/20 shadow-2xl">
       <CardHeader className="pb-4">
         <CardTitle className={cn(
-          "text-lg font-black uppercase tracking-tighter italic", 
+          "text-lg font-black uppercase tracking-tighter italic flex items-center justify-between", 
           team === 'Azul' ? 'text-primary' : 'text-accent'
         )}>
-          Último Partido {team}
+          <span>Último Partido {team}</span>
+          <span className="text-[10px] font-bold text-muted-foreground/50 bg-black/40 px-2 py-0.5 rounded-full not-italic">
+            Táctica 1-3-2-1
+          </span>
         </CardTitle>
       </CardHeader>
       <CardContent className="p-4">
@@ -100,33 +109,42 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
           ref={fieldRef}
           onPointerMove={handlePointerMove}
           className={cn(
-            "relative mx-auto h-[520px] w-full rounded-2xl border-[4px] border-white/20 overflow-hidden touch-none select-none shadow-2xl",
-            "bg-emerald-600",
+            "relative mx-auto h-[540px] w-full rounded-2xl border-[4px] border-white/20 overflow-hidden touch-none select-none",
+            "bg-emerald-600 shadow-inner",
             draggingPlayer ? "cursor-grabbing" : "cursor-default"
           )}
           style={{
             backgroundImage: `
-              linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-              repeating-linear-gradient(0deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 40px, transparent 40px, transparent 80px)
+              linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+              repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 40px, transparent 40px, transparent 80px)
             `,
             backgroundSize: '100% 100%, 100% 80px'
           }}
         >
           {/* Líneas de Cal del Campo */}
           <div className="absolute inset-4 border-2 border-white/30 rounded-lg pointer-events-none" />
-          <div className="absolute top-1/2 left-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/30" />
+          <div className="absolute top-1/2 left-1/2 h-28 w-28 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/30" />
           <div className="absolute top-1/2 left-0 w-full h-[2px] bg-white/30 -translate-y-1/2" />
-          <div className="absolute top-4 left-1/2 h-20 w-44 -translate-x-1/2 border-2 border-t-0 border-white/30 rounded-b-xl" />
-          <div className="absolute bottom-4 left-1/2 h-20 w-44 -translate-x-1/2 border-2 border-b-0 border-white/30 rounded-t-xl" />
+          
+          {/* Área de Portería (GK Zone Visual) */}
+          <div className={cn(
+            "absolute top-4 left-1/2 h-24 w-48 -translate-x-1/2 border-2 border-t-0 border-white/40 rounded-b-xl transition-colors duration-300",
+            draggingPlayer && isPlayerInGKZone(playerPositions[draggingPlayer.id] || {x:0, y:100}) 
+              ? "bg-orange-500/10 border-orange-500/40" 
+              : "bg-white/5"
+          )} />
+          
+          {/* Área Grande Inferior */}
+          <div className="absolute bottom-4 left-1/2 h-24 w-48 -translate-x-1/2 border-2 border-b-0 border-white/30 rounded-t-xl" />
           
           <TooltipProvider>
-            {players.map((player, index) => {
+            {players.map((player) => {
               const pos = playerPositions[player.id];
               if (!pos) return null;
               
               const isDragging = draggingPlayer?.id === player.id;
               const isPichichi = player.id === topScorerId;
-              const isGK = index === 0; // El primero de la lista siempre es el Portero en la carga
+              const isGK = isPlayerInGKZone(pos);
 
               return (
                 <div
@@ -148,15 +166,15 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
                       <div className="flex flex-col items-center gap-1.5">
                         <div className="relative">
                           <Avatar className={cn(
-                            "h-11 w-11 border-[3px] shadow-xl ring-2 ring-black/30 transition-all",
+                            "h-12 w-12 border-[3px] shadow-2xl ring-2 ring-black/30 transition-all duration-300",
                             isGK 
-                              ? "border-orange-500 bg-orange-500/30" // Portero en Naranja
+                              ? "border-orange-500 bg-orange-600/40 scale-105" // Estilo Portero Dinámico
                               : isPichichi 
-                                ? "border-yellow-400 shadow-yellow-400/40 ring-yellow-400/20" // Pichichi Dorado
+                                ? "border-yellow-400 shadow-yellow-500/40 ring-yellow-400/20" 
                                 : team === 'Azul' 
-                                  ? "border-primary bg-primary/20 shadow-primary/20" 
-                                  : "border-accent bg-accent/20 shadow-accent/20",
-                            isDragging && "ring-white/50"
+                                  ? "border-primary bg-primary/20" 
+                                  : "border-accent bg-accent/20",
+                            isDragging && "ring-white/50 opacity-90"
                           )}>
                             <AvatarImage src={player.avatar} alt={player.name} className="object-cover" />
                             <AvatarFallback className="bg-muted text-[10px] font-black">{player.name.charAt(0)}</AvatarFallback>
@@ -164,23 +182,23 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
                           
                           {isPichichi && (
                             <div className="absolute -top-1.5 -right-1.5 bg-yellow-400 rounded-full p-1 shadow-md border border-black/20 animate-bounce">
-                              <Trophy className="h-2.5 w-2.5 text-black" />
+                              <Trophy className="h-3 w-3 text-black" />
                             </div>
                           )}
                           
                           {isGK && (
-                            <div className="absolute -bottom-1 -right-1 bg-orange-500 rounded-full p-0.5 shadow-md border border-white/20">
-                              <ShieldCheck className="h-3 w-3 text-white" />
+                            <div className="absolute -bottom-1 -right-1 bg-orange-500 rounded-full p-1 shadow-md border border-white/40 animate-pulse">
+                              <ShieldCheck className="h-3.5 w-3.5 text-white" />
                             </div>
                           )}
                         </div>
                         
                         <div className={cn(
-                          "backdrop-blur-md border border-white/20 rounded-full px-2.5 py-0.5 shadow-lg",
+                          "backdrop-blur-md border border-white/20 rounded-full px-2.5 py-0.5 shadow-lg transition-colors duration-300",
                           isPichichi ? "bg-yellow-400/90" : isGK ? "bg-orange-500/90" : "bg-black/80"
                         )}>
                           <p className={cn(
-                            "text-[10px] font-black uppercase tracking-tighter",
+                            "text-[10px] font-black uppercase tracking-tighter whitespace-nowrap",
                             (isPichichi || isGK) ? "text-black" : "text-white"
                           )}>
                             {player.name.split(' ')[0]}
@@ -189,9 +207,10 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
                       </div>
                     </TooltipTrigger>
                     <TooltipContent side="top" className="bg-black border-white/20 text-white font-bold text-xs">
-                      {player.name} 
-                      {isPichichi && ' (Máximo Goleador)'}
-                      {isGK && ' (Arquero)'}
+                      <div className="flex flex-col gap-0.5">
+                        <span>{player.name}</span>
+                        {isGK && <span className="text-orange-400 text-[10px] uppercase tracking-widest">En Portería</span>}
+                      </div>
                     </TooltipContent>
                   </Tooltip>
                 </div>
