@@ -18,7 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Medal, Trophy, Loader2, Sparkles, TrendingUp, Zap, Heart, Calendar } from "lucide-react";
+import { Medal, Trophy, Loader2, Sparkles, TrendingUp, Zap, Heart, Calendar, Users } from "lucide-react";
 import Link from "next/link";
 import { GoalsChart } from "@/components/dashboard/goals-chart";
 import { FieldView } from "@/components/dashboard/field-view";
@@ -26,7 +26,7 @@ import { PowerRanking } from "@/components/dashboard/power-ranking";
 import { useCollection, useMemoFirebase, useFirestore } from "@/firebase";
 import { collection, query, orderBy } from "firebase/firestore";
 import type { Match, Player } from "@/lib/definitions";
-import { getInitials } from "@/lib/utils";
+import { getInitials, cn } from "@/lib/utils";
 
 export default function DashboardPage() {
   const firestore = useFirestore();
@@ -66,6 +66,24 @@ export default function DashboardPage() {
   const mvpKing = sortedByMvp[0];
   const winRateLeader = sortedByWinRate[0];
 
+  // Cálculo de Asistencia
+  const totalMatches = allMatches.length;
+  const attendanceLeaders = playerStats.length > 0 && totalMatches > 0
+    ? (() => {
+        const leaders = [...playerStats].sort((a, b) => {
+          const rateA = a.matchesPlayed / totalMatches;
+          const rateB = b.matchesPlayed / totalMatches;
+          return rateB - rateA || b.matchesPlayed - a.matchesPlayed;
+        });
+        const maxRate = leaders[0].matchesPlayed / totalMatches;
+        return leaders.filter(p => (p.matchesPlayed / totalMatches) === maxRate);
+      })()
+    : [];
+
+  const attendanceRate = attendanceLeaders.length > 0 && totalMatches > 0 
+    ? Math.round((attendanceLeaders[0].matchesPlayed / totalMatches) * 100) 
+    : 0;
+
   const totalGoals = playerStats.reduce((sum, p) => sum + p.totalGoals, 0);
 
   const lastMatchTeamAPlayers = lastMatch?.teamAPlayers.map(s => allPlayers.find(p => p.id === s.playerId)).filter(Boolean) as Player[] || [];
@@ -73,8 +91,8 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-6 lg:gap-10 pb-10">
-      {/* Metrics Row: Optimized for mobile vertical stack or tight grid */}
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
+      {/* Metrics Row: Optimized for 6 cards in desktop with xl:grid-cols-6 */}
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <Link href="/matches" className="col-span-1">
           <Card className="glass-card hover:translate-y-[-4px] transition-all duration-300 cursor-pointer h-full border-white/5">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
@@ -99,8 +117,8 @@ export default function DashboardPage() {
           </Card>
         </Link>
 
-        {/* Elite Highlight Cards - Vertical on Mobile */}
-        <Link href={topScorer ? `/players/${topScorer.playerId}` : "/players"} className="col-span-2 lg:col-span-1">
+        {/* Elite Highlight Cards */}
+        <Link href={topScorer ? `/players/${topScorer.playerId}` : "/players"} className="col-span-1">
           <Card className="glass-card card-gold hover:translate-y-[-4px] transition-all duration-300 cursor-pointer h-full bg-gradient-to-br from-card/60 to-yellow-500/10 border-yellow-500/30">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
               <CardTitle className="text-[10px] font-black uppercase tracking-widest text-yellow-500">Pichichi</CardTitle>
@@ -117,7 +135,7 @@ export default function DashboardPage() {
           </Card>
         </Link>
 
-        <Link href={mvpKing ? `/players/${mvpKing.playerId}` : "/players"} className="col-span-2 lg:col-span-1">
+        <Link href={mvpKing ? `/players/${mvpKing.playerId}` : "/players"} className="col-span-1">
           <Card className="glass-card hover:translate-y-[-4px] transition-all duration-300 cursor-pointer h-full border-primary/30 bg-primary/5">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
               <CardTitle className="text-[10px] font-black uppercase tracking-widest text-primary">MVP King</CardTitle>
@@ -135,7 +153,7 @@ export default function DashboardPage() {
           </Card>
         </Link>
 
-        <Link href={winRateLeader ? `/players/${winRateLeader.playerId}` : "/players"} className="col-span-2 lg:col-span-1">
+        <Link href={winRateLeader ? `/players/${winRateLeader.playerId}` : "/players"} className="col-span-1">
           <Card className="glass-card hover:translate-y-[-4px] transition-all duration-300 cursor-pointer h-full border-accent/30 bg-accent/5">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
               <CardTitle className="text-[10px] font-black uppercase tracking-widest text-accent">Efectividad</CardTitle>
@@ -147,6 +165,48 @@ export default function DashboardPage() {
               </div>
               <div className="flex items-baseline gap-1 mt-1">
                 <span className="text-lg font-black text-accent/90">{winRateLeader?.winPercentage || 0}%</span>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+
+        {/* Tarjeta de Asistencia */}
+        <Link href="/players" className="col-span-1">
+          <Card className="glass-card hover:translate-y-[-4px] transition-all duration-300 cursor-pointer h-full border-emerald-500/30 bg-emerald-500/5">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+              <CardTitle className="text-[10px] font-black uppercase tracking-widest text-emerald-500">Asistencia</CardTitle>
+              <Users className="h-4 w-4 text-emerald-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-xl lg:text-2xl font-black tracking-tighter text-emerald-500">
+                {attendanceRate}%
+              </div>
+              <div className="flex items-baseline gap-1 mt-1">
+                <span className="text-lg font-black text-emerald-500/90">{attendanceLeaders[0]?.matchesPlayed || 0}</span>
+                <span className="text-[10px] text-emerald-500/60 font-bold uppercase ml-1">Partidos</span>
+              </div>
+              <div className="flex items-center gap-2 mt-4">
+                <div className="flex -space-x-2 overflow-hidden">
+                  {attendanceLeaders.slice(0, 3).map((leader) => (
+                    <Avatar key={leader.playerId} className="inline-block h-6 w-6 ring-2 ring-background border-emerald-500/20">
+                      <AvatarFallback className="text-[8px] font-black bg-emerald-500/20 text-emerald-500">
+                        {getInitials(leader.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                  ))}
+                  {attendanceLeaders.length > 3 && (
+                    <div className="flex items-center justify-center h-6 w-6 rounded-full bg-muted ring-2 ring-background text-[8px] font-black">
+                      +{attendanceLeaders.length - 3}
+                    </div>
+                  )}
+                </div>
+                <div className="text-[10px] font-bold truncate text-muted-foreground uppercase tracking-tight">
+                  {attendanceLeaders.length === 1 
+                    ? attendanceLeaders[0].name.split(' ')[0] 
+                    : attendanceLeaders.length > 1 
+                      ? `${attendanceLeaders.length} Líderes` 
+                      : '-'}
+                </div>
               </div>
             </CardContent>
           </Card>
