@@ -1,4 +1,3 @@
-
 export type PlayerPosition = 'Arquero' | 'Lateral Derecho' | 'Defensor Central' | 'Lateral Izquierdo' | 'Mediocampista' | 'Delantero';
 
 export type Player = {
@@ -45,4 +44,10 @@ export type AggregatedPlayerStats = {
   matchesAsRed: number;
   powerPoints: number;
   form: ('W' | 'D' | 'L')[];
+};
+
+export type ChemistryPair = {
+  player1: Player;
+  player2: Player;
+  wins: number;
 };

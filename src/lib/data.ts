@@ -1,5 +1,4 @@
-
-import type { Player, Match, AggregatedPlayerStats, PlayerStats } from "./definitions";
+import type { Player, Match, AggregatedPlayerStats, PlayerStats, ChemistryPair } from "./definitions";
 
 const POINTS = {
   WIN: 10,
@@ -111,6 +110,37 @@ export const getTeamGlobalStats = (allMatches: Match[]) => {
     });
 
     return { blueWins, redWins, draws, total: allMatches.length };
+};
+
+export const getTopChemistry = (players: Player[], matches: Match[]): ChemistryPair | null => {
+  const winMap: { [key: string]: number } = {};
+  
+  matches.forEach(match => {
+    const winningTeam = match.teamAScore > match.teamBScore ? match.teamAPlayers : (match.teamBScore > match.teamAScore ? match.teamBPlayers : []);
+    if (winningTeam.length < 2) return;
+    
+    for (let i = 0; i < winningTeam.length; i++) {
+      for (let j = i + 1; j < winningTeam.length; j++) {
+        const p1 = winningTeam[i].playerId;
+        const p2 = winningTeam[j].playerId;
+        const key = [p1, p2].sort().join('-');
+        winMap[key] = (winMap[key] || 0) + 1;
+      }
+    }
+  });
+
+  const sortedPairs = Object.entries(winMap).sort((a, b) => b[1] - a[1]);
+  if (sortedPairs.length === 0) return null;
+
+  const [id1, id2] = sortedPairs[0][0].split('-');
+  const wins = sortedPairs[0][1];
+  
+  const player1 = players.find(p => p.id === id1);
+  const player2 = players.find(p => p.id === id2);
+
+  if (!player1 || !player2) return null;
+
+  return { player1, player2, wins };
 };
 
 export const balanceTeams = (selectedPlayers: AggregatedPlayerStats[]) => {
