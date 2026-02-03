@@ -9,19 +9,7 @@
  *
  * Data Structure:
  * The data is organized into top-level collections: /teams, /players, /matches, 
- * /matchevents, and /playerRatings. This flat structure, combined with denormalized 
- * relationship IDs, allows for efficient querying and granular security.
- *
- * Key Security Decisions:
- * 1. Public Read/Restricted Write: General entities (Teams, Players, Matches, Events) 
- *    are publicly readable to support app browsing but restricted for writes.
- * 2. User Ownership for Ratings: Player ratings are owned by the user who created 
- *    them, verified via the `ratingUserId` field.
- * 3. Prototyping Flexibility: Rules enforce strict identity and ownership for writes 
- *    but do not strictly validate data types or optional fields, allowing for rapid 
- *    schema iteration.
- * 4. Relational Integrity: On creation of ratings, the rules enforce that the 
- *    `ratingUserId` matches the authenticated user's UID.
+ * /matchevents, /playerRatings, and /roles_admin.
  */
 
 rules_version = '2';
@@ -46,7 +34,6 @@ service cloud.firestore {
 
     /**
      * @description Checks if the user is the owner of the existing document.
-     * Used for update and delete operations.
      */
     function isExistingOwner(userId) {
       return resource != null && isOwner(userId);
@@ -55,74 +42,63 @@ service cloud.firestore {
     // --- Collection Rules ---
 
     /**
+     * @description Rules for admin roles. Users can check their own admin status.
+     * @path /roles_admin/{userId}
+     */
+    match /roles_admin/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow write: if false; // Roles are managed externally or via Firebase Console for security.
+    }
+
+    /**
      * @description Rules for the Teams collection. Teams are public for reading.
-     * @path /teams/{teamId}
-     * @allow (get, list) if true;
-     * @deny (create, update, delete) if no ownership field is present in schema.
-     * @principle Public consumption with restricted administrative writes.
      */
     match /teams/{teamId} {
       allow get, list: if true;
-      // CRITICAL: Cannot implement owner-only writes. The 'Team' entity is missing an 'ownerId' or 'adminId' field.
-      allow create, update, delete: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
+      allow create, update, delete: if false; 
     }
 
     /**
      * @description Rules for the Players collection. Player profiles are public.
-     * @path /players/{playerId}
-     * @allow (get, list) if true;
-     * @deny (write) if unauthorized or if ownership cannot be verified.
-     * @principle Structural segregation of public entities.
      */
     match /players/{playerId} {
       allow get, list: if true;
-      // CRITICAL: Cannot implement owner-only writes. The 'Player' entity is missing an 'ownerId' or 'userId' field.
-      allow create, update, delete: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
+      allow create, update, delete: if false;
     }
 
     /**
      * @description Rules for the Matches collection. Match data is public.
-     * @path /matches/{matchId}
-     * @allow (get, list) if true;
-     * @deny (write) without administrative or ownership context.
-     * @principle Public read with restricted writes.
      */
     match /matches/{matchId} {
       allow get, list: if true;
-      // CRITICAL: Cannot implement owner-only writes. The 'Match' entity is missing an 'authorId' or 'managerId' field.
-      allow create, update, delete: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
+      allow create, update, delete: if false;
     }
 
     /**
      * @description Rules for individual match events (goals, fouls, etc).
-     * @path /matchevents/{matchEventId}
-     * @allow (get, list) if true;
-     * @deny (write) without administrative or ownership context.
-     * @principle Maintains visibility of game data while protecting integrity.
      */
     match /matchevents/{matchEventId} {
       allow get, list: if true;
-      // CRITICAL: Cannot implement owner-only writes. The 'MatchEvent' entity is missing an 'authorId' or 'refereeId' field.
-      allow create, update, delete: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
+      allow create, update, delete: if false;
     }
 
     /**
      * @description Rules for player ratings. Users can rate players and manage their own ratings.
-     * @path /playerRatings/{playerRatingId}
-     * @allow (get, list) if true;
-     * @allow (create) if the user is signed in and provides their own UID as ratingUserId.
-     * @allow (update, delete) if the user is the owner of the rating.
-     * @deny (update) if the user attempts to change the ratingUserId (immutability).
-     * @principle Pattern 5: Public Read with Owner-Only Writes.
      */
     match /playerRatings/{playerRatingId} {
       allow get, list: if true;
-      
       allow create: if isSignedIn() && request.resource.data.ratingUserId == request.auth.uid;
-      
       allow update: if isExistingOwner(resource.data.ratingUserId) && request.resource.data.ratingUserId == resource.data.ratingUserId;
-      
       allow delete: if isExistingOwner(resource.data.ratingUserId);
+    }
+
+    /**
+     * @description Rules for match goal votes.
+     */
+    match /matches/{matchId}/votes/{userId} {
+      allow read: if true;
+      allow write: if isOwner(userId);
     }
   }
 }
