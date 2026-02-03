@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -83,7 +84,13 @@ export default function DashboardPage() {
   const lastMatch = allMatches[0];
 
   const topScorers = [...playerStats].sort((a, b) => b.totalGoals - a.totalGoals).slice(0, 5);
-  const topWinner = [...playerStats].sort((a, b) => b.wins - a.wins)[0];
+  
+  // Mejora de lógica: Desempate por winPercentage si tienen las mismas victorias
+  const topWinner = [...playerStats].sort((a, b) => {
+    if (b.wins !== a.wins) return b.wins - a.wins;
+    return b.winPercentage - a.winPercentage;
+  })[0];
+  
   const totalGoals = playerStats.reduce((sum, p) => sum + p.totalGoals, 0);
 
   const lastMatchTeamAPlayers = lastMatch?.teamAPlayers.map(s => allPlayers.find(p => p.id === s.playerId)).filter(Boolean) as Player[] || [];
@@ -112,7 +119,6 @@ export default function DashboardPage() {
 
       {/* Hero Stats Section */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
-        {/* Global Stats con colores por equipo */}
         <Card className="glass-card overflow-hidden hover:translate-y-[-4px] transition-all duration-300 border-white/5">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Global (Azul-Rojo)</CardTitle>
@@ -150,7 +156,6 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Premios individuales con color blanco/neutro para no confundir equipo */}
         <Card className="glass-card overflow-hidden hover:translate-y-[-4px] transition-all duration-300 border-white/5">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Pichichi</CardTitle>
@@ -169,7 +174,9 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-black tracking-tighter text-white truncate">{topWinner?.name || '-'}</div>
-            <p className="text-xs text-muted-foreground font-medium mt-1">{topWinner?.wins || 0} victorias</p>
+            <p className="text-xs text-muted-foreground font-medium mt-1">
+              {topWinner?.wins || 0} victorias ({topWinner?.winPercentage || 0}%)
+            </p>
           </CardContent>
         </Card>
       </div>

@@ -3,7 +3,7 @@
     {
       "id": "pele",
       "description": "Pelé - O Rei",
-      "imageUrl": "https://images.unsplash.com/photo-1587103365297-77661edc549d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxmb290YmFsbCUyMHBlbGV8ZW58MHx8fHwxNzcwMDg4MzEwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1665839267241-380a062ebcd6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxmb290YmFsbCUyMHBlbGV8ZW58MHx8fHwxNzcwMDg4MzEwfDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "football pele"
     },
     {
@@ -15,13 +15,13 @@
     {
       "id": "messi",
       "description": "Lionel Messi - La Pulga",
-      "imageUrl": "https://images.unsplash.com/photo-1667983090870-38b3a9ad3d06?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxmb290YmFsbCUyMG1lc3NpfGVufDB8fHx8MTc3MDA4ODMxMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1667983088885-226788e18a6e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxmb290YmFsbCUyMG1lc3NpfGVufDB8fHx8MTc3MDA4ODMxMHww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "football messi"
     },
     {
       "id": "cr7",
       "description": "Cristiano Ronaldo - El Bicho",
-      "imageUrl": "https://images.unsplash.com/photo-1649771543037-916e2702008a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxmb290YmFsbCUyMHJvbmFsZG98ZW58MHx8fHwxNzcwMDg4MzEwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1649771544464-03bedb456a4f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxmb290YmFsbCUyMHJvbmFsZG98ZW58MHx8fHwxNzcwMDg4MzEwfDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "football ronaldo"
     },
     {
@@ -33,49 +33,49 @@
     {
       "id": "cruyff",
       "description": "Johan Cruyff - El Holandés Volador",
-      "imageUrl": "https://images.unsplash.com/photo-1726361614810-2617ca12cff6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxmb290YmFsbCUyMGNydXlmZnxlbnwwfHx8fDE3NzAwODgzMTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1633008246097-e3980a6000da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxmb290YmFsbCUyMGNydXlmZnxlbnwwfHx8fDE3NzAwODgzMTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "football cruyff"
     },
     {
       "id": "ronaldinho",
-      "description": "Ronaldinho - El Brujo de Porto Alegre",
+      "description": "Ronaldinho - El Brujo",
       "imageUrl": "https://images.unsplash.com/photo-1631392406631-c2eeeda4d4bb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxmb290YmFsbCUyMHJvbmFsZGluaG98ZW58MHx8fHwxNzcwMDg4MzEwfDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "football ronaldinho"
     },
     {
       "id": "r9",
       "description": "Ronaldo Nazário - El Fenómeno",
-      "imageUrl": "https://picsum.photos/seed/r9/400/400",
+      "imageUrl": "https://picsum.photos/seed/r9fenomeno/400/400",
       "imageHint": "football nazario"
     },
     {
       "id": "beckenbauer",
       "description": "Franz Beckenbauer - El Káiser",
-      "imageUrl": "https://picsum.photos/seed/beckenbauer/400/400",
+      "imageUrl": "https://picsum.photos/seed/beckenbauer4/400/400",
       "imageHint": "football beckenbauer"
     },
     {
       "id": "platini",
       "description": "Michel Platini - Le Roi",
-      "imageUrl": "https://picsum.photos/seed/platini/400/400",
+      "imageUrl": "https://picsum.photos/seed/platini10/400/400",
       "imageHint": "football platini"
     },
     {
       "id": "puskas",
       "description": "Ferenc Puskás - Cañoncito Pum",
-      "imageUrl": "https://images.unsplash.com/photo-1587103365297-77661edc549d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxmb290YmFsbCUyMHB1c2thc3xlbnwwfHx8fDE3NzAwODgzMTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1708533144300-9a00b4cc29f8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxmb290YmFsbCUyMHB1c2thc3xlbnwwfHx8fDE3NzAwODgzMTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "football puskas"
     },
     {
       "id": "distefano",
       "description": "Alfredo Di Stéfano - La Saeta Rubia",
-      "imageUrl": "https://picsum.photos/seed/distefano/400/400",
+      "imageUrl": "https://picsum.photos/seed/distefano9/400/400",
       "imageHint": "football stefano"
     },
     {
       "id": "maldini",
       "description": "Paolo Maldini - Il Capitano",
-      "imageUrl": "https://picsum.photos/seed/maldini/400/400",
+      "imageUrl": "https://picsum.photos/seed/maldini3/400/400",
       "imageHint": "football maldini"
     },
     {
