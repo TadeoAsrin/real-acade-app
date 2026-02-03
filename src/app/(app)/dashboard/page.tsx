@@ -83,15 +83,23 @@ export default function DashboardPage() {
   const teamStats = getTeamGlobalStats(allMatches);
   const lastMatch = allMatches[0];
 
-  const topScorers = [...playerStats].sort((a, b) => b.totalGoals - a.totalGoals).slice(0, 5);
+  // Sorting for Pichichi (Goles > Eficacia > Partidos jugados asc)
+  const topScorers = [...playerStats].sort((a, b) => {
+    if (b.totalGoals !== a.totalGoals) return b.totalGoals - a.totalGoals;
+    if (b.winPercentage !== a.winPercentage) return b.winPercentage - a.winPercentage;
+    return a.matchesPlayed - b.matchesPlayed;
+  });
   
-  const topWinner = [...playerStats].sort((a, b) => {
+  // Sorting for Best Winner (Wins > % > Goals > Matches)
+  const topWinners = [...playerStats].sort((a, b) => {
     if (b.wins !== a.wins) return b.wins - a.wins;
     if (b.winPercentage !== a.winPercentage) return b.winPercentage - a.winPercentage;
     if (b.totalGoals !== a.totalGoals) return b.totalGoals - a.totalGoals;
     return b.matchesPlayed - a.matchesPlayed;
-  })[0];
-  
+  });
+
+  const topScorer = topScorers[0];
+  const topWinner = topWinners[0];
   const totalGoals = playerStats.reduce((sum, p) => sum + p.totalGoals, 0);
 
   const lastMatchTeamAPlayers = lastMatch?.teamAPlayers.map(s => allPlayers.find(p => p.id === s.playerId)).filter(Boolean) as Player[] || [];
@@ -164,11 +172,11 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-black tracking-tighter text-yellow-500 truncate drop-shadow-[0_0_8px_rgba(234,179,8,0.3)]">
-              {topScorers[0]?.name || '-'}
+              {topScorer?.name || '-'}
             </div>
             <div className="flex items-baseline gap-1 mt-1">
-              <span className="text-xl font-black text-yellow-500/90">{topScorers[0]?.totalGoals || 0}</span>
-              <span className="text-[10px] text-yellow-500/60 font-bold uppercase">goles en {topScorers[0]?.matchesPlayed || 0} part.</span>
+              <span className="text-xl font-black text-yellow-500/90">{topScorer?.totalGoals || 0}</span>
+              <span className="text-[10px] text-yellow-500/60 font-bold uppercase">goles en {topScorer?.matchesPlayed || 0} part.</span>
             </div>
           </CardContent>
         </Card>
@@ -217,7 +225,7 @@ export default function DashboardPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {topScorers.map((player) => (
+                {topScorers.slice(0, 5).map((player) => (
                   <TableRow key={player.playerId} className="border-white/5 group">
                     <TableCell>
                       <div className="flex items-center gap-3">
