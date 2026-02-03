@@ -1,8 +1,14 @@
-
 "use client";
 
 import * as React from 'react';
-import dynamic from 'next/dynamic';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  ResponsiveContainer
+} from 'recharts';
 import {
   Card,
   CardContent,
@@ -10,20 +16,15 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+} from "../ui/chart";
 import type { Match } from "@/lib/definitions";
-
-// Importación dinámica de Recharts para evitar errores en el build de producción (SSR)
-const BarChart = dynamic(() => import('recharts').then((mod) => mod.BarChart), { ssr: false });
-const Bar = dynamic(() => import('recharts').then((mod) => mod.Bar), { ssr: false });
-const XAxis = dynamic(() => import('recharts').then((mod) => mod.XAxis), { ssr: false });
-const YAxis = dynamic(() => import('recharts').then((mod) => mod.YAxis), { ssr: false });
-const CartesianGrid = dynamic(() => import('recharts').then((mod) => mod.CartesianGrid), { ssr: false });
-
-const ChartContainer = dynamic(() => import('../ui/chart').then((mod) => mod.ChartContainer), { ssr: false });
-const ChartTooltip = dynamic(() => import('../ui/chart').then((mod) => mod.ChartTooltip), { ssr: false });
-const ChartTooltipContent = dynamic(() => import('../ui/chart').then((mod) => mod.ChartTooltipContent), { ssr: false });
-const ChartLegend = dynamic(() => import('../ui/chart').then((mod) => mod.ChartLegend), { ssr: false });
-const ChartLegendContent = dynamic(() => import('../ui/chart').then((mod) => mod.ChartLegendContent), { ssr: false });
+import { BarChart3 } from "lucide-react";
 
 const chartConfig = {
   azul: {
@@ -48,6 +49,7 @@ export function GoalsChart({ matches }: GoalsChartProps) {
   }, []);
 
   const chartData = React.useMemo(() => {
+    if (!matches || matches.length === 0) return [];
     return [...matches]
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
       .map((match) => ({
@@ -63,7 +65,7 @@ export function GoalsChart({ matches }: GoalsChartProps) {
 
   if (!isMounted) {
     return (
-      <Card className="h-80 w-full animate-pulse bg-muted/10">
+      <Card className="h-[400px] w-full animate-pulse bg-muted/10">
         <CardHeader>
           <CardTitle>Rendimiento General</CardTitle>
           <CardDescription>Cargando estadísticas...</CardDescription>
@@ -72,40 +74,59 @@ export function GoalsChart({ matches }: GoalsChartProps) {
     );
   }
 
+  if (chartData.length === 0) {
+    return (
+      <Card className="h-[400px] flex flex-col items-center justify-center text-center p-6 border-dashed">
+        <BarChart3 className="h-12 w-12 text-muted-foreground/20 mb-4" />
+        <CardTitle className="text-muted-foreground">Sin Datos de Partidos</CardTitle>
+        <CardDescription>Carga el primer partido para ver el rendimiento.</CardDescription>
+      </Card>
+    );
+  }
+
   return (
-    <Card>
+    <Card className="overflow-hidden">
       <CardHeader>
-        <CardTitle>Rendimiento General</CardTitle>
-        <CardDescription>Goles por equipo en los últimos partidos.</CardDescription>
+        <CardTitle className="text-xl font-black uppercase tracking-tight italic">Rendimiento General</CardTitle>
+        <CardDescription>Goles por equipo en los últimos 10 encuentros.</CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="h-80 w-full">
-          <BarChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-            <XAxis
-              dataKey="date"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-            />
-            <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
-            <ChartTooltip
-              cursor={{ fill: "hsl(var(--secondary))" }}
-              content={<ChartTooltipContent indicator="dot" />}
-            />
-            <ChartLegend content={<ChartLegendContent />} />
-            <Bar
-              dataKey="azul"
-              fill="var(--color-azul)"
-              stackId="a"
-            />
-            <Bar
-              dataKey="rojo"
-              fill="var(--color-rojo)"
-              radius={[4, 4, 0, 0]}
-              stackId="a"
-            />
-          </BarChart>
+        <ChartContainer config={chartConfig} className="h-[300px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData} margin={{ top: 20, right: 0, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsla(var(--foreground), 0.05)" />
+              <XAxis
+                dataKey="date"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                tick={{ fill: 'hsla(var(--muted-foreground), 0.5)', fontSize: 10, fontWeight: 'bold' }}
+              />
+              <YAxis 
+                allowDecimals={false} 
+                tickLine={false} 
+                axisLine={false}
+                tick={{ fill: 'hsla(var(--muted-foreground), 0.5)', fontSize: 10 }}
+              />
+              <ChartTooltip
+                cursor={{ fill: "hsla(var(--foreground), 0.05)" }}
+                content={<ChartTooltipContent indicator="dot" />}
+              />
+              <ChartLegend content={<ChartLegendContent />} />
+              <Bar
+                dataKey="azul"
+                fill="var(--color-azul)"
+                stackId="a"
+                radius={[0, 0, 0, 0]}
+              />
+              <Bar
+                dataKey="rojo"
+                fill="var(--color-rojo)"
+                radius={[4, 4, 0, 0]}
+                stackId="a"
+              />
+            </BarChart>
+          </ResponsiveContainer>
         </ChartContainer>
       </CardContent>
     </Card>
