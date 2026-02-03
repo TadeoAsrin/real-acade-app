@@ -28,29 +28,17 @@ const positionCoordinates: { [key: string]: { top: string; left: string; transfo
   FWD: { top: '80%', left: '50%', transform: 'translateX(-50%)' },
 };
 
-const playerPositionMap: { [key: string]: keyof typeof positionCoordinates } = {
-  '1': 'FWD', '2': 'MID_L', '3': 'MID_R', '4': 'MID_C', '5': 'DEF_L', '6': 'DEF_R', '7': 'GK',
-};
-
-type PlayerPosition = { x: number; y: number };
-type PlayerPositions = { [playerId: string]: PlayerPosition };
-type DraggingState = {
-  id: string;
-  offsetX: number;
-  offsetY: number;
-};
-
 export function FieldView({ team, players }: FieldViewProps) {
   const fieldRef = React.useRef<HTMLDivElement>(null);
   const playerRefs = React.useRef<{ [key: string]: HTMLDivElement | null }>({});
-  const [playerPositions, setPlayerPositions] = React.useState<PlayerPositions>({});
-  const [draggingPlayer, setDraggingPlayer] = React.useState<DraggingState | null>(null);
+  const [playerPositions, setPlayerPositions] = React.useState<{ [key: string]: { x: number; y: number } }>({});
+  const [draggingPlayer, setDraggingPlayer] = React.useState<{ id: string; offsetX: number; offsetY: number } | null>(null);
 
   React.useEffect(() => {
-    const initialPositions: PlayerPositions = {};
+    const initialPositions: { [key: string]: { x: number; y: number } } = {};
+    const coordsKeys = Object.keys(positionCoordinates);
     players.forEach((player, index) => {
-      const positionKey = playerPositionMap[player.id] || Object.keys(positionCoordinates)[index % Object.keys(positionCoordinates).length];
-      const coords = positionCoordinates[positionKey];
+      const coords = positionCoordinates[coordsKeys[index % coordsKeys.length]];
       initialPositions[player.id] = {
         x: parseFloat(coords.left),
         y: parseFloat(coords.top),
@@ -73,13 +61,9 @@ export function FieldView({ team, players }: FieldViewProps) {
     if (!draggingPlayer || !fieldRef.current) return;
     e.preventDefault();
     const fieldRect = fieldRef.current.getBoundingClientRect();
-    const playerElement = playerRefs.current[draggingPlayer.id];
-    if (!playerElement) return;
-    const playerRect = playerElement.getBoundingClientRect();
     let newCenterX = e.clientX - fieldRect.left - draggingPlayer.offsetX;
     let newCenterY = e.clientY - fieldRect.top - draggingPlayer.offsetY;
-    newCenterX = Math.max(playerRect.width / 2, Math.min(newCenterX, fieldRect.width - playerRect.width / 2));
-    newCenterY = Math.max(playerRect.height / 2, Math.min(newCenterY, fieldRect.height - playerRect.height / 2));
+    
     setPlayerPositions((prev) => ({
       ...prev,
       [draggingPlayer.id]: { x: (newCenterX / fieldRect.width) * 100, y: (newCenterY / fieldRect.height) * 100 },
@@ -113,7 +97,6 @@ export function FieldView({ team, players }: FieldViewProps) {
           <div className="absolute inset-0 border-[2px] border-white/30 m-2 rounded-lg pointer-events-none" />
           <div className="absolute top-1/2 left-0 h-[2px] w-full -translate-y-1/2 bg-white/30" />
           <div className="absolute top-1/2 left-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/30" />
-          <div className="absolute top-1/2 left-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/30" />
           
           {/* Áreas */}
           <div className="absolute top-2 left-1/2 h-20 w-48 -translate-x-1/2 border-2 border-t-0 border-white/30" />
@@ -141,7 +124,7 @@ export function FieldView({ team, players }: FieldViewProps) {
                           "h-12 w-12 border-2 shadow-xl ring-4 ring-black/20",
                           team === 'Azul' ? "border-primary bg-primary/20" : "border-accent bg-accent/20"
                         )}>
-                          <AvatarImage src={player.avatar} alt={player.name} />
+                          <AvatarImage src={player.avatar} alt={player.name} className="object-cover" />
                           <AvatarFallback className="bg-muted text-xs">{player.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-sm border border-white/10 rounded-full px-2 py-0.5 whitespace-nowrap shadow-lg">

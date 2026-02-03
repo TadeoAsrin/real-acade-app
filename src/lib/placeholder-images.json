@@ -1,88 +1,88 @@
 {
   "placeholderImages": [
     {
-      "id": "pele",
-      "description": "Pelé - O Rei",
-      "imageUrl": "https://images.unsplash.com/photo-1665839267241-380a062ebcd6?auto=format&fit=crop&q=80&w=400&h=400",
-      "imageHint": "football pele"
-    },
-    {
-      "id": "maradona",
-      "description": "Diego Maradona - El Pibe de Oro",
-      "imageUrl": "https://images.unsplash.com/photo-1634931538113-538f0a15a33c?auto=format&fit=crop&q=80&w=400&h=400",
-      "imageHint": "football maradona"
-    },
-    {
       "id": "messi",
       "description": "Lionel Messi - La Pulga",
-      "imageUrl": "https://images.unsplash.com/photo-1667983088885-226788e18a6e?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageUrl": "https://images.unsplash.com/photo-1552318975-2758c95c11bc?auto=format&fit=crop&q=80&w=400&h=400",
       "imageHint": "football messi"
     },
     {
       "id": "cr7",
       "description": "Cristiano Ronaldo - El Bicho",
-      "imageUrl": "https://images.unsplash.com/photo-1649771544464-03bedb456a4f?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageUrl": "https://images.unsplash.com/photo-1518604666860-9ed391f76460?auto=format&fit=crop&q=80&w=400&h=400",
       "imageHint": "football ronaldo"
+    },
+    {
+      "id": "pele",
+      "description": "Pelé - O Rei",
+      "imageUrl": "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "football soccer"
+    },
+    {
+      "id": "maradona",
+      "description": "Diego Maradona - El Pibe de Oro",
+      "imageUrl": "https://images.unsplash.com/photo-1529900948632-58674ba19306?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "soccer portrait"
     },
     {
       "id": "zidane",
       "description": "Zinedine Zidane - Zizou",
-      "imageUrl": "https://images.unsplash.com/photo-1604331546936-ba127df7370e?auto=format&fit=crop&q=80&w=400&h=400",
-      "imageHint": "football zidane"
-    },
-    {
-      "id": "cruyff",
-      "description": "Johan Cruyff - El Holandés Volador",
-      "imageUrl": "https://images.unsplash.com/photo-1633008246097-e3980a6000da?auto=format&fit=crop&q=80&w=400&h=400",
-      "imageHint": "football cruyff"
+      "imageUrl": "https://images.unsplash.com/photo-1606925797300-0b35e9d1741e?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "football player"
     },
     {
       "id": "ronaldinho",
       "description": "Ronaldinho - El Brujo",
-      "imageUrl": "https://images.unsplash.com/photo-1631392406631-c2eeeda4d4bb?auto=format&fit=crop&q=80&w=400&h=400",
-      "imageHint": "football ronaldinho"
+      "imageUrl": "https://images.unsplash.com/photo-1551958219-acbc608c6377?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "football joy"
     },
     {
       "id": "r9",
       "description": "Ronaldo Nazário - El Fenómeno",
-      "imageUrl": "https://picsum.photos/seed/r9fenomeno/400/400",
-      "imageHint": "football nazario"
+      "imageUrl": "https://images.unsplash.com/photo-1628891435222-065925dcb365?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "football striker"
+    },
+    {
+      "id": "cruyff",
+      "description": "Johan Cruyff - El Holandés",
+      "imageUrl": "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "vintage soccer"
     },
     {
       "id": "beckenbauer",
       "description": "Franz Beckenbauer - El Káiser",
-      "imageUrl": "https://picsum.photos/seed/beckenbauer4/400/400",
-      "imageHint": "football beckenbauer"
-    },
-    {
-      "id": "platini",
-      "description": "Michel Platini - Le Roi",
-      "imageUrl": "https://picsum.photos/seed/platini10/400/400",
-      "imageHint": "football platini"
-    },
-    {
-      "id": "puskas",
-      "description": "Ferenc Puskás - Cañoncito Pum",
-      "imageUrl": "https://images.unsplash.com/photo-1708533144300-9a00b4cc29f8?auto=format&fit=crop&q=80&w=400&h=400",
-      "imageHint": "football puskas"
-    },
-    {
-      "id": "distefano",
-      "description": "Alfredo Di Stéfano - La Saeta Rubia",
-      "imageUrl": "https://picsum.photos/seed/distefano9/400/400",
-      "imageHint": "football stefano"
+      "imageUrl": "https://images.unsplash.com/photo-1517466787929-bc90951d0974?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "football legend"
     },
     {
       "id": "maldini",
-      "description": "Paolo Maldini - Il Capitano",
-      "imageUrl": "https://picsum.photos/seed/maldini3/400/400",
-      "imageHint": "football maldini"
+      "description": "Paolo Maldini - El Capitán",
+      "imageUrl": "https://images.unsplash.com/photo-1551288049-bbbda536ad0a?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "defender portrait"
     },
     {
       "id": "yashin",
       "description": "Lev Yashin - La Araña Negra",
-      "imageUrl": "https://images.unsplash.com/photo-1760890518049-47b9822e1c89?auto=format&fit=crop&q=80&w=400&h=400",
-      "imageHint": "football yashin"
+      "imageUrl": "https://images.unsplash.com/photo-1510298737750-5ca07c13414d?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "goalkeeper portrait"
+    },
+    {
+      "id": "puskas",
+      "description": "Ferenc Puskás",
+      "imageUrl": "https://images.unsplash.com/photo-1624891151634-1929c367752e?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "soccer star"
+    },
+    {
+      "id": "henry",
+      "description": "Thierry Henry - Tití",
+      "imageUrl": "https://images.unsplash.com/photo-1431324155629-1a6eda1eed2d?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "arsenal football"
+    },
+    {
+      "id": "iniesta",
+      "description": "Andrés Iniesta - El Genio",
+      "imageUrl": "https://images.unsplash.com/photo-1516567727245-ad8c68f3ec93?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "spain football"
     }
   ]
 }
