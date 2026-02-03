@@ -9,10 +9,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Flame, Crown } from "lucide-react";
+import { Flame, Crown, Info } from "lucide-react";
 import Link from "next/link";
 import { cn, getInitials } from "@/lib/utils";
 import type { Player, Match } from "@/lib/definitions";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface PowerRankingProps {
   players: Player[];
@@ -28,11 +34,30 @@ export function PowerRanking({ players, matches }: PowerRankingProps) {
   return (
     <Card className="h-full glass-card border-orange-500/10">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Flame className="h-6 w-6 text-orange-500 fill-orange-500 animate-pulse" />
-          <span className="font-black uppercase tracking-tighter italic text-2xl text-orange-500">On Fire</span>
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Flame className="h-6 w-6 text-orange-500 fill-orange-500 animate-pulse" />
+            <span className="font-black uppercase tracking-tighter italic text-2xl text-orange-500">On Fire</span>
+          </div>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button className="text-muted-foreground/40 hover:text-orange-500 transition-colors">
+                  <Info className="h-4 w-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent className="bg-black/90 border-white/10 text-[10px] p-3 space-y-1">
+                <p className="font-bold text-orange-500 uppercase">¿Cómo se puntúa?</p>
+                <p>• MVP: +15 pts</p>
+                <p>• Victoria: +10 pts</p>
+                <p>• Empate: +5 pts</p>
+                <p>• Mejor Gol: +5 pts</p>
+                <p>• Gol: +2 pts</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </CardTitle>
-        <CardDescription>Los mejores 5 jugadores según su rendimiento actual.</CardDescription>
+        <CardDescription>Los 5 líderes por impacto: MVP, Victorias y Goles.</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
