@@ -4,7 +4,9 @@ import * as React from 'react';
 import { generateMatchSummary, type MatchSummaryOutput, type MatchSummaryInput } from '@/ai/flows/match-summary-flow';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Loader2, Quote } from 'lucide-react';
+import { Sparkles, Loader2, Quote, LogIn } from 'lucide-react';
+import { useUser } from '@/firebase';
+import Link from 'next/link';
 
 interface MatchAiSummaryProps {
   matchData: MatchSummaryInput;
@@ -13,8 +15,10 @@ interface MatchAiSummaryProps {
 export function MatchAiSummary({ matchData }: MatchAiSummaryProps) {
   const [summary, setSummary] = React.useState<MatchSummaryOutput | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
+  const { user } = useUser();
 
   async function handleGenerate() {
+    if (!user) return;
     setIsLoading(true);
     try {
       const result = await generateMatchSummary(matchData);
@@ -39,7 +43,20 @@ export function MatchAiSummary({ matchData }: MatchAiSummaryProps) {
         <CardDescription>Análisis periodístico generado por inteligencia artificial.</CardDescription>
       </CardHeader>
       <CardContent>
-        {summary ? (
+        {!user ? (
+          <div className="flex flex-col items-center justify-center py-6 text-center space-y-4">
+            <div className="p-3 bg-primary/10 rounded-full">
+                <LogIn className="h-6 w-6 text-primary" />
+            </div>
+            <div className="space-y-1">
+                <p className="font-medium text-sm text-primary">Función Exclusiva</p>
+                <p className="text-xs text-muted-foreground">Inicia sesión para que la IA de Real Acade escriba la crónica de este encuentro.</p>
+            </div>
+            <Button asChild variant="outline" size="sm" className="border-primary/20 hover:bg-primary/10">
+              <Link href="/login">Iniciar Sesión</Link>
+            </Button>
+          </div>
+        ) : summary ? (
           <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-700">
             <h4 className="text-xl font-bold text-primary italic">"{summary.title}"</h4>
             <div className="relative">
@@ -59,7 +76,7 @@ export function MatchAiSummary({ matchData }: MatchAiSummaryProps) {
             </div>
             <div className="space-y-1">
                 <p className="font-medium text-sm">¿Quieres leer la crónica de este encuentro?</p>
-                <p className="text-xs text-muted-foreground">La IA de Real Acade escribirá un resumen basado en las estadísticas.</p>
+                <p className="text-xs text-muted-foreground">La IA escribirá un resumen basado en las estadísticas del partido.</p>
             </div>
             <Button onClick={handleGenerate} disabled={isLoading}>
               {isLoading ? (
