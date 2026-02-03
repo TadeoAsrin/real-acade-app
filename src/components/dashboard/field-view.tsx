@@ -10,7 +10,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { cn, getInitials } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { Trophy } from 'lucide-react';
 
 interface FieldViewProps {
@@ -37,14 +37,19 @@ const GlovesIcon = ({ className }: { className?: string }) => (
 );
 
 const formationCoordinates: { top: string; left: string }[] = [
-  { top: '15%', left: '50%' },
-  { top: '38%', left: '22%' },
-  { top: '38%', left: '50%' },
-  { top: '38%', left: '78%' },
-  { top: '68%', left: '35%' },
-  { top: '68%', left: '65%' },
-  { top: '88%', left: '50%' },
+  { top: '12%', left: '50%' }, // 0: GK (1)
+  { top: '35%', left: '22%' }, // 1: Def L (3)
+  { top: '35%', left: '50%' }, // 2: Def C (2)
+  { top: '35%', left: '78%' }, // 3: Def R (4)
+  { top: '65%', left: '35%' }, // 4: Mid L (5)
+  { top: '65%', left: '65%' }, // 5: Mid R (5)
+  { top: '85%', left: '50%' }, // 6: Fwd (9)
 ];
+
+const getTacticalNumber = (index: number): string => {
+  const numbers = ["1", "3", "2", "4", "5", "5", "9"];
+  return numbers[index] || "";
+};
 
 export function FieldView({ team, players, topScorerId }: FieldViewProps) {
   const fieldRef = React.useRef<HTMLDivElement>(null);
@@ -121,38 +126,39 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
           onPointerMove={handlePointerMove}
           className={cn(
             "relative mx-auto h-[560px] w-full rounded-2xl border-[4px] border-white/20 overflow-hidden touch-none select-none shadow-2xl",
-            "bg-emerald-700",
+            "bg-emerald-800",
             draggingPlayer ? "cursor-grabbing" : "cursor-default"
           )}
           style={{
             backgroundImage: `
               linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
-              repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 40px, transparent 40px, transparent 80px)
+              repeating-linear-gradient(0deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 40px, transparent 40px, transparent 80px)
             `,
             backgroundSize: '100% 100%, 100% 80px'
           }}
         >
-          <div className="absolute inset-4 border-2 border-white/30 rounded-lg pointer-events-none" />
-          <div className="absolute top-1/2 left-1/2 h-32 w-32 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/30" />
-          <div className="absolute top-1/2 left-0 w-full h-[2px] bg-white/30 -translate-y-1/2" />
+          <div className="absolute inset-4 border-2 border-white/20 rounded-lg pointer-events-none" />
+          <div className="absolute top-1/2 left-1/2 h-32 w-32 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/20" />
+          <div className="absolute top-1/2 left-0 w-full h-[2px] bg-white/20 -translate-y-1/2" />
           
           <div className={cn(
-            "absolute top-4 left-1/2 h-28 w-56 -translate-x-1/2 border-2 border-t-0 border-white/40 rounded-b-2xl transition-all duration-300",
+            "absolute top-4 left-1/2 h-24 w-48 -translate-x-1/2 border-2 border-t-0 border-white/30 rounded-b-xl transition-all duration-300",
             draggingPlayer && isPlayerInGKZone(playerPositions[draggingPlayer.id] || {x:0, y:100}) 
               ? "bg-orange-500/20 border-orange-500 shadow-[0_0_30px_rgba(249,115,22,0.3)]" 
               : "bg-white/5"
           )} />
           
-          <div className="absolute bottom-4 left-1/2 h-28 w-56 -translate-x-1/2 border-2 border-b-0 border-white/30 rounded-t-2xl" />
+          <div className="absolute bottom-4 left-1/2 h-24 w-48 -translate-x-1/2 border-2 border-b-0 border-white/30 rounded-t-xl" />
           
           <TooltipProvider>
-            {players.map((player) => {
+            {players.map((player, index) => {
               const pos = playerPositions[player.id];
               if (!pos) return null;
               
               const isDragging = draggingPlayer?.id === player.id;
               const isPichichi = player.id === topScorerId;
               const isGK = isPlayerInGKZone(pos);
+              const tacticalNumber = getTacticalNumber(index);
 
               return (
                 <div
@@ -171,24 +177,24 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
                 >
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className="flex flex-col items-center gap-1.5">
+                      <div className="flex flex-col items-center gap-1">
                         <div className="relative">
                           <Avatar className={cn(
-                            "h-11 w-11 border-[3px] shadow-2xl ring-2 ring-black/30 transition-all duration-300",
+                            "h-11 w-11 border-[3px] shadow-2xl transition-all duration-300",
                             isGK 
                               ? "border-orange-500 bg-orange-600/40" 
                               : isPichichi 
-                                ? "border-yellow-400 shadow-yellow-500/40 ring-yellow-400/20" 
+                                ? "border-yellow-400 shadow-yellow-500/40" 
                                 : team === 'Azul' 
                                   ? "border-primary bg-primary/20" 
                                   : "border-accent bg-accent/20",
-                            isDragging && "ring-white/50 opacity-90 shadow-white/20"
+                            isDragging && "opacity-90 scale-105"
                           )}>
                             <AvatarFallback className={cn(
-                                "text-[10px] font-black",
+                                "text-sm font-black italic",
                                 isGK ? "bg-orange-500 text-white" : isPichichi ? "bg-yellow-400 text-black" : team === 'Azul' ? "bg-primary text-white" : "bg-accent text-white"
                             )}>
-                                {getInitials(player.name)}
+                                {tacticalNumber}
                             </AvatarFallback>
                           </Avatar>
                           
@@ -206,7 +212,7 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
                         </div>
                         
                         <div className={cn(
-                          "backdrop-blur-md border border-white/20 rounded-full px-2.5 py-0.5 shadow-lg transition-colors duration-300",
+                          "backdrop-blur-md border border-white/20 rounded-full px-2.5 py-0.5 shadow-lg",
                           isPichichi ? "bg-yellow-400/90" : isGK ? "bg-orange-500/90" : "bg-black/80"
                         )}>
                           <p className={cn(
