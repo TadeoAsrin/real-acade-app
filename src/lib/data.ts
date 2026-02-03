@@ -25,6 +25,7 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
       losses: 0,
       draws: 0,
       winPercentage: 0,
+      goalsPerMatch: 0,
       matchesAsBlue: 0,
       matchesAsRed: 0,
       powerPoints: 0,
@@ -77,6 +78,7 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
       const stats = statsMap[playerId];
       if (stats.matchesPlayed > 0) {
           stats.winPercentage = Math.round((stats.wins / stats.matchesPlayed) * 100);
+          stats.goalsPerMatch = Number((stats.totalGoals / stats.matchesPlayed).toFixed(2));
       }
   }
 

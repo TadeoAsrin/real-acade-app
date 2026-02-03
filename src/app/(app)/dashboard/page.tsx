@@ -82,16 +82,14 @@ export default function DashboardPage() {
   const teamStats = getTeamGlobalStats(allMatches);
   const lastMatch = allMatches[0];
 
-  // Lógica de desempate refinada: Victorias > % Efectividad > Goles > Partidos
-  const sortedByWins = [...playerStats].sort((a, b) => {
-    if (b.wins !== a.wins) return b.wins - a.wins;
-    if (b.winPercentage !== a.winPercentage) return b.winPercentage - a.winPercentage;
+  const sortedByGoals = [...playerStats].sort((a, b) => {
     if (b.totalGoals !== a.totalGoals) return b.totalGoals - a.totalGoals;
+    if (b.goalsPerMatch !== a.goalsPerMatch) return b.goalsPerMatch - a.goalsPerMatch;
     return a.matchesPlayed - b.matchesPlayed;
   });
 
-  const sortedByGoals = [...playerStats].sort((a, b) => {
-    if (b.totalGoals !== a.totalGoals) return b.totalGoals - a.totalGoals;
+  const sortedByWins = [...playerStats].sort((a, b) => {
+    if (b.wins !== a.wins) return b.wins - a.wins;
     if (b.winPercentage !== a.winPercentage) return b.winPercentage - a.winPercentage;
     return a.matchesPlayed - b.matchesPlayed;
   });
@@ -173,7 +171,9 @@ export default function DashboardPage() {
             </div>
             <div className="flex items-baseline gap-1 mt-1">
               <span className="text-xl font-black text-yellow-500/90">{topScorer?.totalGoals || 0}</span>
-              <span className="text-[10px] text-yellow-500/60 font-bold uppercase">goles en {topScorer?.matchesPlayed || 0} part.</span>
+              <span className="text-[10px] text-yellow-500/60 font-bold uppercase ml-1">goles</span>
+              <span className="mx-1 text-muted-foreground/30">|</span>
+              <span className="text-[10px] text-yellow-500/60 font-bold uppercase">{topScorer?.goalsPerMatch || 0} avg</span>
             </div>
           </CardContent>
         </Card>
@@ -189,7 +189,7 @@ export default function DashboardPage() {
             </div>
             <div className="flex items-baseline gap-1 mt-1">
               <span className="text-xl font-black text-emerald-500/90">{topWinner?.wins || 0}V</span>
-              <span className="text-[10px] text-emerald-500/60 font-bold uppercase">({topWinner?.winPercentage || 0}% efectividad)</span>
+              <span className="text-[10px] text-emerald-500/60 font-bold uppercase">({topWinner?.winPercentage || 0}% efec.)</span>
             </div>
           </CardContent>
         </Card>
@@ -218,6 +218,7 @@ export default function DashboardPage() {
                 <TableRow className="hover:bg-transparent border-white/5">
                   <TableHead className="font-black uppercase text-[10px] tracking-widest">Jugador</TableHead>
                   <TableHead className="text-center font-black uppercase text-[10px] tracking-widest">Goles</TableHead>
+                  <TableHead className="text-center font-black uppercase text-[10px] tracking-widest">Promedio</TableHead>
                   <TableHead className="text-right font-black uppercase text-[10px] tracking-widest">Partidos</TableHead>
                 </TableRow>
               </TableHeader>
@@ -234,6 +235,11 @@ export default function DashboardPage() {
                       </div>
                     </TableCell>
                     <TableCell className="text-center font-black text-lg">{player.totalGoals}</TableCell>
+                    <TableCell className="text-center">
+                      <span className="bg-primary/10 text-primary px-2 py-0.5 rounded text-xs font-black">
+                        {player.goalsPerMatch}
+                      </span>
+                    </TableCell>
                     <TableCell className="text-right font-mono text-sm text-muted-foreground">{player.matchesPlayed}</TableCell>
                   </TableRow>
                 ))}
