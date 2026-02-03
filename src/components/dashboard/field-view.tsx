@@ -19,14 +19,32 @@ interface FieldViewProps {
   topScorerId?: string;
 }
 
-// Formación Táctica inicial 1-3-2-1
+// Icono de Guantes de Portero Personalizado
+const GlovesIcon = ({ className }: { className?: string }) => (
+  <svg 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2.5" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    className={className}
+  >
+    <path d="M6 18c-2 0-3-1-3-3s1-3 3-3 3 1 3 3-1 3-3 3z" />
+    <path d="M18 18c2 0 3-1 3-3s-1-3-3-3-3 1-3 3 1 3 3 3z" />
+    <path d="M9 12V7a3 3 0 0 1 6 0v5" />
+    <path d="M3 15V9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6" />
+  </svg>
+);
+
+// Formación Táctica 1-3-2-1
 const formationCoordinates: { top: string; left: string }[] = [
-  { top: '12%', left: '50%' }, // Portero
-  { top: '35%', left: '20%' }, // Defensor Izquierdo
-  { top: '35%', left: '50%' }, // Defensor Central
-  { top: '35%', left: '80%' }, // Defensor Derecho
-  { top: '65%', left: '35%' }, // Mediocampista Izquierdo
-  { top: '65%', left: '65%' }, // Mediocampista Derecho
+  { top: '15%', left: '50%' }, // Portero (GK Zone)
+  { top: '38%', left: '22%' }, // Defensor Izquierdo
+  { top: '38%', left: '50%' }, // Defensor Central
+  { top: '38%', left: '78%' }, // Defensor Derecho
+  { top: '68%', left: '35%' }, // Mediocampista Izquierdo
+  { top: '68%', left: '65%' }, // Mediocampista Derecho
   { top: '88%', left: '50%' }, // Delantero Centro
 ];
 
@@ -35,7 +53,7 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
   const [playerPositions, setPlayerPositions] = React.useState<{ [key: string]: { x: number; y: number } }>({});
   const [draggingPlayer, setDraggingPlayer] = React.useState<{ id: string; startX: number; startY: number } | null>(null);
 
-  // Inicializar posiciones
+  // Inicializar posiciones tácticas
   React.useEffect(() => {
     const initialPositions: { [key: string]: { x: number; y: number } } = {};
     players.forEach((player, index) => {
@@ -68,9 +86,8 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
     let newX = ((e.clientX - fieldRect.left - draggingPlayer.startX) / fieldRect.width) * 100;
     let newY = ((e.clientY - fieldRect.top - draggingPlayer.startY) / fieldRect.height) * 100;
     
-    // Límites del campo
-    newX = Math.max(5, Math.min(95, newX));
-    newY = Math.max(5, Math.min(95, newY));
+    newX = Math.max(8, Math.min(92, newX));
+    newY = Math.max(8, Math.min(92, newY));
 
     setPlayerPositions((prev) => ({
       ...prev,
@@ -85,10 +102,8 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
     }
   };
 
-  // Función para determinar si un jugador está en la "Zona de Portero"
   const isPlayerInGKZone = (pos: { x: number; y: number }) => {
-    // Definimos el área pequeña como el 22% superior del campo y centralizado
-    return pos.y < 22 && pos.x > 30 && pos.x < 70;
+    return pos.y < 25 && pos.x > 25 && pos.x < 75;
   };
 
   return (
@@ -109,33 +124,33 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
           ref={fieldRef}
           onPointerMove={handlePointerMove}
           className={cn(
-            "relative mx-auto h-[540px] w-full rounded-2xl border-[4px] border-white/20 overflow-hidden touch-none select-none",
-            "bg-emerald-600 shadow-inner",
+            "relative mx-auto h-[560px] w-full rounded-2xl border-[4px] border-white/20 overflow-hidden touch-none select-none shadow-2xl",
+            "bg-emerald-700",
             draggingPlayer ? "cursor-grabbing" : "cursor-default"
           )}
           style={{
             backgroundImage: `
               linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
-              repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 40px, transparent 40px, transparent 80px)
+              repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 40px, transparent 40px, transparent 80px)
             `,
             backgroundSize: '100% 100%, 100% 80px'
           }}
         >
           {/* Líneas de Cal del Campo */}
           <div className="absolute inset-4 border-2 border-white/30 rounded-lg pointer-events-none" />
-          <div className="absolute top-1/2 left-1/2 h-28 w-28 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/30" />
+          <div className="absolute top-1/2 left-1/2 h-32 w-32 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/30" />
           <div className="absolute top-1/2 left-0 w-full h-[2px] bg-white/30 -translate-y-1/2" />
           
-          {/* Área de Portería (GK Zone Visual) */}
+          {/* Área de Portería Dinámica */}
           <div className={cn(
-            "absolute top-4 left-1/2 h-24 w-48 -translate-x-1/2 border-2 border-t-0 border-white/40 rounded-b-xl transition-colors duration-300",
+            "absolute top-4 left-1/2 h-28 w-56 -translate-x-1/2 border-2 border-t-0 border-white/40 rounded-b-2xl transition-all duration-300",
             draggingPlayer && isPlayerInGKZone(playerPositions[draggingPlayer.id] || {x:0, y:100}) 
-              ? "bg-orange-500/10 border-orange-500/40" 
+              ? "bg-orange-500/20 border-orange-500 shadow-[0_0_30px_rgba(249,115,22,0.3)]" 
               : "bg-white/5"
           )} />
           
           {/* Área Grande Inferior */}
-          <div className="absolute bottom-4 left-1/2 h-24 w-48 -translate-x-1/2 border-2 border-b-0 border-white/30 rounded-t-xl" />
+          <div className="absolute bottom-4 left-1/2 h-28 w-56 -translate-x-1/2 border-2 border-b-0 border-white/30 rounded-t-2xl" />
           
           <TooltipProvider>
             {players.map((player) => {
@@ -153,7 +168,7 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
                   onPointerUp={handlePointerUp}
                   className={cn(
                     "absolute transition-shadow duration-200 z-10",
-                    isDragging ? "scale-110 z-50 cursor-grabbing" : "cursor-grab hover:scale-105"
+                    isDragging ? "scale-110 z-50 cursor-grabbing" : "cursor-grab hover:scale-110"
                   )}
                   style={{
                     top: `${pos.y}%`,
@@ -168,13 +183,13 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
                           <Avatar className={cn(
                             "h-12 w-12 border-[3px] shadow-2xl ring-2 ring-black/30 transition-all duration-300",
                             isGK 
-                              ? "border-orange-500 bg-orange-600/40 scale-105" // Estilo Portero Dinámico
+                              ? "border-orange-500 bg-orange-600/40 scale-105" 
                               : isPichichi 
                                 ? "border-yellow-400 shadow-yellow-500/40 ring-yellow-400/20" 
                                 : team === 'Azul' 
                                   ? "border-primary bg-primary/20" 
                                   : "border-accent bg-accent/20",
-                            isDragging && "ring-white/50 opacity-90"
+                            isDragging && "ring-white/50 opacity-90 shadow-white/20"
                           )}>
                             <AvatarImage src={player.avatar} alt={player.name} className="object-cover" />
                             <AvatarFallback className="bg-muted text-[10px] font-black">{player.name.charAt(0)}</AvatarFallback>
@@ -188,7 +203,7 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
                           
                           {isGK && (
                             <div className="absolute -bottom-1 -right-1 bg-orange-500 rounded-full p-1 shadow-md border border-white/40 animate-pulse">
-                              <ShieldCheck className="h-3.5 w-3.5 text-white" />
+                              <GlovesIcon className="h-3.5 w-3.5 text-white" />
                             </div>
                           )}
                         </div>
@@ -206,10 +221,11 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
                         </div>
                       </div>
                     </TooltipTrigger>
-                    <TooltipContent side="top" className="bg-black border-white/20 text-white font-bold text-xs">
+                    <TooltipContent side="top" className="bg-black border-white/20 text-white font-bold text-xs shadow-2xl">
                       <div className="flex flex-col gap-0.5">
                         <span>{player.name}</span>
-                        {isGK && <span className="text-orange-400 text-[10px] uppercase tracking-widest">En Portería</span>}
+                        {isGK && <span className="text-orange-400 text-[10px] uppercase tracking-widest font-black">Guardián del Arco</span>}
+                        {isPichichi && <span className="text-yellow-400 text-[10px] uppercase tracking-widest font-black">Goleador de Élite</span>}
                       </div>
                     </TooltipContent>
                   </Tooltip>
