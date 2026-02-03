@@ -2,10 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
-}
-
 @layer base {
   :root {
     --background: 231 15% 18%;
@@ -29,46 +25,7 @@ body {
     --ring: 221.2 83.2% 53.3%;
     --chart-1: 221 83% 53%;
     --chart-2: 0 72% 51%;
-    --chart-3: 27 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
     --radius: 0.5rem;
-
-    --sidebar-background: 231 15% 14%;
-    --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 221.2 83.2% 53.3%;
-    --sidebar-primary-foreground: 210 40% 98%;
-    --sidebar-accent: 231 15% 22%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 231 15% 22%;
-    --sidebar-ring: 221.2 83.2% 53.3%;
-  }
-
-  .dark {
-    --background: 231 15% 18%;
-    --foreground: 0 0% 98%;
-    --card: 231 15% 22%;
-    --card-foreground: 0 0% 98%;
-    --popover: 231 15% 18%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 231 15% 28%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 231 15% 28%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 72.2% 50.6%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 231 15% 28%;
-    --input: 231 15% 28%;
-    --ring: 221.2 83.2% 53.3%;
-    --chart-1: 221 83% 53%;
-    --chart-2: 0 72% 51%;
-    --chart-3: 27 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
 
     --sidebar-background: 231 15% 14%;
     --sidebar-foreground: 0 0% 95%;
@@ -82,10 +39,6 @@ body {
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
+  * { @apply border-border; }
+  body { @apply bg-background text-foreground antialiased; }
 }

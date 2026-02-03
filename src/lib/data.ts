@@ -1,9 +1,4 @@
-
 import type { Player, Match, AggregatedPlayerStats, PlayerStats } from "./definitions";
-
-// Static data removed to rely on Firebase Firestore
-export const players: Player[] = [];
-export const matches: Match[] = [];
 
 const POINTS = {
   WIN: 10,
@@ -13,10 +8,6 @@ const POINTS = {
   BEST_GOAL: 5,
 };
 
-/**
- * Calculates aggregated statistics from a list of players and matches.
- * Useful for processing data fetched from Firestore.
- */
 export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match[]): AggregatedPlayerStats[] => {
   const statsMap: { [key: string]: AggregatedPlayerStats } = {};
 
