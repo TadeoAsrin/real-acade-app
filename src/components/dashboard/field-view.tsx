@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -18,22 +17,23 @@ interface FieldViewProps {
   players: Player[];
 }
 
-const positionCoordinates: { [key: string]: { top: string; left: string; transform: string } } = {
-  GK: { top: '5%', left: '50%', transform: 'translateX(-50%)' },
-  DEF_L: { top: '25%', left: '20%', transform: 'translateX(-50%)' },
-  DEF_R: { top: '25%', left: '80%', transform: 'translateX(-50%)' },
-  MID_C: { top: '50%', left: '50%', transform: 'translateX(-50%)' },
-  MID_L: { top: '55%', left: '25%', transform: 'translateX(-50%)' },
-  MID_R: { top: '55%', left: '75%', transform: 'translateX(-50%)' },
-  FWD: { top: '80%', left: '50%', transform: 'translateX(-50%)' },
+// Posiciones iniciales tácticas para Fútbol 7
+const positionCoordinates: { [key: string]: { top: string; left: string } } = {
+  GK: { top: '8%', left: '50%' },
+  DEF_L: { top: '25%', left: '25%' },
+  DEF_R: { top: '25%', left: '75%' },
+  MID_C: { top: '45%', left: '50%' },
+  MID_L: { top: '65%', left: '20%' },
+  MID_R: { top: '65%', left: '80%' },
+  FWD: { top: '85%', left: '50%' },
 };
 
 export function FieldView({ team, players }: FieldViewProps) {
   const fieldRef = React.useRef<HTMLDivElement>(null);
-  const playerRefs = React.useRef<{ [key: string]: HTMLDivElement | null }>({});
   const [playerPositions, setPlayerPositions] = React.useState<{ [key: string]: { x: number; y: number } }>({});
-  const [draggingPlayer, setDraggingPlayer] = React.useState<{ id: string; offsetX: number; offsetY: number } | null>(null);
+  const [draggingPlayer, setDraggingPlayer] = React.useState<{ id: string; startX: number; startY: number } | null>(null);
 
+  // Inicializar posiciones
   React.useEffect(() => {
     const initialPositions: { [key: string]: { x: number; y: number } } = {};
     const coordsKeys = Object.keys(positionCoordinates);
@@ -47,98 +47,141 @@ export function FieldView({ team, players }: FieldViewProps) {
     setPlayerPositions(initialPositions);
   }, [players]);
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>, playerId: string) => {
+  const handlePointerDown = (e: React.PointerEvent, playerId: string) => {
     e.preventDefault();
-    const playerElement = playerRefs.current[playerId];
-    if (!playerElement) return;
-    const playerRect = playerElement.getBoundingClientRect();
-    const offsetX = e.clientX - (playerRect.left + playerRect.width / 2);
-    const offsetY = e.clientY - (playerRect.top + playerRect.height / 2);
-    setDraggingPlayer({ id: playerId, offsetX, offsetY });
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    // Guardamos el punto relativo donde se hizo click dentro del avatar para evitar el "salto"
+    setDraggingPlayer({ 
+      id: playerId, 
+      startX: e.clientX - rect.left - rect.width / 2,
+      startY: e.clientY - rect.top - rect.height / 2
+    });
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handlePointerMove = (e: React.PointerEvent) => {
     if (!draggingPlayer || !fieldRef.current) return;
-    e.preventDefault();
-    const fieldRect = fieldRef.current.getBoundingClientRect();
-    let newCenterX = e.clientX - fieldRect.left - draggingPlayer.offsetX;
-    let newCenterY = e.clientY - fieldRect.top - draggingPlayer.offsetY;
     
+    const fieldRect = fieldRef.current.getBoundingClientRect();
+    
+    // Calculamos la nueva posición en porcentaje relativa al campo
+    let newX = ((e.clientX - fieldRect.left - draggingPlayer.startX) / fieldRect.width) * 100;
+    let newY = ((e.clientY - fieldRect.top - draggingPlayer.startY) / fieldRect.height) * 100;
+    
+    // Límites para que no se salgan del campo
+    newX = Math.max(5, Math.min(95, newX));
+    newY = Math.max(5, Math.min(95, newY));
+
     setPlayerPositions((prev) => ({
       ...prev,
-      [draggingPlayer.id]: { x: (newCenterX / fieldRect.width) * 100, y: (newCenterY / fieldRect.height) * 100 },
+      [draggingPlayer.id]: { x: newX, y: newY },
     }));
   };
 
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (draggingPlayer) {
+      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+      setDraggingPlayer(null);
+    }
+  };
+
   return (
-    <Card className="glass-card overflow-hidden">
-      <CardHeader className="pb-2">
-        <CardTitle className={cn("text-lg font-black uppercase tracking-widest", team === 'Azul' ? 'text-primary' : 'text-accent')}>
-          Último Partido ({team})
+    <Card className="glass-card overflow-hidden border-white/5 bg-black/20">
+      <CardHeader className="pb-4">
+        <CardTitle className={cn(
+          "text-xl font-black uppercase tracking-tighter italic", 
+          team === 'Azul' ? 'text-primary' : 'text-accent'
+        )}>
+          Último Partido {team}
         </CardTitle>
       </CardHeader>
       <CardContent className="p-4">
         <div
           ref={fieldRef}
-          onMouseMove={handleMouseMove}
-          onMouseUp={() => setDraggingPlayer(null)}
-          onMouseLeave={() => setDraggingPlayer(null)}
+          onPointerMove={handlePointerMove}
           className={cn(
-            "relative mx-auto h-[480px] w-full max-w-sm rounded-xl border-4 border-white/20 overflow-hidden touch-none select-none shadow-2xl bg-emerald-900",
-            draggingPlayer ? "cursor-grabbing" : "cursor-grab"
+            "relative mx-auto h-[540px] w-full rounded-2xl border-[6px] border-white/10 overflow-hidden touch-none select-none shadow-2xl",
+            "bg-gradient-to-b from-emerald-800 to-emerald-950",
+            draggingPlayer ? "cursor-grabbing" : "cursor-default"
           )}
           style={{
             backgroundImage: `
-              repeating-linear-gradient(0deg, #065f46 0px, #065f46 60px, #064e3b 60px, #064e3b 120px)
-            `
+              linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+              repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 40px, transparent 40px, transparent 80px)
+            `,
+            backgroundSize: '100% 100%, 100% 80px'
           }}
         >
-          {/* Líneas del campo */}
-          <div className="absolute inset-0 border-[2px] border-white/30 m-2 rounded-lg pointer-events-none" />
-          <div className="absolute top-1/2 left-0 h-[2px] w-full -translate-y-1/2 bg-white/30" />
-          <div className="absolute top-1/2 left-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/30" />
+          {/* Líneas de cal profesionales */}
+          <div className="absolute inset-4 border-2 border-white/30 rounded-lg pointer-events-none" />
           
-          {/* Áreas */}
-          <div className="absolute top-2 left-1/2 h-20 w-48 -translate-x-1/2 border-2 border-t-0 border-white/30" />
-          <div className="absolute bottom-2 left-1/2 h-20 w-48 -translate-x-1/2 border-2 border-b-0 border-white/30" />
+          {/* Círculo Central */}
+          <div className="absolute top-1/2 left-1/2 h-28 w-28 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/30" />
+          <div className="absolute top-1/2 left-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/50" />
+          
+          {/* Área Superior (Portería A) */}
+          <div className="absolute top-4 left-1/2 h-24 w-48 -translate-x-1/2 border-2 border-t-0 border-white/30 rounded-b-md" />
+          <div className="absolute top-4 left-1/2 h-10 w-24 -translate-x-1/2 border-2 border-t-0 border-white/20 rounded-b-sm" />
+          
+          {/* Área Inferior (Portería B) */}
+          <div className="absolute bottom-4 left-1/2 h-24 w-48 -translate-x-1/2 border-2 border-b-0 border-white/30 rounded-t-md" />
+          <div className="absolute bottom-4 left-1/2 h-10 w-24 -translate-x-1/2 border-2 border-b-0 border-white/20 rounded-t-sm" />
+
+          {/* Sombra interna del campo */}
+          <div className="absolute inset-0 shadow-[inner_0_0_100px_rgba(0,0,0,0.4)] pointer-events-none" />
           
           <TooltipProvider>
             {players.map((player) => {
               const pos = playerPositions[player.id];
               if (!pos) return null;
+              const isDragging = draggingPlayer?.id === player.id;
+
               return (
-                <Tooltip key={player.id}>
-                  <TooltipTrigger asChild>
-                    <div
-                      ref={(el) => (playerRefs.current[player.id] = el)}
-                      onMouseDown={(e) => handleMouseDown(e, player.id)}
-                      className="absolute transition-transform hover:scale-125 hover:z-20 active:scale-110"
-                      style={{
-                        top: `${pos.y}%`,
-                        left: `${pos.x}%`,
-                        transform: 'translate(-50%, -50%)',
-                      }}
-                    >
-                      <div className="relative group">
-                        <Avatar className={cn(
-                          "h-12 w-12 border-2 shadow-xl ring-4 ring-black/20",
-                          team === 'Azul' ? "border-primary bg-primary/20" : "border-accent bg-accent/20"
-                        )}>
-                          <AvatarImage src={player.avatar} alt={player.name} className="object-cover" />
-                          <AvatarFallback className="bg-muted text-xs">{player.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-sm border border-white/10 rounded-full px-2 py-0.5 whitespace-nowrap shadow-lg">
-                          <p className="text-[10px] font-bold text-white uppercase tracking-tighter">
+                <div
+                  key={player.id}
+                  onPointerDown={(e) => handlePointerDown(e, player.id)}
+                  onPointerUp={handlePointerUp}
+                  className={cn(
+                    "absolute transition-shadow duration-200 z-10",
+                    isDragging ? "scale-110 z-50 cursor-grabbing" : "cursor-grab hover:scale-105"
+                  )}
+                  style={{
+                    top: `${pos.y}%`,
+                    left: `${pos.x}%`,
+                    transform: 'translate(-50%, -50%)',
+                  }}
+                >
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex flex-col items-center gap-1.5">
+                        <div className="relative">
+                          <Avatar className={cn(
+                            "h-14 w-14 border-[3px] shadow-[0_10px_20px_rgba(0,0,0,0.4)] ring-4 ring-black/30 transition-all",
+                            team === 'Azul' 
+                              ? "border-primary bg-primary/20 shadow-primary/20" 
+                              : "border-accent bg-accent/20 shadow-accent/20",
+                            isDragging && "ring-white/50"
+                          )}>
+                            <AvatarImage src={player.avatar} alt={player.name} className="object-cover" />
+                            <AvatarFallback className="bg-muted text-xs font-black">{player.name.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          
+                          {/* Pequeño destello superior */}
+                          <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-white/10 to-white/20 pointer-events-none" />
+                        </div>
+                        
+                        <div className="bg-black/80 backdrop-blur-md border border-white/10 rounded-full px-3 py-0.5 shadow-xl">
+                          <p className="text-[10px] font-black text-white uppercase tracking-tighter">
                             {player.name.split(' ')[0]}
                           </p>
                         </div>
                       </div>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent side="top">
-                    <p className="text-xs font-black uppercase">{player.name}</p>
-                  </TooltipContent>
-                </Tooltip>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="bg-black border-white/20 text-white font-bold">
+                      {player.name}
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
               );
             })}
           </TooltipProvider>
