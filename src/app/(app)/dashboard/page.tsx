@@ -168,49 +168,51 @@ export default function DashboardPage() {
           {/* Quick Stats Grid */}
           <div className="lg:col-span-1 grid grid-cols-2 lg:grid-cols-1 gap-4">
             <Link href="/matches">
-              <Card className="glass-card hover:bg-white/5 transition-all h-full border-white/5">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+              <Card className="glass-card hover:bg-white/5 transition-all border-white/5 overflow-hidden">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 px-4">
                   <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Partidos</CardTitle>
                   <Calendar className="h-3 w-3 text-muted-foreground" />
                 </CardHeader>
-                <CardContent>
+                <CardContent className="px-4 pb-4">
                   <div className="text-3xl font-black tracking-tighter">{allMatches.length}</div>
                 </CardContent>
               </Card>
             </Link>
             <Link href="/players?sort=totalGoals">
-              <Card className="glass-card hover:bg-white/5 transition-all h-full border-white/5">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+              <Card className="glass-card hover:bg-white/5 transition-all border-white/5 overflow-hidden">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 px-4">
                   <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Goles</CardTitle>
                   <Target className="h-3 w-3 text-muted-foreground" />
                 </CardHeader>
-                <CardContent>
+                <CardContent className="px-4 pb-4">
                   <div className="text-3xl font-black tracking-tighter">{totalGoals}</div>
                 </CardContent>
               </Card>
             </Link>
             <Link href="/players" className="col-span-2 lg:col-span-1">
-              <Card className="glass-card hover:bg-emerald-500/10 transition-all h-full border-emerald-500/20 bg-emerald-500/5">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+              <Card className="glass-card hover:bg-emerald-500/10 transition-all border-emerald-500/20 bg-emerald-500/5 overflow-hidden">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 px-4">
                   <CardTitle className="text-[10px] font-black uppercase tracking-widest text-emerald-500">Los Infaltables</CardTitle>
                   <Users className="h-4 w-4 text-emerald-500" />
                 </CardHeader>
-                <CardContent className="flex flex-col justify-between h-full py-2">
-                  <div className="flex items-baseline justify-between">
-                    <div className="text-3xl font-black tracking-tighter text-emerald-500">{attendanceRate}%</div>
-                    <div className="text-[10px] font-bold text-emerald-500/60 uppercase">Asistencia</div>
-                  </div>
-                  <div className="mt-2 space-y-1">
-                    <p className="text-[10px] font-bold text-white uppercase truncate">
-                      {attendanceLeaders.length > 0 
-                        ? (attendanceLeaders.length <= 3 
-                            ? attendanceLeaders.map(p => p.name.split(' ')[0]).join(', ')
-                            : `${attendanceLeaders[0].name.split(' ')[0]} + ${attendanceLeaders.length - 1} más`)
-                        : 'Sin datos'}
-                    </p>
-                    <p className="text-[8px] uppercase font-black text-emerald-500/50 tracking-widest">
-                      {attendanceLeaders.length > 0 ? `Presentes en ${attendanceLeaders[0].matchesPlayed} encuentros` : ''}
-                    </p>
+                <CardContent className="px-4 pb-4">
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-baseline justify-between">
+                      <div className="text-3xl font-black tracking-tighter text-emerald-500">{attendanceRate}%</div>
+                      <div className="text-[10px] font-bold text-emerald-500/60 uppercase">Asistencia</div>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-bold text-white uppercase truncate">
+                        {attendanceLeaders.length > 0 
+                          ? (attendanceLeaders.length <= 3 
+                              ? attendanceLeaders.map(p => p.name.split(' ')[0]).join(', ')
+                              : `${attendanceLeaders[0].name.split(' ')[0]} + ${attendanceLeaders.length - 1} más`)
+                          : 'Sin datos'}
+                      </p>
+                      <p className="text-[8px] uppercase font-black text-emerald-500/50 tracking-widest truncate">
+                        {attendanceLeaders.length > 0 ? `Presentes en ${attendanceLeaders[0].matchesPlayed} encuentros` : ''}
+                      </p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -248,8 +250,8 @@ export default function DashboardPage() {
                             <Avatar className="h-12 w-12 border-2 border-primary/30">
                                 <AvatarFallback className="bg-primary/10 text-primary font-black">{getInitials(influencer?.name || "??")}</AvatarFallback>
                             </Avatar>
-                            <div className="flex flex-col">
-                                <span className="text-lg font-black tracking-tight leading-none group-hover:text-primary transition-colors">{influencer?.name || '-'}</span>
+                            <div className="flex flex-col min-w-0">
+                                <span className="text-lg font-black tracking-tight leading-none group-hover:text-primary transition-colors truncate">{influencer?.name || '-'}</span>
                                 <span className="text-[10px] uppercase font-bold text-muted-foreground">Efectividad Bruta</span>
                             </div>
                         </div>
@@ -274,7 +276,7 @@ export default function DashboardPage() {
                             <span className="text-5xl font-black italic text-white leading-none">{spiciestMatch ? spiciestMatch.teamAScore + spiciestMatch.teamBScore : 0}</span>
                             <span className="text-[10px] uppercase font-black text-orange-500 tracking-widest">Goles Totales</span>
                         </div>
-                        <div className="bg-white/5 p-2 rounded-xl border border-white/5">
+                        <div className="bg-white/5 p-2 rounded-xl border border-white/5 min-w-0">
                             <p className="text-[10px] font-bold text-white uppercase tracking-tighter truncate">
                                 {spiciestMatch ? `Azul ${spiciestMatch.teamAScore} - ${spiciestMatch.teamBScore} Rojo` : 'Sin registros'}
                             </p>
@@ -295,15 +297,15 @@ export default function DashboardPage() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="flex -space-x-3 items-center">
-                            <Avatar className="h-10 w-10 border-2 border-background ring-2 ring-white/10">
+                        <div className="flex -space-x-3 items-center min-w-0">
+                            <Avatar className="h-10 w-10 border-2 border-background ring-2 ring-white/10 shrink-0">
                                 <AvatarFallback className="bg-muted text-[10px] font-black">{getInitials(topChemistry?.player1.name || "?")}</AvatarFallback>
                             </Avatar>
-                            <Avatar className="h-10 w-10 border-2 border-background ring-2 ring-white/10">
+                            <Avatar className="h-10 w-10 border-2 border-background ring-2 ring-white/10 shrink-0">
                                 <AvatarFallback className="bg-muted text-[10px] font-black">{getInitials(topChemistry?.player2.name || "?")}</AvatarFallback>
                             </Avatar>
-                            <div className="pl-6 flex flex-col">
-                                <span className="text-sm font-black truncate max-w-[120px]">{topChemistry?.player1.name.split(' ')[0]} + {topChemistry?.player2.name.split(' ')[0]}</span>
+                            <div className="pl-6 flex flex-col min-w-0">
+                                <span className="text-sm font-black truncate">{topChemistry ? `${topChemistry.player1.name.split(' ')[0]} + ${topChemistry.player2.name.split(' ')[0]}` : 'Sin datos'}</span>
                                 <span className="text-[8px] uppercase text-muted-foreground font-bold">{topChemistry?.matches || 0} partidos juntos</span>
                             </div>
                         </div>
@@ -314,7 +316,7 @@ export default function DashboardPage() {
                             </div>
                             <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
                                 <div 
-                                    className="h-full bg-primary" 
+                                    className="h-full bg-primary transition-all duration-500" 
                                     style={{ width: `${topChemistry ? (topChemistry.wins / topChemistry.matches) * 100 : 0}%` }} 
                                 />
                             </div>
