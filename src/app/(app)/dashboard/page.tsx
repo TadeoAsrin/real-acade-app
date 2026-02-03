@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -82,7 +83,6 @@ export default function DashboardPage() {
   const teamStats = getTeamGlobalStats(allMatches);
   const lastMatch = allMatches[0];
 
-  // Logic: Wins > Effective % > Goals > Matches (asc)
   const sortedByWins = [...playerStats].sort((a, b) => {
     if (b.wins !== a.wins) return b.wins - a.wins;
     if (b.winPercentage !== a.winPercentage) return b.winPercentage - a.winPercentage;
@@ -124,7 +124,6 @@ export default function DashboardPage() {
         </Card>
       )}
 
-      {/* Tarjetas Superiores */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
         <Card className="glass-card overflow-hidden hover:translate-y-[-4px] transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
@@ -163,7 +162,6 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Pichichi Dorado */}
         <Card className="glass-card card-gold overflow-hidden hover:translate-y-[-4px] transition-all duration-300 bg-gradient-to-br from-card/60 to-yellow-500/10 border-yellow-500/30">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
             <CardTitle className="text-[10px] font-black uppercase tracking-widest text-yellow-500">Pichichi</CardTitle>
@@ -180,7 +178,6 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Mejor Ganador Verde */}
         <Card className="glass-card card-success overflow-hidden hover:translate-y-[-4px] transition-all duration-300 bg-gradient-to-br from-card/60 to-emerald-500/10 border-emerald-500/30">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
             <CardTitle className="text-[10px] font-black uppercase tracking-widest text-emerald-500">Victoria</CardTitle>
@@ -198,14 +195,12 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      {/* Formación y On Fire */}
       <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-3">
         <FieldView team="Azul" players={lastMatchTeamAPlayers} topScorerId={topScorer?.playerId} />
         <FieldView team="Rojo" players={lastMatchTeamBPlayers} topScorerId={topScorer?.playerId} />
         <PowerRanking players={allPlayers} matches={allMatches} />
       </div>
 
-      {/* Tabla y Gráfica */}
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
         <Card className="glass-card">
           <CardHeader>

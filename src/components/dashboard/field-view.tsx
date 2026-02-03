@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -11,7 +12,7 @@ import {
 } from '@/components/ui/tooltip';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { cn } from '@/lib/utils';
-import { Trophy } from 'lucide-react';
+import { Trophy, ShieldAlert } from 'lucide-react';
 
 interface FieldViewProps {
   team: 'Azul' | 'Rojo';
@@ -19,15 +20,14 @@ interface FieldViewProps {
   topScorerId?: string;
 }
 
-// Posiciones iniciales tácticas para Fútbol 7
 const positionCoordinates: { [key: string]: { top: string; left: string } } = {
-  GK: { top: '8%', left: '50%' },
-  DEF_L: { top: '25%', left: '25%' },
-  DEF_R: { top: '25%', left: '75%' },
-  MID_C: { top: '45%', left: '50%' },
-  MID_L: { top: '65%', left: '20%' },
-  MID_R: { top: '65%', left: '80%' },
-  FWD: { top: '85%', left: '50%' },
+  GK: { top: '10%', left: '50%' },
+  DEF_L: { top: '30%', left: '25%' },
+  DEF_R: { top: '30%', left: '75%' },
+  MID_C: { top: '50%', left: '50%' },
+  MID_L: { top: '70%', left: '20%' },
+  MID_R: { top: '70%', left: '80%' },
+  FWD: { top: '88%', left: '50%' },
 };
 
 export function FieldView({ team, players, topScorerId }: FieldViewProps) {
@@ -35,7 +35,6 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
   const [playerPositions, setPlayerPositions] = React.useState<{ [key: string]: { x: number; y: number } }>({});
   const [draggingPlayer, setDraggingPlayer] = React.useState<{ id: string; startX: number; startY: number } | null>(null);
 
-  // Inicializar posiciones
   React.useEffect(() => {
     const initialPositions: { [key: string]: { x: number; y: number } } = {};
     const coordsKeys = Object.keys(positionCoordinates);
@@ -98,30 +97,31 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
           ref={fieldRef}
           onPointerMove={handlePointerMove}
           className={cn(
-            "relative mx-auto h-[480px] w-full rounded-2xl border-[4px] border-white/10 overflow-hidden touch-none select-none shadow-2xl",
-            "bg-gradient-to-b from-emerald-800 to-emerald-950",
+            "relative mx-auto h-[520px] w-full rounded-2xl border-[4px] border-white/20 overflow-hidden touch-none select-none shadow-2xl",
+            "bg-emerald-600",
             draggingPlayer ? "cursor-grabbing" : "cursor-default"
           )}
           style={{
             backgroundImage: `
-              linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-              repeating-linear-gradient(0deg, rgba(255,255,255,0.01) 0px, rgba(255,255,255,0.01) 40px, transparent 40px, transparent 80px)
+              linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+              repeating-linear-gradient(0deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 40px, transparent 40px, transparent 80px)
             `,
             backgroundSize: '100% 100%, 100% 80px'
           }}
         >
-          <div className="absolute inset-4 border border-white/20 rounded-lg pointer-events-none" />
-          <div className="absolute top-1/2 left-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/20" />
-          <div className="absolute top-1/2 left-1/2 h-1 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/30" />
-          <div className="absolute top-4 left-1/2 h-20 w-40 -translate-x-1/2 border border-t-0 border-white/20 rounded-b-md" />
-          <div className="absolute bottom-4 left-1/2 h-20 w-40 -translate-x-1/2 border border-b-0 border-white/20 rounded-t-md" />
-
+          <div className="absolute inset-4 border-2 border-white/30 rounded-lg pointer-events-none" />
+          <div className="absolute top-1/2 left-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/30" />
+          <div className="absolute top-1/2 left-0 w-full h-[2px] bg-white/30 -translate-y-1/2" />
+          <div className="absolute top-4 left-1/2 h-20 w-44 -translate-x-1/2 border-2 border-t-0 border-white/30 rounded-b-xl" />
+          <div className="absolute bottom-4 left-1/2 h-20 w-44 -translate-x-1/2 border-2 border-b-0 border-white/30 rounded-t-xl" />
+          
           <TooltipProvider>
-            {players.map((player) => {
+            {players.map((player, index) => {
               const pos = playerPositions[player.id];
               if (!pos) return null;
               const isDragging = draggingPlayer?.id === player.id;
               const isPichichi = player.id === topScorerId;
+              const isGK = index === 0;
 
               return (
                 <div
@@ -140,35 +140,43 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
                 >
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className="flex flex-col items-center gap-1">
+                      <div className="flex flex-col items-center gap-1.5">
                         <div className="relative">
                           <Avatar className={cn(
-                            "h-11 w-11 border-[2.5px] shadow-[0_4px_10px_rgba(0,0,0,0.5)] ring-2 ring-black/40 transition-all",
-                            isPichichi 
-                              ? "border-yellow-500 shadow-yellow-500/40 ring-yellow-500/20" 
-                              : team === 'Azul' 
-                                ? "border-primary bg-primary/20 shadow-primary/10" 
-                                : "border-accent bg-accent/20 shadow-accent/10",
-                            isDragging && "ring-white/40"
+                            "h-12 w-12 border-[3px] shadow-xl ring-2 ring-black/30 transition-all",
+                            isGK 
+                              ? "border-orange-500 bg-orange-500/20"
+                              : isPichichi 
+                                ? "border-yellow-400 shadow-yellow-400/30" 
+                                : team === 'Azul' 
+                                  ? "border-primary bg-primary/20 shadow-primary/20" 
+                                  : "border-accent bg-accent/20 shadow-accent/20",
+                            isDragging && "ring-white/50"
                           )}>
                             <AvatarImage src={player.avatar} alt={player.name} className="object-cover" />
                             <AvatarFallback className="bg-muted text-[10px] font-black">{player.name.charAt(0)}</AvatarFallback>
                           </Avatar>
                           
                           {isPichichi && (
-                            <div className="absolute -top-1.5 -right-1.5 bg-yellow-500 rounded-full p-0.5 shadow-md border border-white/20">
+                            <div className="absolute -top-1.5 -right-1.5 bg-yellow-400 rounded-full p-1 shadow-md border border-black/20">
                               <Trophy className="h-2.5 w-2.5 text-black" />
+                            </div>
+                          )}
+                          
+                          {isGK && (
+                            <div className="absolute -bottom-1 -right-1 bg-orange-500 rounded-full p-0.5 shadow-md border border-white/20">
+                              <ShieldAlert className="h-2.5 w-2.5 text-white" />
                             </div>
                           )}
                         </div>
                         
                         <div className={cn(
-                          "backdrop-blur-md border border-white/10 rounded-full px-2 py-0.5 shadow-lg",
-                          isPichichi ? "bg-yellow-500/90" : "bg-black/70"
+                          "backdrop-blur-md border border-white/20 rounded-full px-2.5 py-0.5 shadow-lg",
+                          isPichichi ? "bg-yellow-400/90" : isGK ? "bg-orange-500/90" : "bg-black/80"
                         )}>
                           <p className={cn(
-                            "text-[9px] font-black uppercase tracking-tighter",
-                            isPichichi ? "text-black" : "text-white"
+                            "text-[10px] font-black uppercase tracking-tighter",
+                            (isPichichi || isGK) ? "text-black" : "text-white"
                           )}>
                             {player.name.split(' ')[0]}
                           </p>
@@ -176,7 +184,9 @@ export function FieldView({ team, players, topScorerId }: FieldViewProps) {
                       </div>
                     </TooltipTrigger>
                     <TooltipContent side="top" className="bg-black border-white/20 text-white font-bold text-xs">
-                      {player.name} {isPichichi && ' (Pichichi)'}
+                      {player.name} 
+                      {isPichichi && ' (Máximo Goleador)'}
+                      {isGK && ' (Portero)'}
                     </TooltipContent>
                   </Tooltip>
                 </div>
