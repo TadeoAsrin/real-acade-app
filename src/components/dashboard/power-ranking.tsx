@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Zap, Crown } from "lucide-react";
+import { Flame, Crown } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import type { Player, Match } from "@/lib/definitions";
@@ -26,13 +26,13 @@ export function PowerRanking({ players, matches }: PowerRankingProps) {
     .slice(0, 5);
 
   return (
-    <Card className="h-full">
+    <Card className="h-full glass-card">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Zap className="h-5 w-5 text-yellow-500 fill-yellow-500" />
-          Power Ranking
+          <Flame className="h-6 w-6 text-orange-500 fill-orange-500 animate-pulse" />
+          <span className="font-black uppercase tracking-tighter italic text-2xl">On Fire</span>
         </CardTitle>
-        <CardDescription>Los mejores 5 jugadores por puntos de rendimiento.</CardDescription>
+        <CardDescription>Los mejores 5 jugadores según su rendimiento actual.</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
@@ -41,7 +41,7 @@ export function PowerRanking({ players, matches }: PowerRankingProps) {
               <div className="flex items-center gap-4">
                 <div className="relative">
                     <Avatar className={cn(
-                        "h-10 w-10 border-2",
+                        "h-12 w-12 border-2",
                         index === 0 ? "border-yellow-500 shadow-lg shadow-yellow-500/20" : "border-muted"
                     )}>
                     <AvatarImage src={player.avatar} alt={player.name} />
@@ -49,20 +49,20 @@ export function PowerRanking({ players, matches }: PowerRankingProps) {
                     </Avatar>
                     {index === 0 && (
                         <div className="absolute -top-3 -right-2 rotate-12">
-                            <Crown className="h-5 w-5 text-yellow-500 fill-yellow-500" />
+                            <Crown className="h-6 w-6 text-yellow-500 fill-yellow-500" />
                         </div>
                     )}
                 </div>
                 <div className="flex flex-col">
-                  <Link href={`/players/${player.playerId}`} className="font-bold hover:underline">
+                  <Link href={`/players/${player.playerId}`} className="font-bold hover:text-primary transition-colors">
                     {player.name}
                   </Link>
-                  <span className="text-xs text-muted-foreground uppercase tracking-widest">Puesto #{index + 1}</span>
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">Puesto #{index + 1}</span>
                 </div>
               </div>
               <div className="flex flex-col items-end">
-                <span className="text-xl font-black text-primary">{player.powerPoints}</span>
-                <span className="text-[10px] text-muted-foreground uppercase font-bold">Puntos</span>
+                <span className="text-2xl font-black text-primary italic leading-none">{player.powerPoints}</span>
+                <span className="text-[10px] text-muted-foreground uppercase font-black">Pts</span>
               </div>
             </div>
           ))}

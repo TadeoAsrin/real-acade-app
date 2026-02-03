@@ -89,7 +89,7 @@ export function FieldView({ team, players }: FieldViewProps) {
     <Card className="glass-card overflow-hidden">
       <CardHeader className="pb-2">
         <CardTitle className={cn("text-lg font-black uppercase tracking-widest", team === 'Azul' ? 'text-primary' : 'text-accent')}>
-          11 Inicial {team}
+          7 Inicial {team}
         </CardTitle>
       </CardHeader>
       <CardContent className="p-4">
