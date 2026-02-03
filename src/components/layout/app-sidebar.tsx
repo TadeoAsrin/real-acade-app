@@ -1,3 +1,4 @@
+
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
@@ -174,24 +175,12 @@ export function AppSidebar() {
                 </SidebarMenuItem>
               </SidebarMenu>
            </div>
-         ) : !isUserLoading ? (
-           <SidebarMenuItem>
-              <SidebarMenuButton 
-                asChild
-                className="text-primary hover:bg-primary/10 w-full justify-start font-black italic uppercase tracking-tighter text-lg"
-              >
-                <Link href="/login">
-                  <LogIn className="h-5 w-5" />
-                  <span>Acceso Miembros</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-         ) : (
+         ) : isUserLoading ? (
            <div className="flex items-center gap-3 px-2 py-4">
              <div className="h-8 w-8 animate-pulse bg-white/5 rounded-full" />
              <div className="h-4 w-24 animate-pulse bg-white/5 rounded" />
            </div>
-         )}
+         ) : null}
       </SidebarFooter>
     </Sidebar>
   );
