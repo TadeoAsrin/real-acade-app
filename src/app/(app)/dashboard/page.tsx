@@ -162,68 +162,67 @@ export default function DashboardPage() {
       </section>
 
       {/* SECCIÓN 2: EL MOTOR DEL CLUB (RENDIMIENTO INDIVIDUAL Y TÁCTICO) */}
-      <section className="space-y-4">
+      <section className="space-y-6">
         <h2 className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground/50 px-1">Acción en la Cancha</h2>
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Quick Stats Grid */}
-          <div className="lg:col-span-1 grid grid-cols-2 lg:grid-cols-1 gap-4">
-            <Link href="/matches">
-              <Card className="glass-card hover:bg-white/5 transition-all border-white/5 overflow-hidden">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 px-4">
-                  <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Partidos</CardTitle>
-                  <Calendar className="h-3 w-3 text-muted-foreground" />
-                </CardHeader>
-                <CardContent className="px-4 pb-4">
-                  <div className="text-3xl font-black tracking-tighter">{allMatches.length}</div>
-                </CardContent>
-              </Card>
-            </Link>
-            <Link href="/players?sort=totalGoals">
-              <Card className="glass-card hover:bg-white/5 transition-all border-white/5 overflow-hidden">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 px-4">
-                  <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Goles</CardTitle>
-                  <Target className="h-3 w-3 text-muted-foreground" />
-                </CardHeader>
-                <CardContent className="px-4 pb-4">
-                  <div className="text-3xl font-black tracking-tighter">{totalGoals}</div>
-                </CardContent>
-              </Card>
-            </Link>
-            <Link href="/players" className="col-span-2 lg:col-span-1">
-              <Card className="glass-card hover:bg-emerald-500/10 transition-all border-emerald-500/20 bg-emerald-500/5 overflow-hidden">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 px-4">
-                  <CardTitle className="text-[10px] font-black uppercase tracking-widest text-emerald-500">Los Infaltables</CardTitle>
-                  <Users className="h-4 w-4 text-emerald-500" />
-                </CardHeader>
-                <CardContent className="px-4 pb-4">
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-baseline justify-between">
-                      <div className="text-3xl font-black tracking-tighter text-emerald-500">{attendanceRate}%</div>
-                      <div className="text-[10px] font-bold text-emerald-500/60 uppercase">Asistencia</div>
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-[10px] font-bold text-white uppercase truncate">
-                        {attendanceLeaders.length > 0 
-                          ? (attendanceLeaders.length <= 3 
-                              ? attendanceLeaders.map(p => p.name.split(' ')[0]).join(', ')
-                              : `${attendanceLeaders[0].name.split(' ')[0]} + ${attendanceLeaders.length - 1} más`)
-                          : 'Sin datos'}
-                      </p>
-                      <p className="text-[8px] uppercase font-black text-emerald-500/50 tracking-widest truncate">
-                        {attendanceLeaders.length > 0 ? `Presentes en ${attendanceLeaders[0].matchesPlayed} encuentros` : ''}
-                      </p>
-                    </div>
+        
+        {/* Quick Stats Grid - Horizontal Row on Desktop */}
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+          <Link href="/matches">
+            <Card className="glass-card hover:bg-white/5 transition-all border-white/5 overflow-hidden">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 px-4">
+                <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Partidos</CardTitle>
+                <Calendar className="h-3 w-3 text-muted-foreground" />
+              </CardHeader>
+              <CardContent className="px-4 pb-4">
+                <div className="text-3xl font-black tracking-tighter">{allMatches.length}</div>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/players?sort=totalGoals">
+            <Card className="glass-card hover:bg-white/5 transition-all border-white/5 overflow-hidden">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 px-4">
+                <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Goles</CardTitle>
+                <Target className="h-3 w-3 text-muted-foreground" />
+              </CardHeader>
+              <CardContent className="px-4 pb-4">
+                <div className="text-3xl font-black tracking-tighter">{totalGoals}</div>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/players" className="col-span-2 lg:col-span-1">
+            <Card className="glass-card hover:bg-emerald-500/10 transition-all border-emerald-500/20 bg-emerald-500/5 overflow-hidden">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 px-4">
+                <CardTitle className="text-[10px] font-black uppercase tracking-widest text-emerald-500">Los Infaltables</CardTitle>
+                <Users className="h-4 w-4 text-emerald-500" />
+              </CardHeader>
+              <CardContent className="px-4 pb-4">
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-baseline justify-between">
+                    <div className="text-3xl font-black tracking-tighter text-emerald-500">{attendanceRate}%</div>
+                    <div className="text-[10px] font-bold text-emerald-500/60 uppercase">Asistencia</div>
                   </div>
-                </CardContent>
-              </Card>
-            </Link>
-          </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-bold text-white uppercase truncate">
+                      {attendanceLeaders.length > 0 
+                        ? (attendanceLeaders.length <= 3 
+                            ? attendanceLeaders.map(p => p.name.split(' ')[0]).join(', ')
+                            : `${attendanceLeaders[0].name.split(' ')[0]} + ${attendanceLeaders.length - 1} más`)
+                        : 'Sin datos'}
+                    </p>
+                    <p className="text-[8px] uppercase font-black text-emerald-500/50 tracking-widest truncate">
+                      {attendanceLeaders.length > 0 ? `Presentes en ${attendanceLeaders[0].matchesPlayed} encuentros` : ''}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
 
-          {/* Field Views */}
-          <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <FieldView team="Azul" players={lastMatchTeamAPlayers} topScorerId={topScorer?.playerId} date={lastMatch?.date} />
-            <FieldView team="Rojo" players={lastMatchTeamBPlayers} topScorerId={topScorer?.playerId} date={lastMatch?.date} />
-          </div>
+        {/* Field Views - Full Width Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FieldView team="Azul" players={lastMatchTeamAPlayers} topScorerId={topScorer?.playerId} date={lastMatch?.date} />
+          <FieldView team="Rojo" players={lastMatchTeamBPlayers} topScorerId={topScorer?.playerId} date={lastMatch?.date} />
         </div>
       </section>
 
