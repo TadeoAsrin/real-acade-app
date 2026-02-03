@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -84,6 +85,7 @@ export default function DashboardPage() {
 
   const topScorers = [...playerStats].sort((a, b) => b.totalGoals - a.totalGoals).slice(0, 5);
   
+  // Lógica de desempate refinada: Victorias > Efectividad > Goles > Partidos Jugados
   const topWinner = [...playerStats].sort((a, b) => {
     if (b.wins !== a.wins) return b.wins - a.wins;
     if (b.winPercentage !== a.winPercentage) return b.winPercentage - a.winPercentage;

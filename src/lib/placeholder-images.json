@@ -3,43 +3,43 @@
     {
       "id": "pele",
       "description": "Pelé - O Rei",
-      "imageUrl": "https://images.unsplash.com/photo-1665839267241-380a062ebcd6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxmb290YmFsbCUyMHBlbGV8ZW58MHx8fHwxNzcwMDg4MzEwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1665839267241-380a062ebcd6?auto=format&fit=crop&q=80&w=400&h=400",
       "imageHint": "football pele"
     },
     {
       "id": "maradona",
       "description": "Diego Maradona - El Pibe de Oro",
-      "imageUrl": "https://images.unsplash.com/photo-1634931538113-538f0a15a33c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxmb290YmFsbCUyMG1hcmFkb25hfGVufDB8fHx8MTc3MDA4ODMxMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1634931538113-538f0a15a33c?auto=format&fit=crop&q=80&w=400&h=400",
       "imageHint": "football maradona"
     },
     {
       "id": "messi",
       "description": "Lionel Messi - La Pulga",
-      "imageUrl": "https://images.unsplash.com/photo-1667983088885-226788e18a6e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxmb290YmFsbCUyMG1lc3NpfGVufDB8fHx8MTc3MDA4ODMxMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1667983088885-226788e18a6e?auto=format&fit=crop&q=80&w=400&h=400",
       "imageHint": "football messi"
     },
     {
       "id": "cr7",
       "description": "Cristiano Ronaldo - El Bicho",
-      "imageUrl": "https://images.unsplash.com/photo-1649771544464-03bedb456a4f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxmb290YmFsbCUyMHJvbmFsZG98ZW58MHx8fHwxNzcwMDg4MzEwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1649771544464-03bedb456a4f?auto=format&fit=crop&q=80&w=400&h=400",
       "imageHint": "football ronaldo"
     },
     {
       "id": "zidane",
       "description": "Zinedine Zidane - Zizou",
-      "imageUrl": "https://images.unsplash.com/photo-1604331546936-ba127df7370e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxmb290YmFsbCUyMHppZGFuZXxlbnwwfHx8fDE3NzAwODgzMTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1604331546936-ba127df7370e?auto=format&fit=crop&q=80&w=400&h=400",
       "imageHint": "football zidane"
     },
     {
       "id": "cruyff",
       "description": "Johan Cruyff - El Holandés Volador",
-      "imageUrl": "https://images.unsplash.com/photo-1633008246097-e3980a6000da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxmb290YmFsbCUyMGNydXlmZnxlbnwwfHx8fDE3NzAwODgzMTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1633008246097-e3980a6000da?auto=format&fit=crop&q=80&w=400&h=400",
       "imageHint": "football cruyff"
     },
     {
       "id": "ronaldinho",
       "description": "Ronaldinho - El Brujo",
-      "imageUrl": "https://images.unsplash.com/photo-1631392406631-c2eeeda4d4bb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxmb290YmFsbCUyMHJvbmFsZGluaG98ZW58MHx8fHwxNzcwMDg4MzEwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1631392406631-c2eeeda4d4bb?auto=format&fit=crop&q=80&w=400&h=400",
       "imageHint": "football ronaldinho"
     },
     {
@@ -63,7 +63,7 @@
     {
       "id": "puskas",
       "description": "Ferenc Puskás - Cañoncito Pum",
-      "imageUrl": "https://images.unsplash.com/photo-1708533144300-9a00b4cc29f8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxmb290YmFsbCUyMHB1c2thc3xlbnwwfHx8fDE3NzAwODgzMTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1708533144300-9a00b4cc29f8?auto=format&fit=crop&q=80&w=400&h=400",
       "imageHint": "football puskas"
     },
     {
@@ -81,7 +81,7 @@
     {
       "id": "yashin",
       "description": "Lev Yashin - La Araña Negra",
-      "imageUrl": "https://images.unsplash.com/photo-1760890518049-47b9822e1c89?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxmb290YmFsbCUyMHlhc2hpbnxlbnwwfHx8fDE3NzAwODgzMTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1760890518049-47b9822e1c89?auto=format&fit=crop&q=80&w=400&h=400",
       "imageHint": "football yashin"
     }
   ]
