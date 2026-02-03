@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -132,7 +131,7 @@ export default function NewMatchPage() {
     setIsLoading(true);
     
     try {
-        const matchId = crypto.randomUUID();
+        const matchRef = doc(collection(firestore, 'matches'));
         const teamAPlayers = data.teamAPlayerIds.map(id => ({
             playerId: id,
             goals: data.teamAStats[id]?.goals || 0,
@@ -151,7 +150,7 @@ export default function NewMatchPage() {
         const teamAScore = teamAPlayers.reduce((sum, p) => sum + p.goals, 0);
         const teamBScore = teamBPlayers.reduce((sum, p) => sum + p.goals, 0);
 
-        await setDoc(doc(firestore, 'matches', matchId), {
+        await setDoc(matchRef, {
             date: data.date.toISOString(),
             teamAScore,
             teamBScore,

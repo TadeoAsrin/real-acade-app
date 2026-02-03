@@ -107,8 +107,8 @@ function PlayersList() {
     if (!firestore || !newPlayerName) return;
     setIsUpdatingPlayer(true);
     try {
-      const playerId = crypto.randomUUID();
-      await setDoc(doc(firestore, 'players', playerId), {
+      const playerRef = doc(collection(firestore, 'players'));
+      await setDoc(playerRef, {
         name: newPlayerName,
         position: newPlayerPosition || null,
         role: 'player'
