@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Award, CheckCircle2 } from "lucide-react";
+import { Loader2, Award, CheckCircle2, LogIn } from "lucide-react";
 import type { Player } from "@/lib/definitions";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Label } from "../ui/label";
@@ -13,6 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { useFirestore, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
 import { doc, setDoc, collection } from "firebase/firestore";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 interface GoalVoterProps {
   matchId: string;
@@ -79,6 +80,28 @@ export function BestGoalVote({ matchId, scorers }: GoalVoterProps) {
     );
   }
 
+  if (!user) {
+    return (
+      <Card className="border-primary/20 bg-primary/5">
+        <CardHeader>
+          <CardTitle>Elección del Mejor Gol</CardTitle>
+          <CardDescription>
+            Los miembros del club pueden votar por la joya de la jornada.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center gap-4 py-6">
+          <LogIn className="h-10 w-10 text-primary/40 mb-2" />
+          <p className="text-sm text-center text-muted-foreground max-w-[200px]">
+            Inicia sesión para participar en la votación oficial.
+          </p>
+          <Button asChild className="w-full">
+            <Link href="/login">Iniciar Sesión</Link>
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
   if (myVote) {
     return (
       <Card className="border-green-500/20 bg-green-500/5">
@@ -102,7 +125,6 @@ export function BestGoalVote({ matchId, scorers }: GoalVoterProps) {
                     )}>
                         <div className="flex items-center gap-3">
                             <Avatar className="h-8 w-8">
-                                <AvatarImage src={scorer.avatar} alt={scorer.name} />
                                 <AvatarFallback>{scorer.name.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <span className="font-medium">{scorer.name}</span>
@@ -134,7 +156,6 @@ export function BestGoalVote({ matchId, scorers }: GoalVoterProps) {
                 <RadioGroupItem value={scorer.id} id={`player-${scorer.id}`} />
                 <Label htmlFor={`player-${scorer.id}`} className="flex flex-1 items-center gap-3 cursor-pointer rounded-md border p-3 hover:bg-accent/50 transition-colors">
                 <Avatar className="h-10 w-10">
-                    <AvatarImage src={scorer.avatar} alt={scorer.name} />
                     <AvatarFallback>{scorer.name.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col">

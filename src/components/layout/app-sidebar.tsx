@@ -11,7 +11,7 @@ import {
   SidebarFooter,
   SidebarContent,
 } from "../ui/sidebar";
-import { Goal, BarChart3, Users, LogOut, Trophy, Dices, ArrowLeftRight } from "lucide-react";
+import { Goal, BarChart3, Users, LogOut, Trophy, Dices, ArrowLeftRight, LogIn } from "lucide-react";
 import { Fut7StatsLogo } from "@/components/icons";
 import Link from "next/link";
 import { useAuth, useUser, useFirestore, useMemoFirebase, useDoc } from "@/firebase";
@@ -125,15 +125,29 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter className="p-4 border-t border-sidebar-border">
-         <SidebarMenuItem>
-            <SidebarMenuButton 
-              onClick={handleLogout}
-              className="text-muted-foreground hover:text-destructive w-full justify-start"
-            >
-              <LogOut />
-              <span>Cerrar Sesión</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+         {user ? (
+           <SidebarMenuItem>
+              <SidebarMenuButton 
+                onClick={handleLogout}
+                className="text-muted-foreground hover:text-destructive w-full justify-start"
+              >
+                <LogOut />
+                <span>Cerrar Sesión</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+         ) : (
+           <SidebarMenuItem>
+              <SidebarMenuButton 
+                asChild
+                className="text-primary hover:bg-primary/10 w-full justify-start font-bold"
+              >
+                <Link href="/login">
+                  <LogIn />
+                  <span>Acceso Miembros</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+         )}
       </SidebarFooter>
     </Sidebar>
   );

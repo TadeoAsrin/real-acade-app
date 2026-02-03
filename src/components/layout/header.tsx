@@ -1,3 +1,4 @@
+
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
@@ -12,13 +13,14 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { SidebarTrigger } from "../ui/sidebar";
-import { LogOut, User, Loader2 } from "lucide-react";
+import { LogOut, User, Loader2, LogIn } from "lucide-react";
 import { useUser, useFirestore, useMemoFirebase, useCollection, useAuth } from "@/firebase";
 import { collection, query, orderBy } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import type { Player } from "@/lib/definitions";
 import { useToast } from "@/hooks/use-toast";
 import { getInitials } from "@/lib/utils";
+import Link from "next/link";
 
 const getPageTitle = (pathname: string) => {
   if (pathname.includes("/dashboard")) return "Panel de Control";
@@ -67,43 +69,51 @@ export function Header() {
           {getPageTitle(pathname)}
         </h1>
       </div>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-            {isUserLoading ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-                <Avatar className="h-10 w-10 border-2 border-primary/20">
+
+      {isUserLoading ? (
+        <Loader2 className="h-5 w-5 animate-spin" />
+      ) : user ? (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+              <Avatar className="h-10 w-10 border-2 border-primary/20">
                 <AvatarFallback className="bg-primary/10 text-primary font-black">
-                    {getInitials(currentUser?.name || user?.email || "U")}
+                  {getInitials(currentUser?.name || user?.email || "U")}
                 </AvatarFallback>
-                </Avatar>
-            )}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56" align="end" forceMount>
-          <DropdownMenuLabel className="font-normal">
-            <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">
-                {currentUser?.name || user?.email || "Usuario"}
-              </p>
-              <p className="text-xs leading-none text-muted-foreground uppercase tracking-widest font-bold mt-1">
-                {currentUser?.role === 'admin' ? 'Administrador' : 'Jugador'}
-              </p>
-            </div>
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => currentUser && router.push(`/players/${currentUser.id}`)}>
-            <User className="mr-2 h-4 w-4" />
-            <span>Mi Perfil</span>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
-            <LogOut className="mr-2 h-4 w-4" />
-            <span>Cerrar Sesión</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+              </Avatar>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56" align="end" forceMount>
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium leading-none">
+                  {currentUser?.name || user?.email || "Usuario"}
+                </p>
+                <p className="text-xs leading-none text-muted-foreground uppercase tracking-widest font-bold mt-1">
+                  {currentUser?.role === 'admin' ? 'Administrador' : 'Jugador'}
+                </p>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => currentUser && router.push(`/players/${currentUser.id}`)}>
+              <User className="mr-2 h-4 w-4" />
+              <span>Mi Perfil</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Cerrar Sesión</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ) : (
+        <Button asChild variant="outline" size="sm" className="gap-2 border-primary/20 hover:bg-primary/10">
+          <Link href="/login">
+            <LogIn className="h-4 w-4" />
+            <span className="hidden sm:inline">Iniciar Sesión</span>
+          </Link>
+        </Button>
+      )}
     </header>
   );
 }
