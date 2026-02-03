@@ -7,15 +7,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Loader2, Dices, RefreshCw, Swords, Shield, Zap } from "lucide-react";
-import { useCollection, useMemoFirebase, useFirestore } from "@/firebase";
-import { collection } from "firebase/firestore";
+import { Loader2, Dices, RefreshCw, Swords, Shield, Zap, Lock } from "lucide-react";
+import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc } from "@/firebase";
+import { collection, doc } from "firebase/firestore";
 import type { Player, Match, AggregatedPlayerStats } from "@/lib/definitions";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
 export default function TeamGeneratorPage() {
   const firestore = useFirestore();
+  const { user } = useUser();
   const [selectedIds, setSelectedIds] = React.useState<string[]>([]);
   const [teams, setTeams] = React.useState<{ teamA: AggregatedPlayerStats[], teamB: AggregatedPlayerStats[], scoreA: number, scoreB: number } | null>(null);
 
@@ -29,13 +30,41 @@ export default function TeamGeneratorPage() {
     return collection(firestore, 'matches');
   }, [firestore]);
 
+  const adminRoleRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'roles_admin', user.uid);
+  }, [firestore, user]);
+
   const { data: playersData, isLoading: playersLoading } = useCollection<Player>(playersQuery);
   const { data: matchesData, isLoading: matchesLoading } = useCollection<Match>(matchesQuery);
+  const { data: adminRole, isLoading: adminLoading } = useDoc<{isAdmin: boolean}>(adminRoleRef);
 
   const stats = React.useMemo(() => {
     if (!playersData || !matchesData) return [];
     return calculateAggregatedStats(playersData, matchesData);
   }, [playersData, matchesData]);
+
+  if (playersLoading || matchesLoading || adminLoading) {
+    return (
+      <div className="flex h-[50vh] items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!adminRole?.isAdmin) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[60vh] gap-6 text-center px-6">
+        <div className="p-6 bg-red-500/10 rounded-full">
+            <Lock className="h-16 w-16 text-red-500" />
+        </div>
+        <div className="max-w-md">
+            <h1 className="text-3xl font-black uppercase italic mb-2">Acceso Restringido</h1>
+            <p className="text-muted-foreground">El Equilibrador Pro es una herramienta exclusiva para los capitanes y administradores del club.</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleTogglePlayer = (id: string) => {
     setSelectedIds(prev => 
@@ -49,33 +78,25 @@ export default function TeamGeneratorPage() {
     setTeams(balanced);
   };
 
-  if (playersLoading || matchesLoading) {
-    return (
-      <div className="flex h-[50vh] items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-primary" />
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col gap-10 max-w-6xl mx-auto pb-20">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-black tracking-tighter uppercase italic flex items-center gap-3">
-            <Dices className="h-10 w-10 text-primary" />
+          <h1 className="text-4xl font-black tracking-tighter uppercase italic flex items-center gap-3 text-orange-400">
+            <Dices className="h-10 w-10" />
             Equilibrador Pro
           </h1>
           <p className="text-muted-foreground">Selecciona a los jugadores presentes y genera equipos nivelados automáticamente.</p>
         </div>
         <div className="flex items-center gap-3">
-            <Badge variant="outline" className="text-lg py-1 px-4 border-primary/20">
+            <Badge variant="outline" className="text-lg py-1 px-4 border-orange-500/20 text-orange-400">
                 {selectedIds.length} Seleccionados
             </Badge>
             <Button 
                 onClick={handleGenerate} 
                 disabled={selectedIds.length < 2} 
                 size="lg"
-                className="shadow-lg shadow-primary/20"
+                className="bg-orange-500 hover:bg-orange-600 shadow-lg shadow-orange-500/20"
             >
                 <Zap className="mr-2 h-4 w-4" /> Generar Equipos
             </Button>
@@ -96,7 +117,7 @@ export default function TeamGeneratorPage() {
                     className={cn(
                         "flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer",
                         selectedIds.includes(player.playerId) 
-                            ? "bg-primary/10 border-primary/40 shadow-inner" 
+                            ? "bg-orange-500/10 border-orange-500/40 shadow-inner" 
                             : "bg-white/5 border-transparent hover:border-white/10"
                     )}
                     onClick={() => handleTogglePlayer(player.playerId)}
@@ -111,7 +132,10 @@ export default function TeamGeneratorPage() {
                         <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">Nivel: {player.powerPoints}</span>
                     </div>
                   </div>
-                  <Checkbox checked={selectedIds.includes(player.playerId)} />
+                  <Checkbox 
+                    checked={selectedIds.includes(player.playerId)}
+                    className="data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500" 
+                  />
                 </div>
               ))}
             </div>
@@ -142,7 +166,7 @@ export default function TeamGeneratorPage() {
                       </Avatar>
                       <div className="flex flex-col">
                         <span className="font-black text-lg">{p.name}</span>
-                        <span className="text-xs text-muted-foreground italic font-medium">{p.totalGoals} goles este año</span>
+                        <span className="text-xs text-muted-foreground italic font-medium">{p.powerPoints} Puntos de Poder</span>
                       </div>
                     </div>
                   ))}
@@ -170,7 +194,7 @@ export default function TeamGeneratorPage() {
                       </Avatar>
                       <div className="flex flex-col">
                         <span className="font-black text-lg">{p.name}</span>
-                        <span className="text-xs text-muted-foreground italic font-medium">{p.totalGoals} goles este año</span>
+                        <span className="text-xs text-muted-foreground italic font-medium">{p.powerPoints} Puntos de Poder</span>
                       </div>
                     </div>
                   ))}
@@ -191,7 +215,7 @@ export default function TeamGeneratorPage() {
                     <Swords className="h-10 w-10 text-muted-foreground/30" />
                     <div className="text-center">
                         <p className="text-[10px] uppercase font-black text-muted-foreground mb-1">Equilibrio</p>
-                        <span className="text-xl font-bold uppercase tracking-widest">
+                        <span className="text-xl font-bold uppercase tracking-widest text-white">
                             {Math.abs(teams.scoreA - teams.scoreB) < 10 ? "Máximo" : "Aceptable"}
                         </span>
                     </div>
@@ -203,12 +227,12 @@ export default function TeamGeneratorPage() {
             </div>
           ) : (
             <div className="h-[400px] flex flex-col items-center justify-center border-2 border-dashed rounded-3xl bg-black/20 text-center p-12 space-y-6">
-                <div className="p-6 bg-primary/10 rounded-full animate-pulse">
-                    <Dices className="h-16 w-16 text-primary" />
+                <div className="p-6 bg-orange-500/10 rounded-full animate-pulse">
+                    <Dices className="h-16 w-16 text-orange-500" />
                 </div>
                 <div className="max-w-xs">
                     <h3 className="text-xl font-bold uppercase italic mb-2 tracking-tight">Listo para el Pick</h3>
-                    <p className="text-sm text-muted-foreground">Selecciona a los jugadores que han venido hoy a la izquierda para armar los equipos más parejos del club.</p>
+                    <p className="text-sm text-muted-foreground">Selecciona a los jugadores que han venido hoy a la izquierda para armar los equipos más parejos del club basándose en su nivel actual.</p>
                 </div>
             </div>
           )}

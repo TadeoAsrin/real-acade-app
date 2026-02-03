@@ -12,13 +12,27 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { useCollection, useMemoFirebase, useFirestore } from "@/firebase";
 import { collection, query, orderBy } from "firebase/firestore";
 import type { Player, Match } from "@/lib/definitions";
-import { Loader2, Trophy, Medal } from "lucide-react";
+import { Loader2, Trophy } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+
+const FormDot = ({ result }: { result: 'W' | 'D' | 'L' }) => {
+  const colors = {
+    W: "bg-emerald-500",
+    D: "bg-orange-400",
+    L: "bg-red-500"
+  };
+  const labels = { W: "G", D: "E", L: "P" };
+  return (
+    <div className={cn("h-5 w-5 rounded-full flex items-center justify-center text-[8px] font-black text-white", colors[result])}>
+      {labels[result]}
+    </div>
+  );
+};
 
 export default function StandingsPage() {
   const firestore = useFirestore();
@@ -56,7 +70,7 @@ export default function StandingsPage() {
     });
 
   return (
-    <div className="flex flex-col gap-8 max-w-5xl mx-auto">
+    <div className="flex flex-col gap-8 max-w-6xl mx-auto">
       <div>
         <h1 className="text-4xl font-black tracking-tighter uppercase italic">Clasificación General</h1>
         <p className="text-muted-foreground">La tabla oficial de Real Acade. Victoria: 3pts | Empate: 1pt.</p>
@@ -75,6 +89,7 @@ export default function StandingsPage() {
                 <TableHead className="text-center font-black uppercase text-[10px] hidden md:table-cell text-red-500">P</TableHead>
                 <TableHead className="text-center font-black uppercase text-[10px]">GF</TableHead>
                 <TableHead className="text-center font-black uppercase text-[10px] bg-primary/20">PTS</TableHead>
+                <TableHead className="text-center font-black uppercase text-[10px] hidden lg:table-cell">Últimos 5</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -106,6 +121,13 @@ export default function StandingsPage() {
                         index < 3 ? "text-primary" : "text-white"
                     )}>
                         {points}
+                    </TableCell>
+                    <TableCell className="hidden lg:table-cell">
+                      <div className="flex items-center justify-center gap-1">
+                        {player.form.map((res, i) => (
+                          <FormDot key={i} result={res} />
+                        ))}
+                      </div>
                     </TableCell>
                   </TableRow>
                 );

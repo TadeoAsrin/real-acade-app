@@ -29,10 +29,14 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
       matchesAsBlue: 0,
       matchesAsRed: 0,
       powerPoints: 0,
+      form: [],
     };
   });
 
-  allMatches.forEach(match => {
+  // Sort matches by date to calculate form
+  const sortedMatches = [...allMatches].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  sortedMatches.forEach(match => {
     const teamAWon = match.teamAScore > match.teamBScore;
     const teamBWon = match.teamBScore > match.teamAScore;
     const draw = match.teamAScore === match.teamBScore;
@@ -58,15 +62,21 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
             if (team === 'A') stats.matchesAsBlue++;
             else stats.matchesAsRed++;
 
+            let result: 'W' | 'D' | 'L' = 'L';
             if (draw) {
                 stats.draws++;
                 stats.powerPoints += POINTS.DRAW;
+                result = 'D';
             } else if ((team === 'A' && teamAWon) || (team === 'B' && teamBWon)) {
                 stats.wins++;
                 stats.powerPoints += POINTS.WIN;
+                result = 'W';
             } else {
                 stats.losses++;
             }
+            
+            stats.form.push(result);
+            if (stats.form.length > 5) stats.form.shift();
         }
     };
     
@@ -80,6 +90,8 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
           stats.winPercentage = Math.round((stats.wins / stats.matchesPlayed) * 100);
           stats.goalsPerMatch = Number((stats.totalGoals / stats.matchesPlayed).toFixed(2));
       }
+      // Reverse form to show most recent first
+      stats.form = [...stats.form].reverse();
   }
 
   return Object.values(statsMap);
@@ -99,11 +111,7 @@ export const getTeamGlobalStats = (allMatches: Match[]) => {
     return { blueWins, redWins, draws, total: allMatches.length };
 };
 
-/**
- * Algoritmo para equilibrar equipos basado en Power Points.
- */
 export const balanceTeams = (selectedPlayers: AggregatedPlayerStats[]) => {
-  // Ordenar por nivel (Power Points) de mayor a menor
   const sorted = [...selectedPlayers].sort((a, b) => b.powerPoints - a.powerPoints);
   
   const teamA: AggregatedPlayerStats[] = [];
@@ -112,8 +120,7 @@ export const balanceTeams = (selectedPlayers: AggregatedPlayerStats[]) => {
   let scoreA = 0;
   let scoreB = 0;
 
-  // Reparto "serpiente" (Snake draft simplificado)
-  sorted.forEach((player, index) => {
+  sorted.forEach((player) => {
     if (scoreA <= scoreB) {
       teamA.push(player);
       scoreA += player.powerPoints;

@@ -39,4 +39,5 @@ export type AggregatedPlayerStats = {
   matchesAsBlue: number;
   matchesAsRed: number;
   powerPoints: number;
+  form: ('W' | 'D' | 'L')[];
 };

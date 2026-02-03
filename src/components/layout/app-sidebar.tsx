@@ -11,12 +11,13 @@ import {
   SidebarFooter,
   SidebarContent,
 } from "../ui/sidebar";
-import { Goal, BarChart3, Users, LogOut, Trophy, Dices } from "lucide-react";
+import { Goal, BarChart3, Users, LogOut, Trophy, Dices, ArrowLeftRight } from "lucide-react";
 import { Fut7StatsLogo } from "@/components/icons";
 import Link from "next/link";
-import { useAuth } from "@/firebase";
+import { useAuth, useUser, useFirestore, useMemoFirebase, useDoc } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
+import { doc } from "firebase/firestore";
 
 const menuItems = [
   {
@@ -31,7 +32,7 @@ const menuItems = [
   },
   {
     href: "/matches",
-    label: "Historial de Partidos",
+    label: "Partidos",
     icon: Goal,
   },
   {
@@ -40,17 +41,27 @@ const menuItems = [
     icon: Users,
   },
   {
-    href: "/generator",
-    label: "Generador de Equipos",
-    icon: Dices,
+    href: "/compare",
+    label: "Comparador",
+    icon: ArrowLeftRight,
   },
 ];
 
 export function AppSidebar() {
   const pathname = usePathname();
   const auth = useAuth();
+  const { user } = useUser();
+  const firestore = useFirestore();
   const router = useRouter();
   const { toast } = useToast();
+
+  const adminRoleRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'roles_admin', user.uid);
+  }, [firestore, user]);
+
+  const { data: adminRole } = useDoc<{isAdmin: boolean}>(adminRoleRef);
+  const isAdmin = adminRole?.isAdmin;
 
   const handleLogout = async () => {
     try {
@@ -95,6 +106,22 @@ export function AppSidebar() {
                 </SidebarMenuButton>
             </SidebarMenuItem>
             ))}
+            
+            {isAdmin && (
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname.startsWith("/generator")}
+                  tooltip="Generador de Equipos"
+                  className="py-6 text-orange-400 hover:text-orange-500"
+                >
+                  <Link href="/generator">
+                      <Dices className={pathname.startsWith("/generator") ? "text-orange-400" : ""} />
+                      <span className="font-medium">Generador Pro</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            )}
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter className="p-4 border-t border-sidebar-border">
