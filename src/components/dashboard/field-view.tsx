@@ -41,13 +41,13 @@ const formationCoordinates: { top: string; left: string }[] = [
   { top: '35%', left: '22%' }, // 1: Def L (3)
   { top: '35%', left: '50%' }, // 2: Def C (2)
   { top: '35%', left: '78%' }, // 3: Def R (4)
-  { top: '65%', left: '35%' }, // 4: Mid L (5)
-  { top: '65%', left: '65%' }, // 5: Mid R (5)
+  { top: '65%', left: '35%' }, // 4: Mid L (8)
+  { top: '65%', left: '65%' }, // 5: Mid R (10)
   { top: '85%', left: '50%' }, // 6: Fwd (9)
 ];
 
 const getTacticalNumber = (index: number): string => {
-  const numbers = ["1", "3", "2", "4", "5", "5", "9"];
+  const numbers = ["1", "3", "2", "4", "8", "10", "9"];
   return numbers[index] || "";
 };
 

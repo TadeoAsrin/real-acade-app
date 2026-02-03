@@ -1,9 +1,8 @@
-
 'use client';
 
 import * as React from 'react';
 import { useParams } from "next/navigation";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Trophy, History, TrendingUp, Loader2 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -14,6 +13,7 @@ import { useDoc, useCollection, useMemoFirebase, useFirestore } from "@/firebase
 import { doc, collection, query, orderBy } from "firebase/firestore";
 import { calculateAggregatedStats } from "@/lib/data";
 import type { Player, Match, AggregatedPlayerStats } from "@/lib/definitions";
+import { getInitials } from "@/lib/utils";
 
 export default function PlayerProfilePage() {
   const params = useParams();
@@ -79,10 +79,9 @@ export default function PlayerProfilePage() {
   return (
     <div className="space-y-8">
       <div className="flex flex-col items-center gap-4 md:flex-row md:items-start">
-        <Avatar className="h-32 w-32 border-4 border-primary">
-          <AvatarImage src={player.avatar} alt={player.name} />
-          <AvatarFallback className="text-4xl">
-            {player.name.charAt(0)}
+        <Avatar className="h-32 w-32 border-4 border-primary shadow-2xl shadow-primary/20">
+          <AvatarFallback className="text-4xl bg-primary/10 text-primary font-black">
+            {getInitials(player.name)}
           </AvatarFallback>
         </Avatar>
         <div className="pt-4 text-center md:text-left">
@@ -92,7 +91,7 @@ export default function PlayerProfilePage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
+        <Card className="glass-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Efectividad General</CardTitle>
             <TrendingUp className="h-4 w-4 text-primary" />
@@ -104,7 +103,7 @@ export default function PlayerProfilePage() {
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="glass-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Partidos por Equipo</CardTitle>
             <History className="h-4 w-4 text-muted-foreground" />
@@ -122,7 +121,7 @@ export default function PlayerProfilePage() {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="glass-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Hitos</CardTitle>
             <Trophy className="h-4 w-4 text-muted-foreground" />
@@ -146,7 +145,7 @@ export default function PlayerProfilePage() {
 
        <PlayerPerformanceChart matchHistory={playerMatchHistory} />
 
-      <Card>
+      <Card className="glass-card">
         <CardHeader>
           <CardTitle>Historial de Partidos</CardTitle>
           <CardDescription>Rendimiento en los últimos partidos.</CardDescription>
