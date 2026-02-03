@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -201,8 +200,8 @@ export default function DashboardPage() {
 
       {/* Formación y On Fire */}
       <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-3">
-        <FieldView team="Azul" players={lastMatchTeamAPlayers} />
-        <FieldView team="Rojo" players={lastMatchTeamBPlayers} />
+        <FieldView team="Azul" players={lastMatchTeamAPlayers} topScorerId={topScorer?.playerId} />
+        <FieldView team="Rojo" players={lastMatchTeamBPlayers} topScorerId={topScorer?.playerId} />
         <PowerRanking players={allPlayers} matches={allMatches} />
       </div>
 
