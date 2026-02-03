@@ -59,9 +59,16 @@ export default function DashboardPage() {
   const lastMatch = allMatches[0];
 
   const sortedByGoals = [...playerStats].sort((a, b) => b.totalGoals - a.totalGoals || b.goalsPerMatch - a.goalsPerMatch);
+  
+  // New Influence Logic: Min 3 matches + Tie breakers (Win% > Matches > PowerPoints > Goals)
   const sortedByInfluence = [...playerStats]
-    .filter(p => p.matchesPlayed >= 2)
-    .sort((a, b) => b.winPercentage - a.winPercentage);
+    .filter(p => p.matchesPlayed >= 3)
+    .sort((a, b) => {
+      if (b.winPercentage !== a.winPercentage) return b.winPercentage - a.winPercentage;
+      if (b.matchesPlayed !== a.matchesPlayed) return b.matchesPlayed - a.matchesPlayed;
+      if (b.powerPoints !== a.powerPoints) return b.powerPoints - a.powerPoints;
+      return b.totalGoals - a.totalGoals;
+    });
 
   const topScorer = sortedByGoals[0];
   const influencer = sortedByInfluence[0];
@@ -200,7 +207,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* PULSO DE LA LIGA - New Engaging Section */}
+      {/* PULSO DE LA LIGA - Engaging Section */}
       <div className="space-y-4">
         <h2 className="text-2xl font-black uppercase tracking-tighter italic text-white flex items-center gap-3">
             <Zap className="h-6 w-6 text-primary fill-primary" />
@@ -231,10 +238,13 @@ export default function DashboardPage() {
                         <div className="flex items-end justify-between">
                             <div className="flex flex-col">
                                 <span className="text-3xl font-black italic text-white">{influencer?.winPercentage || 0}%</span>
-                                <span className="text-[8px] uppercase font-black text-muted-foreground">Win Rate al jugar</span>
+                                <span className="text-[8px] uppercase font-black text-muted-foreground">Win Rate (mín. 3 PJ)</span>
                             </div>
-                            <div className="bg-primary/10 px-2 py-1 rounded text-[10px] font-bold text-primary">
-                                {influencer ? "Top Factor" : "Sin datos"}
+                            <div className={cn(
+                                "px-2 py-1 rounded text-[10px] font-bold",
+                                influencer ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                            )}>
+                                {influencer ? "Top Factor" : "Faltan datos"}
                             </div>
                         </div>
                     </CardContent>
