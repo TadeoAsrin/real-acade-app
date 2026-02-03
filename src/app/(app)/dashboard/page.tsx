@@ -28,6 +28,7 @@ import { collection, query, orderBy, doc, setDoc } from "firebase/firestore";
 import type { Match, Player } from "@/lib/definitions";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 export default function DashboardPage() {
   const firestore = useFirestore();
@@ -37,7 +38,7 @@ export default function DashboardPage() {
 
   const playersQuery = useMemoFirebase(() => {
     if (!firestore) return null;
-    return collection(firestore, 'players');
+    return query(collection(firestore, 'players'), orderBy('name', 'asc'));
   }, [firestore]);
 
   const matchesQuery = useMemoFirebase(() => {
