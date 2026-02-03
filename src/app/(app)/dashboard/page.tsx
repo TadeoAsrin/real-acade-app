@@ -73,6 +73,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-10">
+      {/* Metrics Row: Improved hierarchy and grouping */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <Link href="/matches">
           <Card className="glass-card hover:translate-y-[-4px] transition-all duration-300 cursor-pointer h-full border-white/5">
@@ -100,6 +101,7 @@ export default function DashboardPage() {
           </Card>
         </Link>
 
+        {/* Elite/Highlight Cards */}
         <Link href={topScorer ? `/players/${topScorer.playerId}` : "/players"}>
           <Card className="glass-card card-gold hover:translate-y-[-4px] transition-all duration-300 cursor-pointer h-full bg-gradient-to-br from-card/60 to-yellow-500/10 border-yellow-500/30">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
@@ -155,6 +157,7 @@ export default function DashboardPage() {
         </Link>
       </div>
 
+      {/* Main Grid: Pitch and Social Analytics */}
       <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-3">
         <FieldView team="Azul" players={lastMatchTeamAPlayers} topScorerId={topScorer?.playerId} />
         <FieldView team="Rojo" players={lastMatchTeamBPlayers} topScorerId={topScorer?.playerId} />
@@ -198,6 +201,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Table and Chart Row */}
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
         <Card className="glass-card border-white/5">
           <CardHeader>
