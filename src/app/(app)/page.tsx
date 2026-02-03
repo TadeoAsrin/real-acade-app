@@ -1,11 +1,9 @@
-
-/**
- * Este archivo ha sido desactivado para resolver el conflicto de rutas duplicadas
- * con src/app/page.tsx. Next.js no permite múltiples archivos para la misma ruta (/).
- * La redirección principal se gestiona ahora únicamente desde el root.
- */
 import { redirect } from "next/navigation";
 
-export default function ConflictedPage() {
+/**
+ * Este archivo ha sido desactivado permanentemente para resolver la colisión de rutas
+ * en la raíz (/) con src/app/page.tsx, que es la causa principal del error 51 en build.
+ */
+export default function RedirectToDashboard() {
   redirect("/dashboard");
 }
