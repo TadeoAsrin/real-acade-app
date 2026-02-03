@@ -112,24 +112,66 @@ export default function DashboardPage() {
 
       {/* Hero Stats Section */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
-        {[
-          { label: "Global (Azul-Rojo)", val: `${teamStats.blueWins}-${teamStats.redWins}`, sub: `${teamStats.draws} empates`, icon: Swords, color: "text-white" },
-          { label: "Partidos", val: allMatches.length, sub: "Encuentros totales", icon: Users, color: "text-white" },
-          { label: "Goles", val: totalGoals, sub: "Goles anotados", icon: Trophy, color: "text-white" },
-          { label: "Pichichi", val: topScorers[0]?.name || '-', sub: `${topScorers[0]?.totalGoals || 0} goles`, icon: Medal, color: "text-primary" },
-          { label: "Victoria", val: topWinner?.name || '-', sub: `${topWinner?.wins || 0} victorias`, icon: Award, color: "text-accent" },
-        ].map((item, i) => (
-          <Card key={i} className="glass-card overflow-hidden hover:translate-y-[-4px] transition-all duration-300 border-white/5">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{item.label}</CardTitle>
-              <item.icon className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className={cn("text-3xl font-black tracking-tighter", item.color)}>{item.val}</div>
-              <p className="text-xs text-muted-foreground font-medium mt-1">{item.sub}</p>
-            </CardContent>
-          </Card>
-        ))}
+        {/* Global Stats con colores por equipo */}
+        <Card className="glass-card overflow-hidden hover:translate-y-[-4px] transition-all duration-300 border-white/5">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Global (Azul-Rojo)</CardTitle>
+            <Swords className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-black tracking-tighter flex items-center gap-1">
+              <span className="text-primary">{teamStats.blueWins}</span>
+              <span className="text-muted-foreground/30">-</span>
+              <span className="text-accent">{teamStats.redWins}</span>
+            </div>
+            <p className="text-xs text-muted-foreground font-medium mt-1">{teamStats.draws} empates</p>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card overflow-hidden hover:translate-y-[-4px] transition-all duration-300 border-white/5">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Partidos</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-black tracking-tighter text-white">{allMatches.length}</div>
+            <p className="text-xs text-muted-foreground font-medium mt-1">Encuentros totales</p>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card overflow-hidden hover:translate-y-[-4px] transition-all duration-300 border-white/5">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Goles</CardTitle>
+            <Trophy className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-black tracking-tighter text-white">{totalGoals}</div>
+            <p className="text-xs text-muted-foreground font-medium mt-1">Goles anotados</p>
+          </CardContent>
+        </Card>
+
+        {/* Premios individuales con color blanco/neutro para no confundir equipo */}
+        <Card className="glass-card overflow-hidden hover:translate-y-[-4px] transition-all duration-300 border-white/5">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Pichichi</CardTitle>
+            <Medal className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-black tracking-tighter text-white truncate">{topScorers[0]?.name || '-'}</div>
+            <p className="text-xs text-muted-foreground font-medium mt-1">{topScorers[0]?.totalGoals || 0} goles</p>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card overflow-hidden hover:translate-y-[-4px] transition-all duration-300 border-white/5">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Victoria</CardTitle>
+            <Award className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-black tracking-tighter text-white truncate">{topWinner?.name || '-'}</div>
+            <p className="text-xs text-muted-foreground font-medium mt-1">{topWinner?.wins || 0} victorias</p>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-3">
