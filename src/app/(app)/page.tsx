@@ -1,9 +1,11 @@
 import { redirect } from "next/navigation";
 
 /**
- * Este archivo ha sido desactivado permanentemente para resolver la colisión de rutas
- * en la raíz (/) con src/app/page.tsx, que es la causa principal del error 51 en build.
+ * Este archivo gestiona la ruta raíz dentro del grupo (app).
+ * Redirige al dashboard para mantener la coherencia con el acceso público.
  */
-export default function RedirectToDashboard() {
+export default function AppHomePage() {
   redirect("/dashboard");
 }
+
+export const dynamic = 'force-static';
