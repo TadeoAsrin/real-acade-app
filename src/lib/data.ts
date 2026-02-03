@@ -112,7 +112,7 @@ export const getTeamGlobalStats = (allMatches: Match[]) => {
     return { blueWins, redWins, draws, total: allMatches.length };
 };
 
-export const getTopChemistry = (players: Player[], matches: Match[]): ChemistryPair | null => {
+export const getTopChemistry = (players: Player[], matches: Match[], minMatches = 3): ChemistryPair | null => {
   const statsMap: { [key: string]: { matches: number, wins: number } } = {};
   
   matches.forEach(match => {
@@ -141,7 +141,7 @@ export const getTopChemistry = (players: Player[], matches: Match[]): ChemistryP
   });
 
   const validPairs = Object.entries(statsMap)
-    .filter(([_, stats]) => stats.matches >= 3)
+    .filter(([_, stats]) => stats.matches >= minMatches)
     .sort((a, b) => b[1].wins - a[1].wins || (b[1].wins / b[1].matches) - (a[1].wins / a[1].matches));
 
   if (validPairs.length === 0) return null;
@@ -154,7 +154,26 @@ export const getTopChemistry = (players: Player[], matches: Match[]): ChemistryP
 
   if (!player1 || !player2) return null;
 
-  return { player1, player2, wins: stats.wins };
+  return { player1, player2, wins: stats.wins, matches: stats.matches };
+};
+
+export const getLeaguePulseMetrics = (matches: Match[]) => {
+  if (matches.length === 0) return null;
+
+  const totalGoals = matches.reduce((sum, m) => sum + m.teamAScore + m.teamBScore, 0);
+  const avgGoals = Number((totalGoals / matches.length).toFixed(1));
+  
+  const recentMatches = matches.slice(0, 5);
+  const recentGoals = recentMatches.reduce((sum, m) => sum + m.teamAScore + m.teamBScore, 0);
+  const recentAvg = Number((recentGoals / recentMatches.length).toFixed(1));
+
+  let trend: 'up' | 'down' | 'stable' = 'stable';
+  if (recentAvg > avgGoals + 0.5) trend = 'up';
+  if (recentAvg < avgGoals - 0.5) trend = 'down';
+
+  const maxGoalsInMatch = Math.max(...matches.map(m => m.teamAScore + m.teamBScore));
+
+  return { avgGoals, trend, maxGoalsInMatch, recentAvg };
 };
 
 export const balanceTeams = (selectedPlayers: AggregatedPlayerStats[]) => {
