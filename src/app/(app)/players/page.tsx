@@ -1,7 +1,7 @@
-
 'use client';
 
 import * as React from 'react';
+import { useSearchParams } from 'next/navigation';
 import { calculateAggregatedStats } from "@/lib/data";
 import {
   Table,
@@ -51,6 +51,7 @@ type SortConfig = {
 };
 
 export default function PlayersPage() {
+  const searchParams = useSearchParams();
   const firestore = useFirestore();
   const { user } = useUser();
   const { toast } = useToast();
@@ -62,6 +63,14 @@ export default function PlayersPage() {
   const [isUpdatingPlayer, setIsUpdatingPlayer] = React.useState(false);
 
   const [sortConfig, setSortConfig] = React.useState<SortConfig>({ key: 'name', direction: 'asc' });
+
+  // Manejar ordenamiento inicial por parámetros de búsqueda
+  React.useEffect(() => {
+    const sortParam = searchParams.get('sort');
+    if (sortParam === 'totalGoals') {
+      setSortConfig({ key: 'totalGoals', direction: 'desc' });
+    }
+  }, [searchParams]);
 
   const playersQuery = useMemoFirebase(() => {
     if (!firestore) return null;

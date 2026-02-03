@@ -96,6 +96,12 @@ export default function DashboardPage() {
 
   const topScorer = sortedByGoals[0];
   const topWinner = sortedByWins[0];
+  
+  // Lógica para detectar empate en victorias
+  const maxWins = topWinner?.wins || 0;
+  const winnersWithMax = playerStats.filter(p => p.wins === maxWins && maxWins > 0);
+  const isVictoriaPeleada = winnersWithMax.length > 1;
+
   const totalGoals = playerStats.reduce((sum, p) => sum + p.totalGoals, 0);
 
   const lastMatchTeamAPlayers = lastMatch?.teamAPlayers.map(s => allPlayers.find(p => p.id === s.playerId)).filter(Boolean) as Player[] || [];
@@ -123,76 +129,89 @@ export default function DashboardPage() {
       )}
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
-        <Card className="glass-card overflow-hidden hover:translate-y-[-4px] transition-all duration-300">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-            <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Global (Azul-Rojo)</CardTitle>
-            <Swords className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-black tracking-tighter flex items-center gap-2">
-              <span className="text-primary">{teamStats.blueWins}</span>
-              <span className="text-muted-foreground/30 font-light">-</span>
-              <span className="text-accent">{teamStats.redWins}</span>
-            </div>
-            <p className="text-[10px] text-muted-foreground font-medium mt-1 uppercase">{teamStats.draws} empates</p>
-          </CardContent>
-        </Card>
+        <Link href="/matches">
+          <Card className="glass-card overflow-hidden hover:translate-y-[-4px] transition-all duration-300 hover:border-primary/50 cursor-pointer h-full">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+              <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Global (Azul-Rojo)</CardTitle>
+              <Swords className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-black tracking-tighter flex items-center gap-2">
+                <span className="text-primary">{teamStats.blueWins}</span>
+                <span className="text-muted-foreground/30 font-light">-</span>
+                <span className="text-accent">{teamStats.redWins}</span>
+              </div>
+              <p className="text-[10px] text-muted-foreground font-medium mt-1 uppercase">{teamStats.draws} empates</p>
+            </CardContent>
+          </Card>
+        </Link>
 
-        <Card className="glass-card overflow-hidden hover:translate-y-[-4px] transition-all duration-300">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-            <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Partidos</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-black tracking-tighter text-white">{allMatches.length}</div>
-            <p className="text-[10px] text-muted-foreground font-medium mt-1 uppercase">Encuentros totales</p>
-          </CardContent>
-        </Card>
+        <Link href="/matches">
+          <Card className="glass-card overflow-hidden hover:translate-y-[-4px] transition-all duration-300 hover:border-white/20 cursor-pointer h-full">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+              <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Partidos</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-black tracking-tighter text-white">{allMatches.length}</div>
+              <p className="text-[10px] text-muted-foreground font-medium mt-1 uppercase">Encuentros totales</p>
+            </CardContent>
+          </Card>
+        </Link>
 
-        <Card className="glass-card overflow-hidden hover:translate-y-[-4px] transition-all duration-300">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-            <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Goles</CardTitle>
-            <Trophy className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-black tracking-tighter text-white">{totalGoals}</div>
-            <p className="text-[10px] text-muted-foreground font-medium mt-1 uppercase">Anotados este año</p>
-          </CardContent>
-        </Card>
+        <Link href="/players?sort=totalGoals">
+          <Card className="glass-card overflow-hidden hover:translate-y-[-4px] transition-all duration-300 hover:border-white/20 cursor-pointer h-full">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+              <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Goles</CardTitle>
+              <Trophy className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-black tracking-tighter text-white">{totalGoals}</div>
+              <p className="text-[10px] text-muted-foreground font-medium mt-1 uppercase">Anotados este año</p>
+            </CardContent>
+          </Card>
+        </Link>
 
-        <Card className="glass-card card-gold overflow-hidden hover:translate-y-[-4px] transition-all duration-300 bg-gradient-to-br from-card/60 to-yellow-500/10 border-yellow-500/30">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-            <CardTitle className="text-[10px] font-black uppercase tracking-widest text-yellow-500">Pichichi</CardTitle>
-            <Medal className="h-4 w-4 text-yellow-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-black tracking-tighter text-yellow-500 truncate drop-shadow-[0_0_8px_rgba(234,179,8,0.3)]">
-              {topScorer?.name || '-'}
-            </div>
-            <div className="flex items-baseline gap-1 mt-1">
-              <span className="text-xl font-black text-yellow-500/90">{topScorer?.totalGoals || 0}</span>
-              <span className="text-[10px] text-yellow-500/60 font-bold uppercase ml-1">goles</span>
-              <span className="mx-1 text-muted-foreground/30">|</span>
-              <span className="text-[10px] text-yellow-500/60 font-bold uppercase">{topScorer?.goalsPerMatch || 0} avg</span>
-            </div>
-          </CardContent>
-        </Card>
+        <Link href={topScorer ? `/players/${topScorer.playerId}` : "/players"}>
+          <Card className="glass-card card-gold overflow-hidden hover:translate-y-[-4px] transition-all duration-300 bg-gradient-to-br from-card/60 to-yellow-500/10 border-yellow-500/30 cursor-pointer h-full">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+              <CardTitle className="text-[10px] font-black uppercase tracking-widest text-yellow-500">Pichichi</CardTitle>
+              <Medal className="h-4 w-4 text-yellow-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-black tracking-tighter text-yellow-500 truncate drop-shadow-[0_0_8px_rgba(234,179,8,0.3)]">
+                {topScorer?.name || '-'}
+              </div>
+              <div className="flex items-baseline gap-1 mt-1">
+                <span className="text-xl font-black text-yellow-500/90">{topScorer?.totalGoals || 0}</span>
+                <span className="text-[10px] text-yellow-500/60 font-bold uppercase ml-1">goles</span>
+                <span className="mx-1 text-muted-foreground/30">|</span>
+                <span className="text-[10px] text-yellow-500/60 font-bold uppercase">{topScorer?.goalsPerMatch || 0} avg</span>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
 
-        <Card className="glass-card card-success overflow-hidden hover:translate-y-[-4px] transition-all duration-300 bg-gradient-to-br from-card/60 to-emerald-500/10 border-emerald-500/30">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-            <CardTitle className="text-[10px] font-black uppercase tracking-widest text-emerald-500">Victoria</CardTitle>
-            <Award className="h-4 w-4 text-emerald-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-black tracking-tighter text-emerald-500 truncate drop-shadow-[0_0_8px_rgba(16,185,129,0.3)]">
-              {topWinner?.name || '-'}
-            </div>
-            <div className="flex items-baseline gap-1 mt-1">
-              <span className="text-xl font-black text-emerald-500/90">{topWinner?.wins || 0}V</span>
-              <span className="text-[10px] text-emerald-500/60 font-bold uppercase">({topWinner?.winPercentage || 0}% efec.)</span>
-            </div>
-          </CardContent>
-        </Card>
+        <Link href={isVictoriaPeleada ? "/players" : (topWinner ? `/players/${topWinner.playerId}` : "/players")}>
+          <Card className="glass-card card-success overflow-hidden hover:translate-y-[-4px] transition-all duration-300 bg-gradient-to-br from-card/60 to-emerald-500/10 border-emerald-500/30 cursor-pointer h-full">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+              <CardTitle className="text-[10px] font-black uppercase tracking-widest text-emerald-500">Victoria</CardTitle>
+              <Award className="h-4 w-4 text-emerald-500" />
+            </CardHeader>
+            <CardContent>
+              <div className={cn(
+                "text-2xl font-black tracking-tighter truncate drop-shadow-[0_0_8px_rgba(16,185,129,0.3)]",
+                isVictoriaPeleada ? "text-orange-400 italic" : "text-emerald-500"
+              )}>
+                {isVictoriaPeleada ? "Peleado" : (topWinner?.name || '-')}
+              </div>
+              <div className="flex items-baseline gap-1 mt-1">
+                <span className="text-xl font-black text-emerald-500/90">{topWinner?.wins || 0}V</span>
+                <span className="text-[10px] text-emerald-500/60 font-bold uppercase">({topWinner?.winPercentage || 0}% efec.)</span>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-3">
