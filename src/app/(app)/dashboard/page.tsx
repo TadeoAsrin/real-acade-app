@@ -192,12 +192,26 @@ export default function DashboardPage() {
             <Link href="/players" className="col-span-2 lg:col-span-1">
               <Card className="glass-card hover:bg-emerald-500/10 transition-all h-full border-emerald-500/20 bg-emerald-500/5">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-                  <CardTitle className="text-[10px] font-black uppercase tracking-widest text-emerald-500">Asistencia Media</CardTitle>
+                  <CardTitle className="text-[10px] font-black uppercase tracking-widest text-emerald-500">Los Infaltables</CardTitle>
                   <Users className="h-4 w-4 text-emerald-500" />
                 </CardHeader>
-                <CardContent className="flex items-end justify-between">
-                  <div className="text-3xl font-black tracking-tighter text-emerald-500">{attendanceRate}%</div>
-                  <div className="text-[10px] font-bold text-emerald-500/60 uppercase mb-1">Presencia Real</div>
+                <CardContent className="flex flex-col justify-between h-full py-2">
+                  <div className="flex items-baseline justify-between">
+                    <div className="text-3xl font-black tracking-tighter text-emerald-500">{attendanceRate}%</div>
+                    <div className="text-[10px] font-bold text-emerald-500/60 uppercase">Asistencia</div>
+                  </div>
+                  <div className="mt-2 space-y-1">
+                    <p className="text-[10px] font-bold text-white uppercase truncate">
+                      {attendanceLeaders.length > 0 
+                        ? (attendanceLeaders.length <= 3 
+                            ? attendanceLeaders.map(p => p.name.split(' ')[0]).join(', ')
+                            : `${attendanceLeaders[0].name.split(' ')[0]} + ${attendanceLeaders.length - 1} más`)
+                        : 'Sin datos'}
+                    </p>
+                    <p className="text-[8px] uppercase font-black text-emerald-500/50 tracking-widest">
+                      {attendanceLeaders.length > 0 ? `Presentes en ${attendanceLeaders[0].matchesPlayed} encuentros` : ''}
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
             </Link>
