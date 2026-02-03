@@ -40,6 +40,7 @@ export type AggregatedPlayerStats = {
   draws: number;
   winPercentage: number;
   goalsPerMatch: number;
+  mvpPerMatch: number;
   matchesAsBlue: number;
   matchesAsRed: number;
   powerPoints: number;

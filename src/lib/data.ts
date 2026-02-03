@@ -27,6 +27,7 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
       draws: 0,
       winPercentage: 0,
       goalsPerMatch: 0,
+      mvpPerMatch: 0,
       matchesAsBlue: 0,
       matchesAsRed: 0,
       powerPoints: 0,
@@ -34,7 +35,6 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
     };
   });
 
-  // Sort matches by date to calculate form
   const sortedMatches = [...allMatches].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   sortedMatches.forEach(match => {
@@ -90,8 +90,8 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
       if (stats.matchesPlayed > 0) {
           stats.winPercentage = Math.round((stats.wins / stats.matchesPlayed) * 100);
           stats.goalsPerMatch = Number((stats.totalGoals / stats.matchesPlayed).toFixed(2));
+          stats.mvpPerMatch = Number((stats.totalMvp / stats.matchesPlayed).toFixed(2));
       }
-      // Reverse form to show most recent first
       stats.form = [...stats.form].reverse();
   }
 
@@ -113,38 +113,51 @@ export const getTeamGlobalStats = (allMatches: Match[]) => {
 };
 
 export const getTopChemistry = (players: Player[], matches: Match[]): ChemistryPair | null => {
-  const winMap: { [key: string]: number } = {};
+  const statsMap: { [key: string]: { matches: number, wins: number } } = {};
   
   matches.forEach(match => {
-    const winningTeam = match.teamAScore > match.teamBScore ? match.teamAPlayers : (match.teamBScore > match.teamAScore ? match.teamBPlayers : []);
-    if (winningTeam.length < 2) return;
-    
-    for (let i = 0; i < winningTeam.length; i++) {
-      for (let j = i + 1; j < winningTeam.length; j++) {
-        const p1 = winningTeam[i].playerId;
-        const p2 = winningTeam[j].playerId;
+    // Analizar Equipo A
+    for (let i = 0; i < match.teamAPlayers.length; i++) {
+      for (let j = i + 1; j < match.teamAPlayers.length; j++) {
+        const p1 = match.teamAPlayers[i].playerId;
+        const p2 = match.teamAPlayers[j].playerId;
         const key = [p1, p2].sort().join('-');
-        winMap[key] = (winMap[key] || 0) + 1;
+        if (!statsMap[key]) statsMap[key] = { matches: 0, wins: 0 };
+        statsMap[key].matches++;
+        if (match.teamAScore > match.teamBScore) statsMap[key].wins++;
+      }
+    }
+    // Analizar Equipo B
+    for (let i = 0; i < match.teamBPlayers.length; i++) {
+      for (let j = i + 1; j < match.teamBPlayers.length; j++) {
+        const p1 = match.teamBPlayers[i].playerId;
+        const p2 = match.teamBPlayers[j].playerId;
+        const key = [p1, p2].sort().join('-');
+        if (!statsMap[key]) statsMap[key] = { matches: 0, wins: 0 };
+        statsMap[key].matches++;
+        if (match.teamBScore > match.teamAScore) statsMap[key].wins++;
       }
     }
   });
 
-  const sortedPairs = Object.entries(winMap).sort((a, b) => b[1] - a[1]);
-  if (sortedPairs.length === 0) return null;
+  const validPairs = Object.entries(statsMap)
+    .filter(([_, stats]) => stats.matches >= 3)
+    .sort((a, b) => b[1].wins - a[1].wins || (b[1].wins / b[1].matches) - (a[1].wins / a[1].matches));
 
-  const [id1, id2] = sortedPairs[0][0].split('-');
-  const wins = sortedPairs[0][1];
+  if (validPairs.length === 0) return null;
+
+  const [ids, stats] = validPairs[0];
+  const [id1, id2] = ids.split('-');
   
   const player1 = players.find(p => p.id === id1);
   const player2 = players.find(p => p.id === id2);
 
   if (!player1 || !player2) return null;
 
-  return { player1, player2, wins };
+  return { player1, player2, wins: stats.wins };
 };
 
 export const balanceTeams = (selectedPlayers: AggregatedPlayerStats[]) => {
-  // Separar porteros del resto para asegurar reparto equitativo
   const goalkeepers = selectedPlayers.filter(p => p.position === 'Arquero');
   const outfieldPlayers = selectedPlayers.filter(p => p.position !== 'Arquero');
   
@@ -154,7 +167,6 @@ export const balanceTeams = (selectedPlayers: AggregatedPlayerStats[]) => {
   let scoreA = 0;
   let scoreB = 0;
 
-  // Repartir porteros primero
   const sortedGKs = [...goalkeepers].sort((a, b) => b.powerPoints - a.powerPoints);
   sortedGKs.forEach(gk => {
     if (scoreA <= scoreB) {
@@ -166,7 +178,6 @@ export const balanceTeams = (selectedPlayers: AggregatedPlayerStats[]) => {
     }
   });
 
-  // Repartir el resto por Power Points (método serpiente)
   const sortedOutfield = [...outfieldPlayers].sort((a, b) => b.powerPoints - a.powerPoints);
   sortedOutfield.forEach((player) => {
     if (scoreA <= scoreB) {

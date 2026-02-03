@@ -59,7 +59,7 @@ export default function DashboardPage() {
   const lastMatch = allMatches[0];
 
   const sortedByGoals = [...playerStats].sort((a, b) => b.totalGoals - a.totalGoals || b.goalsPerMatch - a.goalsPerMatch);
-  const sortedByMvp = [...playerStats].sort((a, b) => b.totalMvp - a.totalMvp);
+  const sortedByMvp = [...playerStats].sort((a, b) => b.totalMvp - a.totalMvp || b.mvpPerMatch - a.mvpPerMatch);
   const sortedByWinRate = [...playerStats].filter(p => p.matchesPlayed > 2).sort((a, b) => b.winPercentage - a.winPercentage);
 
   const topScorer = sortedByGoals[0];
@@ -130,7 +130,7 @@ export default function DashboardPage() {
               </div>
               <div className="flex items-baseline gap-1 mt-1">
                 <span className="text-xl font-black text-primary/90">{mvpKing?.totalMvp || 0}</span>
-                <span className="text-[10px] text-primary/60 font-bold uppercase ml-1">Menciones</span>
+                <span className="text-[10px] text-primary/60 font-bold uppercase ml-1">({mvpKing?.mvpPerMatch || 0} avg)</span>
               </div>
             </CardContent>
           </Card>
@@ -168,7 +168,7 @@ export default function DashboardPage() {
                         <Heart className="h-6 w-6 text-accent fill-accent animate-pulse" />
                         <span className="font-black uppercase tracking-tighter italic text-2xl text-accent">Química</span>
                     </CardTitle>
-                    <CardDescription>La dupla que más victorias tiene jugando juntos.</CardDescription>
+                    <CardDescription>La dupla con más victorias (mín. 3 partidos juntos).</CardDescription>
                 </CardHeader>
                 <CardContent>
                     {topChemistry ? (
@@ -191,7 +191,7 @@ export default function DashboardPage() {
                             </div>
                         </div>
                     ) : (
-                        <div className="text-center py-6 text-muted-foreground italic text-sm">Aún no hay suficientes datos de victorias conjuntas.</div>
+                        <div className="text-center py-6 text-muted-foreground italic text-sm">Aún no hay parejas con 3 partidos ganados juntos.</div>
                     )}
                 </CardContent>
             </Card>
