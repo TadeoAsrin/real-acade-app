@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -89,7 +90,7 @@ export function FieldView({ team, players }: FieldViewProps) {
     <Card className="glass-card overflow-hidden">
       <CardHeader className="pb-2">
         <CardTitle className={cn("text-lg font-black uppercase tracking-widest", team === 'Azul' ? 'text-primary' : 'text-accent')}>
-          7 Inicial {team}
+          Último Partido ({team})
         </CardTitle>
       </CardHeader>
       <CardContent className="p-4">

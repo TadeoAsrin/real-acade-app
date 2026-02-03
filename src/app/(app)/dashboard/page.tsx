@@ -85,7 +85,6 @@ export default function DashboardPage() {
 
   const topScorers = [...playerStats].sort((a, b) => b.totalGoals - a.totalGoals).slice(0, 5);
   
-  // Lógica de desempate refinada: Victorias > Efectividad > Goles > Partidos Jugados
   const topWinner = [...playerStats].sort((a, b) => {
     if (b.wins !== a.wins) return b.wins - a.wins;
     if (b.winPercentage !== a.winPercentage) return b.winPercentage - a.winPercentage;
@@ -167,7 +166,10 @@ export default function DashboardPage() {
             <div className="text-2xl font-black tracking-tighter text-yellow-500 truncate drop-shadow-[0_0_8px_rgba(234,179,8,0.3)]">
               {topScorers[0]?.name || '-'}
             </div>
-            <p className="text-[10px] text-yellow-500/70 font-black mt-1 uppercase">{topScorers[0]?.totalGoals || 0} goles marcados</p>
+            <div className="flex items-baseline gap-1 mt-1">
+              <span className="text-xl font-black text-yellow-500/90">{topScorers[0]?.totalGoals || 0}</span>
+              <span className="text-[10px] text-yellow-500/60 font-bold uppercase">goles en {topScorers[0]?.matchesPlayed || 0} part.</span>
+            </div>
           </CardContent>
         </Card>
 
@@ -180,9 +182,10 @@ export default function DashboardPage() {
             <div className="text-2xl font-black tracking-tighter text-emerald-500 truncate drop-shadow-[0_0_8px_rgba(16,185,129,0.3)]">
               {topWinner?.name || '-'}
             </div>
-            <p className="text-[10px] text-emerald-500/70 font-black mt-1 uppercase">
-              {topWinner?.wins || 0} victorias ({topWinner?.winPercentage || 0}%)
-            </p>
+            <div className="flex items-baseline gap-1 mt-1">
+              <span className="text-xl font-black text-emerald-500/90">{topWinner?.wins || 0}V</span>
+              <span className="text-[10px] text-emerald-500/60 font-bold uppercase">({topWinner?.winPercentage || 0}% efectividad)</span>
+            </div>
           </CardContent>
         </Card>
       </div>
