@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -18,7 +17,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc } from "@/firebase";
 import { collection, doc, setDoc, deleteDoc, updateDoc, query, orderBy } from "firebase/firestore";
 import type { Player, Match, AggregatedPlayerStats, PlayerPosition } from "@/lib/definitions";
-import { Loader2, UserPlus, Trash2, Pencil, ArrowUpDown, ChevronUp, ChevronDown, Shield, Target, Footprints, Users as UsersIcon } from "lucide-react";
+import { Loader2, UserPlus, Trash2, Pencil, ArrowUpDown, ChevronUp, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -50,7 +49,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn, getInitials } from '@/lib/utils';
+import { getInitials } from '@/lib/utils';
 import { Badge } from "@/components/ui/badge";
 
 type SortConfig = {
@@ -60,7 +59,7 @@ type SortConfig = {
 
 const POSITIONS: PlayerPosition[] = ["Arquero", "Lateral Derecho", "Defensor Central", "Lateral Izquierdo", "Mediocampista", "Delantero"];
 
-export default function PlayersPage() {
+function PlayersList() {
   const searchParams = useSearchParams();
   const firestore = useFirestore();
   const { user } = useUser();
@@ -378,5 +377,13 @@ export default function PlayersPage() {
           </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function PlayersPage() {
+  return (
+    <React.Suspense fallback={<div className="flex h-[50vh] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
+      <PlayersList />
+    </React.Suspense>
   );
 }
