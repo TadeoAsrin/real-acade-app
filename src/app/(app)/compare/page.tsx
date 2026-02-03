@@ -1,17 +1,17 @@
 'use client';
 
 import * as React from 'react';
-import { calculateAggregatedStats } from "../../../lib/data";
-import { useCollection, useMemoFirebase, useFirestore } from "../../../firebase";
+import { calculateAggregatedStats } from "@/lib/data";
+import { useCollection, useMemoFirebase, useFirestore } from "@/firebase";
 import { collection } from "firebase/firestore";
-import type { Player, Match, AggregatedPlayerStats } from "../../../lib/definitions";
+import type { Player, Match, AggregatedPlayerStats } from "@/lib/definitions";
 import { Loader2, ArrowLeftRight, Trophy, Zap, Shield, Target, TrendingUp, MapPin } from "lucide-react";
-import { Avatar, AvatarFallback } from "../../../components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../../components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/ui/select";
-import { cn, getInitials } from "../../../lib/utils";
-import { Progress } from "../../../components/ui/progress";
-import { Badge } from "../../../components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { cn, getInitials } from "@/lib/utils";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 
 export default function ComparePage() {
   const firestore = useFirestore();
