@@ -8,7 +8,7 @@ import { collection, query, orderBy } from "firebase/firestore";
 import type { Match, Player } from "@/lib/definitions";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Brain, Activity, Link as LinkIcon, Trophy, Zap, Star, Target, Shield } from "lucide-react";
+import { ArrowLeft, Brain, Activity, Link as LinkIcon, Trophy, Zap, Star, Target, Shield, ArrowUpRight, ArrowDownRight, Minus } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials, cn } from "@/lib/utils";
 

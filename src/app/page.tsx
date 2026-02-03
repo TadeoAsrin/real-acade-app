@@ -1,5 +1,12 @@
+import { redirect } from "next/navigation";
+
 /**
- * Este archivo ha sido desactivado para evitar colisiones con src/app/(app)/page.tsx.
- * La redirección a /dashboard se maneja ahora exclusivamente en el grupo de rutas (app).
+ * Componente principal de la ruta raíz.
+ * Realiza una redirección limpia al dashboard para asegurar que
+ * la aplicación siempre tenga un punto de entrada válido.
  */
+export default function RootPage() {
+  redirect("/dashboard");
+}
+
 export const dynamic = 'force-static';

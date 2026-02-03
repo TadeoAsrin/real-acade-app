@@ -18,7 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Medal, Trophy, Loader2, Sparkles, TrendingUp, Zap, Heart, Calendar, Users, Brain, Activity, Crown, ArrowUpRight, ArrowDownRight, Minus } from "lucide-react";
+import { Medal, Trophy, Loader2, Sparkles, TrendingUp, Zap, Heart, Calendar, Users, Brain, Activity, Crown, ArrowUpRight, ArrowDownRight, Minus, Link as LinkIcon } from "lucide-react";
 import Link from "next/link";
 import { FieldView } from "@/components/dashboard/field-view";
 import { PowerRanking } from "@/components/dashboard/power-ranking";
@@ -133,7 +133,6 @@ export default function DashboardPage() {
           </Card>
         </Link>
 
-        {/* Attendance, WinRate Leaders, etc. removed for brevity in summary, keeping logic structure */}
         <Link href="/players" className="col-span-1">
           <Card className="glass-card hover:translate-y-[-4px] transition-all duration-300 cursor-pointer h-full border-emerald-500/30 bg-emerald-500/5">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
@@ -283,7 +282,7 @@ export default function DashboardPage() {
                     </div>
                     <CardHeader>
                         <CardTitle className="text-xs font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                            <Link className="h-3 w-3" />
+                            <LinkIcon className="h-3 w-3" />
                             Mejor Sociedad
                         </CardTitle>
                     </CardHeader>

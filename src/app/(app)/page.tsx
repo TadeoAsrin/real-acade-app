@@ -1,11 +1,10 @@
-import { redirect } from "next/navigation";
-
 /**
- * Este archivo gestiona la ruta raíz dentro del grupo (app).
- * Redirige al dashboard para mantener la coherencia con el acceso público.
+ * Este archivo ha sido desactivado para evitar conflictos con el archivo raíz src/app/page.tsx.
+ * En Next.js 15, tener dos archivos page.tsx resolviendo a la misma ruta causa errores de compilación.
+ * Mantenemos una exportación mínima para evitar errores de carga de módulo.
  */
-export default function AppHomePage() {
-  redirect("/dashboard");
+export default function AppPlaceholder() {
+  return null;
 }
 
 export const dynamic = 'force-static';
