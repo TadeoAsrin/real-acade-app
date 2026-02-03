@@ -99,7 +99,7 @@ export default function DashboardPage() {
               <ShieldCheck className="h-6 w-6 text-primary animate-pulse" />
               Acceso de Gestión
             </CardTitle>
-            <CardDescription className="text-base">¿Eres el responsable del club? Activa el panel de administración.</CardDescription>
+            <CardDescription className="text-base text-muted-foreground">¿Eres el responsable del club? Activa el panel de administración.</CardDescription>
           </CardHeader>
           <CardContent>
             <Button onClick={handleClaimAdmin} disabled={isSettingUp} size="lg" className="relative z-10 shadow-lg shadow-primary/20">
@@ -113,13 +113,13 @@ export default function DashboardPage() {
       {/* Hero Stats Section */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
         {[
-          { label: "Global", val: `${teamStats.blueWins}-${teamStats.redWins}`, sub: `${teamStats.draws} empates`, icon: Swords, color: "text-white" },
-          { label: "Partidos", val: allMatches.length, sub: "Encuentros", icon: Users, color: "text-white" },
-          { label: "Goles", val: totalGoals, sub: "Anotados", icon: Trophy, color: "text-white" },
-          { label: "Goleador", val: topScorers[0]?.name || '-', sub: `${topScorers[0]?.totalGoals || 0} goles`, icon: Medal, color: "text-primary" },
-          { label: "Victorioso", val: topWinner?.name || '-', sub: `${topWinner?.wins || 0} victorias`, icon: Award, color: "text-accent" },
+          { label: "Global (Azul-Rojo)", val: `${teamStats.blueWins}-${teamStats.redWins}`, sub: `${teamStats.draws} empates`, icon: Swords, color: "text-white" },
+          { label: "Partidos", val: allMatches.length, sub: "Encuentros totales", icon: Users, color: "text-white" },
+          { label: "Goles", val: totalGoals, sub: "Goles anotados", icon: Trophy, color: "text-white" },
+          { label: "Pichichi", val: topScorers[0]?.name || '-', sub: `${topScorers[0]?.totalGoals || 0} goles`, icon: Medal, color: "text-primary" },
+          { label: "Victoria", val: topWinner?.name || '-', sub: `${topWinner?.wins || 0} victorias`, icon: Award, color: "text-accent" },
         ].map((item, i) => (
-          <Card key={i} className="glass-card overflow-hidden hover:translate-y-[-4px] transition-all duration-300">
+          <Card key={i} className="glass-card overflow-hidden hover:translate-y-[-4px] transition-all duration-300 border-white/5">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{item.label}</CardTitle>
               <item.icon className="h-4 w-4 text-muted-foreground" />
@@ -174,11 +174,6 @@ export default function DashboardPage() {
                     <TableCell className="text-right font-mono text-sm text-primary">{player.winPercentage}%</TableCell>
                   </TableRow>
                 ))}
-                {topScorers.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={3} className="text-center py-10 text-muted-foreground italic">Esperando datos...</TableCell>
-                  </TableRow>
-                )}
               </TableBody>
             </Table>
           </CardContent>
