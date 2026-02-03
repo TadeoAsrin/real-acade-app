@@ -11,13 +11,16 @@ import {
   SidebarFooter,
   SidebarContent,
 } from "../ui/sidebar";
-import { Goal, BarChart3, Users, LogOut, Trophy, Dices, ArrowLeftRight, LogIn } from "lucide-react";
+import { Goal, BarChart3, Users, LogOut, Trophy, Dices, ArrowLeftRight, LogIn, User as UserIcon, ShieldCheck } from "lucide-react";
 import { Fut7StatsLogo } from "@/components/icons";
 import Link from "next/link";
-import { useAuth, useUser, useFirestore, useMemoFirebase, useDoc } from "@/firebase";
+import { useAuth, useUser, useFirestore, useMemoFirebase, useDoc, useCollection } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
-import { doc } from "firebase/firestore";
+import { doc, collection, query, orderBy } from "firebase/firestore";
+import { Avatar, AvatarFallback } from "../ui/avatar";
+import { getInitials } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 const menuItems = [
   {
@@ -50,10 +53,18 @@ const menuItems = [
 export function AppSidebar() {
   const pathname = usePathname();
   const auth = useAuth();
-  const { user } = useUser();
+  const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const router = useRouter();
   const { toast } = useToast();
+
+  const playersRef = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'players'), orderBy('name', 'asc'));
+  }, [firestore]);
+
+  const { data: players } = useCollection(playersRef);
+  const currentUserData = players?.find(p => p.id === user?.uid);
 
   const adminRoleRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -84,11 +95,12 @@ export function AppSidebar() {
             <Fut7StatsLogo className="h-6 w-6 text-primary-foreground" />
           </div>
           <div className="flex flex-col">
-            <h2 className="text-xl font-bold tracking-tight text-white">Real Acade</h2>
-            <p className="text-[10px] uppercase tracking-wider text-primary font-bold">Club Social</p>
+            <h2 className="text-xl font-bold tracking-tight text-white leading-none">Real Acade</h2>
+            <p className="text-[10px] uppercase tracking-widest text-primary font-black mt-1">Club de Élite</p>
           </div>
         </div>
       </SidebarHeader>
+      
       <SidebarContent>
         <SidebarMenu className="px-2 pt-4">
             {menuItems.map((item) => (
@@ -97,11 +109,11 @@ export function AppSidebar() {
                 asChild
                 isActive={pathname.startsWith(item.href)}
                 tooltip={item.label}
-                className="py-6"
+                className="py-6 transition-all duration-200"
                 >
                 <Link href={item.href}>
-                    <item.icon className={pathname.startsWith(item.href) ? "text-primary" : ""} />
-                    <span className="font-medium">{item.label}</span>
+                    <item.icon className={cn("transition-colors", pathname.startsWith(item.href) ? "text-primary" : "text-muted-foreground")} />
+                    <span className="font-semibold">{item.label}</span>
                 </Link>
                 </SidebarMenuButton>
             </SidebarMenuItem>
@@ -113,36 +125,64 @@ export function AppSidebar() {
                   asChild
                   isActive={pathname.startsWith("/generator")}
                   tooltip="Generador de Equipos"
-                  className="py-6 text-orange-400 hover:text-orange-500"
+                  className="py-6 text-orange-400 hover:text-orange-500 hover:bg-orange-500/10"
                 >
                   <Link href="/generator">
-                      <Dices className={pathname.startsWith("/generator") ? "text-orange-400" : ""} />
-                      <span className="font-medium">Generador Pro</span>
+                      <Dices className={cn(pathname.startsWith("/generator") ? "text-orange-400" : "text-orange-400/70")} />
+                      <span className="font-bold">Equilibrador Pro</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             )}
         </SidebarMenu>
       </SidebarContent>
-      <SidebarFooter className="p-4 border-t border-sidebar-border">
+
+      <SidebarFooter className="p-4 border-t border-white/5 bg-black/20">
          {user ? (
-           <SidebarMenuItem>
-              <SidebarMenuButton 
-                onClick={handleLogout}
-                className="text-muted-foreground hover:text-destructive w-full justify-start"
-              >
-                <LogOut />
-                <span>Cerrar Sesión</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
+           <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-3 px-2 py-1">
+                <Avatar className={cn("h-10 w-10 border-2", isAdmin ? "border-yellow-500 shadow-lg shadow-yellow-500/20" : "border-primary/20")}>
+                  <AvatarFallback className="bg-muted text-xs font-black">
+                    {getInitials(currentUserData?.name || user.email || "U")}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col min-w-0">
+                  <span className="text-sm font-bold text-white truncate">
+                    {currentUserData?.name || user.email?.split('@')[0]}
+                  </span>
+                  <div className="flex items-center gap-1">
+                    {isAdmin ? (
+                      <span className="flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-yellow-500">
+                        <ShieldCheck className="h-2.5 w-2.5" /> Admin
+                      </span>
+                    ) : (
+                      <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
+                        Jugador
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton 
+                    onClick={handleLogout}
+                    className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    <span className="font-semibold">Cerrar Sesión</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+           </div>
          ) : (
            <SidebarMenuItem>
               <SidebarMenuButton 
                 asChild
-                className="text-primary hover:bg-primary/10 w-full justify-start font-bold"
+                className="text-primary hover:bg-primary/10 w-full justify-start font-black italic uppercase tracking-tighter text-lg"
               >
                 <Link href="/login">
-                  <LogIn />
+                  <LogIn className="h-5 w-5" />
                   <span>Acceso Miembros</span>
                 </Link>
               </SidebarMenuButton>
