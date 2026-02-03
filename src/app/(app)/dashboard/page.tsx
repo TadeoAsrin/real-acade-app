@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -18,7 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Award, Medal, Trophy, Users, Swords, Loader2, ShieldCheck, Sparkles, TrendingUp, Flame } from "lucide-react";
+import { Award, Medal, Trophy, Users, Swords, Loader2, ShieldCheck, Sparkles, TrendingUp, Flame, Dices } from "lucide-react";
 import Link from "next/link";
 import { GoalsChart } from "@/components/dashboard/goals-chart";
 import { FieldView } from "@/components/dashboard/field-view";
@@ -173,7 +174,7 @@ export default function DashboardPage() {
         </Link>
 
         <Link href={topScorer ? `/players/${topScorer.playerId}` : "/players"}>
-          <Card className="glass-card card-gold overflow-hidden hover:translate-y-[-4px] transition-all duration-300 bg-gradient-to-br from-card/60 to-yellow-500/10 border-yellow-500/30 cursor-pointer h-full">
+          <Card className="glass-card card-gold overflow-hidden hover:translate-y-[-4px] transition-all duration-300 bg-gradient-to-br from-card/60 to-yellow-500/10 border-yellow-500/30 cursor-pointer h-full text-gold">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
               <CardTitle className="text-[10px] font-black uppercase tracking-widest text-yellow-500">Pichichi</CardTitle>
               <Medal className="h-4 w-4 text-yellow-500" />
@@ -217,7 +218,22 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-3">
         <FieldView team="Azul" players={lastMatchTeamAPlayers} topScorerId={topScorer?.playerId} />
         <FieldView team="Rojo" players={lastMatchTeamBPlayers} topScorerId={topScorer?.playerId} />
-        <PowerRanking players={allPlayers} matches={allMatches} />
+        <div className="flex flex-col gap-6">
+            <PowerRanking players={allPlayers} matches={allMatches} />
+            <Link href="/generator">
+                <Card className="glass-card hover:bg-primary/5 transition-all cursor-pointer group">
+                    <CardHeader className="flex flex-row items-center gap-4">
+                        <div className="p-3 bg-primary/20 rounded-2xl group-hover:rotate-12 transition-transform">
+                            <Dices className="h-6 w-6 text-primary" />
+                        </div>
+                        <div>
+                            <CardTitle className="text-sm font-black uppercase italic tracking-tighter">Equilibrar Próximo Partido</CardTitle>
+                            <CardDescription className="text-xs">Usa el Power Ranking para armar equipos.</CardDescription>
+                        </div>
+                    </CardHeader>
+                </Card>
+            </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">

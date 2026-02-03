@@ -98,3 +98,30 @@ export const getTeamGlobalStats = (allMatches: Match[]) => {
 
     return { blueWins, redWins, draws, total: allMatches.length };
 };
+
+/**
+ * Algoritmo para equilibrar equipos basado en Power Points.
+ */
+export const balanceTeams = (selectedPlayers: AggregatedPlayerStats[]) => {
+  // Ordenar por nivel (Power Points) de mayor a menor
+  const sorted = [...selectedPlayers].sort((a, b) => b.powerPoints - a.powerPoints);
+  
+  const teamA: AggregatedPlayerStats[] = [];
+  const teamB: AggregatedPlayerStats[] = [];
+  
+  let scoreA = 0;
+  let scoreB = 0;
+
+  // Reparto "serpiente" (Snake draft simplificado)
+  sorted.forEach((player, index) => {
+    if (scoreA <= scoreB) {
+      teamA.push(player);
+      scoreA += player.powerPoints;
+    } else {
+      teamB.push(player);
+      scoreB += player.powerPoints;
+    }
+  });
+
+  return { teamA, teamB, scoreA, scoreB };
+};

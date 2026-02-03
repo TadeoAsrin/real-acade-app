@@ -9,8 +9,9 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarFooter,
+  SidebarContent,
 } from "../ui/sidebar";
-import { Goal, BarChart3, Users, LogOut } from "lucide-react";
+import { Goal, BarChart3, Users, LogOut, Trophy, Dices } from "lucide-react";
 import { Fut7StatsLogo } from "@/components/icons";
 import Link from "next/link";
 import { useAuth } from "@/firebase";
@@ -24,6 +25,11 @@ const menuItems = [
     icon: BarChart3,
   },
   {
+    href: "/standings",
+    label: "Clasificación",
+    icon: Trophy,
+  },
+  {
     href: "/matches",
     label: "Historial de Partidos",
     icon: Goal,
@@ -32,6 +38,11 @@ const menuItems = [
     href: "/players",
     label: "Jugadores",
     icon: Users,
+  },
+  {
+    href: "/generator",
+    label: "Generador de Equipos",
+    icon: Dices,
   },
 ];
 
@@ -67,23 +78,25 @@ export function AppSidebar() {
           </div>
         </div>
       </SidebarHeader>
-      <SidebarMenu className="px-2 pt-4">
-        {menuItems.map((item) => (
-          <SidebarMenuItem key={item.href}>
-            <SidebarMenuButton
-              asChild
-              isActive={pathname.startsWith(item.href)}
-              tooltip={item.label}
-              className="py-6"
-            >
-              <Link href={item.href}>
-                <item.icon className={pathname.startsWith(item.href) ? "text-primary" : ""} />
-                <span className="font-medium">{item.label}</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        ))}
-      </SidebarMenu>
+      <SidebarContent>
+        <SidebarMenu className="px-2 pt-4">
+            {menuItems.map((item) => (
+            <SidebarMenuItem key={item.href}>
+                <SidebarMenuButton
+                asChild
+                isActive={pathname.startsWith(item.href)}
+                tooltip={item.label}
+                className="py-6"
+                >
+                <Link href={item.href}>
+                    <item.icon className={pathname.startsWith(item.href) ? "text-primary" : ""} />
+                    <span className="font-medium">{item.label}</span>
+                </Link>
+                </SidebarMenuButton>
+            </SidebarMenuItem>
+            ))}
+        </SidebarMenu>
+      </SidebarContent>
       <SidebarFooter className="p-4 border-t border-sidebar-border">
          <SidebarMenuItem>
             <SidebarMenuButton 
