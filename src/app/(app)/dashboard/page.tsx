@@ -93,17 +93,27 @@ export default function DashboardPage() {
     ? (playerStats.reduce((sum, p) => sum + p.matchesPlayed, 0) / totalMatches).toFixed(1) 
     : 0;
 
-  // Nos Caemos a Pedazos - Logic for multiple leaders
-  const maxLosses = Math.max(...playerStats.map(p => p.losses), 0);
-  const imanDeDerrotasLeaders = maxLosses > 0 ? playerStats.filter(p => p.losses === maxLosses) : [];
+  // Nos Caemos a Pedazos - Ranking logic (Bottom 3)
+  const imanLeaders = [...playerStats]
+    .filter(p => p.losses > 0)
+    .sort((a, b) => b.losses - a.losses || b.matchesPlayed - a.matchesPlayed)
+    .slice(0, 3);
+  
+  const maxLosses = imanLeaders[0]?.losses || 0;
 
   const eligibleForRiesgo = playerStats.filter(p => p.matchesPlayed >= 3);
-  const minWinRate = eligibleForRiesgo.length > 0 ? Math.min(...eligibleForRiesgo.map(p => p.winPercentage)) : 0;
-  const factorDeRiesgoLeaders = eligibleForRiesgo.length > 0 ? eligibleForRiesgo.filter(p => p.winPercentage === minWinRate) : [];
+  const riesgoLeaders = [...eligibleForRiesgo]
+    .sort((a, b) => a.winPercentage - b.winPercentage || a.matchesPlayed - b.matchesPlayed)
+    .slice(0, 3);
+  
+  const minWinRate = riesgoLeaders[0]?.winPercentage || 0;
 
   const eligibleForPolvora = playerStats.filter(p => p.matchesPlayed >= 3 && p.position !== 'Arquero');
-  const minGoalsPerMatch = eligibleForPolvora.length > 0 ? Math.min(...eligibleForPolvora.map(p => p.goalsPerMatch)) : 0;
-  const polvoraMojadaLeaders = eligibleForPolvora.length > 0 ? eligibleForPolvora.filter(p => p.goalsPerMatch === minGoalsPerMatch) : [];
+  const polvoraLeaders = [...eligibleForPolvora]
+    .sort((a, b) => a.goalsPerMatch - b.goalsPerMatch || a.totalGoals - b.totalGoals)
+    .slice(0, 3);
+  
+  const minGoalsPerMatch = polvoraLeaders[0]?.goalsPerMatch || 0;
 
   // Action Metrics
   const totalGoals = playerStats.reduce((sum, p) => sum + p.totalGoals, 0);
@@ -491,37 +501,40 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* El Imán de Derrotas */}
             <Link href="/pulse/iman-derrotas">
-                <Card className="glass-card border-red-500/10 bg-red-500/5 relative overflow-hidden group hover:border-red-500/30 transition-all cursor-pointer h-full">
+                <Card className="glass-card border-red-500/10 bg-red-500/5 relative overflow-hidden group hover:border-red-500/30 transition-all cursor-pointer h-full flex flex-col">
                     <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                         <CloudRain className="h-20 w-20 text-red-500" />
                     </div>
-                    <CardHeader className="pb-2">
+                    <CardHeader className="pb-4">
                         <CardTitle className="text-[10px] font-black uppercase tracking-widest text-red-500 flex items-center gap-2">
                             <Skull className="h-3 w-3" /> 
-                            {imanDeDerrotasLeaders.length > 1 ? "Imanes de Derrotas" : "El Imán de Derrotas"}
+                            {imanLeaders.length > 1 && imanLeaders[0].losses === imanLeaders[1].losses ? "Imanes de Derrotas" : "El Imán de Derrotas"}
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="flex items-center gap-4">
-                            <div className="flex -space-x-3 overflow-hidden">
-                                {imanDeDerrotasLeaders.slice(0, 3).map(leader => (
-                                    <Avatar key={leader.playerId} className="h-12 w-12 border-2 border-background ring-2 ring-red-500/20">
-                                        <AvatarFallback className="bg-red-500/10 text-red-500 font-black">{getInitials(leader.name)}</AvatarFallback>
-                                    </Avatar>
-                                ))}
-                            </div>
-                            <div className="flex flex-col min-w-0">
-                                <span className="text-lg font-black tracking-tight leading-none truncate italic text-white/80 group-hover:text-red-500 transition-colors">
-                                    {imanDeDerrotasLeaders.length > 1 
-                                        ? `${imanDeDerrotasLeaders[0].name.split(' ')[0]} + ${imanDeDerrotasLeaders.length - 1}`
-                                        : (imanDeDerrotasLeaders[0]?.name || '-')}
-                                </span>
-                                <span className="text-[10px] uppercase font-bold text-muted-foreground">Más caídas registradas</span>
-                            </div>
+                    <CardContent className="space-y-4 flex-1 flex flex-col">
+                        <div className="space-y-3">
+                            {imanLeaders.map((p, i) => {
+                                const isLeader = p.losses === maxLosses;
+                                return (
+                                    <div key={p.playerId} className="flex items-center justify-between group/row">
+                                        <div className="flex items-center gap-2">
+                                            <div className="relative">
+                                                <Avatar className={cn("h-8 w-8 border", isLeader ? "border-red-500" : "border-white/10")}>
+                                                    <AvatarFallback className="bg-red-500/10 text-red-500 text-[10px] font-black">{getInitials(p.name)}</AvatarFallback>
+                                                </Avatar>
+                                            </div>
+                                            <span className="text-xs font-bold text-white/80 group-hover/row:text-red-500 transition-colors truncate max-w-[80px]">{p.name.split(' ')[0]}</span>
+                                        </div>
+                                        <div className="flex items-baseline gap-1">
+                                            <span className={cn("text-lg font-black italic", isLeader ? "text-red-500" : "text-white")}>{p.losses}</span>
+                                            <span className="text-[8px] uppercase font-bold text-muted-foreground">Derrotas</span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-4xl font-black italic text-red-500/80 leading-none">{maxLosses}</span>
-                            <span className="text-[10px] font-black uppercase text-red-500/40 tracking-widest">Derrotas</span>
+                        <div className="mt-auto pt-4 border-t border-white/5">
+                            <p className="text-[8px] uppercase font-black text-muted-foreground/50 tracking-widest text-center italic">Más caídas registradas en la historia</p>
                         </div>
                     </CardContent>
                 </Card>
@@ -529,37 +542,40 @@ export default function DashboardPage() {
 
             {/* Factor de Riesgo */}
             <Link href="/pulse/riesgo">
-                <Card className="glass-card border-zinc-500/10 bg-zinc-500/5 relative overflow-hidden group hover:border-zinc-500/30 transition-all cursor-pointer h-full">
+                <Card className="glass-card border-zinc-500/10 bg-zinc-500/5 relative overflow-hidden group hover:border-zinc-500/30 transition-all cursor-pointer h-full flex flex-col">
                     <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                         <Ghost className="h-20 w-20 text-zinc-500" />
                     </div>
-                    <CardHeader className="pb-2">
+                    <CardHeader className="pb-4">
                         <CardTitle className="text-[10px] font-black uppercase tracking-widest text-zinc-500 flex items-center gap-2">
                             <TrendingUp className="h-3 w-3 rotate-180" /> 
-                            {factorDeRiesgoLeaders.length > 1 ? "Factores de Riesgo" : "Factor de Riesgo"}
+                            {riesgoLeaders.length > 1 && riesgoLeaders[0].winPercentage === riesgoLeaders[1].winPercentage ? "Factores de Riesgo" : "Factor de Riesgo"}
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="flex items-center gap-4">
-                            <div className="flex -space-x-3 overflow-hidden">
-                                {factorDeRiesgoLeaders.slice(0, 3).map(leader => (
-                                    <Avatar key={leader.playerId} className="h-12 w-12 border-2 border-background ring-2 ring-zinc-500/20">
-                                        <AvatarFallback className="bg-zinc-500/10 text-zinc-500 font-black">{getInitials(leader.name)}</AvatarFallback>
-                                    </Avatar>
-                                ))}
-                            </div>
-                            <div className="flex flex-col min-w-0">
-                                <span className="text-lg font-black tracking-tight leading-none truncate italic text-white/80 group-hover:text-zinc-400 transition-colors">
-                                    {factorDeRiesgoLeaders.length > 1 
-                                        ? `${factorDeRiesgoLeaders[0].name.split(' ')[0]} + ${factorDeRiesgoLeaders.length - 1}`
-                                        : (factorDeRiesgoLeaders[0]?.name || '-')}
-                                </span>
-                                <span className="text-[10px] uppercase font-bold text-muted-foreground">Efectividad mínima (+3 PJ)</span>
-                            </div>
+                    <CardContent className="space-y-4 flex-1 flex flex-col">
+                        <div className="space-y-3">
+                            {riesgoLeaders.map((p, i) => {
+                                const isLeader = p.winPercentage === minWinRate;
+                                return (
+                                    <div key={p.playerId} className="flex items-center justify-between group/row">
+                                        <div className="flex items-center gap-2">
+                                            <div className="relative">
+                                                <Avatar className={cn("h-8 w-8 border", isLeader ? "border-zinc-500" : "border-white/10")}>
+                                                    <AvatarFallback className="bg-zinc-500/10 text-zinc-500 text-[10px] font-black">{getInitials(p.name)}</AvatarFallback>
+                                                </Avatar>
+                                            </div>
+                                            <span className="text-xs font-bold text-white/80 group-hover/row:text-zinc-400 transition-colors truncate max-w-[80px]">{p.name.split(' ')[0]}</span>
+                                        </div>
+                                        <div className="flex items-baseline gap-1">
+                                            <span className={cn("text-lg font-black italic", isLeader ? "text-zinc-500" : "text-white")}>{p.winPercentage}%</span>
+                                            <span className="text-[8px] uppercase font-bold text-muted-foreground">Victorias</span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-4xl font-black italic text-zinc-500 leading-none">{minWinRate}%</span>
-                            <span className="text-[10px] font-black uppercase text-zinc-500/40 tracking-widest">Victorias</span>
+                        <div className="mt-auto pt-4 border-t border-white/5">
+                            <p className="text-[8px] uppercase font-black text-muted-foreground/50 tracking-widest text-center italic">Efectividad mínima (+3 PJ)</p>
                         </div>
                     </CardContent>
                 </Card>
@@ -567,37 +583,40 @@ export default function DashboardPage() {
 
             {/* Pólvora Mojada */}
             <Link href="/pulse/polvora">
-                <Card className="glass-card border-blue-500/10 bg-blue-500/5 relative overflow-hidden group hover:border-blue-500/30 transition-all cursor-pointer h-full">
+                <Card className="glass-card border-blue-500/10 bg-blue-500/5 relative overflow-hidden group hover:border-blue-500/30 transition-all cursor-pointer h-full flex flex-col">
                     <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                         <Droplets className="h-20 w-20 text-blue-500" />
                     </div>
-                    <CardHeader className="pb-2">
+                    <CardHeader className="pb-4">
                         <CardTitle className="text-[10px] font-black uppercase tracking-widest text-blue-500 flex items-center gap-2">
                             <Droplets className="h-3 w-3" /> 
-                            {polvoraMojadaLeaders.length > 1 ? "Pólvoras Mojadas" : "Pólvora Mojada"}
+                            {polvoraLeaders.length > 1 && polvoraLeaders[0].goalsPerMatch === polvoraLeaders[1].goalsPerMatch ? "Pólvoras Mojadas" : "Pólvora Mojada"}
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="flex items-center gap-4">
-                            <div className="flex -space-x-3 overflow-hidden">
-                                {polvoraMojadaLeaders.slice(0, 3).map(leader => (
-                                    <Avatar key={leader.playerId} className="h-12 w-12 border-2 border-background ring-2 ring-blue-500/20">
-                                        <AvatarFallback className="bg-blue-500/10 text-blue-500 font-black">{getInitials(leader.name)}</AvatarFallback>
-                                    </Avatar>
-                                ))}
-                            </div>
-                            <div className="flex flex-col min-w-0">
-                                <span className="text-lg font-black tracking-tight leading-none truncate italic text-white/80 group-hover:text-blue-400 transition-colors">
-                                    {polvoraMojadaLeaders.length > 1 
-                                        ? `${polvoraMojadaLeaders[0].name.split(' ')[0]} + ${polvoraMojadaLeaders.length - 1}`
-                                        : (polvoraMojadaLeaders[0]?.name || '-')}
-                                </span>
-                                <span className="text-[10px] uppercase font-bold text-muted-foreground">Menos goles/PJ (+3 PJ)</span>
-                            </div>
+                    <CardContent className="space-y-4 flex-1 flex flex-col">
+                        <div className="space-y-3">
+                            {polvoraLeaders.map((p, i) => {
+                                const isLeader = p.goalsPerMatch === minGoalsPerMatch;
+                                return (
+                                    <div key={p.playerId} className="flex items-center justify-between group/row">
+                                        <div className="flex items-center gap-2">
+                                            <div className="relative">
+                                                <Avatar className={cn("h-8 w-8 border", isLeader ? "border-blue-500" : "border-white/10")}>
+                                                    <AvatarFallback className="bg-blue-500/10 text-blue-500 text-[10px] font-black">{getInitials(p.name)}</AvatarFallback>
+                                                </Avatar>
+                                            </div>
+                                            <span className="text-xs font-bold text-white/80 group-hover/row:text-blue-400 transition-colors truncate max-w-[80px]">{p.name.split(' ')[0]}</span>
+                                        </div>
+                                        <div className="flex items-baseline gap-1">
+                                            <span className={cn("text-lg font-black italic", isLeader ? "text-blue-500" : "text-white")}>{p.goalsPerMatch}</span>
+                                            <span className="text-[8px] uppercase font-bold text-muted-foreground">Goles/PJ</span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-4xl font-black italic text-blue-500 leading-none">{minGoalsPerMatch}</span>
-                            <span className="text-[10px] font-black uppercase text-blue-500/40 tracking-widest">Goles/PJ</span>
+                        <div className="mt-auto pt-4 border-t border-white/5">
+                            <p className="text-[8px] uppercase font-black text-muted-foreground/50 tracking-widest text-center italic">Menos goles/PJ (+3 PJ, no ARQ)</p>
                         </div>
                     </CardContent>
                 </Card>

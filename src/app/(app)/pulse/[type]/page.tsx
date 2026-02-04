@@ -50,6 +50,8 @@ export default function PulseDetailPage() {
       })
       .slice(0, 10);
 
+    const maxWin = Math.max(...sorted.map(p => p.winPercentage));
+
     return (
       <div className="space-y-8 max-w-2xl mx-auto">
         <div className="text-center space-y-4">
@@ -64,31 +66,34 @@ export default function PulseDetailPage() {
         </div>
 
         <div className="space-y-4">
-            {sorted.map((p, i) => (
-                <Card key={p.playerId} className={cn("glass-card transition-all", i === 0 ? "border-primary/50 bg-primary/5 scale-105" : "border-white/5")}>
-                    <CardContent className="p-6 flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <div className="flex flex-col items-center w-8">
-                                {i === 0 ? <Crown className="h-5 w-5 text-yellow-500 mb-1" /> : <span className="text-2xl font-black italic text-muted-foreground/30">{i + 1}</span>}
-                            </div>
-                            <Avatar className={cn("h-12 w-12", i === 0 && "border-2 border-primary")}>
-                                <AvatarFallback className="bg-muted font-black">{getInitials(p.name)}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex flex-col">
-                                <span className="font-black text-lg">{p.name}</span>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-[10px] font-bold uppercase text-muted-foreground">{p.wins}V en {p.matchesPlayed} PJ</span>
-                                    <span className="text-[10px] font-black text-primary/60 tracking-tighter">• {p.powerPoints} PTS</span>
+            {sorted.map((p, i) => {
+                const isLeader = p.winPercentage === maxWin;
+                return (
+                    <Card key={p.playerId} className={cn("glass-card transition-all", isLeader ? "border-primary/50 bg-primary/5 scale-105" : "border-white/5")}>
+                        <CardContent className="p-6 flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="flex flex-col items-center w-8">
+                                    {isLeader ? <Crown className="h-5 w-5 text-yellow-500 mb-1" /> : <span className="text-2xl font-black italic text-muted-foreground/30">{i + 1}</span>}
+                                </div>
+                                <Avatar className={cn("h-12 w-12", isLeader && "border-2 border-primary")}>
+                                    <AvatarFallback className="bg-muted font-black">{getInitials(p.name)}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex flex-col">
+                                    <span className="font-black text-lg">{p.name}</span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[10px] font-bold uppercase text-muted-foreground">{p.wins}V en {p.matchesPlayed} PJ</span>
+                                        <span className="text-[10px] font-black text-primary/60 tracking-tighter">• {p.powerPoints} PTS</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div className="text-right">
-                            <span className={cn("text-3xl font-black italic", i === 0 ? "text-primary" : "text-white")}>{p.winPercentage}%</span>
-                            <p className="text-[8px] uppercase font-black text-muted-foreground leading-none">Efectividad</p>
-                        </div>
-                    </CardContent>
-                </Card>
-            ))}
+                            <div className="text-right">
+                                <span className={cn("text-3xl font-black italic", isLeader ? "text-primary" : "text-white")}>{p.winPercentage}%</span>
+                                <p className="text-[8px] uppercase font-black text-muted-foreground leading-none">Efectividad</p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                );
+            })}
         </div>
       </div>
     );
@@ -147,6 +152,8 @@ export default function PulseDetailPage() {
     const sorted = [...playerStats]
       .sort((a, b) => b.matchesPlayed - a.matchesPlayed || a.name.localeCompare(b.name))
       .slice(0, 20);
+    
+    const maxAttendance = Math.max(...playerStats.map(p => p.matchesPlayed), 0);
 
     return (
       <div className="space-y-8 max-w-2xl mx-auto">
@@ -161,12 +168,13 @@ export default function PulseDetailPage() {
         <div className="space-y-4">
             {sorted.map((p, i) => {
                 const percentage = totalMatches > 0 ? Math.round((p.matchesPlayed / totalMatches) * 100) : 0;
+                const isLeader = p.matchesPlayed === maxAttendance;
                 return (
-                    <Card key={p.playerId} className={cn("glass-card transition-all border-white/5", percentage === 100 && "border-emerald-500/30 bg-emerald-500/5")}>
+                    <Card key={p.playerId} className={cn("glass-card transition-all border-white/5", isLeader && "border-emerald-500/30 bg-emerald-500/5 scale-105")}>
                         <CardContent className="p-6 flex items-center justify-between">
                             <div className="flex items-center gap-4">
                                 <span className="text-2xl font-black italic text-muted-foreground/30 w-8">{i + 1}</span>
-                                <Avatar className={cn("h-12 w-12", percentage === 100 && "ring-2 ring-emerald-500/50")}>
+                                <Avatar className={cn("h-12 w-12", isLeader && "ring-2 ring-emerald-500/50")}>
                                     <AvatarFallback className="bg-muted font-black">{getInitials(p.name)}</AvatarFallback>
                                 </Avatar>
                                 <div className="flex flex-col">
@@ -175,7 +183,7 @@ export default function PulseDetailPage() {
                                 </div>
                             </div>
                             <div className="text-right">
-                                <span className={cn("text-3xl font-black italic", percentage === 100 ? "text-emerald-500" : "text-white")}>{percentage}%</span>
+                                <span className={cn("text-3xl font-black italic", isLeader ? "text-emerald-500" : "text-white")}>{percentage}%</span>
                                 <p className="text-[8px] uppercase font-black text-muted-foreground leading-none">Asistencia</p>
                             </div>
                         </CardContent>
@@ -208,7 +216,7 @@ export default function PulseDetailPage() {
             {sorted.map((p, i) => {
                 const isLeader = p.losses === maxLosses;
                 return (
-                    <Card key={p.playerId} className={cn("glass-card transition-all border-white/5", isLeader && "border-red-500/30 bg-red-500/5")}>
+                    <Card key={p.playerId} className={cn("glass-card transition-all border-white/5", isLeader && "border-red-500/30 bg-red-500/5 scale-105")}>
                         <CardContent className="p-6 flex items-center justify-between">
                             <div className="flex items-center gap-4">
                                 <div className="flex flex-col items-center w-8">
@@ -260,7 +268,7 @@ export default function PulseDetailPage() {
             {sorted.map((p, i) => {
                 const isLeader = p.winPercentage === minWinRate;
                 return (
-                    <Card key={p.playerId} className={cn("glass-card transition-all border-white/5", isLeader && "border-zinc-500/30 bg-zinc-500/5")}>
+                    <Card key={p.playerId} className={cn("glass-card transition-all border-white/5", isLeader && "border-zinc-500/30 bg-zinc-500/5 scale-105")}>
                         <CardContent className="p-6 flex items-center justify-between">
                             <div className="flex items-center gap-4">
                                 <div className="flex flex-col items-center w-8">
@@ -312,7 +320,7 @@ export default function PulseDetailPage() {
             {sorted.map((p, i) => {
                 const isLeader = p.goalsPerMatch === minGoals;
                 return (
-                    <Card key={p.playerId} className={cn("glass-card transition-all border-white/5", isLeader && "border-blue-500/30 bg-blue-500/5")}>
+                    <Card key={p.playerId} className={cn("glass-card transition-all border-white/5", isLeader && "border-blue-500/30 bg-blue-500/5 scale-105")}>
                         <CardContent className="p-6 flex items-center justify-between">
                             <div className="flex items-center gap-4">
                                 <div className="flex flex-col items-center w-8">
