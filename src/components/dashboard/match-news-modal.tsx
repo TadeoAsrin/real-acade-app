@@ -4,6 +4,9 @@ import * as React from 'react';
 import {
   Dialog,
   DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { generateMatchSummary, type MatchSummaryOutput } from '@/ai/flows/match-summary-flow';
 import { useUser } from '@/firebase';
@@ -88,6 +91,11 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="max-w-2xl bg-[#f4f1ea] text-[#1a1a1a] border-none shadow-2xl p-0 overflow-hidden font-serif">
+        <DialogHeader className="sr-only">
+          <DialogTitle>La Gaceta de Real Acade</DialogTitle>
+          <DialogDescription>Crónica oficial del encuentro del {format(new Date(match.date), "PPPP", { locale: es })}</DialogDescription>
+        </DialogHeader>
+        
         <div className="border-b-4 border-double border-black/20 p-6 text-center bg-black/5">
           <div className="flex items-center justify-center gap-2 mb-2">
             <Newspaper className="h-6 w-6 text-black/60" />
