@@ -8,7 +8,7 @@ import { collection, query, orderBy } from "firebase/firestore";
 import type { Match, Player } from "@/lib/definitions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Brain, Link as LinkIcon, Zap, Crown, Flame, Trophy, Calendar, Star, Heart } from "lucide-react";
+import { ArrowLeft, Brain, Link as LinkIcon, Zap, Crown, Flame, Trophy, Calendar, Star, Heart, Skull, Ghost, CloudRain, Droplets, TrendingUp } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials, cn } from "@/lib/utils";
 import Link from "next/link";
@@ -48,7 +48,7 @@ export default function PulseDetailPage() {
         if (b.powerPoints !== a.powerPoints) return b.powerPoints - a.powerPoints;
         return b.totalGoals - a.totalGoals;
       })
-      .slice(0, 5);
+      .slice(0, 10);
 
     return (
       <div className="space-y-8 max-w-2xl mx-auto">
@@ -89,11 +89,6 @@ export default function PulseDetailPage() {
                     </CardContent>
                 </Card>
             ))}
-            {sorted.length === 0 && (
-                <div className="text-center py-20 border-2 border-dashed rounded-3xl opacity-30">
-                    <p className="font-black uppercase italic">Ningún jugador ha llegado al mínimo de 3 partidos aún.</p>
-                </div>
-            )}
         </div>
       </div>
     );
@@ -104,7 +99,7 @@ export default function PulseDetailPage() {
     const sorted = [...playerStats]
       .filter(p => p.totalMvp > 0)
       .sort((a, b) => b.totalMvp - a.totalMvp || b.powerPoints - a.powerPoints)
-      .slice(0, 5);
+      .slice(0, 10);
 
     return (
       <div className="space-y-8 max-w-2xl mx-auto">
@@ -142,11 +137,158 @@ export default function PulseDetailPage() {
                     </Card>
                 );
             })}
-            {sorted.length === 0 && (
-                <div className="text-center py-20 border-2 border-dashed rounded-3xl opacity-30">
-                    <p className="font-black uppercase italic">Nadie ha sido elegido MVP todavía.</p>
-                </div>
-            )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderImanDerrotas = () => {
+    const maxLosses = Math.max(...playerStats.map(p => p.losses), 0);
+    const sorted = [...playerStats]
+      .filter(p => p.losses > 0)
+      .sort((a, b) => b.losses - a.losses || b.matchesPlayed - a.matchesPlayed)
+      .slice(0, 10);
+
+    return (
+      <div className="space-y-8 max-w-2xl mx-auto">
+        <div className="text-center space-y-4">
+            <div className="mx-auto w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center border border-red-500/20">
+                <Skull className="h-10 w-10 text-red-500" />
+            </div>
+            <h1 className="text-4xl font-black italic uppercase tracking-tighter">Sala de Humildad: Imán de Derrotas</h1>
+            <p className="text-muted-foreground italic">El registro de la mala suerte o el bajo rendimiento. Los que más veces han visto caer su arco.</p>
+        </div>
+
+        <div className="space-y-4">
+            {sorted.map((p, i) => {
+                const isLeader = p.losses === maxLosses;
+                return (
+                    <Card key={p.playerId} className={cn("glass-card transition-all border-white/5", isLeader && "border-red-500/30 bg-red-500/5")}>
+                        <CardContent className="p-6 flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="flex flex-col items-center w-8">
+                                    <span className="text-2xl font-black italic text-muted-foreground/30">{i + 1}</span>
+                                </div>
+                                <Avatar className={cn("h-12 w-12", isLeader && "ring-2 ring-red-500/50")}>
+                                    <AvatarFallback className="bg-muted font-black">{getInitials(p.name)}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex flex-col">
+                                    <span className="font-black text-lg">{p.name}</span>
+                                    <span className="text-[10px] font-bold uppercase text-muted-foreground">{p.matchesPlayed} Partidos Jugados</span>
+                                </div>
+                            </div>
+                            <div className="text-right">
+                                <span className={cn("text-3xl font-black italic", isLeader ? "text-red-500" : "text-white")}>{p.losses}</span>
+                                <p className="text-[8px] uppercase font-black text-muted-foreground leading-none">Derrotas</p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                );
+            })}
+        </div>
+      </div>
+    );
+  };
+
+  const renderRiesgo = () => {
+    const sorted = [...playerStats]
+      .filter(p => p.matchesPlayed >= 3)
+      .sort((a, b) => a.winPercentage - b.winPercentage || a.matchesPlayed - b.matchesPlayed)
+      .slice(0, 10);
+
+    const minWinRate = Math.min(...sorted.map(p => p.winPercentage));
+
+    return (
+      <div className="space-y-8 max-w-2xl mx-auto">
+        <div className="text-center space-y-4">
+            <div className="mx-auto w-20 h-20 bg-zinc-500/10 rounded-full flex items-center justify-center border border-zinc-500/20">
+                <Ghost className="h-10 w-10 text-zinc-500" />
+            </div>
+            <h1 className="text-4xl font-black italic uppercase tracking-tighter">Sala de Humildad: Factor de Riesgo</h1>
+            <div className="bg-zinc-500/10 border border-zinc-500/20 rounded-xl p-4 text-xs text-zinc-400 font-bold uppercase tracking-widest inline-block">
+                Mínimo 3 Partidos Jugados
+            </div>
+            <p className="text-muted-foreground italic">Menor porcentaje de victorias. Los que más sufren para sumar de a tres.</p>
+        </div>
+
+        <div className="space-y-4">
+            {sorted.map((p, i) => {
+                const isLeader = p.winPercentage === minWinRate;
+                return (
+                    <Card key={p.playerId} className={cn("glass-card transition-all border-white/5", isLeader && "border-zinc-500/30 bg-zinc-500/5")}>
+                        <CardContent className="p-6 flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="flex flex-col items-center w-8">
+                                    <span className="text-2xl font-black italic text-muted-foreground/30">{i + 1}</span>
+                                </div>
+                                <Avatar className={cn("h-12 w-12")}>
+                                    <AvatarFallback className="bg-muted font-black">{getInitials(p.name)}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex flex-col">
+                                    <span className="font-black text-lg">{p.name}</span>
+                                    <span className="text-[10px] font-bold uppercase text-muted-foreground">{p.wins}V en {p.matchesPlayed} PJ</span>
+                                </div>
+                            </div>
+                            <div className="text-right">
+                                <span className={cn("text-3xl font-black italic", isLeader ? "text-zinc-400" : "text-white")}>{p.winPercentage}%</span>
+                                <p className="text-[8px] uppercase font-black text-muted-foreground leading-none">Efectividad</p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                );
+            })}
+        </div>
+      </div>
+    );
+  };
+
+  const renderPolvora = () => {
+    const sorted = [...playerStats]
+      .filter(p => p.matchesPlayed >= 3 && p.position !== 'Arquero')
+      .sort((a, b) => a.goalsPerMatch - b.goalsPerMatch || a.totalGoals - b.totalGoals)
+      .slice(0, 10);
+
+    const minGoals = Math.min(...sorted.map(p => p.goalsPerMatch));
+
+    return (
+      <div className="space-y-8 max-w-2xl mx-auto">
+        <div className="text-center space-y-4">
+            <div className="mx-auto w-20 h-20 bg-blue-500/10 rounded-full flex items-center justify-center border border-blue-500/20">
+                <Droplets className="h-10 w-10 text-blue-500" />
+            </div>
+            <h1 className="text-4xl font-black italic uppercase tracking-tighter">Sala de Humildad: Pólvora Mojada</h1>
+            <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 text-xs text-blue-400 font-bold uppercase tracking-widest inline-block">
+                Mínimo 3 PJ • No Arqueros
+            </div>
+            <p className="text-muted-foreground italic">Menor promedio de gol por partido. Jugadores de campo con la brújula un poco desviada.</p>
+        </div>
+
+        <div className="space-y-4">
+            {sorted.map((p, i) => {
+                const isLeader = p.goalsPerMatch === minGoals;
+                return (
+                    <Card key={p.playerId} className={cn("glass-card transition-all border-white/5", isLeader && "border-blue-500/30 bg-blue-500/5")}>
+                        <CardContent className="p-6 flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="flex flex-col items-center w-8">
+                                    <span className="text-2xl font-black italic text-muted-foreground/30">{i + 1}</span>
+                                </div>
+                                <Avatar className={cn("h-12 w-12")}>
+                                    <AvatarFallback className="bg-muted font-black">{getInitials(p.name)}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex flex-col">
+                                    <span className="font-black text-lg">{p.name}</span>
+                                    <span className="text-[10px] font-bold uppercase text-muted-foreground">{p.totalGoals} Goles en {p.matchesPlayed} PJ</span>
+                                </div>
+                            </div>
+                            <div className="text-right">
+                                <span className={cn("text-3xl font-black italic", isLeader ? "text-blue-400" : "text-white")}>{p.goalsPerMatch}</span>
+                                <p className="text-[8px] uppercase font-black text-muted-foreground leading-none">Goles/PJ</p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                );
+            })}
         </div>
       </div>
     );
@@ -266,6 +408,9 @@ export default function PulseDetailPage() {
       {type === 'league' && renderSpiciestMatch()}
       {type === 'partnership' && renderPartnership()}
       {type === 'mvp' && renderMvpRanking()}
+      {type === 'iman-derrotas' && renderImanDerrotas()}
+      {type === 'riesgo' && renderRiesgo()}
+      {type === 'polvora' && renderPolvora()}
     </div>
   );
 }

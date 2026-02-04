@@ -183,7 +183,7 @@ export default function DashboardPage() {
                     <AvatarFallback className="bg-primary/10 text-primary text-2xl font-black">{getInitials(influencer?.name || "?")}</AvatarFallback>
                   </Avatar>
                   <div className="min-w-0">
-                    <div className="text-3xl lg:text-4xl font-black tracking-tighter text-white uppercase leading-none group-hover/leader:text-primary transition-colors truncate italic">
+                    <div className="text-3xl lg:text-4xl font-black tracking-tighter text-white uppercase leading-none group-hover:text-primary transition-colors truncate italic">
                       {influencer?.name || '-'}
                     </div>
                     <p className="text-xs font-bold text-primary/60 uppercase italic">Factor de Victoria</p>
@@ -376,112 +376,118 @@ export default function DashboardPage() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* El Imán de Derrotas */}
-            <Card className="glass-card border-red-500/10 bg-red-500/5 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                    <CloudRain className="h-20 w-20 text-red-500" />
-                </div>
-                <CardHeader className="pb-2">
-                    <CardTitle className="text-[10px] font-black uppercase tracking-widest text-red-500 flex items-center gap-2">
-                        <Skull className="h-3 w-3" /> 
-                        {imanDeDerrotasLeaders.length > 1 ? "Imanes de Derrotas" : "El Imán de Derrotas"}
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="flex items-center gap-4">
-                        <div className="flex -space-x-3 overflow-hidden">
-                            {imanDeDerrotasLeaders.slice(0, 3).map(leader => (
-                                <Avatar key={leader.playerId} className="h-12 w-12 border-2 border-background ring-2 ring-red-500/20">
-                                    <AvatarFallback className="bg-red-500/10 text-red-500 font-black">{getInitials(leader.name)}</AvatarFallback>
-                                </Avatar>
-                            ))}
-                        </div>
-                        <div className="flex flex-col min-w-0">
-                            <span className="text-lg font-black tracking-tight leading-none truncate italic text-white/80">
-                                {imanDeDerrotasLeaders.length > 1 
-                                    ? `${imanDeDerrotasLeaders[0].name.split(' ')[0]} + ${imanDeDerrotasLeaders.length - 1}`
-                                    : (imanDeDerrotasLeaders[0]?.name || '-')}
-                            </span>
-                            <span className="text-[10px] uppercase font-bold text-muted-foreground">Más caídas registradas</span>
-                        </div>
+            <Link href="/pulse/iman-derrotas">
+                <Card className="glass-card border-red-500/10 bg-red-500/5 relative overflow-hidden group hover:border-red-500/30 transition-all cursor-pointer h-full">
+                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <CloudRain className="h-20 w-20 text-red-500" />
                     </div>
-                    <div className="flex items-baseline gap-2">
-                        <span className="text-4xl font-black italic text-red-500/80 leading-none">{maxLosses}</span>
-                        <span className="text-[10px] font-black uppercase text-red-500/40 tracking-widest">Derrotas</span>
-                    </div>
-                </CardContent>
-            </Card>
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-[10px] font-black uppercase tracking-widest text-red-500 flex items-center gap-2">
+                            <Skull className="h-3 w-3" /> 
+                            {imanDeDerrotasLeaders.length > 1 ? "Imanes de Derrotas" : "El Imán de Derrotas"}
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="flex items-center gap-4">
+                            <div className="flex -space-x-3 overflow-hidden">
+                                {imanDeDerrotasLeaders.slice(0, 3).map(leader => (
+                                    <Avatar key={leader.playerId} className="h-12 w-12 border-2 border-background ring-2 ring-red-500/20">
+                                        <AvatarFallback className="bg-red-500/10 text-red-500 font-black">{getInitials(leader.name)}</AvatarFallback>
+                                    </Avatar>
+                                ))}
+                            </div>
+                            <div className="flex flex-col min-w-0">
+                                <span className="text-lg font-black tracking-tight leading-none truncate italic text-white/80 group-hover:text-red-500 transition-colors">
+                                    {imanDeDerrotasLeaders.length > 1 
+                                        ? `${imanDeDerrotasLeaders[0].name.split(' ')[0]} + ${imanDeDerrotasLeaders.length - 1}`
+                                        : (imanDeDerrotasLeaders[0]?.name || '-')}
+                                </span>
+                                <span className="text-[10px] uppercase font-bold text-muted-foreground">Más caídas registradas</span>
+                            </div>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-4xl font-black italic text-red-500/80 leading-none">{maxLosses}</span>
+                            <span className="text-[10px] font-black uppercase text-red-500/40 tracking-widest">Derrotas</span>
+                        </div>
+                    </CardContent>
+                </Card>
+            </Link>
 
             {/* Factor de Riesgo */}
-            <Card className="glass-card border-zinc-500/10 bg-zinc-500/5 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                    <Ghost className="h-20 w-20 text-zinc-500" />
-                </div>
-                <CardHeader className="pb-2">
-                    <CardTitle className="text-[10px] font-black uppercase tracking-widest text-zinc-500 flex items-center gap-2">
-                        <TrendingUp className="h-3 w-3 rotate-180" /> 
-                        {factorDeRiesgoLeaders.length > 1 ? "Factores de Riesgo" : "Factor de Riesgo"}
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="flex items-center gap-4">
-                        <div className="flex -space-x-3 overflow-hidden">
-                            {factorDeRiesgoLeaders.slice(0, 3).map(leader => (
-                                <Avatar key={leader.playerId} className="h-12 w-12 border-2 border-background ring-2 ring-zinc-500/20">
-                                    <AvatarFallback className="bg-zinc-500/10 text-zinc-500 font-black">{getInitials(leader.name)}</AvatarFallback>
-                                </Avatar>
-                            ))}
-                        </div>
-                        <div className="flex flex-col min-w-0">
-                            <span className="text-lg font-black tracking-tight leading-none truncate italic text-white/80">
-                                {factorDeRiesgoLeaders.length > 1 
-                                    ? `${factorDeRiesgoLeaders[0].name.split(' ')[0]} + ${factorDeRiesgoLeaders.length - 1}`
-                                    : (factorDeRiesgoLeaders[0]?.name || '-')}
-                            </span>
-                            <span className="text-[10px] uppercase font-bold text-muted-foreground">Efectividad mínima (+3 PJ)</span>
-                        </div>
+            <Link href="/pulse/riesgo">
+                <Card className="glass-card border-zinc-500/10 bg-zinc-500/5 relative overflow-hidden group hover:border-zinc-500/30 transition-all cursor-pointer h-full">
+                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <Ghost className="h-20 w-20 text-zinc-500" />
                     </div>
-                    <div className="flex items-baseline gap-2">
-                        <span className="text-4xl font-black italic text-zinc-500 leading-none">{minWinRate}%</span>
-                        <span className="text-[10px] font-black uppercase text-zinc-500/40 tracking-widest">Victorias</span>
-                    </div>
-                </CardContent>
-            </Card>
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-[10px] font-black uppercase tracking-widest text-zinc-500 flex items-center gap-2">
+                            <TrendingUp className="h-3 w-3 rotate-180" /> 
+                            {factorDeRiesgoLeaders.length > 1 ? "Factores de Riesgo" : "Factor de Riesgo"}
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="flex items-center gap-4">
+                            <div className="flex -space-x-3 overflow-hidden">
+                                {factorDeRiesgoLeaders.slice(0, 3).map(leader => (
+                                    <Avatar key={leader.playerId} className="h-12 w-12 border-2 border-background ring-2 ring-zinc-500/20">
+                                        <AvatarFallback className="bg-zinc-500/10 text-zinc-500 font-black">{getInitials(leader.name)}</AvatarFallback>
+                                    </Avatar>
+                                ))}
+                            </div>
+                            <div className="flex flex-col min-w-0">
+                                <span className="text-lg font-black tracking-tight leading-none truncate italic text-white/80 group-hover:text-zinc-400 transition-colors">
+                                    {factorDeRiesgoLeaders.length > 1 
+                                        ? `${factorDeRiesgoLeaders[0].name.split(' ')[0]} + ${factorDeRiesgoLeaders.length - 1}`
+                                        : (factorDeRiesgoLeaders[0]?.name || '-')}
+                                </span>
+                                <span className="text-[10px] uppercase font-bold text-muted-foreground">Efectividad mínima (+3 PJ)</span>
+                            </div>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-4xl font-black italic text-zinc-500 leading-none">{minWinRate}%</span>
+                            <span className="text-[10px] font-black uppercase text-zinc-500/40 tracking-widest">Victorias</span>
+                        </div>
+                    </CardContent>
+                </Card>
+            </Link>
 
             {/* Pólvora Mojada */}
-            <Card className="glass-card border-blue-500/10 bg-blue-500/5 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                    <Droplets className="h-20 w-20 text-blue-500" />
-                </div>
-                <CardHeader className="pb-2">
-                    <CardTitle className="text-[10px] font-black uppercase tracking-widest text-blue-500 flex items-center gap-2">
-                        <Droplets className="h-3 w-3" /> 
-                        {polvoraMojadaLeaders.length > 1 ? "Pólvoras Mojadas" : "Pólvora Mojada"}
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="flex items-center gap-4">
-                        <div className="flex -space-x-3 overflow-hidden">
-                            {polvoraMojadaLeaders.slice(0, 3).map(leader => (
-                                <Avatar key={leader.playerId} className="h-12 w-12 border-2 border-background ring-2 ring-blue-500/20">
-                                    <AvatarFallback className="bg-blue-500/10 text-blue-500 font-black">{getInitials(leader.name)}</AvatarFallback>
-                                </Avatar>
-                            ))}
-                        </div>
-                        <div className="flex flex-col min-w-0">
-                            <span className="text-lg font-black tracking-tight leading-none truncate italic text-white/80">
-                                {polvoraMojadaLeaders.length > 1 
-                                    ? `${polvoraMojadaLeaders[0].name.split(' ')[0]} + ${polvoraMojadaLeaders.length - 1}`
-                                    : (polvoraMojadaLeaders[0]?.name || '-')}
-                            </span>
-                            <span className="text-[10px] uppercase font-bold text-muted-foreground">Menos goles/PJ (+3 PJ)</span>
-                        </div>
+            <Link href="/pulse/polvora">
+                <Card className="glass-card border-blue-500/10 bg-blue-500/5 relative overflow-hidden group hover:border-blue-500/30 transition-all cursor-pointer h-full">
+                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <Droplets className="h-20 w-20 text-blue-500" />
                     </div>
-                    <div className="flex items-baseline gap-2">
-                        <span className="text-4xl font-black italic text-blue-500 leading-none">{minGoalsPerMatch}</span>
-                        <span className="text-[10px] font-black uppercase text-blue-500/40 tracking-widest">Goles/PJ</span>
-                    </div>
-                </CardContent>
-            </Card>
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-[10px] font-black uppercase tracking-widest text-blue-500 flex items-center gap-2">
+                            <Droplets className="h-3 w-3" /> 
+                            {polvoraMojadaLeaders.length > 1 ? "Pólvoras Mojadas" : "Pólvora Mojada"}
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="flex items-center gap-4">
+                            <div className="flex -space-x-3 overflow-hidden">
+                                {polvoraMojadaLeaders.slice(0, 3).map(leader => (
+                                    <Avatar key={leader.playerId} className="h-12 w-12 border-2 border-background ring-2 ring-blue-500/20">
+                                        <AvatarFallback className="bg-blue-500/10 text-blue-500 font-black">{getInitials(leader.name)}</AvatarFallback>
+                                    </Avatar>
+                                ))}
+                            </div>
+                            <div className="flex flex-col min-w-0">
+                                <span className="text-lg font-black tracking-tight leading-none truncate italic text-white/80 group-hover:text-blue-400 transition-colors">
+                                    {polvoraMojadaLeaders.length > 1 
+                                        ? `${polvoraMojadaLeaders[0].name.split(' ')[0]} + ${polvoraMojadaLeaders.length - 1}`
+                                        : (polvoraMojadaLeaders[0]?.name || '-')}
+                                </span>
+                                <span className="text-[10px] uppercase font-bold text-muted-foreground">Menos goles/PJ (+3 PJ)</span>
+                            </div>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-4xl font-black italic text-blue-500 leading-none">{minGoalsPerMatch}</span>
+                            <span className="text-[10px] font-black uppercase text-blue-500/40 tracking-widest">Goles/PJ</span>
+                        </div>
+                    </CardContent>
+                </Card>
+            </Link>
         </div>
       </section>
 
