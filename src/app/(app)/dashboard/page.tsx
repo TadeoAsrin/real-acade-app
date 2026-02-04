@@ -96,12 +96,12 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-8 lg:gap-12 pb-20 max-w-7xl mx-auto">
       
-      {/* SECCIÓN 1: EL OLIMPO (MÉTRICAS REINA) */}
+      {/* SECCIÓN 1: EL OLIMPO (GLORIA INDIVIDUAL) */}
       <section className="space-y-4">
-        <h2 className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground/50 px-1">Líderes de la Academia</h2>
+        <h2 className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground/50 px-1 italic">Nombres Propios de la Academia</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Pichichi Hero Card */}
-          <Card className="md:col-span-2 lg:col-span-1 glass-card card-gold bg-gradient-to-br from-card/60 to-yellow-500/10 overflow-hidden relative flex flex-col h-full">
+          <Card className="md:col-span-2 lg:col-span-1 glass-card card-gold bg-gradient-to-br from-card/60 to-yellow-500/10 overflow-hidden relative flex flex-col h-full border-yellow-500/20">
             <div className="absolute top-0 right-0 p-6 opacity-10">
               <Medal className="h-32 w-32 text-yellow-500" />
             </div>
@@ -117,7 +117,7 @@ export default function DashboardPage() {
                     <AvatarFallback className="bg-yellow-500/10 text-yellow-500 text-2xl font-black">{getInitials(topScorer?.name || "?")}</AvatarFallback>
                   </Avatar>
                   <div className="min-w-0">
-                    <div className="text-3xl lg:text-4xl font-black tracking-tighter text-white uppercase leading-none group-hover:text-yellow-500 transition-colors truncate">
+                    <div className="text-3xl lg:text-4xl font-black tracking-tighter text-white uppercase leading-none group-hover:text-yellow-500 transition-colors truncate italic">
                       {topScorer?.name || '-'}
                     </div>
                     <p className="text-xs font-bold text-yellow-500/60 uppercase italic">Líder Actual</p>
@@ -131,7 +131,7 @@ export default function DashboardPage() {
 
               {runnersUp.length > 0 && (
                 <div className="mt-auto pt-6 border-t border-yellow-500/10 space-y-3">
-                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-yellow-500/40">En la mira</p>
+                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-yellow-500/40 italic">En la mira</p>
                   <div className="space-y-3">
                     {runnersUp.map((runner, idx) => (
                       <Link key={runner.playerId} href={`/players/${runner.playerId}`} className="flex items-center justify-between group/runner">
@@ -171,7 +171,7 @@ export default function DashboardPage() {
                     <AvatarFallback className="bg-primary/10 text-primary text-2xl font-black">{getInitials(influencer?.name || "?")}</AvatarFallback>
                   </Avatar>
                   <div className="min-w-0">
-                    <div className="text-3xl lg:text-4xl font-black tracking-tighter text-white uppercase leading-none group-hover/leader:text-primary transition-colors truncate">
+                    <div className="text-3xl lg:text-4xl font-black tracking-tighter text-white uppercase leading-none group-hover/leader:text-primary transition-colors truncate italic">
                       {influencer?.name || '-'}
                     </div>
                     <p className="text-xs font-bold text-primary/60 uppercase italic">Factor de Victoria</p>
@@ -188,7 +188,7 @@ export default function DashboardPage() {
 
               {influencerRunnersUp.length > 0 && (
                 <div className="mt-auto pt-6 border-t border-primary/10 space-y-3">
-                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-primary/40">En la mira</p>
+                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-primary/40 italic">En la mira</p>
                   <div className="space-y-3">
                     {influencerRunnersUp.map((runner, idx) => (
                       <Link key={runner.playerId} href={`/players/${runner.playerId}`} className="flex items-center justify-between group/runner">
@@ -220,31 +220,32 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* SECCIÓN 2: EL MOTOR DEL CLUB */}
+      {/* SECCIÓN 2: MATCH CENTER (ACCIÓN Y TÁCTICA) */}
       <section className="space-y-6">
-        <h2 className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground/50 px-1">Acción en la Cancha</h2>
+        <h2 className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground/50 px-1 italic">Centro de Operaciones</h2>
         
+        {/* Quick Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Link href="/matches">
-            <Card className="glass-card hover:bg-white/5 transition-all border-white/5 overflow-hidden">
+            <Card className="glass-card hover:bg-white/5 transition-all border-white/5 overflow-hidden group">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 px-4">
-                <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Partidos Totales</CardTitle>
+                <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground group-hover:text-primary transition-colors">Partidos Totales</CardTitle>
                 <Calendar className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent className="px-4 pb-4">
-                <div className="text-4xl font-black tracking-tighter">{allMatches.length}</div>
+                <div className="text-4xl font-black tracking-tighter italic">{allMatches.length}</div>
                 <p className="text-[10px] font-bold text-muted-foreground/60 uppercase mt-1">Historial del club</p>
               </CardContent>
             </Card>
           </Link>
           <Link href="/players?sort=totalGoals">
-            <Card className="glass-card hover:bg-white/5 transition-all border-white/5 overflow-hidden">
+            <Card className="glass-card hover:bg-white/5 transition-all border-white/5 overflow-hidden group">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 px-4">
-                <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Goles Marcados</CardTitle>
+                <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground group-hover:text-primary transition-colors">Goles Marcados</CardTitle>
                 <Target className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent className="px-4 pb-4">
-                <div className="text-4xl font-black tracking-tighter">{totalGoals}</div>
+                <div className="text-4xl font-black tracking-tighter italic">{totalGoals}</div>
                 <p className="text-[10px] font-bold text-muted-foreground/60 uppercase mt-1">Producción colectiva</p>
               </CardContent>
             </Card>
@@ -257,7 +258,7 @@ export default function DashboardPage() {
             <CardContent className="px-4 pb-4 overflow-hidden">
               <div className="flex flex-col gap-2 min-w-0">
                 <div className="flex items-baseline justify-between">
-                  <div className="text-4xl font-black tracking-tighter text-emerald-500">{attendanceRate}%</div>
+                  <div className="text-4xl font-black tracking-tighter text-emerald-500 italic">{attendanceRate}%</div>
                   <div className="text-[10px] font-bold text-emerald-500/60 uppercase">Asistencia</div>
                 </div>
                 <div className="min-w-0">
@@ -268,22 +269,20 @@ export default function DashboardPage() {
                           : `${attendanceLeaders[0].name.split(' ')[0]} + ${attendanceLeaders.length - 1} más`)
                       : 'Sin datos'}
                   </p>
-                  <p className="text-[8px] uppercase font-black text-emerald-500/50 tracking-widest truncate">
-                    {attendanceLeaders.length > 0 ? `Presentes en ${attendanceLeaders[0].matchesPlayed} encuentros` : ''}
-                  </p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
+        {/* Tactical Field Views */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FieldView team="Azul" players={lastMatchTeamAPlayers} topScorerId={topScorer?.playerId} date={lastMatch?.date} />
           <FieldView team="Rojo" players={lastMatchTeamBPlayers} topScorerId={topScorer?.playerId} date={lastMatch?.date} />
         </div>
       </section>
 
-      {/* SECCIÓN 3: EL PULSO SOCIAL (INSIGHTS) */}
+      {/* SECCIÓN 3: PULSO SOCIAL (BENTO BOX) */}
       <section className="space-y-4">
         <div className="flex items-center gap-3">
           <Zap className="h-5 w-5 text-primary fill-primary" />
@@ -307,7 +306,7 @@ export default function DashboardPage() {
                                 <AvatarFallback className="bg-yellow-500/10 text-yellow-500 font-black">{getInitials(topMvpPlayer?.name || "??")}</AvatarFallback>
                             </Avatar>
                             <div className="flex flex-col min-w-0">
-                                <span className="text-lg font-black tracking-tight leading-none group-hover:text-yellow-500 transition-colors truncate">{topMvpPlayer?.name || '-'}</span>
+                                <span className="text-lg font-black tracking-tight leading-none group-hover:text-yellow-500 transition-colors truncate italic">{topMvpPlayer?.name || '-'}</span>
                                 <span className="text-[10px] uppercase font-bold text-muted-foreground">Premios Oficiales</span>
                             </div>
                         </div>
@@ -361,7 +360,7 @@ export default function DashboardPage() {
                                 <AvatarFallback className="bg-muted text-[10px] font-black">{getInitials(topChemistry?.player2.name || "?")}</AvatarFallback>
                             </Avatar>
                             <div className="pl-6 flex flex-col min-w-0">
-                                <span className="text-sm font-black truncate">{topChemistry ? `${topChemistry.player1.name.split(' ')[0]} + ${topChemistry.player2.name.split(' ')[0]}` : 'Sin datos'}</span>
+                                <span className="text-sm font-black truncate italic">{topChemistry ? `${topChemistry.player1.name.split(' ')[0]} + ${topChemistry.player2.name.split(' ')[0]}` : 'Sin datos'}</span>
                                 <span className="text-[8px] uppercase text-muted-foreground font-bold">{topChemistry?.matches || 0} partidos juntos</span>
                             </div>
                         </div>
