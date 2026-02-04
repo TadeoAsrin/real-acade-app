@@ -24,14 +24,18 @@ export function MatchAiSummary({ matchData }: MatchAiSummaryProps) {
     setError(null);
     try {
       const result = await generateMatchSummary(matchData);
-      setSummary(result);
-    } catch (error: any) {
-      console.error('Error generating summary:', error);
-      if (error.message?.includes('429') || error.message?.includes('quota')) {
-        setError('Límite de la IA alcanzado. Intenta nuevamente en un minuto.');
+      
+      if ('error' in result) {
+        if (result.error === 'QUOTA_EXCEEDED') {
+          setError('Límite de la IA alcanzado. Intenta nuevamente en un minuto.');
+        } else {
+          setError('La IA de la redacción está ocupada. Reintenta pronto.');
+        }
       } else {
-        setError('Hubo un error al generar la crónica. Intenta nuevamente.');
+        setSummary(result);
       }
+    } catch (err: any) {
+      setError('Hubo un problema al conectar con la rotativa.');
     } finally {
       setIsLoading(false);
     }

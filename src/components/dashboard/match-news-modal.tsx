@@ -71,14 +71,18 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
       };
 
       const result = await generateMatchSummary(input);
-      setSummary(result);
-    } catch (error: any) {
-      console.error('Error fetching summary:', error);
-      if (error.message?.includes('429') || error.message?.includes('quota')) {
-        setError('La IA está descansando (límite alcanzado). Reintenta en un momento.');
+      
+      if ('error' in result) {
+        if (result.error === 'QUOTA_EXCEEDED') {
+          setError('La IA está descansando (límite alcanzado). Reintenta en un momento.');
+        } else {
+          setError('No pudimos conectar con la rotativa en este momento.');
+        }
       } else {
-        setError('No pudimos conectar con la rotativa.');
+        setSummary(result);
       }
+    } catch (err: any) {
+      setError('Error inesperado al generar la crónica.');
     } finally {
       setIsLoading(false);
     }

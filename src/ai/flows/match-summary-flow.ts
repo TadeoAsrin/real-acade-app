@@ -57,8 +57,26 @@ Detalles del partido:
 Escribe como un cronista de élite. El titular debe ser potente. El subtítulo debe enganchar. La crónica debe destacar la épica, el esfuerzo y los nombres propios. Usa términos como "asedio", "testarazo", "clase magistral", "el fondo de las mallas".`,
 });
 
-export async function generateMatchSummary(input: MatchSummaryInput): Promise<MatchSummaryOutput> {
-  const { output } = await matchSummaryPrompt(input);
-  if (!output) throw new Error('Failed to generate match summary');
-  return output;
+/**
+ * Generates a match summary using AI.
+ * Returns the summary or a structured error object if the AI is unavailable.
+ */
+export async function generateMatchSummary(input: MatchSummaryInput): Promise<MatchSummaryOutput | { error: string }> {
+  try {
+    const { output } = await matchSummaryPrompt(input);
+    if (!output) throw new Error('Failed to generate match summary');
+    return output;
+  } catch (error: any) {
+    // Catch quota errors specifically to avoid triggering standard Next.js error overlays
+    const isQuotaError = error.message?.includes('429') || 
+                         error.message?.includes('quota') || 
+                         error.message?.includes('limit');
+    
+    if (isQuotaError) {
+      return { error: 'QUOTA_EXCEEDED' };
+    }
+    
+    // Return generic error instead of throwing to keep the UI stable
+    return { error: 'SERVICE_UNAVAILABLE' };
+  }
 }
