@@ -50,8 +50,13 @@ export default function DashboardPage() {
   const allMatches = matchesData || [];
   const playerStats = calculateAggregatedStats(allPlayers, allMatches);
   const chemistryRankings = getChemistryRankings(allPlayers, allMatches, 2);
+  
+  // Partnership logic for ties
+  const topWinRate = chemistryRankings[0]?.winRate || 0;
+  const topPairs = chemistryRankings.filter(p => p.winRate === topWinRate).slice(0, 4);
+  const hasMultipleLeaders = topPairs.length > 1;
   const topChemistry = chemistryRankings[0];
-  const runnerUpChemistry = chemistryRankings[1];
+  const runnerUpChemistry = chemistryRankings.find(p => p.winRate < topWinRate);
   
   const spiciestMatch = getSpiciestMatch(allMatches);
   const lastMatch = allMatches[0];
@@ -354,62 +359,88 @@ export default function DashboardPage() {
                     <CardHeader className="pb-2">
                         <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                             <LinkIcon className="h-3 w-3" />
-                            Mejor Sociedad
+                            {hasMultipleLeaders ? "Sociedades Líderes" : "Mejor Sociedad"}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="flex -space-x-3 items-center min-w-0">
-                            <Avatar className="h-10 w-10 border-2 border-background ring-2 ring-white/10 shrink-0">
-                                <AvatarFallback className="bg-muted text-[10px] font-black">{getInitials(topChemistry?.player1.name || "?")}</AvatarFallback>
-                            </Avatar>
-                            <Avatar className="h-10 w-10 border-2 border-background ring-2 ring-white/10 shrink-0">
-                                <AvatarFallback className="bg-muted text-[10px] font-black">{getInitials(topChemistry?.player2.name || "?")}</AvatarFallback>
-                            </Avatar>
-                            <div className="pl-6 flex flex-col min-w-0">
-                                <span className="text-sm font-black truncate italic">{topChemistry ? `${topChemistry.player1.name.split(' ')[0]} + ${topChemistry.player2.name.split(' ')[0]}` : 'Sin datos'}</span>
-                                <span className="text-[8px] uppercase text-muted-foreground font-bold">{topChemistry?.matches || 0} PJ</span>
-                            </div>
-                        </div>
-                        <div className="pt-2 space-y-3">
-                            <div>
-                                <div className="flex justify-between text-[10px] font-black uppercase mb-1">
-                                    <span className="text-muted-foreground italic">Química</span>
-                                    <span className="text-primary italic">{topChemistry?.winRate || 0}%</span>
+                        {hasMultipleLeaders ? (
+                            <div className="space-y-4">
+                                <div className="flex items-baseline gap-2">
+                                    <span className="text-3xl font-black text-primary italic leading-none">{topWinRate}%</span>
+                                    <span className="text-[8px] font-bold uppercase text-muted-foreground tracking-widest">Efectividad compartida</span>
                                 </div>
-                                <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-                                    <div 
-                                        className="h-full bg-primary transition-all duration-500" 
-                                        style={{ width: `${topChemistry?.winRate || 0}%` }} 
-                                    />
-                                </div>
-                            </div>
-                            
-                            {runnerUpChemistry && (
-                                <div className="pt-2 border-t border-white/5">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
+                                <div className="grid grid-cols-2 gap-2">
+                                    {topPairs.map((pair, idx) => (
+                                        <div key={idx} className="bg-white/5 p-2 rounded-xl border border-white/5 space-y-2">
                                             <div className="flex -space-x-2">
-                                                <Avatar className="h-5 w-5 border border-background">
-                                                    <AvatarFallback className="text-[6px] font-black">{getInitials(runnerUpChemistry.player1.name)}</AvatarFallback>
+                                                <Avatar className="h-6 w-6 border border-background">
+                                                    <AvatarFallback className="text-[8px] font-black bg-muted">{getInitials(pair.player1.name)}</AvatarFallback>
                                                 </Avatar>
-                                                <Avatar className="h-5 w-5 border border-background">
-                                                    <AvatarFallback className="text-[6px] font-black">{getInitials(runnerUpChemistry.player2.name)}</AvatarFallback>
+                                                <Avatar className="h-6 w-6 border border-background">
+                                                    <AvatarFallback className="text-[8px] font-black bg-muted">{getInitials(pair.player2.name)}</AvatarFallback>
                                                 </Avatar>
                                             </div>
-                                            <span className="text-[8px] font-bold text-muted-foreground uppercase">
-                                                {runnerUpChemistry.winRate === topChemistry?.winRate ? "Colíderes" : "En los talones"}
-                                            </span>
+                                            <p className="text-[9px] font-black italic truncate leading-none">
+                                                {pair.player1.name.split(' ')[0]} + {pair.player2.name.split(' ')[0]}
+                                            </p>
+                                            <p className="text-[7px] uppercase font-bold text-muted-foreground">{pair.matches} PJ</p>
                                         </div>
-                                        <span className={cn(
-                                            "text-[10px] font-black italic",
-                                            runnerUpChemistry.winRate === topChemistry?.winRate ? "text-primary" : "text-white/60"
-                                        )}>
-                                            {runnerUpChemistry.winRate}%
-                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="flex -space-x-3 items-center min-w-0">
+                                    <Avatar className="h-10 w-10 border-2 border-background ring-2 ring-white/10 shrink-0">
+                                        <AvatarFallback className="bg-muted text-[10px] font-black">{getInitials(topChemistry?.player1.name || "?")}</AvatarFallback>
+                                    </Avatar>
+                                    <Avatar className="h-10 w-10 border-2 border-background ring-2 ring-white/10 shrink-0">
+                                        <AvatarFallback className="bg-muted text-[10px] font-black">{getInitials(topChemistry?.player2.name || "?")}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="pl-6 flex flex-col min-w-0">
+                                        <span className="text-sm font-black truncate italic">{topChemistry ? `${topChemistry.player1.name.split(' ')[0]} + ${topChemistry.player2.name.split(' ')[0]}` : 'Sin datos'}</span>
+                                        <span className="text-[8px] uppercase text-muted-foreground font-bold">{topChemistry?.matches || 0} PJ</span>
                                     </div>
                                 </div>
-                            )}
-                        </div>
+                                <div className="pt-2 space-y-3">
+                                    <div>
+                                        <div className="flex justify-between text-[10px] font-black uppercase mb-1">
+                                            <span className="text-muted-foreground italic">Química</span>
+                                            <span className="text-primary italic">{topChemistry?.winRate || 0}%</span>
+                                        </div>
+                                        <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                            <div 
+                                                className="h-full bg-primary transition-all duration-500" 
+                                                style={{ width: `${topChemistry?.winRate || 0}%` }} 
+                                            />
+                                        </div>
+                                    </div>
+                                    
+                                    {runnerUpChemistry && (
+                                        <div className="pt-2 border-t border-white/5">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="flex -space-x-2">
+                                                        <Avatar className="h-5 w-5 border border-background">
+                                                            <AvatarFallback className="text-[6px] font-black">{getInitials(runnerUpChemistry.player1.name)}</AvatarFallback>
+                                                        </Avatar>
+                                                        <Avatar className="h-5 w-5 border border-background">
+                                                            <AvatarFallback className="text-[6px] font-black">{getInitials(runnerUpChemistry.player2.name)}</AvatarFallback>
+                                                        </Avatar>
+                                                    </div>
+                                                    <span className="text-[8px] font-bold text-muted-foreground uppercase">
+                                                        En los talones
+                                                    </span>
+                                                </div>
+                                                <span className="text-[10px] font-black italic text-white/60">
+                                                    {runnerUpChemistry.winRate}%
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </>
+                        )}
                     </CardContent>
                 </Card>
             </Link>
