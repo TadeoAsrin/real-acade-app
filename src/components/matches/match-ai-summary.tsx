@@ -4,7 +4,7 @@ import * as React from 'react';
 import { generateMatchSummary, type MatchSummaryOutput, type MatchSummaryInput } from '@/ai/flows/match-summary-flow';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Loader2, Quote, LogIn } from 'lucide-react';
+import { Sparkles, Loader2, Quote, LogIn, AlertCircle } from 'lucide-react';
 import { useUser } from '@/firebase';
 import Link from 'next/link';
 
@@ -15,16 +15,23 @@ interface MatchAiSummaryProps {
 export function MatchAiSummary({ matchData }: MatchAiSummaryProps) {
   const [summary, setSummary] = React.useState<MatchSummaryOutput | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
   const { user } = useUser();
 
   async function handleGenerate() {
     if (!user) return;
     setIsLoading(true);
+    setError(null);
     try {
       const result = await generateMatchSummary(matchData);
       setSummary(result);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generating summary:', error);
+      if (error.message?.includes('429') || error.message?.includes('quota')) {
+        setError('Límite de la IA alcanzado. Intenta nuevamente en un minuto.');
+      } else {
+        setError('Hubo un error al generar la crónica. Intenta nuevamente.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -67,6 +74,16 @@ export function MatchAiSummary({ matchData }: MatchAiSummaryProps) {
             </div>
             <Button variant="ghost" size="sm" onClick={() => setSummary(null)} className="text-xs">
                 Generar otra versión
+            </Button>
+          </div>
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center py-6 text-center space-y-4">
+            <div className="p-3 bg-orange-500/10 rounded-full">
+                <AlertCircle className="h-6 w-6 text-orange-500" />
+            </div>
+            <p className="text-xs text-muted-foreground max-w-[200px]">{error}</p>
+            <Button onClick={handleGenerate} variant="outline" size="sm" className="border-primary/20">
+              Reintentar
             </Button>
           </div>
         ) : (

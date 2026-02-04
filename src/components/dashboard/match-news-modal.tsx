@@ -9,7 +9,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { generateMatchSummary, type MatchSummaryOutput } from '@/ai/flows/match-summary-flow';
-import { Loader2, Newspaper, Quote, Trophy, Star, Award, ChevronRight } from 'lucide-react';
+import { Loader2, Newspaper, Quote, Trophy, Star, Award, ChevronRight, AlertCircle, RefreshCcw } from 'lucide-react';
 import { es } from 'date-fns/locale';
 import { format } from 'date-fns';
 import { Button } from '../ui/button';
@@ -27,6 +27,7 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
   const [isOpen, setIsOpen] = React.useState(false);
   const [summary, setSummary] = React.useState<MatchSummaryOutput | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     if (!match) return;
@@ -47,6 +48,7 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
   const fetchSummary = async () => {
     if (!match) return;
     setIsLoading(true);
+    setError(null);
     try {
       const allPlayerStats = [...match.teamAPlayers, ...match.teamBPlayers];
       const mvpStat = allPlayerStats.find((s) => s.isMvp);
@@ -70,8 +72,13 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
 
       const result = await generateMatchSummary(input);
       setSummary(result);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching summary:', error);
+      if (error.message?.includes('429') || error.message?.includes('quota')) {
+        setError('La IA está descansando (límite de cuota excedido). Reintenta en un minuto.');
+      } else {
+        setError('No pudimos conectar con la rotativa. Intenta nuevamente.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -120,6 +127,22 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
                 <Newspaper className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-black/20" />
               </div>
               <p className="font-sans italic text-sm text-black/40 animate-pulse tracking-wide">Imprimiendo edición especial...</p>
+            </div>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center py-32 text-center space-y-6">
+              <div className="bg-orange-500/10 p-4 rounded-full">
+                <AlertCircle className="h-12 w-12 text-orange-600" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="font-sans font-black uppercase italic text-xl">Problemas en la rotativa</h3>
+                <p className="font-sans text-sm text-black/60 max-w-sm mx-auto">{error}</p>
+              </div>
+              <Button 
+                onClick={fetchSummary}
+                className="font-sans uppercase font-bold tracking-widest bg-black text-white rounded-none"
+              >
+                <RefreshCcw className="mr-2 h-4 w-4" /> Reintentar Impresión
+              </Button>
             </div>
           ) : summary ? (
             <article className="space-y-10">
