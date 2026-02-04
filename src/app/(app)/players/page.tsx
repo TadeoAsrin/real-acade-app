@@ -14,8 +14,8 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
-import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc } from "@/firebase";
-import { collection, doc, setDoc, deleteDoc, updateDoc, query, orderBy } from "firebase/firestore";
+import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc, setDocumentNonBlocking, updateDocumentNonBlocking, deleteDocumentNonBlocking } from "@/firebase";
+import { collection, doc, query, orderBy } from "firebase/firestore";
 import type { Player, Match, AggregatedPlayerStats, PlayerPosition } from "@/lib/definitions";
 import { Loader2, UserPlus, Trash2, Pencil, ArrowUpDown, ChevronUp, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -103,61 +103,49 @@ function PlayersList() {
 
   const isAdmin = adminRole?.isAdmin;
 
-  const handleAddPlayer = async () => {
+  const handleAddPlayer = () => {
     if (!firestore || !newPlayerName) return;
     setIsUpdatingPlayer(true);
-    try {
-      const playerRef = doc(collection(firestore, 'players'));
-      await setDoc(playerRef, {
-        name: newPlayerName,
-        position: newPlayerPosition || null,
-        role: 'player'
-      });
+    const playerRef = doc(collection(firestore, 'players'));
+    setDocumentNonBlocking(playerRef, {
+      name: newPlayerName,
+      position: newPlayerPosition || null,
+      role: 'player'
+    }, {});
 
-      toast({
-        title: "Jugador Creado",
-        description: `${newPlayerName} ha sido añadido al club.`,
-      });
-      setNewPlayerName('');
-      setNewPlayerPosition('');
-    } catch (error) {
-      toast({ variant: "destructive", title: "Error", description: "No se pudo crear el jugador." });
-    } finally {
-      setIsUpdatingPlayer(false);
-    }
+    toast({
+      title: "Jugador Creado",
+      description: `${newPlayerName} ha sido añadido al club.`,
+    });
+    setNewPlayerName('');
+    setNewPlayerPosition('');
+    setIsUpdatingPlayer(false);
   };
 
-  const handleUpdatePlayer = async () => {
+  const handleUpdatePlayer = () => {
     if (!firestore || !editingPlayerId || !editPlayerName) return;
     setIsUpdatingPlayer(true);
-    try {
-      await updateDoc(doc(firestore, 'players', editingPlayerId), {
-        name: editPlayerName,
-        position: editPlayerPosition || null
-      });
+    const playerRef = doc(firestore, 'players', editingPlayerId);
+    updateDocumentNonBlocking(playerRef, {
+      name: editPlayerName,
+      position: editPlayerPosition || null
+    });
 
-      toast({
-        title: "Jugador Actualizado",
-        description: "Los datos han sido modificados correctamente.",
-      });
-      setEditingPlayerId(null);
-      setEditPlayerName('');
-      setEditPlayerPosition('');
-    } catch (error) {
-      toast({ variant: "destructive", title: "Error", description: "No se pudo actualizar el jugador." });
-    } finally {
-      setIsUpdatingPlayer(false);
-    }
+    toast({
+      title: "Jugador Actualizado",
+      description: "Los datos han sido modificados correctamente.",
+    });
+    setEditingPlayerId(null);
+    setEditPlayerName('');
+    setEditPlayerPosition('');
+    setIsUpdatingPlayer(false);
   };
 
-  const handleDeletePlayer = async (playerId: string) => {
+  const handleDeletePlayer = (playerId: string) => {
     if (!firestore) return;
-    try {
-      await deleteDoc(doc(firestore, 'players', playerId));
-      toast({ title: "Jugador Eliminado", description: "El registro ha sido borrado del club." });
-    } catch (error) {
-      toast({ variant: "destructive", title: "Error", description: "No se pudo eliminar el jugador." });
-    }
+    const playerRef = doc(firestore, 'players', playerId);
+    deleteDocumentNonBlocking(playerRef);
+    toast({ title: "Jugador Eliminado", description: "El registro ha sido borrado del club." });
   };
 
   const handleSort = (key: keyof AggregatedPlayerStats) => {

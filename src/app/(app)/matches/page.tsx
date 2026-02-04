@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from "@/components/ui/button";
@@ -9,8 +8,8 @@ import {
 import { cn } from "@/lib/utils";
 import { ArrowRight, CalendarIcon, Plus, Loader2, Trash2, Pencil } from "lucide-react";
 import Link from "next/link";
-import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc } from "@/firebase";
-import { collection, query, orderBy, doc, deleteDoc } from "firebase/firestore";
+import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc, deleteDocumentNonBlocking } from "@/firebase";
+import { collection, query, orderBy, doc } from "firebase/firestore";
 import type { Match } from "@/lib/definitions";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -45,22 +44,14 @@ export default function MatchesPage() {
   
   const isAdmin = adminRole?.isAdmin;
 
-  const handleDeleteMatch = async (matchId: string) => {
+  const handleDeleteMatch = (matchId: string) => {
     if (!firestore) return;
-    try {
-      await deleteDoc(doc(firestore, 'matches', matchId));
-      toast({
-        title: "Partido Eliminado",
-        description: "El registro ha sido borrado permanentemente.",
-      });
-    } catch (error) {
-      console.error(error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "No se pudo eliminar el partido.",
-      });
-    }
+    const matchRef = doc(firestore, 'matches', matchId);
+    deleteDocumentNonBlocking(matchRef);
+    toast({
+      title: "Partido Eliminado",
+      description: "El registro ha sido borrado permanentemente.",
+    });
   };
 
   if (isLoading) {

@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -44,8 +43,8 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useDoc, useCollection, useMemoFirebase, useFirestore } from "@/firebase";
-import { collection, doc, updateDoc, query, orderBy } from "firebase/firestore";
+import { useDoc, useCollection, useMemoFirebase, useFirestore, updateDocumentNonBlocking } from "@/firebase";
+import { collection, doc, query, orderBy } from "firebase/firestore";
 import type { Player, Match } from "@/lib/definitions";
 import Link from "next/link";
 
@@ -165,48 +164,38 @@ export default function EditMatchPage() {
     if (!firestore || !id) return;
     setIsSaving(true);
     
-    try {
-        const teamAPlayers = data.teamAPlayerIds.map(playerId => ({
-            playerId,
-            goals: data.teamAStats[playerId]?.goals || 0,
-            isCaptain: data.teamACaptainId === playerId,
-            isMvp: data.mvpPlayerId === playerId,
-            hasBestGoal: data.bestGoalPlayerId === playerId
-        }));
-        const teamBPlayers = data.teamBPlayerIds.map(playerId => ({
-            playerId,
-            goals: data.teamBStats[playerId]?.goals || 0,
-            isCaptain: data.teamBCaptainId === playerId,
-            isMvp: data.mvpPlayerId === playerId,
-            hasBestGoal: data.bestGoalPlayerId === playerId
-        }));
+    const teamAPlayers = data.teamAPlayerIds.map(playerId => ({
+        playerId,
+        goals: data.teamAStats[playerId]?.goals || 0,
+        isCaptain: data.teamACaptainId === playerId,
+        isMvp: data.mvpPlayerId === playerId,
+        hasBestGoal: data.bestGoalPlayerId === playerId
+    }));
+    const teamBPlayers = data.teamBPlayerIds.map(playerId => ({
+        playerId,
+        goals: data.teamBStats[playerId]?.goals || 0,
+        isCaptain: data.teamBCaptainId === playerId,
+        isMvp: data.mvpPlayerId === playerId,
+        hasBestGoal: data.bestGoalPlayerId === playerId
+    }));
 
-        const teamAScore = teamAPlayers.reduce((sum, p) => sum + p.goals, 0);
-        const teamBScore = teamBPlayers.reduce((sum, p) => sum + p.goals, 0);
+    const teamAScore = teamAPlayers.reduce((sum, p) => sum + p.goals, 0);
+    const teamBScore = teamBPlayers.reduce((sum, p) => sum + p.goals, 0);
 
-        await updateDoc(doc(firestore, 'matches', id), {
-            date: data.date.toISOString(),
-            teamAScore,
-            teamBScore,
-            teamAPlayers,
-            teamBPlayers,
-        });
+    const matchRef = doc(firestore, 'matches', id);
+    updateDocumentNonBlocking(matchRef, {
+        date: data.date.toISOString(),
+        teamAScore,
+        teamBScore,
+        teamAPlayers,
+        teamBPlayers,
+    });
 
-        toast({
-          title: "Partido Actualizado",
-          description: "Los cambios se han guardado correctamente.",
-        });
-        router.push(`/matches/${id}`);
-    } catch (error) {
-        console.error("Error updating match:", error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "No se pudo actualizar el partido.",
-        });
-    } finally {
-        setIsSaving(false);
-    }
+    toast({
+      title: "Partido Actualizado",
+      description: "Los cambios se han guardado correctamente.",
+    });
+    router.push(`/matches/${id}`);
   }
 
   const renderPlayerListSelection = (team: "A" | "B") => {

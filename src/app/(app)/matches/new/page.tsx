@@ -43,8 +43,8 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useCollection, useMemoFirebase, useFirestore, useUser } from "@/firebase";
-import { collection, doc, setDoc, serverTimestamp, query, orderBy } from "firebase/firestore";
+import { useCollection, useMemoFirebase, useFirestore, useUser, setDocumentNonBlocking } from "@/firebase";
+import { collection, doc, serverTimestamp, query, orderBy } from "firebase/firestore";
 import type { Player } from "@/lib/definitions";
 
 const playerStatsSchema = z.object({
@@ -77,7 +77,6 @@ export default function NewMatchPage() {
   const { toast } = useToast();
   const router = useRouter();
   const firestore = useFirestore();
-  const { user } = useUser();
   const [isLoading, setIsLoading] = React.useState(false);
   const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
 
@@ -130,50 +129,41 @@ export default function NewMatchPage() {
     if (!firestore) return;
     setIsLoading(true);
     
-    try {
-        const matchRef = doc(collection(firestore, 'matches'));
-        const teamAPlayers = data.teamAPlayerIds.map(id => ({
-            playerId: id,
-            goals: data.teamAStats[id]?.goals || 0,
-            isCaptain: data.teamACaptainId === id,
-            isMvp: data.mvpPlayerId === id,
-            hasBestGoal: data.bestGoalPlayerId === id
-        }));
-        const teamBPlayers = data.teamBPlayerIds.map(id => ({
-            playerId: id,
-            goals: data.teamBStats[id]?.goals || 0,
-            isCaptain: data.teamBCaptainId === id,
-            isMvp: data.mvpPlayerId === id,
-            hasBestGoal: data.bestGoalPlayerId === id
-        }));
+    const matchRef = doc(collection(firestore, 'matches'));
+    const teamAPlayers = data.teamAPlayerIds.map(id => ({
+        playerId: id,
+        goals: data.teamAStats[id]?.goals || 0,
+        isCaptain: data.teamACaptainId === id,
+        isMvp: data.mvpPlayerId === id,
+        hasBestGoal: data.bestGoalPlayerId === id
+    }));
+    const teamBPlayers = data.teamBPlayerIds.map(id => ({
+        playerId: id,
+        goals: data.teamBStats[id]?.goals || 0,
+        isCaptain: data.teamBCaptainId === id,
+        isMvp: data.mvpPlayerId === id,
+        hasBestGoal: data.bestGoalPlayerId === id
+    }));
 
-        const teamAScore = teamAPlayers.reduce((sum, p) => sum + p.goals, 0);
-        const teamBScore = teamBPlayers.reduce((sum, p) => sum + p.goals, 0);
+    const teamAScore = teamAPlayers.reduce((sum, p) => sum + p.goals, 0);
+    const teamBScore = teamBPlayers.reduce((sum, p) => sum + p.goals, 0);
 
-        await setDoc(matchRef, {
-            date: data.date.toISOString(),
-            teamAScore,
-            teamBScore,
-            teamAPlayers,
-            teamBPlayers,
-            createdAt: serverTimestamp()
-        });
+    const matchData = {
+        date: data.date.toISOString(),
+        teamAScore,
+        teamBScore,
+        teamAPlayers,
+        teamBPlayers,
+        createdAt: serverTimestamp()
+    };
 
-        toast({
-          title: "Partido Guardado",
-          description: "Las estadísticas del partido se han guardado correctamente.",
-        });
-        router.push("/matches");
-    } catch (error) {
-        console.error("Error saving match:", error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "No se pudo guardar el partido.",
-        });
-    } finally {
-        setIsLoading(false);
-    }
+    setDocumentNonBlocking(matchRef, matchData, {});
+
+    toast({
+      title: "Partido Guardado",
+      description: "Las estadísticas del partido se han guardado correctamente.",
+    });
+    router.push("/matches");
   }
 
   const renderPlayerListSelection = (team: "A" | "B") => {
