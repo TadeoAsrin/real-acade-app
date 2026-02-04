@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Medal, Loader2, Zap, Calendar, Users, Brain, Heart, Crown, Link as LinkIcon, Flame, Target, Trophy, TrendingUp, Star, Skull, Ghost, CloudRain, Frown, Droplets, Newspaper } from "lucide-react";
+import { Medal, Loader2, Zap, Calendar, Users, Brain, Heart, Crown, Link as LinkIcon, Flame, Target, Trophy, TrendingUp, Star, Skull, Ghost, CloudRain, Frown, Droplets, Newspaper, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { FieldView } from "@/components/dashboard/field-view";
 import { PowerRanking } from "@/components/dashboard/power-ranking";
@@ -80,24 +80,15 @@ export default function DashboardPage() {
 
   // Pulse Metrics - Shared MVP logic
   const maxMvps = Math.max(...playerStats.map(p => p.totalMvp), 0);
-  const mvpLeaders = maxMvps > 0 ? playerStats.filter(p => p.totalMvp === maxMvps) : [];
-  const topMvpPlayer = mvpLeaders[0];
+  const mvpLeaders = [...playerStats].sort((a, b) => b.totalMvp - a.totalMvp || b.powerPoints - a.powerPoints).slice(0, 3);
 
   const totalMatches = allMatches.length;
-  const attendanceLeaders = playerStats.length > 0 && totalMatches > 0
-    ? (() => {
-        const leaders = [...playerStats].sort((a, b) => {
-          const rateA = a.matchesPlayed / totalMatches;
-          const rateB = b.matchesPlayed / totalMatches;
-          return rateB - rateA || b.matchesPlayed - a.matchesPlayed;
-        });
-        const maxRate = (leaders[0]?.matchesPlayed || 0) / totalMatches;
-        return leaders.filter(p => (p.matchesPlayed / totalMatches) === maxRate);
-      })()
-    : [];
+  const attendanceLeaders = [...playerStats]
+    .sort((a, b) => b.matchesPlayed - a.matchesPlayed || a.name.localeCompare(b.name))
+    .slice(0, 3);
 
-  const attendanceRate = attendanceLeaders.length > 0 && totalMatches > 0 
-    ? Math.round((attendanceLeaders[0].matchesPlayed / totalMatches) * 100) 
+  const globalAttendanceRate = totalMatches > 0 && playerStats.length > 0
+    ? Math.round((playerStats.reduce((sum, p) => sum + p.matchesPlayed, 0) / (totalMatches * playerStats.length)) * 100)
     : 0;
 
   // Nos Caemos a Pedazos
@@ -277,85 +268,92 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* SECCIÓN 2: PULSO DE LA LIGA (SOCIAL BENTO) */}
+      {/* SECCIÓN 2: PULSO DE LA LIGA (BENTO PRO) */}
       <section className="space-y-4">
         <div className="flex items-center gap-3 px-1">
           <Zap className="h-5 w-5 text-primary fill-primary" />
           <h2 className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground/50 italic">Pulso de la Liga</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Reyes de los MVP */}
+            
+            {/* Reyes de los MVP (Mini Podio) */}
             <Link href="/pulse/mvp">
-                <Card className="glass-card border-yellow-500/20 hover:border-yellow-500/50 transition-all group overflow-hidden cursor-pointer h-full">
-                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                        <Star className="h-24 w-24 text-yellow-500" />
-                    </div>
-                    <CardHeader className="pb-2">
+                <Card className="glass-card border-yellow-500/20 hover:border-yellow-500/50 transition-all group overflow-hidden cursor-pointer h-full flex flex-col">
+                    <CardHeader className="pb-4">
                         <CardTitle className="text-[10px] font-black uppercase tracking-widest text-yellow-500 flex items-center gap-2">
-                            <Crown className="h-3 w-3" />
-                            {mvpLeaders.length > 1 ? "Reyes de los MVP" : "Rey de los MVP"}
+                            <Crown className="h-3 w-3" /> Reyes de los MVP
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4">
+                    <CardContent className="space-y-4 flex-1 flex flex-col">
+                        <div className="space-y-3">
+                            {mvpLeaders.length > 0 ? mvpLeaders.map((p, i) => (
+                                <div key={p.playerId} className="flex items-center justify-between group/row">
+                                    <div className="flex items-center gap-2">
+                                        <div className="relative">
+                                            <Avatar className={cn("h-8 w-8 border", i === 0 ? "border-yellow-500" : "border-white/10")}>
+                                                <AvatarFallback className="bg-yellow-500/10 text-yellow-500 text-[10px] font-black">{getInitials(p.name)}</AvatarFallback>
+                                            </Avatar>
+                                            {i === 0 && <Star className="absolute -top-1 -right-1 h-3 w-3 text-yellow-500 fill-yellow-500" />}
+                                        </div>
+                                        <span className="text-xs font-bold text-white/80 group-hover/row:text-yellow-500 transition-colors truncate max-w-[80px]">{p.name.split(' ')[0]}</span>
+                                    </div>
+                                    <div className="flex items-baseline gap-1">
+                                        <span className="text-lg font-black italic">{p.totalMvp}</span>
+                                        <span className="text-[8px] uppercase font-bold text-muted-foreground">Premios</span>
+                                    </div>
+                                </div>
+                            )) : (
+                                <p className="text-xs text-muted-foreground italic text-center py-4">Sin registros aún</p>
+                            )}
+                        </div>
+                        <div className="mt-auto pt-4 border-t border-white/5">
+                            <p className="text-[8px] uppercase font-black text-muted-foreground/50 tracking-widest text-center">Basado en la elección de los compañeros</p>
+                        </div>
+                    </CardContent>
+                </Card>
+            </Link>
+
+            {/* Récord Histórico (Partido más Picante) */}
+            <Card className="glass-card border-orange-500/20 bg-gradient-to-br from-card/60 to-orange-500/5 overflow-hidden h-full flex flex-col">
+                <CardHeader className="pb-2">
+                    <CardTitle className="text-[10px] font-black uppercase tracking-widest text-orange-500 flex items-center gap-2">
+                        <Flame className="h-3 w-3 fill-orange-500" /> Récord Histórico
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4 flex-1 flex flex-col">
+                    <div className="flex flex-col items-center justify-center py-2">
                         <div className="flex items-center gap-4">
-                            <div className="flex -space-x-3 overflow-hidden">
-                                {mvpLeaders.slice(0, 3).map((leader) => (
-                                    <Avatar key={leader.playerId} className="h-12 w-12 border-2 border-background ring-2 ring-yellow-500/30 shrink-0">
-                                        <AvatarFallback className="bg-yellow-500/10 text-yellow-500 font-black text-xs">{getInitials(leader.name)}</AvatarFallback>
-                                    </Avatar>
-                                ))}
-                                {mvpLeaders.length === 0 && (
-                                    <Avatar className="h-12 w-12 border-2 border-yellow-500/30">
-                                        <AvatarFallback className="bg-yellow-500/10 text-yellow-500 font-black">??</AvatarFallback>
-                                    </Avatar>
-                                )}
-                            </div>
-                            <div className="flex flex-col min-w-0">
-                                <span className="text-lg font-black tracking-tight leading-none group-hover:text-yellow-500 transition-colors truncate italic">
-                                    {mvpLeaders.length > 1 
-                                        ? `${mvpLeaders[0].name.split(' ')[0]} + ${mvpLeaders.length - 1}`
-                                        : (topMvpPlayer?.name || '-')}
-                                </span>
-                                <span className="text-[10px] uppercase font-bold text-muted-foreground">Premios Oficiales</span>
+                            <span className="text-5xl font-black italic text-white leading-none drop-shadow-[0_0_10px_rgba(249,115,22,0.3)]">
+                                {spiciestMatch ? spiciestMatch.teamAScore + spiciestMatch.teamBScore : 0}
+                            </span>
+                            <div className="flex flex-col">
+                                <span className="text-[8px] uppercase font-black text-orange-500 leading-none">Goles</span>
+                                <span className="text-[8px] uppercase font-black text-orange-500 leading-none">Totales</span>
                             </div>
                         </div>
-                        <div className="text-3xl font-black italic text-white">{maxMvps}</div>
-                    </CardContent>
-                </Card>
-            </Link>
-
-            {/* Partido más Picante */}
-            <Link href="/pulse/league">
-                <Card className="glass-card border-orange-500/20 hover:border-orange-500/50 transition-all group overflow-hidden cursor-pointer h-full bg-gradient-to-br from-card/60 to-orange-500/5">
-                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                        <Flame className="h-24 w-24 text-orange-500" />
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter mt-2">En un solo partido</p>
                     </div>
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-[10px] font-black uppercase tracking-widest text-orange-500 flex items-center gap-2">
-                            <Flame className="h-3 w-3 fill-orange-500" />
-                            Partido más picante
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="flex flex-col">
-                            <span className="text-5xl font-black italic text-white leading-none">{spiciestMatch ? spiciestMatch.teamAScore + spiciestMatch.teamBScore : 0}</span>
-                            <span className="text-[10px] uppercase font-black text-orange-500 tracking-widest">Goles Totales</span>
+                    
+                    {spiciestMatch && (
+                        <div className="space-y-3 mt-auto">
+                            <div className="bg-white/5 p-2 rounded-xl border border-white/5 flex items-center justify-between">
+                                <span className="text-[10px] font-black uppercase italic text-primary">Azul {spiciestMatch.teamAScore}</span>
+                                <span className="text-[8px] font-bold text-muted-foreground">vs</span>
+                                <span className="text-[10px] font-black uppercase italic text-accent">Rojo {spiciestMatch.teamBScore}</span>
+                            </div>
+                            <Button asChild variant="ghost" size="sm" className="w-full h-8 text-[9px] font-black uppercase border border-orange-500/20 hover:bg-orange-500/10 text-orange-500">
+                                <Link href={`/matches/${spiciestMatch.id}`}>
+                                    Ver Ficha Técnica <ChevronRight className="ml-1 h-3 w-3" />
+                                </Link>
+                            </Button>
                         </div>
-                        <div className="bg-white/5 p-2 rounded-xl border border-white/5 min-w-0">
-                            <p className="text-[10px] font-bold text-white uppercase tracking-tighter truncate">
-                                {spiciestMatch ? `Azul ${spiciestMatch.teamAScore} - ${spiciestMatch.teamBScore} Rojo` : 'Sin registros'}
-                            </p>
-                        </div>
-                    </CardContent>
-                </Card>
-            </Link>
+                    )}
+                </CardContent>
+            </Card>
 
-            {/* Mejor Sociedad */}
+            {/* Mejor Sociedad (Colíderes System) */}
             <Link href="/pulse/partnership">
                 <Card className="glass-card border-white/10 hover:border-white/20 transition-all group overflow-hidden cursor-pointer h-full">
-                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                        <Heart className="h-24 w-24 text-white" />
-                    </div>
                     <CardHeader className="pb-2">
                         <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                             <LinkIcon className="h-3 w-3" />
@@ -445,26 +443,31 @@ export default function DashboardPage() {
                 </Card>
             </Link>
 
-            {/* Los Infaltables */}
-            <Card className="glass-card border-emerald-500/20 bg-emerald-500/5 overflow-hidden h-full">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 pt-4">
-                    <CardTitle className="text-[10px] font-black uppercase tracking-widest text-emerald-500">Los Infaltables</CardTitle>
-                    <Users className="h-4 w-4 text-emerald-500" />
+            {/* Los Infaltables (Compromiso) */}
+            <Card className="glass-card border-emerald-500/20 bg-emerald-500/5 overflow-hidden h-full flex flex-col">
+                <CardHeader className="pb-2">
+                    <CardTitle className="text-[10px] font-black uppercase tracking-widest text-emerald-500 flex items-center gap-2">
+                        <Users className="h-3 w-3" /> Los Infaltables
+                    </CardTitle>
                 </CardHeader>
-                <CardContent className="px-4 pb-4 overflow-hidden">
-                    <div className="flex flex-col gap-4 min-w-0">
-                        <div className="flex flex-col">
-                            <span className="text-5xl font-black tracking-tighter text-emerald-500 italic leading-none">{attendanceRate}%</span>
-                            <span className="text-[10px] font-bold text-emerald-500/60 uppercase mt-1">Asistencia Global</span>
-                        </div>
-                        <div className="bg-white/5 p-2 rounded-xl border border-white/5 min-w-0">
-                            <p className="text-[10px] font-bold text-white uppercase truncate">
-                                {attendanceLeaders.length > 0 
-                                ? (attendanceLeaders.length <= 3 
-                                    ? attendanceLeaders.map(p => p.name.split(' ')[0]).join(', ')
-                                    : `${attendanceLeaders[0].name.split(' ')[0]} + ${attendanceLeaders.length - 1} más`)
-                                : 'Sin datos'}
-                            </p>
+                <CardContent className="space-y-4 flex-1 flex flex-col">
+                    <div className="flex flex-col py-1">
+                        <span className="text-5xl font-black tracking-tighter text-emerald-500 italic leading-none">{globalAttendanceRate}%</span>
+                        <span className="text-[10px] font-bold text-emerald-500/60 uppercase mt-1">Compromiso Global</span>
+                    </div>
+                    
+                    <div className="space-y-3 mt-auto">
+                        <p className="text-[8px] uppercase font-black text-muted-foreground/50 tracking-widest">Líderes de asistencia</p>
+                        <div className="space-y-2">
+                            {attendanceLeaders.map((p, i) => (
+                                <div key={p.playerId} className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[9px] font-black text-emerald-500/40 italic">#{i + 1}</span>
+                                        <span className="text-xs font-bold text-white/80">{p.name.split(' ')[0]}</span>
+                                    </div>
+                                    <span className="text-[10px] font-black italic text-emerald-500/80">{p.matchesPlayed} <span className="text-[8px] not-italic opacity-50 uppercase">PJ</span></span>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </CardContent>
