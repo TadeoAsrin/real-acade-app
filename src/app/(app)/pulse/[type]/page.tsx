@@ -8,7 +8,7 @@ import { collection, query, orderBy } from "firebase/firestore";
 import type { Match, Player } from "@/lib/definitions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Brain, Link as LinkIcon, Zap, Crown, Flame, Trophy, Calendar } from "lucide-react";
+import { ArrowLeft, Brain, Link as LinkIcon, Zap, Crown, Flame, Trophy, Calendar, Star, Heart } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials, cn } from "@/lib/utils";
 import Link from "next/link";
@@ -56,7 +56,7 @@ export default function PulseDetailPage() {
             <div className="mx-auto w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center">
                 <Brain className="h-10 w-10 text-primary" />
             </div>
-            <h1 className="text-4xl font-black italic uppercase tracking-tighter">Jugador Más Influyente</h1>
+            <h1 className="text-4xl font-black italic uppercase tracking-tighter">Jugadores Más Influyentes</h1>
             <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 text-xs text-primary font-bold uppercase tracking-widest inline-block">
                 Mínimo 3 Partidos Jugados
             </div>
@@ -92,6 +92,55 @@ export default function PulseDetailPage() {
             {sorted.length === 0 && (
                 <div className="text-center py-20 border-2 border-dashed rounded-3xl opacity-30">
                     <p className="font-black uppercase italic">Ningún jugador ha llegado al mínimo de 3 partidos aún.</p>
+                </div>
+            )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderMvpRanking = () => {
+    const sorted = [...playerStats]
+      .filter(p => p.totalMvp > 0)
+      .sort((a, b) => b.totalMvp - a.totalMvp || b.powerPoints - a.powerPoints)
+      .slice(0, 5);
+
+    return (
+      <div className="space-y-8 max-w-2xl mx-auto">
+        <div className="text-center space-y-4">
+            <div className="mx-auto w-20 h-20 bg-yellow-500/10 rounded-full flex items-center justify-center">
+                <Star className="h-10 w-10 text-yellow-500 fill-yellow-500" />
+            </div>
+            <h1 className="text-4xl font-black italic uppercase tracking-tighter">Rey de los MVP</h1>
+            <p className="text-muted-foreground italic">El reconocimiento máximo de los compañeros. Jugadores elegidos como el mejor del partido.</p>
+        </div>
+
+        <div className="space-y-4">
+            {sorted.map((p, i) => (
+                <Card key={p.playerId} className={cn("glass-card transition-all", i === 0 ? "border-yellow-500/50 bg-yellow-500/5 scale-105" : "border-white/5")}>
+                    <CardContent className="p-6 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <div className="flex flex-col items-center w-8">
+                                {i === 0 ? <Crown className="h-5 w-5 text-yellow-500 mb-1" /> : <span className="text-2xl font-black italic text-muted-foreground/30">{i + 1}</span>}
+                            </div>
+                            <Avatar className={cn("h-12 w-12", i === 0 && "border-2 border-yellow-500")}>
+                                <AvatarFallback className="bg-muted font-black">{getInitials(p.name)}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex flex-col">
+                                <span className="font-black text-lg">{p.name}</span>
+                                <span className="text-[10px] font-bold uppercase text-muted-foreground">{p.matchesPlayed} Partidos Jugados</span>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <span className={cn("text-3xl font-black italic", i === 0 ? "text-yellow-500" : "text-white")}>{p.totalMvp}</span>
+                            <p className="text-[8px] uppercase font-black text-muted-foreground leading-none">Premios</p>
+                        </div>
+                    </CardContent>
+                </Card>
+            ))}
+            {sorted.length === 0 && (
+                <div className="text-center py-20 border-2 border-dashed rounded-3xl opacity-30">
+                    <p className="font-black uppercase italic">Nadie ha sido elegido MVP todavía.</p>
                 </div>
             )}
         </div>
@@ -212,6 +261,7 @@ export default function PulseDetailPage() {
       {type === 'influencer' && renderInfluencer()}
       {type === 'league' && renderSpiciestMatch()}
       {type === 'partnership' && renderPartnership()}
+      {type === 'mvp' && renderMvpRanking()}
     </div>
   );
 }

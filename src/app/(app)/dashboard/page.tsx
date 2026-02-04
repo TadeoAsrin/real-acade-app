@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Medal, Loader2, Zap, Calendar, Users, Brain, Heart, Crown, Link as LinkIcon, Flame, Target, Trophy, TrendingUp } from "lucide-react";
+import { Medal, Loader2, Zap, Calendar, Users, Brain, Heart, Crown, Link as LinkIcon, Flame, Target, Trophy, TrendingUp, Star } from "lucide-react";
 import Link from "next/link";
 import { FieldView } from "@/components/dashboard/field-view";
 import { PowerRanking } from "@/components/dashboard/power-ranking";
@@ -69,6 +69,8 @@ export default function DashboardPage() {
   const influencer = topInfluencers[0];
   const influencerRunnersUp = topInfluencers.slice(1);
 
+  const topMvpPlayer = [...playerStats].sort((a, b) => b.totalMvp - a.totalMvp || b.powerPoints - a.powerPoints)[0];
+
   const totalMatches = allMatches.length;
   const attendanceLeaders = playerStats.length > 0 && totalMatches > 0
     ? (() => {
@@ -98,7 +100,7 @@ export default function DashboardPage() {
       <section className="space-y-4">
         <h2 className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground/50 px-1">Líderes de la Academia</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Pichichi Hero Card - Podio Completo */}
+          {/* Pichichi Hero Card */}
           <Card className="md:col-span-2 lg:col-span-1 glass-card card-gold bg-gradient-to-br from-card/60 to-yellow-500/10 overflow-hidden relative flex flex-col h-full">
             <div className="absolute top-0 right-0 p-6 opacity-10">
               <Medal className="h-32 w-32 text-yellow-500" />
@@ -109,7 +111,6 @@ export default function DashboardPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6 flex-1 flex flex-col">
-              {/* LÍDER (REINA) */}
               <Link href={topScorer ? `/players/${topScorer.playerId}` : "/players"} className="group">
                 <div className="flex items-center gap-4">
                   <Avatar className="h-16 w-16 border-4 border-yellow-500/30 group-hover:scale-105 transition-transform">
@@ -128,7 +129,6 @@ export default function DashboardPage() {
                 </div>
               </Link>
 
-              {/* PERSEGUIDORES (EN LA MIRA) */}
               {runnersUp.length > 0 && (
                 <div className="mt-auto pt-6 border-t border-yellow-500/10 space-y-3">
                   <p className="text-[9px] font-black uppercase tracking-[0.2em] text-yellow-500/40">En la mira</p>
@@ -154,7 +154,7 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          {/* Influencer Hero Card - Podio de Efectividad */}
+          {/* Influencer Hero Card */}
           <Card className="md:col-span-2 lg:col-span-1 glass-card border-primary/30 bg-gradient-to-br from-card/60 to-primary/10 overflow-hidden flex flex-col h-full relative group">
             <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform duration-500">
               <Brain className="h-32 w-32 text-primary" />
@@ -165,7 +165,6 @@ export default function DashboardPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6 flex-1 flex flex-col">
-              {/* LÍDER DE INFLUENCIA */}
               <Link href={influencer ? `/players/${influencer.playerId}` : "/players"} className="group/leader">
                 <div className="flex items-center gap-4">
                   <Avatar className="h-16 w-16 border-4 border-primary/30 group-hover/leader:scale-105 transition-transform">
@@ -187,7 +186,6 @@ export default function DashboardPage() {
                 </div>
               </Link>
 
-              {/* PERSEGUIDORES DE INFLUENCIA */}
               {influencerRunnersUp.length > 0 && (
                 <div className="mt-auto pt-6 border-t border-primary/10 space-y-3">
                   <p className="text-[9px] font-black uppercase tracking-[0.2em] text-primary/40">En la mira</p>
@@ -216,18 +214,16 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          {/* Power Ranking Column */}
           <div className="lg:col-span-1">
             <PowerRanking players={allPlayers} matches={allMatches} />
           </div>
         </div>
       </section>
 
-      {/* SECCIÓN 2: EL MOTOR DEL CLUB (RENDIMIENTO INDIVIDUAL Y TÁCTICO) */}
+      {/* SECCIÓN 2: EL MOTOR DEL CLUB */}
       <section className="space-y-6">
         <h2 className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground/50 px-1">Acción en la Cancha</h2>
         
-        {/* Quick Stats Grid - Top Row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Link href="/matches">
             <Card className="glass-card hover:bg-white/5 transition-all border-white/5 overflow-hidden">
@@ -281,7 +277,6 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        {/* Field Views - Full Width Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FieldView team="Azul" players={lastMatchTeamAPlayers} topScorerId={topScorer?.playerId} date={lastMatch?.date} />
           <FieldView team="Rojo" players={lastMatchTeamBPlayers} topScorerId={topScorer?.playerId} date={lastMatch?.date} />
@@ -295,28 +290,28 @@ export default function DashboardPage() {
           <h2 className="text-2xl font-black uppercase tracking-tighter italic text-white">Pulso de la Liga</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Link href="/pulse/influencer">
-                <Card className="glass-card border-primary/20 hover:border-primary/50 transition-all group overflow-hidden cursor-pointer h-full">
+            <Link href="/pulse/mvp">
+                <Card className="glass-card border-yellow-500/20 hover:border-yellow-500/50 transition-all group overflow-hidden cursor-pointer h-full">
                     <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                        <Brain className="h-24 w-24 text-primary" />
+                        <Star className="h-24 w-24 text-yellow-500" />
                     </div>
                     <CardHeader>
-                        <CardTitle className="text-xs font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                            <Zap className="h-3 w-3" />
-                            Top Factor
+                        <CardTitle className="text-xs font-black uppercase tracking-widest text-yellow-500 flex items-center gap-2">
+                            <Crown className="h-3 w-3" />
+                            Rey de los MVP
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="flex items-center gap-4">
-                            <Avatar className="h-12 w-12 border-2 border-primary/30">
-                                <AvatarFallback className="bg-primary/10 text-primary font-black">{getInitials(influencer?.name || "??")}</AvatarFallback>
+                            <Avatar className="h-12 w-12 border-2 border-yellow-500/30">
+                                <AvatarFallback className="bg-yellow-500/10 text-yellow-500 font-black">{getInitials(topMvpPlayer?.name || "??")}</AvatarFallback>
                             </Avatar>
                             <div className="flex flex-col min-w-0">
-                                <span className="text-lg font-black tracking-tight leading-none group-hover:text-primary transition-colors truncate">{influencer?.name || '-'}</span>
-                                <span className="text-[10px] uppercase font-bold text-muted-foreground">Efectividad Bruta</span>
+                                <span className="text-lg font-black tracking-tight leading-none group-hover:text-yellow-500 transition-colors truncate">{topMvpPlayer?.name || '-'}</span>
+                                <span className="text-[10px] uppercase font-bold text-muted-foreground">Premios Oficiales</span>
                             </div>
                         </div>
-                        <div className="text-3xl font-black italic text-white">{influencer?.winPercentage || 0}%</div>
+                        <div className="text-3xl font-black italic text-white">{topMvpPlayer?.totalMvp || 0}</div>
                     </CardContent>
                 </Card>
             </Link>
