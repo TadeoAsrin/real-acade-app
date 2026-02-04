@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -9,9 +10,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Medal, Loader2, Zap, Calendar, Users, Brain, Crown, Link as LinkIcon, Flame, Target, Trophy, TrendingUp, Star, Skull, Ghost, CloudRain, Frown, Droplets, Newspaper, ChevronRight } from "lucide-react";
+import { Medal, Loader2, Zap, Calendar, Users, Brain, Crown, Link as LinkIcon, Flame, Target, Trophy, TrendingUp, Star, Skull, Ghost, CloudRain, Frown, Droplets, Newspaper, ChevronRight, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { FieldView } from "@/components/dashboard/field-view";
 import { PowerRanking } from "@/components/dashboard/power-ranking";
 import { MatchNewsModal } from "@/components/dashboard/match-news-modal";
 import { useCollection, useMemoFirebase, useFirestore } from "@/firebase";
@@ -111,8 +111,6 @@ export default function DashboardPage() {
   const minGoalsPerMatch = polvoraLeaders[0]?.goalsPerMatch || 0;
 
   const totalGoals = playerStats.reduce((sum, p) => sum + p.totalGoals, 0);
-  const lastMatchTeamAPlayers = lastMatch?.teamAPlayers.map(s => allPlayers.find(p => p.id === s.playerId)).filter(Boolean) as Player[] || [];
-  const lastMatchTeamBPlayers = lastMatch?.teamBPlayers.map(s => allPlayers.find(p => p.id === s.playerId)).filter(Boolean) as Player[] || [];
 
   return (
     <div className="flex flex-col gap-8 lg:gap-12 pb-20 max-w-7xl mx-auto">
@@ -126,31 +124,74 @@ export default function DashboardPage() {
         />
       )}
 
-      {/* Quiosco / Banner de Gaceta */}
+      {/* Hero: Última Gaceta Card */}
       {lastMatch && (
-        <div className="bg-primary/10 border border-primary/20 p-2 rounded-xl flex items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-1000">
-          <div className="flex items-center gap-3 pl-2">
-            <div className="relative">
-              <Newspaper className="h-5 w-5 text-primary" />
-              <span className="absolute -top-1 -right-1 flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-              </span>
-            </div>
-            <p className="text-[10px] md:text-xs font-black uppercase tracking-widest italic">
-              <span className="text-primary mr-2">¡ÚLTIMA HORA!</span>
-              La crónica del partido ya está disponible en La Gaceta
-            </p>
+        <Card className="glass-card border-none bg-gradient-to-br from-primary/20 via-background to-card overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/5 relative group">
+          <div className="absolute inset-0 bg-dot-pattern opacity-10" />
+          <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-700">
+            <Newspaper className="h-40 w-40 text-primary" />
           </div>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => setShowGacetaManually(true)}
-            className="text-[10px] font-black uppercase hover:bg-primary/20 text-primary"
-          >
-            Leer Edición
-          </Button>
-        </div>
+          <CardContent className="p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
+            <div className="flex-1 space-y-6 text-center md:text-left">
+              <div className="flex items-center justify-center md:justify-start gap-3">
+                <Badge className="bg-primary text-white font-black uppercase italic tracking-widest animate-pulse px-3 py-1">
+                  ¡Nueva Edición!
+                </Badge>
+                <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                  {format(parseISO(lastMatch.date), "dd MMMM", { locale: es })}
+                </span>
+              </div>
+              <div className="space-y-2">
+                <h2 className="text-4xl md:text-6xl font-black italic uppercase tracking-tighter leading-[0.9] text-white">
+                  {lastMatch.aiSummary?.title || "Crónica del Último Partido"}
+                </h2>
+                <p className="text-lg text-muted-foreground font-medium italic line-clamp-2 max-w-2xl">
+                  {lastMatch.aiSummary?.subtitle || "Los detalles de la batalla por la gloria en Real Acade."}
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
+                <Button 
+                  size="lg" 
+                  onClick={() => setShowGacetaManually(true)}
+                  className="font-black uppercase italic h-14 px-8 text-lg shadow-xl shadow-primary/30 gap-2"
+                >
+                  <Newspaper className="h-5 w-5" /> Leer Gaceta
+                </Button>
+                <Button 
+                  asChild
+                  variant="outline" 
+                  size="lg"
+                  className="h-14 px-8 font-black uppercase italic border-white/10 hover:bg-white/5"
+                >
+                  <Link href={`/matches/${lastMatch.id}`}>Ver Ficha Técnica</Link>
+                </Button>
+              </div>
+            </div>
+            
+            <div className="flex flex-col items-center gap-4 min-w-[240px] bg-black/40 backdrop-blur-md p-8 rounded-[2rem] border border-white/10">
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/60">Resultado Final</span>
+              <div className="flex items-center gap-6">
+                <div className="flex flex-col items-center">
+                  <span className="text-5xl font-black text-primary italic">{lastMatch.teamAScore}</span>
+                  <span className="text-[8px] font-black uppercase text-muted-foreground">Azul</span>
+                </div>
+                <div className="h-10 w-[1px] bg-white/10 rotate-12" />
+                <div className="flex flex-col items-center">
+                  <span className="text-5xl font-black text-accent italic">{lastMatch.teamBScore}</span>
+                  <span className="text-[8px] font-black uppercase text-muted-foreground">Rojo</span>
+                </div>
+              </div>
+              <div className="pt-4 border-t border-white/5 w-full text-center">
+                <div className="flex items-center justify-center gap-2 text-[10px] font-black uppercase text-yellow-500">
+                  <Trophy className="h-3 w-3" />
+                  <span>
+                    {lastMatch.teamAScore > lastMatch.teamBScore ? "Gana Azul" : lastMatch.teamBScore > lastMatch.teamAScore ? "Gana Rojo" : "Empate Amargo"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       <section className="space-y-4">
@@ -608,7 +649,7 @@ export default function DashboardPage() {
       </section>
 
       <section className="space-y-6">
-        <h2 className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground/50 px-1 italic">Historial</h2>
+        <h2 className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground/50 px-1 italic">Historial Histórico</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Link href="/matches">
@@ -619,7 +660,7 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent className="px-4 pb-4">
                 <div className="text-4xl font-black tracking-tighter italic">{allMatches.length}</div>
-                <p className="text-[10px] font-bold text-muted-foreground/60 uppercase mt-1">Historial del club</p>
+                <p className="text-[10px] font-bold text-muted-foreground/60 uppercase mt-1">Timeline del club</p>
               </CardContent>
             </Card>
           </Link>
@@ -635,11 +676,6 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
           </Link>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FieldView team="Azul" players={lastMatchTeamAPlayers} topScorerId={topScorer?.playerId} date={lastMatch?.date} />
-          <FieldView team="Rojo" players={lastMatchTeamBPlayers} topScorerId={topScorer?.playerId} date={lastMatch?.date} />
         </div>
       </section>
     </div>

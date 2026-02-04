@@ -1,10 +1,11 @@
+
 'use client';
 
 import * as React from 'react';
 import { useParams } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Trophy, History, TrendingUp, Loader2, MapPin, Target, Star, ChevronLeft, Calendar, ChevronRight } from "lucide-react";
+import { Trophy, History, TrendingUp, Loader2, MapPin, Target, Star, ChevronLeft, Calendar, ChevronRight, Zap } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -85,8 +86,8 @@ export default function PlayerProfilePage() {
         };
     });
 
-  const StatBox = ({ label, value, icon: Icon, color = "primary" }: { label: string, value: string | number, icon: any, color?: string }) => (
-    <Card className="glass-card overflow-hidden group">
+  const StatBox = ({ label, value, icon: Icon, color = "primary", sub }: { label: string, value: string | number, icon: any, color?: string, sub?: string }) => (
+    <Card className="glass-card overflow-hidden group border-white/5 hover:border-white/10 transition-all">
       <CardContent className="p-6 relative">
         <div className={cn("absolute -right-4 -bottom-4 opacity-5 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12", `text-${color}`)}>
           <Icon className="h-24 w-24" />
@@ -95,7 +96,7 @@ export default function PlayerProfilePage() {
           <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">{label}</p>
           <div className="flex items-baseline gap-2">
             <span className={cn("text-4xl font-black italic tracking-tighter", `text-${color}`)}>{value}</span>
-            <Icon className={cn("h-4 w-4 opacity-40", `text-${color}`)} />
+            {sub && <span className="text-[10px] font-bold text-muted-foreground/40 uppercase">{sub}</span>}
           </div>
         </div>
       </CardContent>
@@ -108,39 +109,55 @@ export default function PlayerProfilePage() {
         <ChevronLeft className="h-3 w-3" /> Galería de Cracks
       </Link>
 
-      <div className="flex flex-col items-center gap-8 md:flex-row md:items-end">
-        <div className="relative">
-          <Avatar className="h-40 w-40 border-4 border-primary shadow-2xl shadow-primary/20">
-            <AvatarFallback className="text-5xl bg-primary/10 text-primary font-black">
-              {getInitials(player.name)}
-            </AvatarFallback>
-          </Avatar>
-          <Badge className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-4 py-1 font-black uppercase italic tracking-tighter bg-primary shadow-lg">
-            {playerStats.powerPoints} PTS
-          </Badge>
-        </div>
-        <div className="text-center md:text-left space-y-4">
-          <div className="space-y-1">
-            <h1 className="text-5xl font-black italic uppercase tracking-tighter leading-none">{player.name}</h1>
-            <div className="flex items-center justify-center md:justify-start gap-3">
-              {player.position && (
-                  <div className="flex items-center gap-1.5 text-primary bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
-                      <MapPin className="h-3 w-3" />
-                      <span className="text-[10px] font-black uppercase tracking-widest">{player.position}</span>
-                  </div>
-              )}
-              <Badge variant="outline" className="px-3 py-1 uppercase tracking-widest text-[9px] font-black border-white/10">
-                  ID: {id.slice(0, 8)}
-              </Badge>
+      <div className="flex flex-col items-center gap-8 md:flex-row md:items-end justify-between">
+        <div className="flex flex-col items-center md:items-start gap-6 md:flex-row md:items-end">
+          <div className="relative">
+            <Avatar className="h-40 w-40 border-4 border-primary shadow-2xl shadow-primary/20">
+              <AvatarFallback className="text-5xl bg-primary/10 text-primary font-black">
+                {getInitials(player.name)}
+              </AvatarFallback>
+            </Avatar>
+            <Badge className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-4 py-1 font-black uppercase italic tracking-tighter bg-primary shadow-lg ring-4 ring-background">
+              {playerStats.powerPoints} PTS
+            </Badge>
+          </div>
+          <div className="text-center md:text-left space-y-4">
+            <div className="space-y-1">
+              <h1 className="text-5xl font-black italic uppercase tracking-tighter leading-none">{player.name}</h1>
+              <div className="flex items-center justify-center md:justify-start gap-3">
+                {player.position && (
+                    <div className="flex items-center gap-1.5 text-primary bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
+                        <MapPin className="h-3 w-3" />
+                        <span className="text-[10px] font-black uppercase tracking-widest">{player.position}</span>
+                    </div>
+                )}
+                <Badge variant="outline" className="px-3 py-1 uppercase tracking-widest text-[9px] font-black border-white/10">
+                    MODO COMPETITIVO
+                </Badge>
+              </div>
             </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-center md:items-end gap-2">
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/40">Estado de Forma</p>
+          <div className="flex items-center gap-1.5 bg-white/5 p-2 rounded-2xl border border-white/5">
+            {playerStats.form.map((res, i) => (
+              <div key={i} className={cn(
+                "h-8 w-8 rounded-lg flex items-center justify-center text-[10px] font-black text-white transition-all hover:scale-110",
+                res === 'W' ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]' : res === 'D' ? 'bg-orange-400' : 'bg-red-500 opacity-40'
+              )}>
+                {res}
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
       <div className="grid gap-6 grid-cols-2 lg:grid-cols-4">
-        <StatBox label="Partidos" value={playerStats.matchesPlayed} icon={History} color="primary" />
-        <StatBox label="Goles" value={playerStats.totalGoals} icon={Target} color="accent" />
-        <StatBox label="MVP" value={playerStats.totalMvp} icon={Star} color="yellow-500" />
+        <StatBox label="Partidos" value={playerStats.matchesPlayed} icon={History} color="primary" sub="PJ" />
+        <StatBox label="Goles" value={playerStats.totalGoals} icon={Target} color="accent" sub="GF" />
+        <StatBox label="Premios MVP" value={playerStats.totalMvp} icon={Star} color="yellow-500" sub="MVP" />
         <StatBox label="Efectividad" value={`${playerStats.winPercentage}%`} icon={TrendingUp} color="emerald-500" />
       </div>
 
@@ -148,63 +165,65 @@ export default function PlayerProfilePage() {
         <div className="lg:col-span-2 space-y-8">
           <PlayerPerformanceChart matchHistory={playerMatchHistory} />
           
-          <Card className="glass-card">
+          <Card className="glass-card border-white/5">
             <CardHeader>
               <CardTitle className="text-xl font-black uppercase italic tracking-tighter">Historial de Combates</CardTitle>
               <CardDescription>Desempeño cronológico en la liga.</CardDescription>
             </CardHeader>
             <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/20 border-white/5">
-                    <TableHead className="pl-6 text-[10px] font-black uppercase">Fecha</TableHead>
-                    <TableHead className="text-center text-[10px] font-black uppercase">Equipo</TableHead>
-                    <TableHead className="text-center text-[10px] font-black uppercase">Resultado</TableHead>
-                    <TableHead className="text-center text-[10px] font-black uppercase">Goles</TableHead>
-                    <TableHead></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {playerMatchHistory.map((match) => (
-                    <TableRow key={match.matchId} className="border-white/5 hover:bg-white/5 transition-colors">
-                      <TableCell className="pl-6 font-bold text-sm">
-                        {format(parseISO(match.date), "dd MMM yyyy", { locale: es })}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Badge variant="outline" className={cn(
-                          "font-black text-[9px] uppercase",
-                          match.team === 'Azul' ? 'border-primary text-primary bg-primary/5' : 'border-accent text-accent bg-accent/5'
-                        )}>
-                            {match.team}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <div className={cn(
-                          "h-6 w-6 rounded-full mx-auto flex items-center justify-center text-[10px] font-black text-white",
-                          match.result === 'W' ? 'bg-emerald-500' : match.result === 'D' ? 'bg-orange-400' : 'bg-red-500'
-                        )}>
-                          {match.result}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-center font-black italic text-lg">{match.goals}</TableCell>
-                      <TableCell className="text-right pr-6">
-                        <Button variant="ghost" size="sm" asChild className="h-8 w-8 p-0 hover:text-primary">
-                          <Link href={`/matches/${match.matchId}`}><ChevronRight className="h-4 w-4" /></Link>
-                        </Button>
-                      </TableCell>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/20 border-white/5">
+                      <TableHead className="pl-6 text-[10px] font-black uppercase">Fecha</TableHead>
+                      <TableHead className="text-center text-[10px] font-black uppercase">Equipo</TableHead>
+                      <TableHead className="text-center text-[10px] font-black uppercase">Resultado</TableHead>
+                      <TableHead className="text-center text-[10px] font-black uppercase">Goles</TableHead>
+                      <TableHead></TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {playerMatchHistory.map((match) => (
+                      <TableRow key={match.matchId} className="border-white/5 hover:bg-white/5 transition-colors group">
+                        <TableCell className="pl-6 font-bold text-sm">
+                          {format(parseISO(match.date), "dd MMM yyyy", { locale: es })}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Badge variant="outline" className={cn(
+                            "font-black text-[9px] uppercase",
+                            match.team === 'Azul' ? 'border-primary text-primary bg-primary/5' : 'border-accent text-accent bg-accent/5'
+                          )}>
+                              {match.team}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <div className={cn(
+                            "h-6 w-6 rounded-full mx-auto flex items-center justify-center text-[10px] font-black text-white",
+                            match.result === 'W' ? 'bg-emerald-500' : match.result === 'D' ? 'bg-orange-400' : 'bg-red-500'
+                          )}>
+                            {match.result}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-center font-black italic text-lg">{match.goals}</TableCell>
+                        <TableCell className="text-right pr-6">
+                          <Button variant="ghost" size="sm" asChild className="h-8 w-8 p-0 group-hover:text-primary transition-colors">
+                            <Link href={`/matches/${match.matchId}`}><ChevronRight className="h-4 w-4" /></Link>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         </div>
 
         <div className="space-y-8">
-          <Card className="glass-card border-primary/20 overflow-hidden">
-            <CardHeader className="bg-primary/5 pb-4">
+          <Card className="glass-card border-primary/20 overflow-hidden bg-primary/5">
+            <CardHeader className="bg-primary/10 pb-4">
               <CardTitle className="text-xs font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                <Trophy className="h-3 w-3" /> Distribución de Puntos
+                <Trophy className="h-3 w-3" /> Distribución de Power
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6 space-y-4">
@@ -224,24 +243,32 @@ export default function PlayerProfilePage() {
                 <span className="text-muted-foreground font-bold uppercase tracking-tighter">Por MVP / Goles VIP</span>
                 <span className="font-black text-yellow-500">+{playerStats.totalMvp * 15 + playerStats.totalBestGoals * 5}</span>
               </div>
-              <div className="pt-4 border-t border-white/5 flex items-center justify-between">
-                <span className="font-black uppercase tracking-widest text-white">Total Power</span>
-                <span className="text-2xl font-black italic text-primary">{playerStats.powerPoints}</span>
+              <div className="pt-4 border-t border-white/10 flex items-center justify-between">
+                <span className="font-black uppercase tracking-widest text-white">Total Acumulado</span>
+                <div className="flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-primary fill-primary" />
+                  <span className="text-3xl font-black italic text-primary">{playerStats.powerPoints}</span>
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="glass-card bg-gradient-to-br from-card/60 to-primary/5">
-            <CardHeader>
+          <Card className="glass-card border-white/5 overflow-hidden">
+            <CardHeader className="pb-2">
               <CardTitle className="text-xs font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                <Calendar className="h-3 w-3" /> Fidelidad
+                <Calendar className="h-3 w-3" /> Fidelidad al Club
               </CardTitle>
             </CardHeader>
-            <CardContent className="text-center py-6">
-              <span className="text-6xl font-black italic tracking-tighter text-white">
-                {allMatches.length > 0 ? Math.round((playerStats.matchesPlayed / allMatches.length) * 100) : 0}%
-              </span>
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mt-2">Asistencia Perfecta</p>
+            <CardContent className="text-center py-8">
+              <div className="relative inline-flex">
+                <span className="text-7xl font-black italic tracking-tighter text-white">
+                  {allMatches.length > 0 ? Math.round((playerStats.matchesPlayed / allMatches.length) * 100) : 0}%
+                </span>
+                <div className="absolute -top-4 -right-4 h-8 w-8 bg-primary rounded-full flex items-center justify-center animate-bounce">
+                  <Star className="h-4 w-4 text-white fill-white" />
+                </div>
+              </div>
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mt-2">Compromiso Total</p>
             </CardContent>
           </Card>
         </div>

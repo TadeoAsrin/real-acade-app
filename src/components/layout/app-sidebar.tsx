@@ -12,7 +12,7 @@ import {
   SidebarContent,
   useSidebar,
 } from "../ui/sidebar";
-import { Goal, BarChart3, Users, LogOut, Trophy, Dices, ArrowLeftRight, LogIn, User as UserIcon, ShieldCheck, Swords } from "lucide-react";
+import { Goal, BarChart3, Users, LogOut, Trophy, Dices, ArrowLeftRight, LogIn, User as UserIcon, ShieldCheck, Swords, Calendar as CalendarIcon } from "lucide-react";
 import { Fut7StatsLogo } from "@/components/icons";
 import Link from "next/link";
 import { useAuth, useUser, useFirestore, useMemoFirebase, useDoc, useCollection } from "@/firebase";
@@ -35,8 +35,13 @@ const menuItems = [
     icon: Trophy,
   },
   {
+    href: "/calendar",
+    label: "Calendario",
+    icon: CalendarIcon,
+  },
+  {
     href: "/matches",
-    label: "Partidos",
+    label: "Timeline",
     icon: Goal,
   },
   {
@@ -116,12 +121,12 @@ export function AppSidebar() {
             <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton
                 asChild
-                isActive={pathname.startsWith(item.href)}
+                isActive={pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))}
                 tooltip={item.label}
                 className="py-6 transition-all duration-200"
                 >
                 <Link href={item.href} onClick={handleNavClick}>
-                    <item.icon className={cn("transition-colors", pathname.startsWith(item.href) ? "text-primary" : "text-muted-foreground")} />
+                    <item.icon className={cn("transition-colors", (pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))) ? "text-primary" : "text-muted-foreground")} />
                     <span className="font-semibold">{item.label}</span>
                 </Link>
                 </SidebarMenuButton>
