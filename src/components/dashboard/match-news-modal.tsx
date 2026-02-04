@@ -15,6 +15,8 @@ import { format } from 'date-fns';
 import { Button } from '../ui/button';
 import type { Match, Player } from '@/lib/definitions';
 import { cn } from '@/lib/utils';
+import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
+import { doc } from 'firebase/firestore';
 
 interface MatchNewsModalProps {
   match: Match;
@@ -28,6 +30,17 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
   const [summary, setSummary] = React.useState<MatchSummaryOutput | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  
+  const { user } = useUser();
+  const firestore = useFirestore();
+
+  const adminRoleRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'roles_admin', user.uid);
+  }, [firestore, user]);
+
+  const { data: adminRole } = useDoc<{isAdmin: boolean}>(adminRoleRef);
+  const isAdmin = !!adminRole?.isAdmin;
 
   const fetchSummary = React.useCallback(async () => {
     if (!match) return;
@@ -113,7 +126,7 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-w-4xl p-0 overflow-hidden border-none bg-[#fcfcf9] text-[#1a1a1a] font-serif shadow-2xl flex flex-col h-[90vh] sm:h-auto sm:max-h-[85vh]">
+      <DialogContent className="max-w-4xl p-0 overflow-hidden border-none bg-[#fcfcf9] text-[#1a1a1a] font-serif shadow-2xl flex flex-col h-[90vh] sm:h-auto sm:max-h-[85vh] left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
         <DialogHeader className="sr-only">
           <DialogTitle>La Gaceta de Real Acade</DialogTitle>
           <DialogDescription>Crónica oficial del encuentro</DialogDescription>
@@ -235,16 +248,21 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
         </div>
 
         <div className="shrink-0 p-4 sm:p-6 bg-black/5 border-t border-black/10 flex flex-col sm:flex-row gap-3">
+          {isAdmin && (
+            <Button 
+              onClick={shareToWhatsApp}
+              className="flex-1 font-sans font-black uppercase tracking-widest text-[10px] bg-black text-white hover:bg-black/90 rounded-none h-12"
+            >
+              Enviar a WhatsApp
+            </Button>
+          )}
           <Button 
-            onClick={shareToWhatsApp}
-            className="flex-1 font-sans font-black uppercase tracking-widest text-[10px] bg-black text-white hover:bg-black/90 rounded-none h-12"
-          >
-            Enviar a WhatsApp
-          </Button>
-          <Button 
-            variant="ghost" 
+            variant={isAdmin ? "ghost" : "default"}
             onClick={handleClose} 
-            className="font-sans font-black uppercase tracking-widest text-[10px] hover:bg-black/5 rounded-none h-12 px-8 text-black"
+            className={cn(
+              "font-sans font-black uppercase tracking-widest text-[10px] rounded-none h-12 px-8",
+              isAdmin ? "hover:bg-black/5 text-black" : "bg-black text-white hover:bg-black/90 flex-1"
+            )}
           >
             Cerrar Edición
           </Button>
