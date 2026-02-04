@@ -51,7 +51,6 @@ export default function DashboardPage() {
   const playerStats = calculateAggregatedStats(allPlayers, allMatches);
   const chemistryRankings = getChemistryRankings(allPlayers, allMatches, 2);
   
-  // Partnership logic for ties
   const topWinRate = chemistryRankings[0]?.winRate || 0;
   const topPairs = chemistryRankings.filter(p => p.winRate === topWinRate).slice(0, 4);
   const hasMultipleLeaders = topPairs.length > 1;
@@ -61,7 +60,6 @@ export default function DashboardPage() {
   const spiciestMatch = getSpiciestMatch(allMatches);
   const lastMatch = allMatches[0];
 
-  // Gloria Metrics
   const sortedByGoals = [...playerStats].sort((a, b) => b.totalGoals - a.totalGoals || b.goalsPerMatch - a.goalsPerMatch);
   const sortedByInfluence = [...playerStats]
     .filter(p => p.matchesPlayed >= 3)
@@ -78,7 +76,6 @@ export default function DashboardPage() {
   const influencer = sortedByInfluence[0];
   const influencerRunnersUp = sortedByInfluence.slice(1, 3);
 
-  // Pulse Metrics - Shared MVP logic
   const mvpLeaders = [...playerStats].sort((a, b) => b.totalMvp - a.totalMvp || b.powerPoints - a.powerPoints).slice(0, 3);
 
   const totalMatches = allMatches.length;
@@ -86,14 +83,12 @@ export default function DashboardPage() {
     .sort((a, b) => b.matchesPlayed - a.matchesPlayed || a.name.localeCompare(b.name))
     .slice(0, 3);
 
-  // New metrics for Los Infaltables
   const maxPlayerAttendance = totalMatches > 0 ? Math.max(...playerStats.map(p => p.matchesPlayed), 0) : 0;
   const maxPlayerAttendanceRate = totalMatches > 0 ? Math.round((maxPlayerAttendance / totalMatches) * 100) : 0;
   const avgPlayersPerMatch = totalMatches > 0 
     ? (playerStats.reduce((sum, p) => sum + p.matchesPlayed, 0) / totalMatches).toFixed(1) 
     : 0;
 
-  // Nos Caemos a Pedazos - Ranking logic (Bottom 3)
   const imanLeaders = [...playerStats]
     .filter(p => p.losses > 0)
     .sort((a, b) => b.losses - a.losses || b.matchesPlayed - a.matchesPlayed)
@@ -115,7 +110,6 @@ export default function DashboardPage() {
   
   const minGoalsPerMatch = polvoraLeaders[0]?.goalsPerMatch || 0;
 
-  // Action Metrics
   const totalGoals = playerStats.reduce((sum, p) => sum + p.totalGoals, 0);
   const lastMatchTeamAPlayers = lastMatch?.teamAPlayers.map(s => allPlayers.find(p => p.id === s.playerId)).filter(Boolean) as Player[] || [];
   const lastMatchTeamBPlayers = lastMatch?.teamBPlayers.map(s => allPlayers.find(p => p.id === s.playerId)).filter(Boolean) as Player[] || [];
@@ -123,7 +117,6 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-8 lg:gap-12 pb-20 max-w-7xl mx-auto">
       
-      {/* GACETA MODAL */}
       {lastMatch && (
         <MatchNewsModal 
           match={lastMatch} 
@@ -133,7 +126,6 @@ export default function DashboardPage() {
         />
       )}
 
-      {/* BANNER ÚLTIMA HORA */}
       {lastMatch && (
         <div className="bg-primary/10 border border-primary/20 p-2 rounded-xl flex items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-1000">
           <div className="flex items-center gap-3 pl-2">
@@ -160,7 +152,6 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* SECCIÓN 1: EL OLIMPO (GLORIA INDIVIDUAL) */}
       <section className="space-y-4">
         <h2 className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground/50 px-1 italic">Nombres Propios de la Academia</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -280,7 +271,6 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* SECCIÓN 2: PULSO DE LA LIGA (BENTO PRO) */}
       <section className="space-y-4">
         <div className="flex items-center gap-3 px-1">
           <Zap className="h-5 w-5 text-primary fill-primary" />
@@ -288,7 +278,6 @@ export default function DashboardPage() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             
-            {/* Reyes de los MVP (Mini Podio) */}
             <Link href="/pulse/mvp">
                 <Card className="glass-card border-yellow-500/20 hover:border-yellow-500/50 transition-all group overflow-hidden cursor-pointer h-full flex flex-col">
                     <CardHeader className="pb-4">
@@ -325,7 +314,6 @@ export default function DashboardPage() {
                 </Card>
             </Link>
 
-            {/* Récord Histórico (Partido más Picante) */}
             <Link href="/pulse/league">
                 <Card className="glass-card border-orange-500/20 bg-gradient-to-br from-card/60 to-orange-500/5 hover:border-orange-500/50 transition-all group overflow-hidden cursor-pointer h-full flex flex-col">
                     <CardHeader className="pb-2">
@@ -363,7 +351,6 @@ export default function DashboardPage() {
                 </Card>
             </Link>
 
-            {/* Mejor Sociedad (Colíderes System) */}
             <Link href="/pulse/partnership">
                 <Card className="glass-card border-white/10 hover:border-white/30 transition-all group overflow-hidden cursor-pointer h-full">
                     <CardHeader className="pb-2">
@@ -455,7 +442,6 @@ export default function DashboardPage() {
                 </Card>
             </Link>
 
-            {/* Los Infaltables (Compromiso) */}
             <Link href="/pulse/attendance">
                 <Card className="glass-card border-emerald-500/20 bg-emerald-500/5 hover:border-emerald-500/50 transition-all group overflow-hidden cursor-pointer h-full flex flex-col">
                     <CardHeader className="pb-2">
@@ -492,14 +478,12 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* SECCIÓN 3: NOS CAEMOS A PEDAZOS (SALA DE HUMILDAD) */}
       <section className="space-y-4">
         <div className="flex items-center gap-3 px-1">
           <Frown className="h-5 w-5 text-muted-foreground" />
           <h2 className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground/50 italic">Nos Caemos a Pedazos</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* El Imán de Derrotas */}
             <Link href="/pulse/iman-derrotas">
                 <Card className="glass-card border-red-500/10 bg-red-500/5 relative overflow-hidden group hover:border-red-500/30 transition-all cursor-pointer h-full flex flex-col">
                     <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
@@ -540,7 +524,6 @@ export default function DashboardPage() {
                 </Card>
             </Link>
 
-            {/* Factor de Riesgo */}
             <Link href="/pulse/riesgo">
                 <Card className="glass-card border-zinc-500/10 bg-zinc-500/5 relative overflow-hidden group hover:border-zinc-500/30 transition-all cursor-pointer h-full flex flex-col">
                     <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
@@ -581,7 +564,6 @@ export default function DashboardPage() {
                 </Card>
             </Link>
 
-            {/* Pólvora Mojada */}
             <Link href="/pulse/polvora">
                 <Card className="glass-card border-blue-500/10 bg-blue-500/5 relative overflow-hidden group hover:border-blue-500/30 transition-all cursor-pointer h-full flex flex-col">
                     <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
@@ -624,7 +606,6 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* SECCIÓN 4: HISTORIAL (ACCIÓN Y TÁCTICA) */}
       <section className="space-y-6">
         <h2 className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground/50 px-1 italic">Historial</h2>
         

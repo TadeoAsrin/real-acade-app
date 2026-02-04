@@ -9,27 +9,18 @@ service cloud.firestore {
      * This ruleset implements a hybrid security model for a soccer league management application. 
      * It prioritizes public visibility for league statistics (Matches, Goals, Fouls) while 
      * enforcing strict identity-based authorization for player profiles and performance ratings.
-     * 
-     * Data Structure:
-     * - /matches/{matchId}: Root collection for game data.
-     * - /players/{playerId}: Root collection for league participants.
-     * - /roles_admin/{uid}: Stores admin status.
-     * - /matches/.../goals, /matches/.../fouls, /matches/.../matchPlayerPerformances: Sub-collections nested under matches.
      */
 
     // --- Helper Functions ---
 
-    /** @description Checks if the user is authenticated. */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /** @description Checks if the user's UID matches the provided ID. */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    /** @description Checks ownership for existing documents. */
     function isExistingOwner(userId) {
       return resource != null && isOwner(userId);
     }
@@ -51,9 +42,6 @@ service cloud.firestore {
       allow get, list: if true;
       allow create, update, delete: if false;
 
-      /**
-       * @description Rules for Votes within a match.
-       */
       match /votes/{userId} {
         allow get, list: if true;
         allow create, update: if isOwner(userId);
