@@ -117,10 +117,11 @@ export const getTopChemistry = (players: Player[], matches: Match[], minMatches 
   
   matches.forEach(match => {
     // Alianzas Equipo Azul
-    for (let i = 0; i < match.teamAPlayers.length; i++) {
-      for (let j = i + 1; j < match.teamAPlayers.length; j++) {
-        const p1 = match.teamAPlayers[i].playerId;
-        const p2 = match.teamAPlayers[j].playerId;
+    const teamAIds = match.teamAPlayers.map(p => p.playerId).filter(Boolean);
+    for (let i = 0; i < teamAIds.length; i++) {
+      for (let j = i + 1; j < teamAIds.length; j++) {
+        const p1 = teamAIds[i];
+        const p2 = teamAIds[j];
         const key = [p1, p2].sort().join('-');
         if (!statsMap[key]) statsMap[key] = { matches: 0, wins: 0 };
         statsMap[key].matches++;
@@ -128,10 +129,11 @@ export const getTopChemistry = (players: Player[], matches: Match[], minMatches 
       }
     }
     // Alianzas Equipo Rojo
-    for (let i = 0; i < match.teamBPlayers.length; i++) {
-      for (let j = i + 1; j < match.teamBPlayers.length; j++) {
-        const p1 = match.teamBPlayers[i].playerId;
-        const p2 = match.teamBPlayers[j].playerId;
+    const teamBIds = match.teamBPlayers.map(p => p.playerId).filter(Boolean);
+    for (let i = 0; i < teamBIds.length; i++) {
+      for (let j = i + 1; j < teamBIds.length; j++) {
+        const p1 = teamBIds[i];
+        const p2 = teamBIds[j];
         const key = [p1, p2].sort().join('-');
         if (!statsMap[key]) statsMap[key] = { matches: 0, wins: 0 };
         statsMap[key].matches++;
@@ -140,16 +142,18 @@ export const getTopChemistry = (players: Player[], matches: Match[], minMatches 
     }
   });
 
-  const validPairs = Object.entries(statsMap)
+  let validPairs = Object.entries(statsMap)
     .filter(([_, stats]) => stats.matches >= minMatches)
     .sort((a, b) => {
-      // Priorizar primero por número de partidos juntos (frecuencia)
       if (b[1].matches !== a[1].matches) return b[1].matches - a[1].matches;
-      // Luego por victorias totales
       if (b[1].wins !== a[1].wins) return b[1].wins - a[1].wins;
-      // Finalmente por win rate
       return (b[1].wins / b[1].matches) - (a[1].wins / a[1].matches);
     });
+
+  // Fallback: Si no hay parejas con 2 partidos, intentamos con 1 si minMatches era 2
+  if (validPairs.length === 0 && minMatches > 1) {
+    return getTopChemistry(players, matches, minMatches - 1);
+  }
 
   if (validPairs.length === 0) return null;
 
