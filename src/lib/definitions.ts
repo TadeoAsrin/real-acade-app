@@ -17,6 +17,12 @@ export type PlayerStats = {
   hasBestGoal?: boolean;
 };
 
+export type MatchAiSummary = {
+  title: string;
+  subtitle: string;
+  summary: string;
+};
+
 export type Match = {
   id: string;
   date: string;
@@ -26,6 +32,7 @@ export type Match = {
   teamBPlayers: PlayerStats[];
   comment?: string;
   photos?: string[];
+  aiSummary?: MatchAiSummary;
 };
 
 export type AggregatedPlayerStats = {

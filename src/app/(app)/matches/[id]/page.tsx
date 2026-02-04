@@ -217,7 +217,7 @@ export default function MatchDetailPage() {
   const mvpStat = allPlayerStats.find(s => s.isMvp);
   const bestGoalStat = allPlayerStats.find(s => s.hasBestGoal);
 
-  const matchSummaryData = {
+  const matchSummaryInput = {
     date: match.date,
     teamAScore: match.teamAScore,
     teamBScore: match.teamBScore,
@@ -315,7 +315,7 @@ export default function MatchDetailPage() {
         </div>
 
         <div className="lg:col-span-4 space-y-8">
-            <MatchAiSummary matchData={matchSummaryData} />
+            <MatchAiSummary matchId={id} matchData={matchSummaryInput} />
             <BestGoalVote matchId={id} scorers={scorers} />
         </div>
       </div>

@@ -32,6 +32,14 @@
           "type": "array",
           "items": { "type": "string" },
           "description": "URLs of photos taken during the match."
+        },
+        "aiSummary": {
+          "type": "object",
+          "properties": {
+            "title": { "type": "string" },
+            "subtitle": { "type": "string" },
+            "summary": { "type": "string" }
+          }
         }
       },
       "required": [

@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -31,7 +32,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn, getInitials } from "@/lib/utils";
-import { CalendarIcon, Loader2, Award, Star, Camera, MessageSquare, Plus, Trash2 } from "lucide-react";
+import { CalendarIcon, Loader2, Award, Star, Camera, MessageSquare, Plus, Trash2, Sparkles } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -49,6 +50,7 @@ import { collection, doc, serverTimestamp, query, orderBy } from "firebase/fires
 import type { Player } from "@/lib/definitions";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { generateMatchSummary } from "@/ai/flows/match-summary-flow";
 
 const playerStatsSchema = z.object({
   goals: z.coerce.number().min(0).default(0),
@@ -138,43 +140,67 @@ export default function NewMatchPage() {
     if (!firestore) return;
     setIsLoading(true);
     
-    const matchRef = doc(collection(firestore, 'matches'));
-    const teamAPlayers = data.teamAPlayerIds.map(id => ({
-        playerId: id,
-        goals: data.teamAStats[id]?.goals || 0,
-        isCaptain: data.teamACaptainId === id,
-        isMvp: data.mvpPlayerId === id,
-        hasBestGoal: data.bestGoalPlayerId === id
-    }));
-    const teamBPlayers = data.teamBPlayerIds.map(id => ({
-        playerId: id,
-        goals: data.teamBStats[id]?.goals || 0,
-        isCaptain: data.teamBCaptainId === id,
-        isMvp: data.mvpPlayerId === id,
-        hasBestGoal: data.bestGoalPlayerId === id
-    }));
+    try {
+      const teamAPlayers = data.teamAPlayerIds.map(id => ({
+          playerId: id,
+          goals: data.teamAStats[id]?.goals || 0,
+          isCaptain: data.teamACaptainId === id,
+          isMvp: data.mvpPlayerId === id,
+          hasBestGoal: data.bestGoalPlayerId === id
+      }));
+      const teamBPlayers = data.teamBPlayerIds.map(id => ({
+          playerId: id,
+          goals: data.teamBStats[id]?.goals || 0,
+          isCaptain: data.teamBCaptainId === id,
+          isMvp: data.mvpPlayerId === id,
+          hasBestGoal: data.bestGoalPlayerId === id
+      }));
 
-    const teamAScore = teamAPlayers.reduce((sum, p) => sum + p.goals, 0);
-    const teamBScore = teamBPlayers.reduce((sum, p) => sum + p.goals, 0);
+      const teamAScore = teamAPlayers.reduce((sum, p) => sum + p.goals, 0);
+      const teamBScore = teamBPlayers.reduce((sum, p) => sum + p.goals, 0);
 
-    const matchData = {
+      // Generar el resumen de IA antes de guardar
+      let aiSummary;
+      const aiInput = {
         date: data.date.toISOString(),
         teamAScore,
         teamBScore,
-        teamAPlayers,
-        teamBPlayers,
-        comment: data.comment,
-        photos: data.photos,
-        createdAt: serverTimestamp()
-    };
+        teamAPlayers: teamAPlayers.map(s => ({ name: players.find(p => p.id === s.playerId)?.name || '?', goals: s.goals })),
+        teamBPlayers: teamBPlayers.map(s => ({ name: players.find(p => p.id === s.playerId)?.name || '?', goals: s.goals })),
+        mvpName: players.find(p => p.id === data.mvpPlayerId)?.name,
+        bestGoalName: players.find(p => p.id === data.bestGoalPlayerId)?.name,
+      };
 
-    setDocumentNonBlocking(matchRef, matchData, {});
+      const aiResult = await generateMatchSummary(aiInput);
+      if (aiResult && !('error' in aiResult)) {
+        aiSummary = aiResult;
+      }
 
-    toast({
-      title: "Partido Guardado",
-      description: "Las estadísticas y la crónica se han guardado correctamente.",
-    });
-    router.push("/matches");
+      const matchRef = doc(collection(firestore, 'matches'));
+      const matchData = {
+          date: data.date.toISOString(),
+          teamAScore,
+          teamBScore,
+          teamAPlayers,
+          teamBPlayers,
+          comment: data.comment,
+          photos: data.photos,
+          aiSummary: aiSummary || null,
+          createdAt: serverTimestamp()
+      };
+
+      setDocumentNonBlocking(matchRef, matchData, {});
+
+      toast({
+        title: "Partido Guardado",
+        description: "Las estadísticas y la crónica se han guardado correctamente.",
+      });
+      router.push("/matches");
+    } catch (err) {
+      toast({ variant: "destructive", title: "Error", description: "No se pudo guardar el partido." });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   const addPhoto = () => {
@@ -548,7 +574,10 @@ export default function NewMatchPage() {
                 "Finalizar y Publicar"
               )}
             </Button>
-            <p className="text-center text-[10px] uppercase font-black tracking-widest text-muted-foreground/40 italic">Certificado por Real Acade League</p>
+            <div className="flex items-center justify-center gap-2 p-3 bg-primary/5 rounded-lg border border-primary/10">
+              <Sparkles className="h-4 w-4 text-primary animate-pulse" />
+              <p className="text-[10px] uppercase font-black tracking-widest text-primary/60 italic">La IA generará la crónica automáticamente</p>
+            </div>
           </div>
         </form>
       </Form>

@@ -32,7 +32,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn, getInitials } from "@/lib/utils";
-import { CalendarIcon, Loader2, Award, Star, ArrowLeft, Camera, Plus, Trash2, MessageSquare } from "lucide-react";
+import { CalendarIcon, Loader2, Award, Star, ArrowLeft, Camera, Plus, Trash2, MessageSquare, Sparkles } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
@@ -50,6 +50,7 @@ import { collection, doc, query, orderBy } from "firebase/firestore";
 import type { Player, Match } from "@/lib/definitions";
 import Link from "next/link";
 import { Textarea } from "@/components/ui/textarea";
+import { generateMatchSummary } from "@/ai/flows/match-summary-flow";
 
 const playerStatsSchema = z.object({
   goals: z.coerce.number().min(0).default(0),
@@ -75,6 +76,7 @@ const formSchema = z.object({
   bestGoalPlayerId: z.string().optional(),
   comment: z.string().optional(),
   photos: z.array(z.string()).max(5),
+  aiSummary: z.any().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -86,6 +88,7 @@ export default function EditMatchPage() {
   const router = useRouter();
   const firestore = useFirestore();
   const [isSaving, setIsSaving] = React.useState(false);
+  const [isRegeneratingAi, setIsRegeneratingAi] = React.useState(false);
   const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
   const [photoUrl, setPhotoUrl] = React.useState("");
 
@@ -116,6 +119,7 @@ export default function EditMatchPage() {
       bestGoalPlayerId: "",
       comment: "",
       photos: [],
+      aiSummary: null,
     },
   });
 
@@ -143,6 +147,7 @@ export default function EditMatchPage() {
         bestGoalPlayerId: match.teamAPlayers.find(p => p.hasBestGoal)?.playerId || match.teamBPlayers.find(p => p.hasBestGoal)?.playerId || "",
         comment: match.comment || "",
         photos: match.photos || [],
+        aiSummary: match.aiSummary || null,
       });
     }
   }, [match, form]);
@@ -153,6 +158,7 @@ export default function EditMatchPage() {
   const watchedTeamAStats = useWatch({ control, name: "teamAStats" }) || {};
   const watchedTeamBStats = useWatch({ control, name: "teamBStats" }) || {};
   const watchedPhotos = useWatch({ control, name: "photos" }) || [];
+  const watchedAiSummary = useWatch({ control, name: "aiSummary" }) || null;
 
   const allSelectedPlayerIds = React.useMemo(() => 
     [...watchedTeamAPlayerIds, ...watchedTeamBPlayerIds], 
@@ -169,6 +175,45 @@ export default function EditMatchPage() {
     });
     return players.filter(p => scorerIds.has(p.id));
   }, [watchedTeamAStats, watchedTeamBStats, watchedTeamAPlayerIds, watchedTeamBPlayerIds, players]);
+
+  const handleRegenerateAi = async () => {
+    setIsRegeneratingAi(true);
+    try {
+      const teamAPlayers = watchedTeamAPlayerIds.map(id => ({
+        name: players.find(p => p.id === id)?.name || '?',
+        goals: watchedTeamAStats[id]?.goals || 0
+      }));
+      const teamBPlayers = watchedTeamBPlayerIds.map(id => ({
+        name: players.find(p => p.id === id)?.name || '?',
+        goals: watchedTeamBStats[id]?.goals || 0
+      }));
+
+      const teamAScore = teamAPlayers.reduce((sum, p) => sum + p.goals, 0);
+      const teamBScore = teamBPlayers.reduce((sum, p) => sum + p.goals, 0);
+
+      const aiInput = {
+        date: form.getValues('date').toISOString(),
+        teamAScore,
+        teamBScore,
+        teamAPlayers,
+        teamBPlayers,
+        mvpName: players.find(p => p.id === form.getValues('mvpPlayerId'))?.name,
+        bestGoalName: players.find(p => p.id === form.getValues('bestGoalPlayerId'))?.name,
+      };
+
+      const result = await generateMatchSummary(aiInput);
+      if (result && !('error' in result)) {
+        form.setValue('aiSummary', result);
+        toast({ title: "Crónica Regenerada", description: "La IA ha escrito una nueva versión." });
+      } else {
+        toast({ variant: "destructive", title: "Error de IA", description: "No se pudo conectar con la redacción." });
+      }
+    } catch (err) {
+      toast({ variant: "destructive", title: "Error", description: "Ocurrió un problema al regenerar." });
+    } finally {
+      setIsRegeneratingAi(false);
+    }
+  };
 
   async function onSubmit(data: FormValues) {
     if (!firestore || !id) return;
@@ -201,6 +246,7 @@ export default function EditMatchPage() {
         teamBPlayers,
         comment: data.comment,
         photos: data.photos,
+        aiSummary: data.aiSummary || null,
     });
 
     toast({ title: "Partido Actualizado", description: "Los cambios se han guardado correctamente." });
@@ -398,7 +444,7 @@ export default function EditMatchPage() {
                         <Calendar
                           mode="single"
                           selected={field.value}
-                          onSelect={(date) => { field.onChange(date); setIsCalendarOpen(false); }}
+                          onSelect={(date) => { if(date) field.onChange(date); setIsCalendarOpen(false); }}
                           locale={es}
                           initialFocus
                         />
@@ -528,6 +574,31 @@ export default function EditMatchPage() {
                     </div>
                   ))}
                 </div>
+              </div>
+
+              <div className="pt-6 border-t border-white/5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <FormLabel className="text-xs font-black uppercase tracking-widest text-muted-foreground">Crónica de la IA</FormLabel>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={handleRegenerateAi}
+                    disabled={isRegeneratingAi}
+                    className="h-8 border-primary/20 text-primary hover:bg-primary/10"
+                  >
+                    {isRegeneratingAi ? <Loader2 className="h-3 w-3 animate-spin mr-2" /> : <Sparkles className="h-3 w-3 mr-2" />}
+                    Regenerar Crónica
+                  </Button>
+                </div>
+                {watchedAiSummary ? (
+                  <div className="p-4 bg-primary/5 rounded-xl border border-primary/10">
+                    <p className="text-xs font-black text-primary italic mb-1">{watchedAiSummary.title}</p>
+                    <p className="text-[10px] text-muted-foreground line-clamp-3">{watchedAiSummary.summary}</p>
+                  </div>
+                ) : (
+                  <p className="text-[10px] text-muted-foreground italic">Sin crónica generada aún.</p>
+                )}
               </div>
             </CardContent>
           </Card>
