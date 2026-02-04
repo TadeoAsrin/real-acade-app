@@ -93,7 +93,7 @@ export default function DashboardPage() {
     ? (playerStats.reduce((sum, p) => sum + p.matchesPlayed, 0) / totalMatches).toFixed(1) 
     : 0;
 
-  // Nos Caemos a Pedazos
+  // Nos Caemos a Pedazos - Logic for multiple leaders
   const maxLosses = Math.max(...playerStats.map(p => p.losses), 0);
   const imanDeDerrotasLeaders = maxLosses > 0 ? playerStats.filter(p => p.losses === maxLosses) : [];
 
