@@ -126,14 +126,14 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-w-4xl p-0 overflow-hidden border-none bg-[#fcfcf9] text-[#1a1a1a] font-serif shadow-2xl flex flex-col h-[90vh] sm:h-auto sm:max-h-[85vh] left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+      <DialogContent className="max-w-4xl p-0 overflow-hidden border-none bg-[#fcfcf9] text-[#1a1a1a] font-serif shadow-2xl flex flex-col h-[92vh] sm:h-auto sm:max-h-[85vh] sm:rounded-xl">
         <DialogHeader className="sr-only">
           <DialogTitle>La Gaceta de Real Acade</DialogTitle>
           <DialogDescription>Crónica oficial del encuentro</DialogDescription>
         </DialogHeader>
         
-        {/* Masthead */}
-        <div className="shrink-0 p-4 sm:p-6 border-b border-black/10 bg-[#fcfcf9]">
+        {/* Masthead - Sticky Header */}
+        <div className="shrink-0 p-4 sm:p-6 border-b border-black/10 bg-[#fcfcf9] z-20">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="bg-black text-white p-1.5 rounded-sm">
@@ -145,14 +145,19 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
               <span className="hidden xs:inline">Edición Nº {match.id.slice(-4).toUpperCase()}</span>
               <span className="h-3 w-[1px] bg-black/10 hidden xs:inline" />
               <span>{format(new Date(match.date), "dd · MM · yyyy", { locale: es })}</span>
-              <button onClick={handleClose} className="ml-2 p-1 hover:bg-black/5 rounded-full transition-colors">
-                <X className="h-4 w-4 text-black" />
+              <button 
+                onClick={handleClose} 
+                className="ml-2 p-2 hover:bg-black/5 rounded-full transition-colors touch-none"
+                aria-label="Cerrar noticia"
+              >
+                <X className="h-5 w-5 text-black" />
               </button>
             </div>
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto bg-[#fcfcf9]">
+        {/* Content Area - Scrollable */}
+        <div className="flex-1 overflow-y-auto bg-[#fcfcf9] overscroll-contain">
           <div className="p-6 sm:p-10 md:p-12">
             {isLoading ? (
               <div className="flex flex-col items-center justify-center py-24 gap-6">
@@ -247,7 +252,8 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
           </div>
         </div>
 
-        <div className="shrink-0 p-4 sm:p-6 bg-black/5 border-t border-black/10 flex flex-col sm:flex-row gap-3">
+        {/* Footer - Sticky Actions */}
+        <div className="shrink-0 p-4 sm:p-6 bg-black/5 border-t border-black/10 flex flex-col sm:flex-row gap-3 z-20">
           {isAdmin && (
             <Button 
               onClick={shareToWhatsApp}
