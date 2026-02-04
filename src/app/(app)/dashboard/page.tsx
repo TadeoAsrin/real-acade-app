@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { calculateAggregatedStats, getTopChemistry, getSpiciestMatch } from "@/lib/data";
+import { calculateAggregatedStats, getChemistryRankings, getSpiciestMatch } from "@/lib/data";
 import {
   Card,
   CardContent,
@@ -46,7 +46,10 @@ export default function DashboardPage() {
   const allPlayers = playersData || [];
   const allMatches = matchesData || [];
   const playerStats = calculateAggregatedStats(allPlayers, allMatches);
-  const topChemistry = getTopChemistry(allPlayers, allMatches, 2);
+  const chemistryRankings = getChemistryRankings(allPlayers, allMatches, 2);
+  const topChemistry = chemistryRankings[0];
+  const runnerUpChemistry = chemistryRankings[1];
+  
   const spiciestMatch = getSpiciestMatch(allMatches);
   const lastMatch = allMatches[0];
 
@@ -91,7 +94,7 @@ export default function DashboardPage() {
     ? Math.round((attendanceLeaders[0].matchesPlayed / totalMatches) * 100) 
     : 0;
 
-  // NOS CAEMOS A PEDAZOS (Humildad Metrics)
+  // HUMILDAD Metrics
   const maxLosses = Math.max(...playerStats.map(p => p.losses), 0);
   const imanDeDerrotasLeaders = maxLosses > 0 ? playerStats.filter(p => p.losses === maxLosses) : [];
 
@@ -173,7 +176,7 @@ export default function DashboardPage() {
             </div>
             <CardHeader className="pb-2">
               <CardTitle className="text-xs font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                <Crown className="h-3 w-3" /> Jugadores más Influyentes
+                <Crown className="h-3 w-3" /> Jugador más Influyente
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6 flex-1 flex flex-col">
@@ -326,17 +329,38 @@ export default function DashboardPage() {
                                 <span className="text-[8px] uppercase text-muted-foreground font-bold">{topChemistry?.matches || 0} PJ</span>
                             </div>
                         </div>
-                        <div className="pt-2">
-                            <div className="flex justify-between text-[10px] font-black uppercase mb-1">
-                                <span className="text-muted-foreground italic">Química</span>
-                                <span className="text-primary italic">{topChemistry ? Math.round((topChemistry.wins / topChemistry.matches) * 100) : 0}%</span>
+                        <div className="pt-2 space-y-3">
+                            <div>
+                                <div className="flex justify-between text-[10px] font-black uppercase mb-1">
+                                    <span className="text-muted-foreground italic">Química</span>
+                                    <span className="text-primary italic">{topChemistry?.winRate || 0}%</span>
+                                </div>
+                                <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                    <div 
+                                        className="h-full bg-primary transition-all duration-500" 
+                                        style={{ width: `${topChemistry?.winRate || 0}%` }} 
+                                    />
+                                </div>
                             </div>
-                            <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-                                <div 
-                                    className="h-full bg-primary transition-all duration-500" 
-                                    style={{ width: `${topChemistry ? (topChemistry.wins / topChemistry.matches) * 100 : 0}%` }} 
-                                />
-                            </div>
+                            
+                            {runnerUpChemistry && (
+                                <div className="pt-2 border-t border-white/5">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <div className="flex -space-x-2">
+                                                <Avatar className="h-5 w-5 border border-background">
+                                                    <AvatarFallback className="text-[6px] font-black">{getInitials(runnerUpChemistry.player1.name)}</AvatarFallback>
+                                                </Avatar>
+                                                <Avatar className="h-5 w-5 border border-background">
+                                                    <AvatarFallback className="text-[6px] font-black">{getInitials(runnerUpChemistry.player2.name)}</AvatarFallback>
+                                                </Avatar>
+                                            </div>
+                                            <span className="text-[8px] font-bold text-muted-foreground uppercase">En los talones</span>
+                                        </div>
+                                        <span className="text-[10px] font-black italic text-white/60">{runnerUpChemistry.winRate}%</span>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </CardContent>
                 </Card>

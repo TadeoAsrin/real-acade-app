@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useParams, useRouter } from "next/navigation";
-import { calculateAggregatedStats, getTopChemistry, getSpiciestMatch } from "@/lib/data";
+import { calculateAggregatedStats, getChemistryRankings, getSpiciestMatch } from "@/lib/data";
 import { useCollection, useMemoFirebase, useFirestore } from "@/firebase";
 import { collection, query, orderBy } from "firebase/firestore";
 import type { Match, Player } from "@/lib/definitions";
@@ -34,7 +34,7 @@ export default function PulseDetailPage() {
   const allPlayers = playersData || [];
   const allMatches = matchesData || [];
   const playerStats = calculateAggregatedStats(allPlayers, allMatches);
-  const topChemistry = getTopChemistry(allPlayers, allMatches, 2);
+  const chemistryRankings = getChemistryRankings(allPlayers, allMatches, 2);
   const spiciestMatch = getSpiciestMatch(allMatches);
 
   if (playersLoading || matchesLoading) return <div className="flex h-screen items-center justify-center"><Zap className="animate-pulse text-primary h-12 w-12" /></div>;
@@ -359,38 +359,40 @@ export default function PulseDetailPage() {
             <div className="mx-auto w-20 h-20 bg-white/10 rounded-full flex items-center justify-center">
                 <LinkIcon className="h-10 w-10 text-white" />
             </div>
-            <h1 className="text-4xl font-black italic uppercase tracking-tighter">Mejor Sociedad</h1>
-            <p className="text-muted-foreground italic">La química perfecta. Jugadores que se entienden sin mirarse y dominan el campo juntos.</p>
+            <h1 className="text-4xl font-black italic uppercase tracking-tighter">Ranking de Sociedades</h1>
+            <p className="text-muted-foreground italic">La química perfecta. Parejas de jugadores que dominan el campo cuando juegan juntos.</p>
         </div>
 
-        {topChemistry ? (
-            <Card className="glass-card border-primary/30 bg-primary/5 p-10 overflow-hidden relative">
-                <div className="absolute -bottom-10 -right-10 opacity-5">
-                    <Heart className="h-64 w-64 text-primary fill-primary" />
-                </div>
-                <div className="flex flex-col md:flex-row items-center justify-around gap-10 relative z-10">
-                    <div className="flex flex-col items-center gap-4">
-                        <Avatar className="h-24 w-24 border-4 border-primary">
-                            <AvatarFallback className="text-2xl font-black">{getInitials(topChemistry.player1.name)}</AvatarFallback>
-                        </Avatar>
-                        <span className="font-black text-xl italic uppercase tracking-tighter">{topChemistry.player1.name}</span>
-                    </div>
-                    <div className="flex flex-col items-center">
-                        <Zap className="h-12 w-12 text-primary animate-pulse" />
-                        <span className="text-4xl font-black italic text-white mt-2">+{topChemistry.wins}V</span>
-                        <span className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">Imbatibles</span>
-                    </div>
-                    <div className="flex flex-col items-center gap-4">
-                        <Avatar className="h-24 w-24 border-4 border-primary">
-                            <AvatarFallback className="text-2xl font-black">{getInitials(topChemistry.player2.name)}</AvatarFallback>
-                        </Avatar>
-                        <span className="font-black text-xl italic uppercase tracking-tighter">{topChemistry.player2.name}</span>
-                    </div>
-                </div>
-                <div className="mt-12 p-4 bg-black/40 rounded-2xl border border-white/5 text-center">
-                    <p className="text-xs font-bold text-muted-foreground uppercase">Han disputado <span className="text-white">{topChemistry.matches} encuentros</span> como aliados en el mismo equipo.</p>
-                </div>
-            </Card>
+        {chemistryRankings.length > 0 ? (
+            <div className="space-y-4">
+                {chemistryRankings.map((pair, i) => (
+                    <Card key={i} className={cn("glass-card transition-all", i === 0 ? "border-primary/50 bg-primary/5 scale-105" : "border-white/5")}>
+                        <CardContent className="p-6 flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <span className="text-2xl font-black italic text-muted-foreground/30 w-8">{i + 1}</span>
+                                <div className="flex -space-x-4">
+                                    <Avatar className="h-12 w-12 border-2 border-background ring-2 ring-primary/20">
+                                        <AvatarFallback className="bg-muted font-black">{getInitials(pair.player1.name)}</AvatarFallback>
+                                    </Avatar>
+                                    <Avatar className="h-12 w-12 border-2 border-background ring-2 ring-primary/20">
+                                        <AvatarFallback className="bg-muted font-black">{getInitials(pair.player2.name)}</AvatarFallback>
+                                    </Avatar>
+                                </div>
+                                <div className="flex flex-col min-w-0">
+                                    <span className="font-black text-lg truncate italic">
+                                        {pair.player1.name.split(' ')[0]} + {pair.player2.name.split(' ')[0]}
+                                    </span>
+                                    <span className="text-[10px] font-bold uppercase text-muted-foreground">{pair.wins}V en {pair.matches} PJ</span>
+                                </div>
+                            </div>
+                            <div className="text-right">
+                                <span className={cn("text-3xl font-black italic", i === 0 ? "text-primary" : "text-white")}>{pair.winRate}%</span>
+                                <p className="text-[8px] uppercase font-black text-muted-foreground leading-none">Efectividad</p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
         ) : (
             <div className="h-64 border-2 border-dashed rounded-3xl flex items-center justify-center text-muted-foreground italic">No hay suficientes datos de parejas aún (mínimo 2 partidos juntos).</div>
         )}

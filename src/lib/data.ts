@@ -112,53 +112,52 @@ export const getTeamGlobalStats = (allMatches: Match[]) => {
     return { blueWins, redWins, draws, total: allMatches.length };
 };
 
-export const getTopChemistry = (players: Player[], matches: Match[], minMatches = 2): ChemistryPair | null => {
+export const getChemistryRankings = (players: Player[], matches: Match[], minMatches = 2): ChemistryPair[] => {
   const statsMap: { [key: string]: { matches: number, wins: number } } = {};
   
   matches.forEach(match => {
-    const teamAIds = match.teamAPlayers.map(p => p.playerId).filter(Boolean);
-    for (let i = 0; i < teamAIds.length; i++) {
-      for (let j = i + 1; j < teamAIds.length; j++) {
-        const p1 = teamAIds[i];
-        const p2 = teamAIds[j];
-        const key = [p1, p2].sort().join('-');
-        if (!statsMap[key]) statsMap[key] = { matches: 0, wins: 0 };
-        statsMap[key].matches++;
-        if (match.teamAScore > match.teamBScore) statsMap[key].wins++;
+    const processTeam = (playerStats: PlayerStats[], teamWon: boolean) => {
+      const ids = playerStats.map(p => p.playerId).filter(Boolean);
+      for (let i = 0; i < ids.length; i++) {
+        for (let j = i + 1; j < ids.length; j++) {
+          const key = [ids[i], ids[j]].sort().join('_::_');
+          if (!statsMap[key]) statsMap[key] = { matches: 0, wins: 0 };
+          statsMap[key].matches++;
+          if (teamWon) statsMap[key].wins++;
+        }
       }
-    }
-    const teamBIds = match.teamBPlayers.map(p => p.playerId).filter(Boolean);
-    for (let i = 0; i < teamBIds.length; i++) {
-      for (let j = i + 1; j < teamBIds.length; j++) {
-        const p1 = teamBIds[i];
-        const p2 = teamBIds[j];
-        const key = [p1, p2].sort().join('-');
-        if (!statsMap[key]) statsMap[key] = { matches: 0, wins: 0 };
-        statsMap[key].matches++;
-        if (match.teamBScore > match.teamAScore) statsMap[key].wins++;
-      }
-    }
+    };
+
+    processTeam(match.teamAPlayers, match.teamAScore > match.teamBScore);
+    processTeam(match.teamBPlayers, match.teamBScore > match.teamAScore);
   });
 
-  let validPairs = Object.entries(statsMap)
+  return Object.entries(statsMap)
     .filter(([_, stats]) => stats.matches >= minMatches)
+    .map(([key, stats]) => {
+      const [id1, id2] = key.split('_::_');
+      const player1 = players.find(p => p.id === id1);
+      const player2 = players.find(p => p.id === id2);
+      return { 
+        player1: player1!, 
+        player2: player2!, 
+        wins: stats.wins, 
+        matches: stats.matches,
+        winRate: Math.round((stats.wins / stats.matches) * 100)
+      };
+    })
+    .filter(pair => pair.player1 && pair.player2)
     .sort((a, b) => {
-      if (b[1].matches !== a[1].matches) return b[1].matches - a[1].matches;
-      if (b[1].wins !== a[1].wins) return b[1].wins - a[1].wins;
-      return (b[1].wins / b[1].matches) - (a[1].wins / a[1].matches);
+      if (b.winRate !== a.winRate) return b.winRate - a.winRate;
+      if (b.matches !== a.matches) return b.matches - a.matches;
+      return b.wins - a.wins;
     });
+};
 
-  if (validPairs.length === 0) return null;
-
-  const [ids, stats] = validPairs[0];
-  const [id1, id2] = ids.split('-');
-  
-  const player1 = players.find(p => p.id === id1);
-  const player2 = players.find(p => p.id === id2);
-
-  if (!player1 || !player2) return null;
-
-  return { player1, player2, wins: stats.wins, matches: stats.matches };
+// Mantenemos getTopChemistry por compatibilidad pero que use la nueva lógica interna
+export const getTopChemistry = (players: Player[], matches: Match[], minMatches = 2): ChemistryPair | null => {
+  const rankings = getChemistryRankings(players, matches, minMatches);
+  return rankings.length > 0 ? rankings[0] : null;
 };
 
 export const getSpiciestMatch = (matches: Match[]) => {

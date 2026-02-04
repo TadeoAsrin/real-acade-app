@@ -52,4 +52,5 @@ export type ChemistryPair = {
   player2: Player;
   wins: number;
   matches: number;
+  winRate: number;
 };
