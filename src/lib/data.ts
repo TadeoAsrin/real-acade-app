@@ -116,7 +116,6 @@ export const getTopChemistry = (players: Player[], matches: Match[], minMatches 
   const statsMap: { [key: string]: { matches: number, wins: number } } = {};
   
   matches.forEach(match => {
-    // Alianzas Equipo Azul
     const teamAIds = match.teamAPlayers.map(p => p.playerId).filter(Boolean);
     for (let i = 0; i < teamAIds.length; i++) {
       for (let j = i + 1; j < teamAIds.length; j++) {
@@ -128,7 +127,6 @@ export const getTopChemistry = (players: Player[], matches: Match[], minMatches 
         if (match.teamAScore > match.teamBScore) statsMap[key].wins++;
       }
     }
-    // Alianzas Equipo Rojo
     const teamBIds = match.teamBPlayers.map(p => p.playerId).filter(Boolean);
     for (let i = 0; i < teamBIds.length; i++) {
       for (let j = i + 1; j < teamBIds.length; j++) {
@@ -149,11 +147,6 @@ export const getTopChemistry = (players: Player[], matches: Match[], minMatches 
       if (b[1].wins !== a[1].wins) return b[1].wins - a[1].wins;
       return (b[1].wins / b[1].matches) - (a[1].wins / a[1].matches);
     });
-
-  // Fallback: Si no hay parejas con 2 partidos, intentamos con 1 si minMatches era 2
-  if (validPairs.length === 0 && minMatches > 1) {
-    return getTopChemistry(players, matches, minMatches - 1);
-  }
 
   if (validPairs.length === 0) return null;
 
