@@ -493,7 +493,7 @@ export default function DashboardPage() {
 
       {/* SECCIÓN 4: MATCH CENTER (ACCIÓN Y TÁCTICA) */}
       <section className="space-y-6">
-        <h2 className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground/50 px-1 italic">Centro de Operaciones</h2>
+        <h2 className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground/50 px-1 italic">Historial</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Link href="/matches">

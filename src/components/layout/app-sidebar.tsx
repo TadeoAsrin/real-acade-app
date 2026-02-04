@@ -1,4 +1,3 @@
-
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
@@ -10,6 +9,7 @@ import {
   SidebarMenuButton,
   SidebarFooter,
   SidebarContent,
+  useSidebar,
 } from "../ui/sidebar";
 import { Goal, BarChart3, Users, LogOut, Trophy, Dices, ArrowLeftRight, LogIn, User as UserIcon, ShieldCheck } from "lucide-react";
 import { Fut7StatsLogo } from "@/components/icons";
@@ -57,6 +57,7 @@ export function AppSidebar() {
   const firestore = useFirestore();
   const router = useRouter();
   const { toast } = useToast();
+  const { setOpenMobile, isMobile } = useSidebar();
 
   const playersRef = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -81,9 +82,16 @@ export function AppSidebar() {
         title: "Sesión cerrada",
         description: "Has salido de Real Acade correctamente.",
       });
+      if (isMobile) setOpenMobile(false);
       router.push("/login");
     } catch (error) {
       console.error("Logout error", error);
+    }
+  };
+
+  const handleNavClick = () => {
+    if (isMobile) {
+      setOpenMobile(false);
     }
   };
 
@@ -111,7 +119,7 @@ export function AppSidebar() {
                 tooltip={item.label}
                 className="py-6 transition-all duration-200"
                 >
-                <Link href={item.href}>
+                <Link href={item.href} onClick={handleNavClick}>
                     <item.icon className={cn("transition-colors", pathname.startsWith(item.href) ? "text-primary" : "text-muted-foreground")} />
                     <span className="font-semibold">{item.label}</span>
                 </Link>
@@ -127,7 +135,7 @@ export function AppSidebar() {
                   tooltip="Generador de Equipos"
                   className="py-6 text-orange-400 hover:text-orange-500 hover:bg-orange-500/10"
                 >
-                  <Link href="/generator">
+                  <Link href="/generator" onClick={handleNavClick}>
                       <Dices className={cn(pathname.startsWith("/generator") ? "text-orange-400" : "text-orange-400/70")} />
                       <span className="font-bold">Equilibrador Pro</span>
                   </Link>
