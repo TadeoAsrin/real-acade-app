@@ -126,6 +126,7 @@ export default function DashboardPage() {
         />
       )}
 
+      {/* Quiosco / Banner de Gaceta */}
       {lastMatch && (
         <div className="bg-primary/10 border border-primary/20 p-2 rounded-xl flex items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-1000">
           <div className="flex items-center gap-3 pl-2">
