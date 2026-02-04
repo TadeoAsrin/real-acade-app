@@ -1,113 +1,115 @@
-/**
- * Fut7Stats Security Rules
- *
- * Core Philosophy: 
- * This ruleset implements an authorization model focused on "Authorization Independence." 
- * It relies on denormalized ownership fields (like `ratingUserId`) to make local authorization 
- * decisions without requiring expensive cross-document lookups (get() calls). This ensures 
- * high performance and scalability for match statistics and player tracking.
- *
- * Data Structure:
- * The data is organized into top-level collections: /teams, /players, /matches, 
- * /matchevents, /playerRatings, and /roles_admin.
- */
-
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    /**
+     * FUT7STATS SECURITY MODEL
+     * 
+     * Core Philosophy:
+     * This ruleset implements a hybrid security model for a soccer league management application. 
+     * It prioritizes public visibility for league statistics (Matches, Goals, Fouls) while 
+     * enforcing strict identity-based authorization for player profiles and performance ratings.
+     * 
+     * Data Structure:
+     * - /matches/{matchId}: Root collection for game data.
+     * - /players/{playerId}: Root collection for league participants.
+     * - /matches/.../goals, /matches/.../fouls, /matches/.../matchPlayerPerformances: Sub-collections nested under matches.
+     * 
+     * Key Security Decisions:
+     * 1. Player Profiles: Managed exclusively by the authenticated user whose UID matches the document ID.
+     * 2. Performance Ratings: Only the 'raterPlayerId' (the player who provided the rating) is authorized to 
+     *    create or modify their specific performance review.
+     * 3. Public Stats: Match results, goals, and fouls are publicly readable to support league-wide rankings 
+     *    and match history, but writes are currently locked down due to missing administrative ownership fields.
+     * 4. Relational Integrity: On creation of user-linked data, rules enforce that the 'raterPlayerId' 
+     *    matches the authenticated user.
+     */
+
     // --- Helper Functions ---
 
-    /**
-     * @description Checks if the request is coming from an authenticated user.
-     */
+    /** @description Checks if the user is authenticated. */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /**
-     * @description Checks if the provided UID matches the authenticated user's UID.
-     */
+    /** @description Checks if the user's UID matches the provided ID. */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    /**
-     * @description Checks if the user is the owner of the existing document.
-     */
+    /** @description Checks ownership for existing documents to ensure they exist before modification. */
     function isExistingOwner(userId) {
       return resource != null && isOwner(userId);
-    }
-
-    /**
-     * @description Checks if the user has an administrator role.
-     */
-    function isAdmin() {
-      return isSignedIn() && 
-             exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid)) && 
-             get(/databases/$(database)/documents/roles_admin/$(request.auth.uid)).data.isAdmin == true;
     }
 
     // --- Collection Rules ---
 
     /**
-     * @description Rules for admin roles. Users can check their own admin status.
-     * @path /roles_admin/{userId}
-     */
-    match /roles_admin/{userId} {
-      allow get: if isOwner(userId);
-      allow list: if false;
-      allow write: if false; // Roles are managed externally or via Firebase Console for security.
-    }
-
-    /**
-     * @description Rules for the Teams collection. Teams are public for reading.
-     */
-    match /teams/{teamId} {
-      allow get, list: if true;
-      allow create, update, delete: if isAdmin(); 
-    }
-
-    /**
-     * @description Rules for the Players collection. Player profiles are public.
-     */
-    match /players/{playerId} {
-      allow get, list: if true;
-      allow create, update, delete: if isAdmin();
-    }
-
-    /**
-     * @description Rules for the Matches collection. Match data is public.
+     * @description Rules for Match documents. These contain core game results.
+     * @path /matches/{matchId}
+     * @allow (get, list) for any user to see match results.
+     * @deny (create, update, delete) for all users currently.
+     * @principle Public Read with Owner-Only Writes (Pending Schema Update).
      */
     match /matches/{matchId} {
       allow get, list: if true;
-      allow create, update, delete: if isAdmin();
+      // CRITICAL: Cannot implement owner-only writes. The 'Match' entity is missing an 'ownerId' or 'adminId' field.
+      allow create, update, delete: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
+
+      /**
+       * @description Rules for Goals scored within a match.
+       * @path /matches/{matchId}/goals/{goalId}
+       * @allow (get, list) for any user to see goal history.
+       * @deny (create, update, delete) for all users.
+       * @principle Inherited security posture from the parent Match.
+       */
+      match /goals/{goalId} {
+        allow get, list: if true;
+        // CRITICAL: Missing ownership field to determine who can record goals for a match.
+        allow create, update, delete: if false; // TODO: Implement write access for match organizers/refs.
+      }
+
+      /**
+       * @description Rules for Fouls committed during a match.
+       * @path /matches/{matchId}/fouls/{foulId}
+       * @allow (get, list) for any user to see foul statistics.
+       * @deny (create, update, delete) for all users.
+       * @principle Inherited security posture from the parent Match.
+       */
+      match /fouls/{foulId} {
+        allow get, list: if true;
+        // CRITICAL: Missing ownership field to determine who can record fouls.
+        allow create, update, delete: if false; // TODO: Implement write access for match organizers/refs.
+      }
+
+      /**
+       * @description Rules for Player Performance ratings given after a match.
+       * @path /matches/{matchId}/matchPlayerPerformances/{mppId}
+       * @allow (get, list) for any user to view player ratings.
+       * @allow (create) if the user is the rater.
+       * @allow (update, delete) if the user is the original rater.
+       * @principle Validates relational integrity by ensuring the rater field matches the auth UID.
+       */
+      match /matchPlayerPerformances/{mppId} {
+        allow get, list: if true;
+        allow create: if isSignedIn() && request.resource.data.raterPlayerId == request.auth.uid;
+        allow update: if isExistingOwner(resource.data.raterPlayerId) && request.resource.data.raterPlayerId == resource.data.raterPlayerId;
+        allow delete: if isExistingOwner(resource.data.raterPlayerId);
+      }
     }
 
     /**
-     * @description Rules for individual match events (goals, fouls, etc).
+     * @description Rules for Player profiles.
+     * @path /players/{playerId}
+     * @allow (get, list) for any user to find players in the league.
+     * @allow (create) if the document ID matches the user's UID.
+     * @allow (update, delete) if the user owns the profile.
+     * @principle Enforces strict user-ownership for profile management.
      */
-    match /matchevents/{matchEventId} {
+    match /players/{playerId} {
       allow get, list: if true;
-      allow create, update, delete: if isAdmin();
-    }
-
-    /**
-     * @description Rules for player ratings. Users can rate players and manage their own ratings.
-     */
-    match /playerRatings/{playerRatingId} {
-      allow get, list: if true;
-      allow create: if isSignedIn() && request.resource.data.ratingUserId == request.auth.uid;
-      allow update: if isExistingOwner(resource.data.ratingUserId) && request.resource.data.ratingUserId == resource.data.ratingUserId;
-      allow delete: if isExistingOwner(resource.data.ratingUserId);
-    }
-
-    /**
-     * @description Rules for match goal votes.
-     */
-    match /matches/{matchId}/votes/{userId} {
-      allow read: if true;
-      allow write: if isOwner(userId);
+      allow create: if isOwner(playerId);
+      allow update, delete: if isExistingOwner(playerId);
     }
   }
 }
