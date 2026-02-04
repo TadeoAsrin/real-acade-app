@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Medal, Loader2, Zap, Calendar, Users, Brain, Heart, Crown, Link as LinkIcon, Flame, Target, Trophy, TrendingUp, Star } from "lucide-react";
+import { Medal, Loader2, Zap, Calendar, Users, Brain, Heart, Crown, Link as LinkIcon, Flame, Target, Trophy, TrendingUp, Star, Skull, Ghost, CloudRain, Frown } from "lucide-react";
 import Link from "next/link";
 import { FieldView } from "@/components/dashboard/field-view";
 import { PowerRanking } from "@/components/dashboard/power-ranking";
@@ -50,8 +50,8 @@ export default function DashboardPage() {
   const spiciestMatch = getSpiciestMatch(allMatches);
   const lastMatch = allMatches[0];
 
+  // Gloria Metrics
   const sortedByGoals = [...playerStats].sort((a, b) => b.totalGoals - a.totalGoals || b.goalsPerMatch - a.goalsPerMatch);
-  
   const sortedByInfluence = [...playerStats]
     .filter(p => p.matchesPlayed >= 3)
     .sort((a, b) => {
@@ -69,10 +69,10 @@ export default function DashboardPage() {
   const influencer = topInfluencers[0];
   const influencerRunnersUp = topInfluencers.slice(1);
 
-  // MVP Logic: Find all leaders with the max number of MVPs
+  // Pulse Metrics
   const maxMvps = Math.max(...playerStats.map(p => p.totalMvp), 0);
   const mvpLeaders = maxMvps > 0 ? playerStats.filter(p => p.totalMvp === maxMvps) : [];
-  const topMvpPlayer = mvpLeaders[0]; // For fallback UI
+  const topMvpPlayer = mvpLeaders[0];
 
   const totalMatches = allMatches.length;
   const attendanceLeaders = playerStats.length > 0 && totalMatches > 0
@@ -91,8 +91,21 @@ export default function DashboardPage() {
     ? Math.round((attendanceLeaders[0].matchesPlayed / totalMatches) * 100) 
     : 0;
 
-  const totalGoals = playerStats.reduce((sum, p) => sum + p.totalGoals, 0);
+  // NOS CAEMOS A PEDAZOS (Humildad Metrics)
+  const imanDeDerrotas = [...playerStats]
+    .filter(p => p.matchesPlayed >= 1)
+    .sort((a, b) => b.losses - a.losses || a.wins - b.wins)[0];
 
+  const factorDeRiesgo = [...playerStats]
+    .filter(p => p.matchesPlayed >= 3)
+    .sort((a, b) => a.winPercentage - b.winPercentage || b.losses - a.losses)[0];
+
+  const piedraEnElZapato = [...playerStats]
+    .filter(p => p.matchesPlayed >= 3)
+    .sort((a, b) => a.powerPoints - b.powerPoints || a.winPercentage - b.winPercentage)[0];
+
+  // Action Metrics
+  const totalGoals = playerStats.reduce((sum, p) => sum + p.totalGoals, 0);
   const lastMatchTeamAPlayers = lastMatch?.teamAPlayers.map(s => allPlayers.find(p => p.id === s.playerId)).filter(Boolean) as Player[] || [];
   const lastMatchTeamBPlayers = lastMatch?.teamBPlayers.map(s => allPlayers.find(p => p.id === s.playerId)).filter(Boolean) as Player[] || [];
 
@@ -103,7 +116,6 @@ export default function DashboardPage() {
       <section className="space-y-4">
         <h2 className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground/50 px-1 italic">Nombres Propios de la Academia</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Pichichi Hero Card */}
           <Card className="md:col-span-2 lg:col-span-1 glass-card card-gold bg-gradient-to-br from-card/60 to-yellow-500/10 overflow-hidden relative flex flex-col h-full border-yellow-500/20">
             <div className="absolute top-0 right-0 p-6 opacity-10">
               <Medal className="h-32 w-32 text-yellow-500" />
@@ -131,7 +143,6 @@ export default function DashboardPage() {
                   <span className="text-sm font-black text-yellow-500/50 uppercase tracking-widest">Goles Totales</span>
                 </div>
               </Link>
-
               {runnersUp.length > 0 && (
                 <div className="mt-auto pt-6 border-t border-yellow-500/10 space-y-3">
                   <p className="text-[9px] font-black uppercase tracking-[0.2em] text-yellow-500/40 italic">En la mira</p>
@@ -157,7 +168,6 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          {/* Influencer Hero Card */}
           <Card className="md:col-span-2 lg:col-span-1 glass-card border-primary/30 bg-gradient-to-br from-card/60 to-primary/10 overflow-hidden flex flex-col h-full relative group">
             <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform duration-500">
               <Brain className="h-32 w-32 text-primary" />
@@ -188,7 +198,6 @@ export default function DashboardPage() {
                   <Progress value={influencer?.winPercentage || 0} className="h-1.5 bg-primary/10" />
                 </div>
               </Link>
-
               {influencerRunnersUp.length > 0 && (
                 <div className="mt-auto pt-6 border-t border-primary/10 space-y-3">
                   <p className="text-[9px] font-black uppercase tracking-[0.2em] text-primary/40 italic">En la mira</p>
@@ -223,7 +232,7 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* SECCIÓN 2: PULSO SOCIAL (BENTO BOX + LOS INFALTABLES) */}
+      {/* SECCIÓN 2: PULSO DE LA LIGA (SOCIAL BENTO) */}
       <section className="space-y-4">
         <div className="flex items-center gap-3 px-1">
           <Zap className="h-5 w-5 text-primary fill-primary" />
@@ -360,11 +369,100 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* SECCIÓN 3: MATCH CENTER (ACCIÓN Y TÁCTICA) */}
+      {/* SECCIÓN 3: NOS CAEMOS A PEDAZOS (SALA DE HUMILDAD) */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-3 px-1">
+          <Frown className="h-5 w-5 text-muted-foreground" />
+          <h2 className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground/50 italic">Nos Caemos a Pedazos</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* El Imán de Derrotas */}
+            <Card className="glass-card border-red-500/10 bg-red-500/5 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <CloudRain className="h-20 w-20 text-red-500" />
+                </div>
+                <CardHeader className="pb-2">
+                    <CardTitle className="text-[10px] font-black uppercase tracking-widest text-red-500 flex items-center gap-2">
+                        <Skull className="h-3 w-3" /> El Imán de Derrotas
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="flex items-center gap-4">
+                        <Avatar className="h-12 w-12 border-2 border-red-500/20">
+                            <AvatarFallback className="bg-red-500/10 text-red-500 font-black">{getInitials(imanDeDerrotas?.name || "?")}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col min-w-0">
+                            <span className="text-lg font-black tracking-tight leading-none truncate italic text-white/80">{imanDeDerrotas?.name || '-'}</span>
+                            <span className="text-[10px] uppercase font-bold text-muted-foreground">Más caídas registradas</span>
+                        </div>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                        <span className="text-4xl font-black italic text-red-500/80 leading-none">{imanDeDerrotas?.losses || 0}</span>
+                        <span className="text-[10px] font-black uppercase text-red-500/40 tracking-widest">Derrotas</span>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* Factor de Riesgo */}
+            <Card className="glass-card border-zinc-500/10 bg-zinc-500/5 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <Ghost className="h-20 w-20 text-zinc-500" />
+                </div>
+                <CardHeader className="pb-2">
+                    <CardTitle className="text-[10px] font-black uppercase tracking-widest text-zinc-500 flex items-center gap-2">
+                        <TrendingUp className="h-3 w-3 rotate-180" /> Factor de Riesgo
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="flex items-center gap-4">
+                        <Avatar className="h-12 w-12 border-2 border-zinc-500/20">
+                            <AvatarFallback className="bg-zinc-500/10 text-zinc-500 font-black">{getInitials(factorDeRiesgo?.name || "?")}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col min-w-0">
+                            <span className="text-lg font-black tracking-tight leading-none truncate italic text-white/80">{factorDeRiesgo?.name || '-'}</span>
+                            <span className="text-[10px] uppercase font-bold text-muted-foreground">Efectividad mínima (+3 PJ)</span>
+                        </div>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                        <span className="text-4xl font-black italic text-zinc-500 leading-none">{factorDeRiesgo?.winPercentage || 0}%</span>
+                        <span className="text-[10px] font-black uppercase text-zinc-500/40 tracking-widest">Victorias</span>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* Piedra en el Zapato */}
+            <Card className="glass-card border-orange-900/20 bg-orange-900/5 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <Zap className="h-20 w-20 text-orange-900" />
+                </div>
+                <CardHeader className="pb-2">
+                    <CardTitle className="text-[10px] font-black uppercase tracking-widest text-orange-900/60 flex items-center gap-2">
+                        <Target className="h-3 w-3" /> Piedra en el Zapato
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="flex items-center gap-4">
+                        <Avatar className="h-12 w-12 border-2 border-orange-900/20">
+                            <AvatarFallback className="bg-orange-900/10 text-orange-900/60 font-black">{getInitials(piedraEnElZapato?.name || "?")}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col min-w-0">
+                            <span className="text-lg font-black tracking-tight leading-none truncate italic text-white/80">{piedraEnElZapato?.name || '-'}</span>
+                            <span className="text-[10px] uppercase font-bold text-muted-foreground">Menos impacto total (+3 PJ)</span>
+                        </div>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                        <span className="text-4xl font-black italic text-orange-900/60 leading-none">{piedraEnElZapato?.powerPoints || 0}</span>
+                        <span className="text-[10px] font-black uppercase text-orange-900/30 tracking-widest">Poder</span>
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+      </section>
+
+      {/* SECCIÓN 4: MATCH CENTER (ACCIÓN Y TÁCTICA) */}
       <section className="space-y-6">
         <h2 className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground/50 px-1 italic">Centro de Operaciones</h2>
         
-        {/* Quick Stats Grid - Now only 2 cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Link href="/matches">
             <Card className="glass-card hover:bg-white/5 transition-all border-white/5 overflow-hidden group">
@@ -392,7 +490,6 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        {/* Tactical Field Views */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FieldView team="Azul" players={lastMatchTeamAPlayers} topScorerId={topScorer?.playerId} date={lastMatch?.date} />
           <FieldView team="Rojo" players={lastMatchTeamBPlayers} topScorerId={topScorer?.playerId} date={lastMatch?.date} />
