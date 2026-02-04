@@ -1,12 +1,13 @@
 'use client';
 
+import * as React from 'react';
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { ArrowRight, CalendarIcon, Plus, Loader2, Trash2, Pencil } from "lucide-react";
+import { ArrowRight, CalendarIcon, Plus, Loader2, Trash2, Pencil, Camera, MessageSquare } from "lucide-react";
 import Link from "next/link";
 import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc, deleteDocumentNonBlocking } from "@/firebase";
 import { collection, query, orderBy, doc } from "firebase/firestore";
@@ -23,6 +24,123 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { format, isFuture, parseISO } from "date-fns";
+import { es } from "date-fns/locale";
+import { Badge } from "@/components/ui/badge";
+
+interface MatchCardProps {
+  match: Match;
+  isAdmin: boolean;
+  onDelete: (id: string) => void;
+}
+
+const MatchCard = ({ match, isAdmin, onDelete }: MatchCardProps) => {
+  const isCompleted = match.teamAScore > 0 || match.teamBScore > 0 || !isFuture(parseISO(match.date));
+  const teamAWon = match.teamAScore > match.teamBScore;
+  const teamBWon = match.teamBScore > match.teamAScore;
+  const draw = match.teamAScore === match.teamBScore && isCompleted;
+
+  return (
+    <Card className="overflow-hidden border-l-4 border-l-primary/30 hover:border-l-primary transition-all group relative glass-card">
+      <CardContent className="p-0">
+        <div className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <Link href={`/matches/${match.id}`} className="flex-1">
+            <div className="flex flex-col md:flex-row md:items-center gap-6">
+              <div className="flex items-center gap-4 min-w-[180px]">
+                  <div className="p-3 bg-muted rounded-xl">
+                      <CalendarIcon className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <div className="flex flex-col">
+                      <span className="font-black text-white uppercase italic tracking-tighter">
+                        {format(parseISO(match.date), "eeee d", { locale: es })}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
+                          {format(parseISO(match.date), "MMMM yyyy", { locale: es })}
+                      </span>
+                  </div>
+              </div>
+
+              <div className="flex items-center justify-center flex-1 gap-8 md:gap-12 py-2 md:py-0">
+                <div className="flex flex-col items-center gap-1">
+                  <span className={cn(
+                    "text-[10px] font-black uppercase tracking-[0.2em]",
+                    (draw || teamAWon) ? "text-primary" : "text-muted-foreground/30"
+                  )}>Azul</span>
+                  <span className={cn(
+                    "text-4xl font-black transition-all italic",
+                    "text-primary",
+                    teamAWon ? "scale-110 drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]" : "opacity-40"
+                  )}>{match.teamAScore}</span>
+                </div>
+                
+                <div className="text-xl font-light text-muted-foreground/20 italic">VS</div>
+                
+                <div className="flex flex-col items-center gap-1">
+                  <span className={cn(
+                    "text-[10px] font-black uppercase tracking-[0.2em]",
+                    (draw || teamBWon) ? "text-accent" : "text-muted-foreground/30"
+                  )}>Rojo</span>
+                  <span className={cn(
+                    "text-4xl font-black transition-all italic",
+                    "text-accent",
+                    teamBWon ? "scale-110 drop-shadow-[0_0_10px_rgba(244,63,94,0.5)]" : "opacity-40"
+                  )}>{match.teamBScore}</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 md:ml-auto">
+                {match.photos && match.photos.length > 0 && (
+                  <Badge variant="outline" className="h-7 w-7 rounded-full p-0 flex items-center justify-center bg-primary/10 border-primary/20 text-primary">
+                    <Camera className="h-3 w-3" />
+                  </Badge>
+                )}
+                {match.comment && (
+                  <Badge variant="outline" className="h-7 w-7 rounded-full p-0 flex items-center justify-center bg-emerald-500/10 border-emerald-500/20 text-emerald-500">
+                    <MessageSquare className="h-3 w-3" />
+                  </Badge>
+                )}
+              </div>
+            </div>
+          </Link>
+
+          <div className="flex items-center gap-2">
+              {isAdmin && (
+                <>
+                  <Button variant="ghost" size="icon" asChild className="text-muted-foreground hover:text-primary">
+                    <Link href={`/matches/${match.id}/edit`}><Pencil className="h-4 w-4" /></Link>
+                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>¿Eliminar este partido?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Esta acción borrará la crónica y las estadísticas para siempre.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => onDelete(match.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                          Eliminar
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </>
+              )}
+              <Button variant="outline" size="icon" asChild className="group-hover:bg-primary group-hover:border-primary group-hover:text-primary-foreground rounded-xl">
+                <Link href={`/matches/${match.id}`}><ArrowRight className="h-5 w-5" /></Link>
+              </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
 
 export default function MatchesPage() {
   const firestore = useFirestore();
@@ -42,7 +160,7 @@ export default function MatchesPage() {
   const { data: matchesData, isLoading } = useCollection<Match>(matchesQuery);
   const { data: adminRole } = useDoc<{isAdmin: boolean}>(adminRoleRef);
   
-  const isAdmin = adminRole?.isAdmin;
+  const isAdmin = !!adminRole?.isAdmin;
 
   const handleDeleteMatch = (matchId: string) => {
     if (!firestore) return;
@@ -62,125 +180,63 @@ export default function MatchesPage() {
     );
   }
 
-  const allMatches = matchesData || [];
+  const matches = matchesData || [];
+  const futureMatches = matches.filter(m => isFuture(parseISO(m.date)));
+  const pastMatches = matches.filter(m => !isFuture(parseISO(m.date)));
 
   return (
-    <div className="flex flex-col gap-8 max-w-4xl mx-auto">
+    <div className="flex flex-col gap-10 max-w-5xl mx-auto pb-20">
       <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-white">Historial de Partidos</h1>
-            <p className="text-muted-foreground">Registro de todos los encuentros disputados.</p>
+            <h1 className="text-4xl font-black tracking-tighter text-white uppercase italic">Timeline Real Acade</h1>
+            <p className="text-muted-foreground">Calendario oficial y registro histórico del club.</p>
           </div>
           {isAdmin && (
-            <Button asChild>
-                <Link href="/matches/new"><Plus className="mr-2 h-4 w-4" /> Cargar Partido</Link>
+            <Button asChild className="font-black uppercase italic shadow-lg shadow-primary/20">
+                <Link href="/matches/new"><Plus className="mr-2 h-4 w-4" /> Nuevo Partido</Link>
             </Button>
           )}
       </div>
 
-      <div className="grid grid-cols-1 gap-6">
-        {allMatches.map((match) => {
-          const teamAWon = match.teamAScore > match.teamBScore;
-          const teamBWon = match.teamBScore > match.teamAScore;
-          const draw = match.teamAScore === match.teamBScore;
-
-          return (
-            <Card key={match.id} className="overflow-hidden border-l-4 border-l-primary/30 hover:border-l-primary transition-all group relative">
-              <CardContent className="p-0">
-                <div className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                  <Link href={`/matches/${match.id}`} className="flex-1">
-                    <div className="flex flex-col md:flex-row md:items-center gap-6">
-                      <div className="flex items-center gap-4">
-                          <div className="p-3 bg-muted rounded-full">
-                              <CalendarIcon className="h-5 w-5 text-muted-foreground" />
-                          </div>
-                          <div className="flex flex-col">
-                              <span className="font-bold text-white">
-                                {new Date(match.date).toLocaleDateString('es-ES', { 
-                                  weekday: 'long', 
-                                  day: 'numeric', 
-                                  month: 'long' 
-                                })}
-                              </span>
-                              <span className="text-xs text-muted-foreground uppercase tracking-widest">
-                                  {new Date(match.date).getFullYear()}
-                              </span>
-                          </div>
-                      </div>
-
-                      <div className="flex items-center justify-center flex-1 gap-8 md:gap-12">
-                        <div className="flex flex-col items-center gap-1">
-                          <span className={cn(
-                            "text-xs font-bold uppercase tracking-widest",
-                            (draw || teamAWon) ? "text-primary" : "text-muted-foreground/50"
-                          )}>Azul</span>
-                          <span className={cn(
-                            "text-4xl font-black transition-all",
-                            "text-primary",
-                            teamAWon ? "scale-110 drop-shadow-[0_0_8px_rgba(var(--primary),0.5)]" : "opacity-80"
-                          )}>{match.teamAScore}</span>
-                        </div>
-                        
-                        <div className="text-xl font-light text-muted-foreground/30 italic">VS</div>
-                        
-                        <div className="flex flex-col items-center gap-1">
-                          <span className={cn(
-                            "text-xs font-bold uppercase tracking-widest",
-                            (draw || teamBWon) ? "text-accent" : "text-muted-foreground/50"
-                          )}>Rojo</span>
-                          <span className={cn(
-                            "text-4xl font-black transition-all",
-                            "text-accent",
-                            teamBWon ? "scale-110 drop-shadow-[0_0_8px_rgba(var(--accent),0.5)]" : "opacity-80"
-                          )}>{match.teamBScore}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-
-                  <div className="flex items-center gap-2">
-                      {isAdmin && (
-                        <>
-                          <Button variant="ghost" size="icon" asChild className="text-muted-foreground hover:text-primary">
-                            <Link href={`/matches/${match.id}/edit`}><Pencil className="h-4 w-4" /></Link>
-                          </Button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>¿Eliminar este partido?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Esta acción no se puede deshacer. Se borrarán todos los datos y votos asociados.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDeleteMatch(match.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                                  Eliminar permanentemente
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </>
-                      )}
-                      <Button variant="outline" size="icon" asChild className="group-hover:bg-primary group-hover:border-primary group-hover:text-primary-foreground">
-                        <Link href={`/matches/${match.id}`}><ArrowRight className="h-5 w-5" /></Link>
-                      </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-        {allMatches.length === 0 && (
-            <div className="text-center py-12 border-2 border-dashed rounded-lg">
-                <p className="text-muted-foreground">No hay partidos registrados aún.</p>
+      <div className="space-y-12">
+        {futureMatches.length > 0 && (
+          <section className="space-y-6">
+            <h2 className="text-xs font-black uppercase tracking-[0.3em] text-primary flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+              Próximos Desafíos
+            </h2>
+            <div className="grid grid-cols-1 gap-4">
+              {futureMatches.map(match => (
+                <MatchCard 
+                  key={match.id} 
+                  match={match} 
+                  isAdmin={isAdmin} 
+                  onDelete={handleDeleteMatch} 
+                />
+              ))}
             </div>
+          </section>
         )}
+
+        <section className="space-y-6">
+          <h2 className="text-xs font-black uppercase tracking-[0.3em] text-muted-foreground/50">Historial de Batallas</h2>
+          <div className="grid grid-cols-1 gap-6">
+            {pastMatches.map((match) => (
+              <MatchCard 
+                key={match.id} 
+                match={match} 
+                isAdmin={isAdmin} 
+                onDelete={handleDeleteMatch} 
+              />
+            ))}
+          </div>
+          {pastMatches.length === 0 && futureMatches.length === 0 && (
+              <div className="text-center py-20 border-2 border-dashed rounded-3xl opacity-20">
+                  <CalendarIcon className="h-12 w-12 mx-auto mb-4" />
+                  <p className="font-bold uppercase italic tracking-widest">Sin registros aún</p>
+              </div>
+          )}
+        </section>
       </div>
     </div>
   );

@@ -23,6 +23,15 @@
         "teamBScore": {
           "type": "number",
           "description": "The score for team 2."
+        },
+        "comment": {
+          "type": "string",
+          "description": "Post-match analysis by the admin."
+        },
+        "photos": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "URLs of photos taken during the match."
         }
       },
       "required": [

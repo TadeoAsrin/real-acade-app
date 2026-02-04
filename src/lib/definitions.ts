@@ -24,6 +24,8 @@ export type Match = {
   teamBScore: number;
   teamAPlayers: PlayerStats[];
   teamBPlayers: PlayerStats[];
+  comment?: string;
+  photos?: string[];
 };
 
 export type AggregatedPlayerStats = {

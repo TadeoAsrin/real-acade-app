@@ -8,6 +8,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from "@/components/ui/card";
 import {
   Table,
@@ -20,15 +21,25 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import type { Player, PlayerStats, Match } from "@/lib/definitions";
-import { cn } from "@/lib/utils";
+import { cn, getInitials } from "@/lib/utils";
 import { BestGoalVote } from "@/components/matches/best-goal-vote";
-import { Award, Star, Loader2, Share2, Pencil } from "lucide-react";
+import { Award, Star, Loader2, Share2, Pencil, Quote, Camera, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { MatchAiSummary } from "@/components/matches/match-ai-summary";
 import { useDoc, useCollection, useMemoFirebase, useFirestore, useUser } from "@/firebase";
 import { doc, collection } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
+import { format, parseISO } from "date-fns";
+import { es } from "date-fns/locale";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+} from "@/components/ui/dialog";
 
 const PlayerStatsTable = ({
   title,
@@ -42,16 +53,16 @@ const PlayerStatsTable = ({
   allPlayers: Player[];
 }) => {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className={cn(teamColor === 'primary' ? "text-primary" : "text-accent")}>{title}</CardTitle>
+    <Card className="glass-card overflow-hidden">
+      <CardHeader className={cn("pb-4", teamColor === 'primary' ? "bg-primary/5" : "bg-accent/5")}>
+        <CardTitle className={cn("text-lg font-black uppercase italic tracking-tighter", teamColor === 'primary' ? "text-primary" : "text-accent")}>{title}</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-0">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Jugador</TableHead>
-              <TableHead className="text-center">Goles</TableHead>
+            <TableRow className="bg-muted/20 border-white/5">
+              <TableHead className="pl-6 text-[10px] font-black uppercase">Jugador</TableHead>
+              <TableHead className="text-center text-[10px] font-black uppercase">Goles</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -59,27 +70,31 @@ const PlayerStatsTable = ({
               const player = allPlayers.find(p => p.id === stat.playerId);
               if (!player) return null;
               return (
-                <TableRow key={player.id}>
-                  <TableCell>
+                <TableRow key={player.id} className="border-white/5 hover:bg-white/5 transition-colors">
+                  <TableCell className="pl-6 py-4">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-8 w-8">
                         <AvatarImage src={player.avatar} alt={player.name} />
-                        <AvatarFallback>{player.name.charAt(0)}</AvatarFallback>
+                        <AvatarFallback className="text-[10px] font-black bg-muted">{getInitials(player.name)}</AvatarFallback>
                       </Avatar>
-                      <span className="font-medium">{player.name}</span>
-                       {stat.isMvp && (
-                        <Badge variant="outline" className="border-yellow-400 text-yellow-400">
-                          <Star className="mr-1 h-3 w-3" /> MVP
-                        </Badge>
-                      )}
-                      {stat.hasBestGoal && (
-                        <Badge variant="outline" className="border-primary text-primary">
-                          <Award className="mr-1 h-3 w-3" /> Mejor Gol
-                        </Badge>
-                      )}
+                      <div className="flex flex-col">
+                        <span className="font-bold text-sm text-white/90">{player.name}</span>
+                        <div className="flex gap-1.5 mt-1">
+                          {stat.isMvp && (
+                            <Badge variant="outline" className="h-4 text-[8px] border-yellow-500/50 text-yellow-500 bg-yellow-500/5 uppercase font-black">
+                              MVP
+                            </Badge>
+                          )}
+                          {stat.hasBestGoal && (
+                            <Badge variant="outline" className="h-4 text-[8px] border-primary/50 text-primary bg-primary/5 uppercase font-black">
+                              Golazo
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </TableCell>
-                  <TableCell className="text-center font-mono">
+                  <TableCell className="text-center font-black italic text-xl">
                     {stat.goals}
                   </TableCell>
                 </TableRow>
@@ -91,6 +106,53 @@ const PlayerStatsTable = ({
     </Card>
   );
 };
+
+export function MatchGallery({ photos }: { photos: string[] }) {
+  const [selectedPhoto, setSelectedPlayer] = React.useState<string | null>(null);
+
+  if (!photos || photos.length === 0) return null;
+
+  return (
+    <section className="space-y-4">
+      <div className="flex items-center gap-2 px-1">
+        <Camera className="h-4 w-4 text-primary" />
+        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">Galería de Combate</h2>
+      </div>
+      <div className="flex gap-4 overflow-x-auto pb-4 snap-x no-scrollbar">
+        {photos.map((url, idx) => (
+          <div 
+            key={idx} 
+            className="relative flex-none w-64 aspect-[4/3] rounded-2xl overflow-hidden cursor-zoom-in snap-center border-2 border-white/5 group"
+            onClick={() => setSelectedPlayer(url)}
+          >
+            <img 
+              src={url} 
+              alt={`Foto ${idx + 1}`} 
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              data-ai-hint="football match action"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          </div>
+        ))}
+      </div>
+
+      <Dialog open={!!selectedPhoto} onOpenChange={(open) => !open && setSelectedPlayer(null)}>
+        <DialogContent className="max-w-screen-lg p-0 bg-transparent border-none shadow-none">
+          <DialogHeader className="sr-only"><DialogTitle>Foto Ampliada</DialogTitle></DialogHeader>
+          <div className="relative w-full h-full flex items-center justify-center">
+            <img src={selectedPhoto || ""} className="max-w-full max-h-[90vh] object-contain rounded-xl shadow-2xl" alt="Zoom" />
+            <button 
+              className="absolute top-4 right-4 bg-black/50 hover:bg-black p-2 rounded-full text-white transition-colors"
+              onClick={() => setSelectedPlayer(null)}
+            >
+              <X className="h-6 w-6" />
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </section>
+  );
+}
 
 export default function MatchDetailPage() {
   const params = useParams();
@@ -121,11 +183,14 @@ export default function MatchDetailPage() {
   const isAdmin = adminRole?.isAdmin;
 
   const handleShare = () => {
-    navigator.clipboard.writeText(window.location.href);
-    toast({
-      title: "Enlace Copiado",
-      description: "El enlace al partido se ha copiado al portapapeles.",
-    });
+    const text = `⚽ *REAL ACADE* ⚽\n\n` +
+      `🔥 *AZUL ${match?.teamAScore} - ${match?.teamBScore} ROJO*\n` +
+      `📅 ${format(parseISO(match?.date || ""), "PPP", { locale: es })}\n\n` +
+      `Mirá la crónica completa y las fotos acá:\n` +
+      `${window.location.href}`;
+    
+    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
   };
 
   if (matchLoading || playersLoading) {
@@ -136,9 +201,7 @@ export default function MatchDetailPage() {
     );
   }
 
-  if (!match) {
-    return <div className="text-center py-12">Partido no encontrado.</div>;
-  }
+  if (!match) return <div className="text-center py-12 font-black uppercase italic opacity-20">Partido no encontrado.</div>;
 
   const allPlayers = players || [];
   const allPlayerStats = [...match.teamAPlayers, ...match.teamBPlayers];
@@ -165,21 +228,20 @@ export default function MatchDetailPage() {
   };
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-            <h1 className="text-4xl font-black tracking-tighter uppercase">Resumen del Partido</h1>
-            <div className="flex items-center gap-2">
-                <p className="text-muted-foreground">
-                {new Date(match.date).toLocaleDateString("es-ES", {
-                    weekday: "long",
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                })}
-                </p>
+    <div className="space-y-10 max-w-5xl mx-auto pb-20">
+      
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="space-y-2">
+            <Link href="/matches" className="flex items-center gap-2 text-xs font-black uppercase text-muted-foreground hover:text-primary transition-colors mb-4">
+              <ChevronLeft className="h-3 w-3" /> Volver al Timeline
+            </Link>
+            <h1 className="text-5xl md:text-6xl font-black italic tracking-tighter uppercase leading-none">Anatomía del Partido</h1>
+            <div className="flex items-center gap-3">
+                <Badge variant="outline" className="bg-white/5 border-white/10 uppercase font-black italic">
+                  {format(parseISO(match.date), "PPPP", { locale: es })}
+                </Badge>
                 <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleShare}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-emerald-500/10 hover:text-emerald-500" onClick={handleShare}>
                         <Share2 className="h-4 w-4" />
                     </Button>
                     {isAdmin && (
@@ -190,44 +252,61 @@ export default function MatchDetailPage() {
                 </div>
             </div>
         </div>
-        <Badge variant="secondary" className="w-fit text-lg py-1 px-4 border-primary/20">Real Acade League</Badge>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
-            <Card className="bg-gradient-to-br from-background to-muted/50 border-none shadow-2xl overflow-hidden">
-                <CardContent className="p-12 relative">
-                    <div className="flex items-center justify-around relative z-10">
-                        <div className="flex flex-col items-center gap-4">
-                            <span className="text-2xl font-black text-primary uppercase tracking-widest">Azul</span>
-                            <span className="text-8xl font-black text-primary drop-shadow-[0_0_15px_rgba(var(--primary),0.3)]">
-                                {match.teamAScore}
-                            </span>
-                        </div>
-                        <div className="flex flex-col items-center">
-                            <div className="h-20 w-[2px] bg-muted-foreground/20 rotate-12"></div>
-                            <span className="text-3xl font-light text-muted-foreground/30 italic my-4">VS</span>
-                            <div className="h-20 w-[2px] bg-muted-foreground/20 -rotate-12"></div>
-                        </div>
-                        <div className="flex flex-col items-center gap-4">
-                            <span className="text-2xl font-black text-accent uppercase tracking-widest">Rojo</span>
-                            <span className="text-8xl font-black text-accent drop-shadow-[0_0_15px_rgba(var(--accent),0.3)]">
-                                {match.teamBScore}
-                            </span>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
+      <Card className="bg-gradient-to-br from-card to-background border-none shadow-[0_30px_100px_rgba(0,0,0,0.5)] overflow-hidden relative">
+          <div className="absolute inset-0 bg-dot-pattern opacity-10 pointer-events-none" />
+          <CardContent className="p-10 md:p-20 relative z-10">
+              <div className="flex items-center justify-around gap-4">
+                  <div className="flex flex-col items-center gap-6">
+                      <span className="text-xl md:text-2xl font-black text-primary uppercase tracking-[0.3em] italic">Azul</span>
+                      <span className="text-8xl md:text-[10rem] font-black text-primary drop-shadow-[0_0_30px_rgba(59,130,246,0.4)] leading-none italic">
+                          {match.teamAScore}
+                      </span>
+                  </div>
+                  <div className="flex flex-col items-center">
+                      <div className="h-24 w-[2px] bg-white/5 rotate-12 mb-4"></div>
+                      <span className="text-4xl font-light text-muted-foreground/20 italic">VS</span>
+                      <div className="h-24 w-[2px] bg-white/5 -rotate-12 mt-4"></div>
+                  </div>
+                  <div className="flex flex-col items-center gap-6">
+                      <span className="text-xl md:text-2xl font-black text-accent uppercase tracking-[0.3em] italic">Rojo</span>
+                      <span className="text-8xl md:text-[10rem] font-black text-accent drop-shadow-[0_0_30px_rgba(244,63,94,0.4)] leading-none italic">
+                          {match.teamBScore}
+                      </span>
+                  </div>
+              </div>
+          </CardContent>
+      </Card>
 
+      <MatchGallery photos={match.photos || []} />
+
+      {match.comment && (
+        <section className="relative">
+          <div className="absolute -left-4 top-0 h-full w-1 bg-emerald-500 rounded-full opacity-50" />
+          <div className="bg-emerald-500/5 p-8 rounded-2xl border border-emerald-500/10">
+            <div className="flex items-center gap-2 mb-4">
+              <Quote className="h-5 w-5 text-emerald-500" />
+              <h3 className="text-xs font-black uppercase tracking-widest text-emerald-500/60">Análisis del Administrador</h3>
+            </div>
+            <p className="text-xl md:text-2xl font-medium italic text-white/80 leading-relaxed">
+              {match.comment}
+            </p>
+          </div>
+        </section>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div className="lg:col-span-8 space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <PlayerStatsTable
-                title="Equipo Azul"
+                title="Batallón Azul"
                 stats={match.teamAPlayers}
                 teamColor="primary"
                 allPlayers={allPlayers}
                 />
                 <PlayerStatsTable
-                title="Equipo Rojo"
+                title="Escuadrón Rojo"
                 stats={match.teamBPlayers}
                 teamColor="accent"
                 allPlayers={allPlayers}
@@ -235,9 +314,8 @@ export default function MatchDetailPage() {
             </div>
         </div>
 
-        <div className="space-y-8">
+        <div className="lg:col-span-4 space-y-8">
             <MatchAiSummary matchData={matchSummaryData} />
-            
             <BestGoalVote matchId={id} scorers={scorers} />
         </div>
       </div>
