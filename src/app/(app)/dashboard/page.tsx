@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Medal, Loader2, Zap, Calendar, Users, Brain, Heart, Crown, Link as LinkIcon, Flame, Target, Trophy, TrendingUp, Star, Skull, Ghost, CloudRain, Frown } from "lucide-react";
+import { Medal, Loader2, Zap, Calendar, Users, Brain, Heart, Crown, Link as LinkIcon, Flame, Target, Trophy, TrendingUp, Star, Skull, Ghost, CloudRain, Frown, Droplets } from "lucide-react";
 import Link from "next/link";
 import { FieldView } from "@/components/dashboard/field-view";
 import { PowerRanking } from "@/components/dashboard/power-ranking";
@@ -92,17 +92,16 @@ export default function DashboardPage() {
     : 0;
 
   // NOS CAEMOS A PEDAZOS (Humildad Metrics)
-  const imanDeDerrotas = [...playerStats]
-    .filter(p => p.matchesPlayed >= 1)
-    .sort((a, b) => b.losses - a.losses || a.wins - b.wins)[0];
+  const maxLosses = Math.max(...playerStats.map(p => p.losses), 0);
+  const imanDeDerrotasLeaders = maxLosses > 0 ? playerStats.filter(p => p.losses === maxLosses) : [];
 
-  const factorDeRiesgo = [...playerStats]
-    .filter(p => p.matchesPlayed >= 3)
-    .sort((a, b) => a.winPercentage - b.winPercentage || b.losses - a.losses)[0];
+  const eligibleForRiesgo = playerStats.filter(p => p.matchesPlayed >= 3);
+  const minWinRate = eligibleForRiesgo.length > 0 ? Math.min(...eligibleForRiesgo.map(p => p.winPercentage)) : 0;
+  const factorDeRiesgoLeaders = eligibleForRiesgo.length > 0 ? eligibleForRiesgo.filter(p => p.winPercentage === minWinRate) : [];
 
-  const piedraEnElZapato = [...playerStats]
-    .filter(p => p.matchesPlayed >= 3)
-    .sort((a, b) => a.powerPoints - b.powerPoints || a.winPercentage - b.winPercentage)[0];
+  const eligibleForPolvora = playerStats.filter(p => p.matchesPlayed >= 3 && p.position !== 'Arquero');
+  const minGoalsPerMatch = eligibleForPolvora.length > 0 ? Math.min(...eligibleForPolvora.map(p => p.goalsPerMatch)) : 0;
+  const polvoraMojadaLeaders = eligibleForPolvora.length > 0 ? eligibleForPolvora.filter(p => p.goalsPerMatch === minGoalsPerMatch) : [];
 
   // Action Metrics
   const totalGoals = playerStats.reduce((sum, p) => sum + p.totalGoals, 0);
@@ -383,21 +382,30 @@ export default function DashboardPage() {
                 </div>
                 <CardHeader className="pb-2">
                     <CardTitle className="text-[10px] font-black uppercase tracking-widest text-red-500 flex items-center gap-2">
-                        <Skull className="h-3 w-3" /> El Imán de Derrotas
+                        <Skull className="h-3 w-3" /> 
+                        {imanDeDerrotasLeaders.length > 1 ? "Imanes de Derrotas" : "El Imán de Derrotas"}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="flex items-center gap-4">
-                        <Avatar className="h-12 w-12 border-2 border-red-500/20">
-                            <AvatarFallback className="bg-red-500/10 text-red-500 font-black">{getInitials(imanDeDerrotas?.name || "?")}</AvatarFallback>
-                        </Avatar>
+                        <div className="flex -space-x-3 overflow-hidden">
+                            {imanDeDerrotasLeaders.slice(0, 3).map(leader => (
+                                <Avatar key={leader.playerId} className="h-12 w-12 border-2 border-background ring-2 ring-red-500/20">
+                                    <AvatarFallback className="bg-red-500/10 text-red-500 font-black">{getInitials(leader.name)}</AvatarFallback>
+                                </Avatar>
+                            ))}
+                        </div>
                         <div className="flex flex-col min-w-0">
-                            <span className="text-lg font-black tracking-tight leading-none truncate italic text-white/80">{imanDeDerrotas?.name || '-'}</span>
+                            <span className="text-lg font-black tracking-tight leading-none truncate italic text-white/80">
+                                {imanDeDerrotasLeaders.length > 1 
+                                    ? `${imanDeDerrotasLeaders[0].name.split(' ')[0]} + ${imanDeDerrotasLeaders.length - 1}`
+                                    : (imanDeDerrotasLeaders[0]?.name || '-')}
+                            </span>
                             <span className="text-[10px] uppercase font-bold text-muted-foreground">Más caídas registradas</span>
                         </div>
                     </div>
                     <div className="flex items-baseline gap-2">
-                        <span className="text-4xl font-black italic text-red-500/80 leading-none">{imanDeDerrotas?.losses || 0}</span>
+                        <span className="text-4xl font-black italic text-red-500/80 leading-none">{maxLosses}</span>
                         <span className="text-[10px] font-black uppercase text-red-500/40 tracking-widest">Derrotas</span>
                     </div>
                 </CardContent>
@@ -410,49 +418,67 @@ export default function DashboardPage() {
                 </div>
                 <CardHeader className="pb-2">
                     <CardTitle className="text-[10px] font-black uppercase tracking-widest text-zinc-500 flex items-center gap-2">
-                        <TrendingUp className="h-3 w-3 rotate-180" /> Factor de Riesgo
+                        <TrendingUp className="h-3 w-3 rotate-180" /> 
+                        {factorDeRiesgoLeaders.length > 1 ? "Factores de Riesgo" : "Factor de Riesgo"}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="flex items-center gap-4">
-                        <Avatar className="h-12 w-12 border-2 border-zinc-500/20">
-                            <AvatarFallback className="bg-zinc-500/10 text-zinc-500 font-black">{getInitials(factorDeRiesgo?.name || "?")}</AvatarFallback>
-                        </Avatar>
+                        <div className="flex -space-x-3 overflow-hidden">
+                            {factorDeRiesgoLeaders.slice(0, 3).map(leader => (
+                                <Avatar key={leader.playerId} className="h-12 w-12 border-2 border-background ring-2 ring-zinc-500/20">
+                                    <AvatarFallback className="bg-zinc-500/10 text-zinc-500 font-black">{getInitials(leader.name)}</AvatarFallback>
+                                </Avatar>
+                            ))}
+                        </div>
                         <div className="flex flex-col min-w-0">
-                            <span className="text-lg font-black tracking-tight leading-none truncate italic text-white/80">{factorDeRiesgo?.name || '-'}</span>
+                            <span className="text-lg font-black tracking-tight leading-none truncate italic text-white/80">
+                                {factorDeRiesgoLeaders.length > 1 
+                                    ? `${factorDeRiesgoLeaders[0].name.split(' ')[0]} + ${factorDeRiesgoLeaders.length - 1}`
+                                    : (factorDeRiesgoLeaders[0]?.name || '-')}
+                            </span>
                             <span className="text-[10px] uppercase font-bold text-muted-foreground">Efectividad mínima (+3 PJ)</span>
                         </div>
                     </div>
                     <div className="flex items-baseline gap-2">
-                        <span className="text-4xl font-black italic text-zinc-500 leading-none">{factorDeRiesgo?.winPercentage || 0}%</span>
+                        <span className="text-4xl font-black italic text-zinc-500 leading-none">{minWinRate}%</span>
                         <span className="text-[10px] font-black uppercase text-zinc-500/40 tracking-widest">Victorias</span>
                     </div>
                 </CardContent>
             </Card>
 
-            {/* Piedra en el Zapato */}
-            <Card className="glass-card border-orange-900/20 bg-orange-900/5 relative overflow-hidden group">
+            {/* Pólvora Mojada */}
+            <Card className="glass-card border-blue-500/10 bg-blue-500/5 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                    <Zap className="h-20 w-20 text-orange-900" />
+                    <Droplets className="h-20 w-20 text-blue-500" />
                 </div>
                 <CardHeader className="pb-2">
-                    <CardTitle className="text-[10px] font-black uppercase tracking-widest text-orange-900/60 flex items-center gap-2">
-                        <Target className="h-3 w-3" /> Piedra en el Zapato
+                    <CardTitle className="text-[10px] font-black uppercase tracking-widest text-blue-500 flex items-center gap-2">
+                        <Droplets className="h-3 w-3" /> 
+                        {polvoraMojadaLeaders.length > 1 ? "Pólvoras Mojadas" : "Pólvora Mojada"}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="flex items-center gap-4">
-                        <Avatar className="h-12 w-12 border-2 border-orange-900/20">
-                            <AvatarFallback className="bg-orange-900/10 text-orange-900/60 font-black">{getInitials(piedraEnElZapato?.name || "?")}</AvatarFallback>
-                        </Avatar>
+                        <div className="flex -space-x-3 overflow-hidden">
+                            {polvoraMojadaLeaders.slice(0, 3).map(leader => (
+                                <Avatar key={leader.playerId} className="h-12 w-12 border-2 border-background ring-2 ring-blue-500/20">
+                                    <AvatarFallback className="bg-blue-500/10 text-blue-500 font-black">{getInitials(leader.name)}</AvatarFallback>
+                                </Avatar>
+                            ))}
+                        </div>
                         <div className="flex flex-col min-w-0">
-                            <span className="text-lg font-black tracking-tight leading-none truncate italic text-white/80">{piedraEnElZapato?.name || '-'}</span>
-                            <span className="text-[10px] uppercase font-bold text-muted-foreground">Menos impacto total (+3 PJ)</span>
+                            <span className="text-lg font-black tracking-tight leading-none truncate italic text-white/80">
+                                {polvoraMojadaLeaders.length > 1 
+                                    ? `${polvoraMojadaLeaders[0].name.split(' ')[0]} + ${polvoraMojadaLeaders.length - 1}`
+                                    : (polvoraMojadaLeaders[0]?.name || '-')}
+                            </span>
+                            <span className="text-[10px] uppercase font-bold text-muted-foreground">Menos goles/PJ (+3 PJ)</span>
                         </div>
                     </div>
                     <div className="flex items-baseline gap-2">
-                        <span className="text-4xl font-black italic text-orange-900/60 leading-none">{piedraEnElZapato?.powerPoints || 0}</span>
-                        <span className="text-[10px] font-black uppercase text-orange-900/30 tracking-widest">Poder</span>
+                        <span className="text-4xl font-black italic text-blue-500 leading-none">{minGoalsPerMatch}</span>
+                        <span className="text-[10px] font-black uppercase text-blue-500/40 tracking-widest">Goles/PJ</span>
                     </div>
                 </CardContent>
             </Card>
