@@ -10,10 +10,18 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials, cn } from "@/lib/utils";
-import { Loader2, Swords, UserPlus, Trophy, Share2, Copy } from "lucide-react";
+import { Loader2, Swords, UserPlus, Trophy, Share2, Copy, MessageCircle, Eye } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 export default function NewDraftPage() {
   const firestore = useFirestore();
@@ -77,6 +85,18 @@ export default function NewDraftPage() {
     router.push(`/drafts/${draftId}`);
   };
 
+  const simulateWhatsApp = () => {
+    const dummyA = "Lionel Messi, R9, Zidane, Maldini, Cafu, Roberto Carlos, Casillas".split(', ');
+    const dummyB = "Cristiano Ronaldo, Pele, Maradona, Puyol, Xavi, Ronaldinho, Buffon".split(', ');
+    
+    return `⚽ *PAN Y QUESO - REAL ACADE* ⚽\n\n` +
+      `🔵 *EQUIPO AZUL* (Cap. Tadeo)\n` +
+      dummyA.map((name, i) => `${i+1}. ${name}`).join('\n') +
+      `\n\n🔴 *EQUIPO ROJO* (Cap. Roman)\n` +
+      dummyB.map((name, i) => `${i+1}. ${name}`).join('\n') +
+      `\n\n🔥 *¡Nos vemos en la cancha!*`;
+  };
+
   const selectedPlayers = (players || []).filter(p => selectedPlayerIds.includes(p.id));
 
   return (
@@ -89,20 +109,42 @@ export default function NewDraftPage() {
           </h1>
           <p className="text-muted-foreground">Selecciona a los 14 jugadores y define a los capitanes.</p>
         </div>
-        <Button 
-          onClick={handleCreateDraft} 
-          disabled={selectedPlayerIds.length !== 14 || !capAId || !capBId || isCreating}
-          size="lg"
-          className="font-black uppercase italic"
-        >
-          {isCreating ? <Loader2 className="animate-spin mr-2" /> : "Iniciar Draft"}
-        </Button>
+        <div className="flex gap-2">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="font-black uppercase italic border-emerald-500/20 text-emerald-500 hover:bg-emerald-500/10">
+                <Eye className="mr-2 h-4 w-4" /> Ver Simulación
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md bg-zinc-900 text-white border-zinc-800">
+              <DialogHeader>
+                <DialogTitle className="text-emerald-500 uppercase italic font-black">Vista Previa WhatsApp</DialogTitle>
+                <DialogDescription className="text-zinc-400">Así es como se recibirá el mensaje en el grupo una vez terminado el draft.</DialogDescription>
+              </DialogHeader>
+              <div className="bg-zinc-950 p-6 rounded-xl border border-white/5 font-mono text-sm whitespace-pre-wrap">
+                {simulateWhatsApp()}
+              </div>
+              <div className="mt-4 p-4 bg-emerald-500/10 rounded-lg flex items-center gap-3 border border-emerald-500/20">
+                <MessageCircle className="h-5 w-5 text-emerald-500" />
+                <p className="text-[10px] uppercase font-bold text-emerald-500">Formato de Élite confirmado</p>
+              </div>
+            </DialogContent>
+          </Dialog>
+          <Button 
+            onClick={handleCreateDraft} 
+            disabled={selectedPlayerIds.length !== 14 || !capAId || !capBId || isCreating}
+            size="lg"
+            className="font-black uppercase italic"
+          >
+            {isCreating ? <Loader2 className="animate-spin mr-2" /> : "Iniciar Draft"}
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <Card className="glass-card">
           <CardHeader>
-            <CardTitle>1. Seleccionar Plantilla (14/14)</CardTitle>
+            <CardTitle>1. Seleccionar Plantilla ({selectedPlayerIds.length}/14)</CardTitle>
             <CardDescription>Marca a los que juegan hoy.</CardDescription>
           </CardHeader>
           <CardContent className="max-h-[500px] overflow-y-auto space-y-2">

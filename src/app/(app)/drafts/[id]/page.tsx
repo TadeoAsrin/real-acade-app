@@ -62,6 +62,9 @@ export default function DraftDetailPage() {
 
   const isMyTurn = capType === whoseTurn;
   const isFinished = draft.availablePlayers.length === 0;
+  
+  // Visibility: Admin or being one of the captains
+  const canControl = adminRole?.isAdmin || !!capType;
 
   const handlePick = (player: Player) => {
     if (!isMyTurn || isFinished || !firestore) return;
@@ -189,7 +192,7 @@ export default function DraftDetailPage() {
           </div>
         </div>
         <div className="flex gap-3">
-          {isFinished && (
+          {isFinished && canControl && (
             <Button onClick={shareToWhatsApp} className="bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase italic px-6">
               <MessageCircle className="mr-2 h-5 w-5" />
               Calentar el Partido
