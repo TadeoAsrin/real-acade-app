@@ -6,7 +6,7 @@ import { useParams, useSearchParams } from 'next/navigation';
 import { useDoc, useMemoFirebase, useFirestore, updateDocumentNonBlocking, useUser } from "@/firebase";
 import { doc, setDoc, deleteDoc, collection, serverTimestamp } from "firebase/firestore";
 import type { Draft, Player, PlayerStats } from "@/lib/definitions";
-import { Loader2, Swords, Shield, Zap, Share2, Trophy, Copy, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Loader2, Swords, Shield, Zap, Share2, Trophy, Copy, AlertCircle, CheckCircle2, MessageCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials, cn } from "@/lib/utils";
@@ -21,6 +21,11 @@ export default function DraftDetailPage() {
   const firestore = useFirestore();
   const { user } = useUser();
   const { toast } = useToast();
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const draftRef = useMemoFirebase(() => {
     if (!firestore || !id) return null;
@@ -35,7 +40,7 @@ export default function DraftDetailPage() {
   const { data: draft, isLoading } = useDoc<Draft>(draftRef);
   const { data: adminRole } = useDoc<{isAdmin: boolean}>(adminRoleRef);
 
-  if (isLoading) return <div className="flex h-screen items-center justify-center"><Loader2 className="animate-spin h-10 w-10 text-primary" /></div>;
+  if (!isMounted || isLoading) return <div className="flex h-screen items-center justify-center"><Loader2 className="animate-spin h-10 w-10 text-primary" /></div>;
   if (!draft) return <div className="p-10 text-center">Draft no encontrado.</div>;
 
   const currentPickCount = draft.picks.length;
@@ -61,10 +66,28 @@ export default function DraftDetailPage() {
   const handlePick = (player: Player) => {
     if (!isMyTurn || isFinished || !firestore) return;
 
-    const newPicks = [...draft.picks, { playerId: player.id, captain: whoseTurn }];
-    const newAvailable = draft.availablePlayers.filter(p => p.id !== player.id);
-    const newTeamA = whoseTurn === 'A' ? [...draft.teamAPlayers, player] : draft.teamAPlayers;
-    const newTeamB = whoseTurn === 'B' ? [...draft.teamBPlayers, player] : draft.teamBPlayers;
+    let newPicks = [...draft.picks, { playerId: player.id, captain: whoseTurn }];
+    let newAvailable = draft.availablePlayers.filter(p => p.id !== player.id);
+    let newTeamA = whoseTurn === 'A' ? [...draft.teamAPlayers, player] : draft.teamAPlayers;
+    let newTeamB = whoseTurn === 'B' ? [...draft.teamBPlayers, player] : draft.teamBPlayers;
+
+    // Automatic last pick assignment
+    if (newAvailable.length === 1) {
+      const lastPlayer = newAvailable[0];
+      const nextPickCount = newPicks.length;
+      let nextTurn: 'A' | 'B' = 'A';
+      
+      if (nextPickCount === 1 || nextPickCount === 2) {
+        nextTurn = 'B';
+      } else {
+        nextTurn = nextPickCount % 2 === 1 ? 'A' : 'B';
+      }
+
+      newPicks.push({ playerId: lastPlayer.id, captain: nextTurn });
+      newAvailable = [];
+      if (nextTurn === 'A') newTeamA.push(lastPlayer);
+      else newTeamB.push(lastPlayer);
+    }
 
     updateDocumentNonBlocking(draftRef!, {
       picks: newPicks,
@@ -81,6 +104,18 @@ export default function DraftDetailPage() {
     const url = `${window.location.origin}/drafts/${id}?cap=${type}`;
     navigator.clipboard.writeText(url);
     toast({ title: "Link Copiado", description: `Enviá este link al Capitán ${type === 'A' ? 'Azul' : 'Rojo'}.` });
+  };
+
+  const shareToWhatsApp = () => {
+    const text = `⚽ *PAN Y QUESO - REAL ACADE* ⚽\n\n` +
+      `🔵 *EQUIPO AZUL* (Cap. ${draft.captainA.name.split(' ')[0]})\n` +
+      draft.teamAPlayers.map((p, i) => `${i+1}. ${p.name}`).join('\n') +
+      `\n\n🔴 *EQUIPO ROJO* (Cap. ${draft.captainB.name.split(' ')[0]})\n` +
+      draft.teamBPlayers.map((p, i) => `${i+1}. ${p.name}`).join('\n') +
+      `\n\n🔥 *¡Nos vemos en la cancha!*`;
+    
+    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
   };
 
   const handleConvertToMatch = async () => {
@@ -139,7 +174,7 @@ export default function DraftDetailPage() {
       <div className={cn(
         "p-6 rounded-2xl border-2 flex flex-col md:flex-row items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4",
         isFinished ? "bg-emerald-500/10 border-emerald-500/40 text-emerald-500" :
-        isMyTurn ? "bg-primary border-primary text-white shadow-[0_0_30px_rgba(59,130,246,0.3)]" : 
+        isMyTurn ? (capType === 'A' ? "bg-primary border-primary text-white shadow-[0_0_30px_rgba(59,130,246,0.3)]" : "bg-accent border-accent text-white shadow-[0_0_30px_rgba(244,63,94,0.3)]") : 
         "bg-white/5 border-white/10 text-muted-foreground"
       )}>
         <div className="flex items-center gap-4">
@@ -153,11 +188,19 @@ export default function DraftDetailPage() {
             </p>
           </div>
         </div>
-        {isFinished && adminRole?.isAdmin && (
-          <Button onClick={handleConvertToMatch} className="bg-emerald-500 hover:bg-emerald-600 text-white font-black uppercase italic px-10">
-            Confirmar y Crear Partido
-          </Button>
-        )}
+        <div className="flex gap-3">
+          {isFinished && (
+            <Button onClick={shareToWhatsApp} className="bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase italic px-6">
+              <MessageCircle className="mr-2 h-5 w-5" />
+              Calentar el Partido
+            </Button>
+          )}
+          {isFinished && adminRole?.isAdmin && (
+            <Button onClick={handleConvertToMatch} className="bg-white text-black hover:bg-white/90 font-black uppercase italic px-6">
+              Confirmar Partido
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
