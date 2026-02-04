@@ -79,7 +79,6 @@ export default function DashboardPage() {
   const influencerRunnersUp = sortedByInfluence.slice(1, 3);
 
   // Pulse Metrics - Shared MVP logic
-  const maxMvps = Math.max(...playerStats.map(p => p.totalMvp), 0);
   const mvpLeaders = [...playerStats].sort((a, b) => b.totalMvp - a.totalMvp || b.powerPoints - a.powerPoints).slice(0, 3);
 
   const totalMatches = allMatches.length;
@@ -87,8 +86,11 @@ export default function DashboardPage() {
     .sort((a, b) => b.matchesPlayed - a.matchesPlayed || a.name.localeCompare(b.name))
     .slice(0, 3);
 
-  const globalAttendanceRate = totalMatches > 0 && playerStats.length > 0
-    ? Math.round((playerStats.reduce((sum, p) => sum + p.matchesPlayed, 0) / (totalMatches * playerStats.length)) * 100)
+  // New metrics for Los Infaltables
+  const maxPlayerAttendance = totalMatches > 0 ? Math.max(...playerStats.map(p => p.matchesPlayed), 0) : 0;
+  const maxPlayerAttendanceRate = totalMatches > 0 ? Math.round((maxPlayerAttendance / totalMatches) * 100) : 0;
+  const avgPlayersPerMatch = totalMatches > 0 
+    ? (playerStats.reduce((sum, p) => sum + p.matchesPlayed, 0) / totalMatches).toFixed(1) 
     : 0;
 
   // Nos Caemos a Pedazos
@@ -452,8 +454,8 @@ export default function DashboardPage() {
                 </CardHeader>
                 <CardContent className="space-y-4 flex-1 flex flex-col">
                     <div className="flex flex-col py-1">
-                        <span className="text-5xl font-black tracking-tighter text-emerald-500 italic leading-none">{globalAttendanceRate}%</span>
-                        <span className="text-[10px] font-bold text-emerald-500/60 uppercase mt-1">Compromiso Global</span>
+                        <span className="text-5xl font-black tracking-tighter text-emerald-500 italic leading-none">{maxPlayerAttendanceRate}%</span>
+                        <span className="text-[10px] font-bold text-emerald-500/60 uppercase mt-1">Asistencia Perfecta</span>
                     </div>
                     
                     <div className="space-y-3 mt-auto">
@@ -465,10 +467,13 @@ export default function DashboardPage() {
                                         <span className="text-[9px] font-black text-emerald-500/40 italic">#{i + 1}</span>
                                         <span className="text-xs font-bold text-white/80">{p.name.split(' ')[0]}</span>
                                     </div>
-                                    <span className="text-[10px] font-black italic text-emerald-500/80">{p.matchesPlayed} <span className="text-[8px] not-italic opacity-50 uppercase">PJ</span></span>
+                                    <span className="text-[10px] font-black italic text-emerald-500/80">{p.matchesPlayed} <span className="text-[8px] not-italic opacity-50 uppercase">de {totalMatches}</span></span>
                                 </div>
                             ))}
                         </div>
+                    </div>
+                    <div className="mt-auto pt-4 border-t border-white/5">
+                        <p className="text-[8px] uppercase font-black text-muted-foreground/50 tracking-widest text-center">Promedio: {avgPlayersPerMatch} jugadores/fecha</p>
                     </div>
                 </CardContent>
             </Card>
