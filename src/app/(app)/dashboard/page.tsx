@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Medal, Loader2, Zap, Calendar, Users, Brain, Heart, Crown, Link as LinkIcon, Flame, Target, Trophy } from "lucide-react";
+import { Medal, Loader2, Zap, Calendar, Users, Brain, Heart, Crown, Link as LinkIcon, Flame, Target, Trophy, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { FieldView } from "@/components/dashboard/field-view";
 import { PowerRanking } from "@/components/dashboard/power-ranking";
@@ -17,6 +17,7 @@ import { useCollection, useMemoFirebase, useFirestore } from "@/firebase";
 import { collection, query, orderBy } from "firebase/firestore";
 import type { Match, Player } from "@/lib/definitions";
 import { getInitials, cn } from "@/lib/utils";
+import { Progress } from "@/components/ui/progress";
 
 export default function DashboardPage() {
   const firestore = useFirestore();
@@ -63,7 +64,10 @@ export default function DashboardPage() {
   const topScorers = sortedByGoals.slice(0, 3);
   const topScorer = topScorers[0];
   const runnersUp = topScorers.slice(1);
-  const influencer = sortedByInfluence[0];
+
+  const topInfluencers = sortedByInfluence.slice(0, 3);
+  const influencer = topInfluencers[0];
+  const influencerRunnersUp = topInfluencers.slice(1);
 
   const totalMatches = allMatches.length;
   const attendanceLeaders = playerStats.length > 0 && totalMatches > 0
@@ -111,8 +115,8 @@ export default function DashboardPage() {
                   <Avatar className="h-16 w-16 border-4 border-yellow-500/30 group-hover:scale-105 transition-transform">
                     <AvatarFallback className="bg-yellow-500/10 text-yellow-500 text-2xl font-black">{getInitials(topScorer?.name || "?")}</AvatarFallback>
                   </Avatar>
-                  <div>
-                    <div className="text-3xl lg:text-4xl font-black tracking-tighter text-white uppercase leading-none group-hover:text-yellow-500 transition-colors">
+                  <div className="min-w-0">
+                    <div className="text-3xl lg:text-4xl font-black tracking-tighter text-white uppercase leading-none group-hover:text-yellow-500 transition-colors truncate">
                       {topScorer?.name || '-'}
                     </div>
                     <p className="text-xs font-bold text-yellow-500/60 uppercase italic">Líder Actual</p>
@@ -150,36 +154,67 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          {/* Influencer Hero Card */}
-          <Link href="/pulse/influencer" className="lg:col-span-1">
-            <Card className="glass-card border-primary/30 hover:translate-y-[-4px] transition-all duration-300 cursor-pointer h-full bg-gradient-to-br from-card/60 to-primary/10 overflow-hidden group relative">
-              <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform duration-500">
-                <Brain className="h-32 w-32 text-primary" />
-              </div>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xs font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                  <Crown className="h-3 w-3" /> Jugador más Influyente
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+          {/* Influencer Hero Card - Podio de Efectividad */}
+          <Card className="md:col-span-2 lg:col-span-1 glass-card border-primary/30 bg-gradient-to-br from-card/60 to-primary/10 overflow-hidden flex flex-col h-full relative group">
+            <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform duration-500">
+              <Brain className="h-32 w-32 text-primary" />
+            </div>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                <Crown className="h-3 w-3" /> Jugadores más Influyentes
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6 flex-1 flex flex-col">
+              {/* LÍDER DE INFLUENCIA */}
+              <Link href={influencer ? `/players/${influencer.playerId}` : "/players"} className="group/leader">
                 <div className="flex items-center gap-4">
-                  <Avatar className="h-16 w-16 border-4 border-primary/30">
+                  <Avatar className="h-16 w-16 border-4 border-primary/30 group-hover/leader:scale-105 transition-transform">
                     <AvatarFallback className="bg-primary/10 text-primary text-2xl font-black">{getInitials(influencer?.name || "?")}</AvatarFallback>
                   </Avatar>
-                  <div>
-                    <div className="text-3xl lg:text-4xl font-black tracking-tighter text-white uppercase leading-none">
+                  <div className="min-w-0">
+                    <div className="text-3xl lg:text-4xl font-black tracking-tighter text-white uppercase leading-none group-hover/leader:text-primary transition-colors truncate">
                       {influencer?.name || '-'}
                     </div>
-                    <p className="text-sm font-bold text-primary/60 uppercase italic">Factor de victoria</p>
+                    <p className="text-xs font-bold text-primary/60 uppercase italic">Factor de Victoria</p>
                   </div>
                 </div>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-5xl font-black text-primary italic leading-none">{influencer?.winPercentage || 0}%</span>
-                  <span className="text-sm font-black text-primary/50 uppercase tracking-widest">Efectividad</span>
+                <div className="mt-4 space-y-2">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-5xl font-black text-primary italic leading-none">{influencer?.winPercentage || 0}%</span>
+                    <span className="text-xs font-black text-primary/50 uppercase tracking-widest">{influencer?.wins}V en {influencer?.matchesPlayed}PJ</span>
+                  </div>
+                  <Progress value={influencer?.winPercentage || 0} className="h-1.5 bg-primary/10" />
                 </div>
-              </CardContent>
-            </Card>
-          </Link>
+              </Link>
+
+              {/* PERSEGUIDORES DE INFLUENCIA */}
+              {influencerRunnersUp.length > 0 && (
+                <div className="mt-auto pt-6 border-t border-primary/10 space-y-3">
+                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-primary/40">En la mira</p>
+                  <div className="space-y-3">
+                    {influencerRunnersUp.map((runner, idx) => (
+                      <Link key={runner.playerId} href={`/players/${runner.playerId}`} className="flex items-center justify-between group/runner">
+                        <div className="flex items-center gap-3">
+                          <span className="text-[10px] font-black text-primary/30 italic">#{idx + 2}</span>
+                          <Avatar className="h-8 w-8 border border-white/5">
+                            <AvatarFallback className="text-[10px] font-black bg-muted">{getInitials(runner.name)}</AvatarFallback>
+                          </Avatar>
+                          <span className="text-sm font-bold text-muted-foreground group-hover/runner:text-white transition-colors">{runner.name}</span>
+                        </div>
+                        <div className="text-right">
+                          <div className="flex items-center gap-1.5 justify-end">
+                            <span className="text-lg font-black italic text-white/80">{runner.winPercentage}%</span>
+                            <TrendingUp className="h-3 w-3 text-primary/40" />
+                          </div>
+                          <p className="text-[8px] font-bold text-primary/40 uppercase leading-none">{runner.wins}V - {runner.matchesPlayed}PJ</p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Power Ranking Column */}
           <div className="lg:col-span-1">
@@ -193,57 +228,57 @@ export default function DashboardPage() {
         <h2 className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground/50 px-1">Acción en la Cancha</h2>
         
         {/* Quick Stats Grid - Top Row */}
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Link href="/matches">
             <Card className="glass-card hover:bg-white/5 transition-all border-white/5 overflow-hidden">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 px-4">
-                <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Partidos</CardTitle>
-                <Calendar className="h-3 w-3 text-muted-foreground" />
+                <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Partidos Totales</CardTitle>
+                <Calendar className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent className="px-4 pb-4">
-                <div className="text-3xl font-black tracking-tighter">{allMatches.length}</div>
+                <div className="text-4xl font-black tracking-tighter">{allMatches.length}</div>
+                <p className="text-[10px] font-bold text-muted-foreground/60 uppercase mt-1">Historial del club</p>
               </CardContent>
             </Card>
           </Link>
           <Link href="/players?sort=totalGoals">
             <Card className="glass-card hover:bg-white/5 transition-all border-white/5 overflow-hidden">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 px-4">
-                <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Goles</CardTitle>
-                <Target className="h-3 w-3 text-muted-foreground" />
+                <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Goles Marcados</CardTitle>
+                <Target className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent className="px-4 pb-4">
-                <div className="text-3xl font-black tracking-tighter">{totalGoals}</div>
+                <div className="text-4xl font-black tracking-tighter">{totalGoals}</div>
+                <p className="text-[10px] font-bold text-muted-foreground/60 uppercase mt-1">Producción colectiva</p>
               </CardContent>
             </Card>
           </Link>
-          <Link href="/players" className="col-span-2 lg:col-span-1">
-            <Card className="glass-card hover:bg-emerald-500/10 transition-all border-emerald-500/20 bg-emerald-500/5 overflow-hidden">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 px-4">
-                <CardTitle className="text-[10px] font-black uppercase tracking-widest text-emerald-500">Los Infaltables</CardTitle>
-                <Users className="h-4 w-4 text-emerald-500" />
-              </CardHeader>
-              <CardContent className="px-4 pb-4">
-                <div className="flex flex-col gap-2 min-w-0">
-                  <div className="flex items-baseline justify-between">
-                    <div className="text-3xl font-black tracking-tighter text-emerald-500">{attendanceRate}%</div>
-                    <div className="text-[10px] font-bold text-emerald-500/60 uppercase">Asistencia</div>
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-[10px] font-bold text-white uppercase truncate">
-                      {attendanceLeaders.length > 0 
-                        ? (attendanceLeaders.length <= 3 
-                            ? attendanceLeaders.map(p => p.name.split(' ')[0]).join(', ')
-                            : `${attendanceLeaders[0].name.split(' ')[0]} + ${attendanceLeaders.length - 1} más`)
-                        : 'Sin datos'}
-                    </p>
-                    <p className="text-[8px] uppercase font-black text-emerald-500/50 tracking-widest truncate">
-                      {attendanceLeaders.length > 0 ? `Presentes en ${attendanceLeaders[0].matchesPlayed} encuentros` : ''}
-                    </p>
-                  </div>
+          <Card className="glass-card border-emerald-500/20 bg-emerald-500/5 overflow-hidden">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 px-4">
+              <CardTitle className="text-[10px] font-black uppercase tracking-widest text-emerald-500">Los Infaltables</CardTitle>
+              <Users className="h-4 w-4 text-emerald-500" />
+            </CardHeader>
+            <CardContent className="px-4 pb-4 overflow-hidden">
+              <div className="flex flex-col gap-2 min-w-0">
+                <div className="flex items-baseline justify-between">
+                  <div className="text-4xl font-black tracking-tighter text-emerald-500">{attendanceRate}%</div>
+                  <div className="text-[10px] font-bold text-emerald-500/60 uppercase">Asistencia</div>
                 </div>
-              </CardContent>
-            </Card>
-          </Link>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold text-white uppercase truncate">
+                    {attendanceLeaders.length > 0 
+                      ? (attendanceLeaders.length <= 3 
+                          ? attendanceLeaders.map(p => p.name.split(' ')[0]).join(', ')
+                          : `${attendanceLeaders[0].name.split(' ')[0]} + ${attendanceLeaders.length - 1} más`)
+                      : 'Sin datos'}
+                  </p>
+                  <p className="text-[8px] uppercase font-black text-emerald-500/50 tracking-widest truncate">
+                    {attendanceLeaders.length > 0 ? `Presentes en ${attendanceLeaders[0].matchesPlayed} encuentros` : ''}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Field Views - Full Width Grid */}
