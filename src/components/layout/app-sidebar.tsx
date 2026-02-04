@@ -12,7 +12,7 @@ import {
   SidebarContent,
   useSidebar,
 } from "../ui/sidebar";
-import { Goal, BarChart3, Users, LogOut, Trophy, Dices, ArrowLeftRight, LogIn, User as UserIcon, ShieldCheck, Swords, Calendar as CalendarIcon } from "lucide-react";
+import { Goal, BarChart3, Users, LogOut, Trophy, Dices, ArrowLeftRight, LogIn, User as UserIcon, ShieldCheck, Swords } from "lucide-react";
 import { Fut7StatsLogo } from "@/components/icons";
 import Link from "next/link";
 import { useAuth, useUser, useFirestore, useMemoFirebase, useDoc, useCollection } from "@/firebase";
@@ -35,13 +35,8 @@ const menuItems = [
     icon: Trophy,
   },
   {
-    href: "/calendar",
-    label: "Calendario",
-    icon: CalendarIcon,
-  },
-  {
     href: "/matches",
-    label: "Timeline",
+    label: "Partidos",
     icon: Goal,
   },
   {
