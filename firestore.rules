@@ -1,17 +1,11 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
      * REAL ACADE SECURITY MODEL
-     * 
-     * Core Philosophy:
-     * This ruleset implements a hybrid security model for a soccer league management application. 
-     * It prioritizes public visibility for league statistics while enforcing administrative
-     * control for data mutation.
      */
-
-    // --- Helper Functions ---
 
     function isSignedIn() {
       return request.auth != null;
@@ -31,20 +25,11 @@ service cloud.firestore {
              get(/databases/$(database)/documents/roles_admin/$(request.auth.uid)).data.isAdmin == true;
     }
 
-    // --- Collection Rules ---
-
-    /**
-     * @description Rules for Admin roles. Users can check their own status.
-     */
     match /roles_admin/{uid} {
       allow get: if isOwner(uid);
       allow list, create, update, delete: if false;
     }
 
-    /**
-     * @description Rules for Match documents. These contain core game results.
-     * Only admins can create, update or delete matches.
-     */
     match /matches/{matchId} {
       allow get, list: if true;
       allow create, update, delete: if isAdmin();
@@ -54,33 +39,19 @@ service cloud.firestore {
         allow create, update: if isOwner(userId);
         allow delete: if isExistingOwner(userId);
       }
-
-      match /goals/{goalId} {
-        allow get, list: if true;
-        allow create, update, delete: if isAdmin();
-      }
-
-      match /fouls/{foulId} {
-        allow get, list: if true;
-        allow create, update, delete: if isAdmin();
-      }
-
-      match /matchPlayerPerformances/{mppId} {
-        allow get, list: if true;
-        allow create: if isSignedIn() && request.resource.data.raterPlayerId == request.auth.uid;
-        allow update: if isExistingOwner(resource.data.raterPlayerId) && request.resource.data.raterPlayerId == resource.data.raterPlayerId;
-        allow delete: if isExistingOwner(resource.data.raterPlayerId);
-      }
     }
 
-    /**
-     * @description Rules for Player profiles.
-     * Users can manage their own profiles, admins can manage all.
-     */
     match /players/{playerId} {
       allow get, list: if true;
       allow create: if isOwner(playerId) || isAdmin();
       allow update, delete: if isExistingOwner(playerId) || isAdmin();
+    }
+
+    match /drafts/{draftId} {
+      allow get, list: if true;
+      allow create: if isAdmin();
+      allow update: if true; // Permitiendo updates para que los capitanes puedan elegir sin login
+      allow delete: if isAdmin();
     }
   }
 }

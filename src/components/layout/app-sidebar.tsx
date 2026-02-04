@@ -1,3 +1,4 @@
+
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
@@ -11,7 +12,7 @@ import {
   SidebarContent,
   useSidebar,
 } from "../ui/sidebar";
-import { Goal, BarChart3, Users, LogOut, Trophy, Dices, ArrowLeftRight, LogIn, User as UserIcon, ShieldCheck } from "lucide-react";
+import { Goal, BarChart3, Users, LogOut, Trophy, Dices, ArrowLeftRight, LogIn, User as UserIcon, ShieldCheck, Swords } from "lucide-react";
 import { Fut7StatsLogo } from "@/components/icons";
 import Link from "next/link";
 import { useAuth, useUser, useFirestore, useMemoFirebase, useDoc, useCollection } from "@/firebase";
@@ -128,19 +129,34 @@ export function AppSidebar() {
             ))}
             
             {isAdmin && (
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname.startsWith("/generator")}
-                  tooltip="Generador de Equipos"
-                  className="py-6 text-orange-400 hover:text-orange-500 hover:bg-orange-500/10"
-                >
-                  <Link href="/generator" onClick={handleNavClick}>
-                      <Dices className={cn(pathname.startsWith("/generator") ? "text-orange-400" : "text-orange-400/70")} />
-                      <span className="font-bold">Equilibrador Pro</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              <>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname.startsWith("/drafts/new")}
+                    tooltip="Nuevo Pan y Queso"
+                    className="py-6 text-emerald-400 hover:text-emerald-500 hover:bg-emerald-500/10"
+                  >
+                    <Link href="/drafts/new" onClick={handleNavClick}>
+                        <Swords className={cn(pathname.startsWith("/drafts/new") ? "text-emerald-400" : "text-emerald-400/70")} />
+                        <span className="font-bold">Nuevo Pan y Queso</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname.startsWith("/generator")}
+                    tooltip="Equilibrador Pro"
+                    className="py-6 text-orange-400 hover:text-orange-500 hover:bg-orange-500/10"
+                  >
+                    <Link href="/generator" onClick={handleNavClick}>
+                        <Dices className={cn(pathname.startsWith("/generator") ? "text-orange-400" : "text-orange-400/70")} />
+                        <span className="font-bold">Equilibrador Pro</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </>
             )}
         </SidebarMenu>
       </SidebarContent>

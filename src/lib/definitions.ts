@@ -1,3 +1,4 @@
+
 export type PlayerPosition = 'Arquero' | 'Lateral Derecho' | 'Defensor Central' | 'Lateral Izquierdo' | 'Mediocampista' | 'Delantero';
 
 export type Player = {
@@ -53,4 +54,16 @@ export type ChemistryPair = {
   wins: number;
   matches: number;
   winRate: number;
+};
+
+export type Draft = {
+  id: string;
+  date: string;
+  status: 'pending' | 'completed';
+  captainA: Player;
+  captainB: Player;
+  availablePlayers: Player[];
+  teamAPlayers: Player[];
+  teamBPlayers: Player[];
+  picks: { playerId: string; captain: 'A' | 'B' }[];
 };

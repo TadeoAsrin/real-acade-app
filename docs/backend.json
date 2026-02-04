@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "Match": {
@@ -15,11 +16,11 @@
           "description": "Date and time the match was played.",
           "format": "date-time"
         },
-        "team1Score": {
+        "teamAScore": {
           "type": "number",
           "description": "The score for team 1."
         },
-        "team2Score": {
+        "teamBScore": {
           "type": "number",
           "description": "The score for team 2."
         }
@@ -27,8 +28,8 @@
       "required": [
         "id",
         "date",
-        "team1Score",
-        "team2Score"
+        "teamAScore",
+        "teamBScore"
       ]
     },
     "Player": {
@@ -64,6 +65,22 @@
         "isAdmin": { "type": "boolean" }
       },
       "required": ["isAdmin"]
+    },
+    "Draft": {
+      "title": "Draft",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "date": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "completed"] },
+        "captainA": { "type": "object" },
+        "captainB": { "type": "object" },
+        "availablePlayers": { "type": "array" },
+        "teamAPlayers": { "type": "array" },
+        "teamBPlayers": { "type": "array" },
+        "picks": { "type": "array" }
+      },
+      "required": ["id", "date", "status", "captainA", "captainB", "availablePlayers", "teamAPlayers", "teamBPlayers", "picks"]
     }
   },
   "auth": {
@@ -102,6 +119,16 @@
             "$ref": "#/backend/entities/AdminRole"
           },
           "description": "Stores administrative roles for users."
+        }
+      },
+      {
+        "path": "/drafts/{draftId}",
+        "definition": {
+          "entityName": "Draft",
+          "schema": {
+            "$ref": "#/backend/entities/Draft"
+          },
+          "description": "Stores real-time draft data for pan y queso."
         }
       }
     ]
