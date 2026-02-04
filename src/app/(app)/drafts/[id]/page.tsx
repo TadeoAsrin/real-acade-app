@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -63,8 +62,7 @@ export default function DraftDetailPage() {
   const isMyTurn = capType === whoseTurn;
   const isFinished = draft.availablePlayers.length === 0;
   
-  // Visibility: Admin or being one of the captains
-  const canControl = adminRole?.isAdmin || !!capType;
+  const isAdmin = adminRole?.isAdmin;
 
   const handlePick = (player: Player) => {
     if (!isMyTurn || isFinished || !firestore) return;
@@ -74,7 +72,7 @@ export default function DraftDetailPage() {
     let newTeamA = whoseTurn === 'A' ? [...draft.teamAPlayers, player] : draft.teamAPlayers;
     let newTeamB = whoseTurn === 'B' ? [...draft.teamBPlayers, player] : draft.teamBPlayers;
 
-    // Automatic last pick assignment
+    // Automatic assignment of the very last player
     if (newAvailable.length === 1) {
       const lastPlayer = newAvailable[0];
       const nextPickCount = newPicks.length;
@@ -122,7 +120,7 @@ export default function DraftDetailPage() {
   };
 
   const handleConvertToMatch = async () => {
-    if (!firestore || !adminRole?.isAdmin) return;
+    if (!firestore || !isAdmin) return;
 
     const matchRef = doc(collection(firestore, 'matches'));
     const teamAPlayers: PlayerStats[] = draft.teamAPlayers.map(p => ({
@@ -154,7 +152,7 @@ export default function DraftDetailPage() {
     <div className="flex flex-col gap-8 max-w-6xl mx-auto pb-20">
       
       {/* Header & Links (Admin Only) */}
-      {adminRole?.isAdmin && !isFinished && (
+      {isAdmin && !isFinished && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Button variant="outline" className="h-16 border-primary/20 bg-primary/5 hover:bg-primary/10" onClick={() => copyLink('A')}>
             <Share2 className="mr-2 h-5 w-5 text-primary" />
@@ -192,13 +190,13 @@ export default function DraftDetailPage() {
           </div>
         </div>
         <div className="flex gap-3">
-          {isFinished && canControl && (
+          {isFinished && isAdmin && (
             <Button onClick={shareToWhatsApp} className="bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase italic px-6">
               <MessageCircle className="mr-2 h-5 w-5" />
               Calentar el Partido
             </Button>
           )}
-          {isFinished && adminRole?.isAdmin && (
+          {isFinished && isAdmin && (
             <Button onClick={handleConvertToMatch} className="bg-white text-black hover:bg-white/90 font-black uppercase italic px-6">
               Confirmar Partido
             </Button>
