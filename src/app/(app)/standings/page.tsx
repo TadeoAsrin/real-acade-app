@@ -87,7 +87,8 @@ export default function StandingsPage() {
                 <TableHead className="text-center font-black uppercase text-[10px] hidden md:table-cell text-emerald-500">G</TableHead>
                 <TableHead className="text-center font-black uppercase text-[10px] hidden md:table-cell text-orange-400">E</TableHead>
                 <TableHead className="text-center font-black uppercase text-[10px] hidden md:table-cell text-red-500">P</TableHead>
-                <TableHead className="text-center font-black uppercase text-[10px]">GF</TableHead>
+                <TableHead className="text-center font-black uppercase text-[10px] hidden sm:table-cell">GF</TableHead>
+                <TableHead className="text-center font-black uppercase text-[10px] text-accent">% Efec</TableHead>
                 <TableHead className="text-center font-black uppercase text-[10px] bg-primary/20">PTS</TableHead>
                 <TableHead className="text-center font-black uppercase text-[10px] hidden lg:table-cell">Últimos 5</TableHead>
               </TableRow>
@@ -104,9 +105,9 @@ export default function StandingsPage() {
                       <div className="flex items-center gap-3">
                         <Avatar className="h-9 w-9 ring-2 ring-white/5 group-hover:ring-primary/40 transition-all">
                           <AvatarImage src={player.avatar} alt={player.name} />
-                          <AvatarFallback>{player.name.charAt(0)}</AvatarFallback>
+                          <AvatarFallback className="bg-muted text-xs font-black">{player.name.charAt(0)}</AvatarFallback>
                         </Avatar>
-                        <Link href={`/players/${player.playerId}`} className="font-bold hover:text-primary transition-colors text-sm">
+                        <Link href={`/players/${player.playerId}`} className="font-bold hover:text-primary transition-colors text-sm truncate max-w-[100px] md:max-w-none">
                           {player.name}
                         </Link>
                       </div>
@@ -115,7 +116,10 @@ export default function StandingsPage() {
                     <TableCell className="text-center font-mono hidden md:table-cell text-emerald-500/80">{player.wins}</TableCell>
                     <TableCell className="text-center font-mono hidden md:table-cell text-orange-400/80">{player.draws}</TableCell>
                     <TableCell className="text-center font-mono hidden md:table-cell text-red-500/80">{player.losses}</TableCell>
-                    <TableCell className="text-center font-black text-primary">{player.totalGoals}</TableCell>
+                    <TableCell className="text-center font-black text-primary/70 hidden sm:table-cell">{player.totalGoals}</TableCell>
+                    <TableCell className="text-center font-black text-accent italic">
+                        {player.winPercentage}%
+                    </TableCell>
                     <TableCell className={cn(
                         "text-center font-black text-xl italic bg-primary/10",
                         index < 3 ? "text-primary" : "text-white"
