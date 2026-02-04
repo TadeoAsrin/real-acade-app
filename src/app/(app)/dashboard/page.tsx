@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -20,6 +19,9 @@ import type { Match, Player } from "@/lib/definitions";
 import { getInitials, cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { format, parseISO } from "date-fns";
+import { es } from "date-fns/locale";
 
 export default function DashboardPage() {
   const firestore = useFirestore();
