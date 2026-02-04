@@ -37,38 +37,46 @@ const GlovesIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const formationCoordinates: { top: string; left: string }[] = [
-  { top: '12%', left: '50%' }, // 0: GK (1)
-  { top: '35%', left: '22%' }, // 1: Def L (Ahora será 4)
-  { top: '35%', left: '50%' }, // 2: Def C (2)
-  { top: '35%', left: '78%' }, // 3: Def R (Ahora será 3)
-  { top: '65%', left: '35%' }, // 4: Mid L (8)
-  { top: '65%', left: '65%' }, // 5: Mid R (10)
-  { top: '85%', left: '50%' }, // 6: Fwd (9)
+const formationSlots: { top: string; left: string; dorsal: string; role: string }[] = [
+  { top: '12%', left: '50%', dorsal: "1", role: "GK" },    // 0: Arquero
+  { top: '35%', left: '50%', dorsal: "2", role: "DEF" },   // 1: Defensa Central
+  { top: '35%', left: '22%', dorsal: "4", role: "DEF" },   // 2: Lateral Izquierdo
+  { top: '35%', left: '78%', dorsal: "3", role: "DEF" },   // 3: Lateral Derecho
+  { top: '65%', left: '35%', dorsal: "8", role: "MID" },   // 4: Mediocampista L
+  { top: '65%', left: '65%', dorsal: "10", role: "MID" },  // 5: Mediocampista R
+  { top: '85%', left: '50%', dorsal: "9", role: "FWD" },   // 6: Delantero
 ];
-
-const getTacticalNumber = (index: number): string => {
-  const numbers = ["1", "4", "2", "3", "8", "10", "9"];
-  return numbers[index] || "";
-};
 
 export function FieldView({ team, players, topScorerId, date }: FieldViewProps) {
   const fieldRef = React.useRef<HTMLDivElement>(null);
-  const [playerPositions, setPlayerPositions] = React.useState<{ [key: string]: { x: number; y: number } }>({});
+  const [playerPositions, setPlayerPositions] = React.useState<{ [key: string]: { x: number; y: number; dorsal: string } }>({});
   const [draggingPlayer, setDraggingPlayer] = React.useState<{ id: string; startX: number; startY: number } | null>(null);
   const [formattedDate, setFormattedDate] = React.useState<string>("");
 
   React.useEffect(() => {
-    const initialPositions: { [key: string]: { x: number; y: number } } = {};
-    players.forEach((player, index) => {
-      if (index < formationCoordinates.length) {
-        const coords = formationCoordinates[index];
+    const initialPositions: { [key: string]: { x: number; y: number; dorsal: string } } = {};
+    
+    // Sort players to assign them to best slots based on their position metadata
+    const gks = players.filter(p => p.position === 'Arquero');
+    const defs = players.filter(p => p.position?.includes('Defensor') || p.position?.includes('Lateral'));
+    const mids = players.filter(p => p.position?.includes('Mediocampista'));
+    const fwds = players.filter(p => p.position === 'Delantero');
+    const rest = players.filter(p => !gks.includes(p) && !defs.includes(p) && !mids.includes(p) && !fwds.includes(p));
+
+    const sortedPlayers = [...gks, ...defs, ...mids, ...fwds, ...rest];
+    
+    // Mapping players to slots
+    sortedPlayers.forEach((player, index) => {
+      if (index < formationSlots.length) {
+        const slot = formationSlots[index];
         initialPositions[player.id] = {
-          x: parseFloat(coords.left),
-          y: parseFloat(coords.top),
+          x: parseFloat(slot.left),
+          y: parseFloat(slot.top),
+          dorsal: slot.dorsal
         };
       }
     });
+    
     setPlayerPositions(initialPositions);
 
     if (date) {
@@ -98,7 +106,7 @@ export function FieldView({ team, players, topScorerId, date }: FieldViewProps) 
 
     setPlayerPositions((prev) => ({
       ...prev,
-      [draggingPlayer.id]: { x: newX, y: newY },
+      [draggingPlayer.id]: { ...prev[draggingPlayer.id], x: newX, y: newY },
     }));
   };
 
@@ -123,7 +131,7 @@ export function FieldView({ team, players, topScorerId, date }: FieldViewProps) 
           <div className="flex items-center justify-between w-full">
             <span>Último Partido: {team}</span>
             <span className="text-[8px] lg:text-[10px] font-bold text-muted-foreground/50 bg-black/40 px-2 py-0.5 rounded-full not-italic">
-              3-2-1
+              Táctica 3-2-1
             </span>
           </div>
           {formattedDate && (
@@ -167,14 +175,13 @@ export function FieldView({ team, players, topScorerId, date }: FieldViewProps) 
           <div className="absolute bottom-2 lg:bottom-4 left-1/2 h-16 lg:h-24 w-32 lg:w-48 -translate-x-1/2 border-2 border-b-0 border-white/30 rounded-t-lg lg:rounded-t-xl" />
           
           <TooltipProvider>
-            {players.map((player, index) => {
+            {players.map((player) => {
               const pos = playerPositions[player.id];
               if (!pos) return null;
               
               const isDragging = draggingPlayer?.id === player.id;
               const isPichichi = player.id === topScorerId;
               const isGK = isPlayerInGKZone(pos);
-              const tacticalNumber = getTacticalNumber(index);
 
               return (
                 <div
@@ -210,7 +217,7 @@ export function FieldView({ team, players, topScorerId, date }: FieldViewProps) 
                                 "text-xs lg:text-sm font-black italic",
                                 isGK ? "bg-orange-500 text-white" : isPichichi ? "bg-yellow-400 text-black" : team === 'Azul' ? "bg-primary text-white" : "bg-accent text-white"
                             )}>
-                                {tacticalNumber}
+                                {pos.dorsal}
                             </AvatarFallback>
                           </Avatar>
                           
@@ -243,6 +250,7 @@ export function FieldView({ team, players, topScorerId, date }: FieldViewProps) 
                     <TooltipContent side="top" className="bg-black border-white/20 text-white font-bold text-xs shadow-2xl">
                       <div className="flex flex-col gap-0.5">
                         <span>{player.name}</span>
+                        <span className="text-[10px] opacity-60 uppercase">{player.position || 'Sin posición'}</span>
                       </div>
                     </TooltipContent>
                   </Tooltip>
