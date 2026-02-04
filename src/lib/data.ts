@@ -112,10 +112,11 @@ export const getTeamGlobalStats = (allMatches: Match[]) => {
     return { blueWins, redWins, draws, total: allMatches.length };
 };
 
-export const getTopChemistry = (players: Player[], matches: Match[], minMatches = 3): ChemistryPair | null => {
+export const getTopChemistry = (players: Player[], matches: Match[], minMatches = 2): ChemistryPair | null => {
   const statsMap: { [key: string]: { matches: number, wins: number } } = {};
   
   matches.forEach(match => {
+    // Alianzas Equipo Azul
     for (let i = 0; i < match.teamAPlayers.length; i++) {
       for (let j = i + 1; j < match.teamAPlayers.length; j++) {
         const p1 = match.teamAPlayers[i].playerId;
@@ -126,6 +127,7 @@ export const getTopChemistry = (players: Player[], matches: Match[], minMatches 
         if (match.teamAScore > match.teamBScore) statsMap[key].wins++;
       }
     }
+    // Alianzas Equipo Rojo
     for (let i = 0; i < match.teamBPlayers.length; i++) {
       for (let j = i + 1; j < match.teamBPlayers.length; j++) {
         const p1 = match.teamBPlayers[i].playerId;
@@ -140,7 +142,14 @@ export const getTopChemistry = (players: Player[], matches: Match[], minMatches 
 
   const validPairs = Object.entries(statsMap)
     .filter(([_, stats]) => stats.matches >= minMatches)
-    .sort((a, b) => b[1].wins - a[1].wins || (b[1].wins / b[1].matches) - (a[1].wins / a[1].matches));
+    .sort((a, b) => {
+      // Priorizar primero por número de partidos juntos (frecuencia)
+      if (b[1].matches !== a[1].matches) return b[1].matches - a[1].matches;
+      // Luego por victorias totales
+      if (b[1].wins !== a[1].wins) return b[1].wins - a[1].wins;
+      // Finalmente por win rate
+      return (b[1].wins / b[1].matches) - (a[1].wins / a[1].matches);
+    });
 
   if (validPairs.length === 0) return null;
 
