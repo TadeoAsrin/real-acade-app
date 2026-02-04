@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Medal, Loader2, Zap, Calendar, Users, Brain, Heart, Crown, Link as LinkIcon, Flame, Target, Trophy, TrendingUp, Star, Skull, Ghost, CloudRain, Frown, Droplets, Newspaper, ChevronRight } from "lucide-react";
+import { Medal, Loader2, Zap, Calendar, Users, Brain, Crown, Link as LinkIcon, Flame, Target, Trophy, TrendingUp, Star, Skull, Ghost, CloudRain, Frown, Droplets, Newspaper, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { FieldView } from "@/components/dashboard/field-view";
 import { PowerRanking } from "@/components/dashboard/power-ranking";
@@ -216,7 +216,7 @@ export default function DashboardPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6 flex-1 flex flex-col">
-              <Link href={influencer ? `/players/${influencer.playerId}` : "/players"} className="group/leader">
+              <Link href="/pulse/influencer" className="group/leader">
                 <div className="flex items-center gap-4">
                   <Avatar className="h-16 w-16 border-4 border-primary/30 group-hover/leader:scale-105 transition-transform">
                     <AvatarFallback className="bg-primary/10 text-primary text-2xl font-black">{getInitials(influencer?.name || "?")}</AvatarFallback>
@@ -316,46 +316,46 @@ export default function DashboardPage() {
             </Link>
 
             {/* Récord Histórico (Partido más Picante) */}
-            <Card className="glass-card border-orange-500/20 bg-gradient-to-br from-card/60 to-orange-500/5 overflow-hidden h-full flex flex-col">
-                <CardHeader className="pb-2">
-                    <CardTitle className="text-[10px] font-black uppercase tracking-widest text-orange-500 flex items-center gap-2">
-                        <Flame className="h-3 w-3 fill-orange-500" /> Récord Histórico
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4 flex-1 flex flex-col">
-                    <div className="flex flex-col items-center justify-center py-2">
-                        <div className="flex items-center gap-4">
-                            <span className="text-5xl font-black italic text-white leading-none drop-shadow-[0_0_10px_rgba(249,115,22,0.3)]">
-                                {spiciestMatch ? spiciestMatch.teamAScore + spiciestMatch.teamBScore : 0}
-                            </span>
-                            <div className="flex flex-col">
-                                <span className="text-[8px] uppercase font-black text-orange-500 leading-none">Goles</span>
-                                <span className="text-[8px] uppercase font-black text-orange-500 leading-none">Totales</span>
+            <Link href="/pulse/league">
+                <Card className="glass-card border-orange-500/20 bg-gradient-to-br from-card/60 to-orange-500/5 hover:border-orange-500/50 transition-all group overflow-hidden cursor-pointer h-full flex flex-col">
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-[10px] font-black uppercase tracking-widest text-orange-500 flex items-center gap-2">
+                            <Flame className="h-3 w-3 fill-orange-500" /> Récord Histórico
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4 flex-1 flex flex-col">
+                        <div className="flex flex-col items-center justify-center py-2">
+                            <div className="flex items-center gap-4">
+                                <span className="text-5xl font-black italic text-white leading-none drop-shadow-[0_0_10px_rgba(249,115,22,0.3)]">
+                                    {spiciestMatch ? spiciestMatch.teamAScore + spiciestMatch.teamBScore : 0}
+                                </span>
+                                <div className="flex flex-col">
+                                    <span className="text-[8px] uppercase font-black text-orange-500 leading-none">Goles</span>
+                                    <span className="text-[8px] uppercase font-black text-orange-500 leading-none">Totales</span>
+                                </div>
                             </div>
+                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter mt-2">En un solo partido</p>
                         </div>
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter mt-2">En un solo partido</p>
-                    </div>
-                    
-                    {spiciestMatch && (
-                        <div className="space-y-3 mt-auto">
-                            <div className="bg-white/5 p-2 rounded-xl border border-white/5 flex items-center justify-between">
-                                <span className="text-[10px] font-black uppercase italic text-primary">Azul {spiciestMatch.teamAScore}</span>
-                                <span className="text-[8px] font-bold text-muted-foreground">vs</span>
-                                <span className="text-[10px] font-black uppercase italic text-accent">Rojo {spiciestMatch.teamBScore}</span>
-                            </div>
-                            <Button asChild variant="ghost" size="sm" className="w-full h-8 text-[9px] font-black uppercase border border-orange-500/20 hover:bg-orange-500/10 text-orange-500">
-                                <Link href={`/matches/${spiciestMatch.id}`}>
+                        
+                        {spiciestMatch && (
+                            <div className="space-y-3 mt-auto">
+                                <div className="bg-white/5 p-2 rounded-xl border border-white/5 flex items-center justify-between">
+                                    <span className="text-[10px] font-black uppercase italic text-primary">Azul {spiciestMatch.teamAScore}</span>
+                                    <span className="text-[8px] font-bold text-muted-foreground">vs</span>
+                                    <span className="text-[10px] font-black uppercase italic text-accent">Rojo {spiciestMatch.teamBScore}</span>
+                                </div>
+                                <div className="w-full h-8 flex items-center justify-center text-[9px] font-black uppercase border border-orange-500/20 group-hover:bg-orange-500/10 text-orange-500 rounded-md transition-colors">
                                     Ver Ficha Técnica <ChevronRight className="ml-1 h-3 w-3" />
-                                </Link>
-                            </Button>
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
+                                </div>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+            </Link>
 
             {/* Mejor Sociedad (Colíderes System) */}
             <Link href="/pulse/partnership">
-                <Card className="glass-card border-white/10 hover:border-white/20 transition-all group overflow-hidden cursor-pointer h-full">
+                <Card className="glass-card border-white/10 hover:border-white/30 transition-all group overflow-hidden cursor-pointer h-full">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                             <LinkIcon className="h-3 w-3" />
@@ -446,37 +446,39 @@ export default function DashboardPage() {
             </Link>
 
             {/* Los Infaltables (Compromiso) */}
-            <Card className="glass-card border-emerald-500/20 bg-emerald-500/5 overflow-hidden h-full flex flex-col">
-                <CardHeader className="pb-2">
-                    <CardTitle className="text-[10px] font-black uppercase tracking-widest text-emerald-500 flex items-center gap-2">
-                        <Users className="h-3 w-3" /> Los Infaltables
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4 flex-1 flex flex-col">
-                    <div className="flex flex-col py-1">
-                        <span className="text-5xl font-black tracking-tighter text-emerald-500 italic leading-none">{maxPlayerAttendanceRate}%</span>
-                        <span className="text-[10px] font-bold text-emerald-500/60 uppercase mt-1">Asistencia Perfecta</span>
-                    </div>
-                    
-                    <div className="space-y-3 mt-auto">
-                        <p className="text-[8px] uppercase font-black text-muted-foreground/50 tracking-widest">Líderes de asistencia</p>
-                        <div className="space-y-2">
-                            {attendanceLeaders.map((p, i) => (
-                                <div key={p.playerId} className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-[9px] font-black text-emerald-500/40 italic">#{i + 1}</span>
-                                        <span className="text-xs font-bold text-white/80">{p.name.split(' ')[0]}</span>
-                                    </div>
-                                    <span className="text-[10px] font-black italic text-emerald-500/80">{p.matchesPlayed} <span className="text-[8px] not-italic opacity-50 uppercase">de {totalMatches}</span></span>
-                                </div>
-                            ))}
+            <Link href="/pulse/attendance">
+                <Card className="glass-card border-emerald-500/20 bg-emerald-500/5 hover:border-emerald-500/50 transition-all group overflow-hidden cursor-pointer h-full flex flex-col">
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-[10px] font-black uppercase tracking-widest text-emerald-500 flex items-center gap-2">
+                            <Users className="h-3 w-3" /> Los Infaltables
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4 flex-1 flex flex-col">
+                        <div className="flex flex-col py-1">
+                            <span className="text-5xl font-black tracking-tighter text-emerald-500 italic leading-none">{maxPlayerAttendanceRate}%</span>
+                            <span className="text-[10px] font-bold text-emerald-500/60 uppercase mt-1">Asistencia Perfecta</span>
                         </div>
-                    </div>
-                    <div className="mt-auto pt-4 border-t border-white/5">
-                        <p className="text-[8px] uppercase font-black text-muted-foreground/50 tracking-widest text-center">Promedio: {avgPlayersPerMatch} jugadores/fecha</p>
-                    </div>
-                </CardContent>
-            </Card>
+                        
+                        <div className="space-y-3 mt-auto">
+                            <p className="text-[8px] uppercase font-black text-muted-foreground/50 tracking-widest">Líderes de asistencia</p>
+                            <div className="space-y-2">
+                                {attendanceLeaders.map((p, i) => (
+                                    <div key={p.playerId} className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-[9px] font-black text-emerald-500/40 italic">#{i + 1}</span>
+                                            <span className="text-xs font-bold text-white/80">{p.name.split(' ')[0]}</span>
+                                        </div>
+                                        <span className="text-[10px] font-black italic text-emerald-500/80">{p.matchesPlayed} <span className="text-[8px] not-italic opacity-50 uppercase">de {totalMatches}</span></span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="mt-auto pt-4 border-t border-white/5">
+                            <p className="text-[8px] uppercase font-black text-muted-foreground/50 tracking-widest text-center">Promedio: {avgPlayersPerMatch} jugadores/fecha</p>
+                        </div>
+                    </CardContent>
+                </Card>
+            </Link>
         </div>
       </section>
 

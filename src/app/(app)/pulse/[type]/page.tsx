@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -9,7 +8,7 @@ import { collection, query, orderBy } from "firebase/firestore";
 import type { Match, Player } from "@/lib/definitions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Brain, Link as LinkIcon, Zap, Crown, Flame, Trophy, Calendar, Star, Heart, Skull, Ghost, CloudRain, Droplets, TrendingUp } from "lucide-react";
+import { ArrowLeft, Brain, Link as LinkIcon, Zap, Crown, Flame, Trophy, Calendar, Star, Heart, Skull, Ghost, CloudRain, Droplets, TrendingUp, Users } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials, cn } from "@/lib/utils";
 import Link from "next/link";
@@ -133,6 +132,51 @@ export default function PulseDetailPage() {
                             <div className="text-right">
                                 <span className={cn("text-3xl font-black italic", isLeader ? "text-yellow-500" : "text-white")}>{p.totalMvp}</span>
                                 <p className="text-[8px] uppercase font-black text-muted-foreground leading-none">Premios</p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                );
+            })}
+        </div>
+      </div>
+    );
+  };
+
+  const renderAttendance = () => {
+    const totalMatches = allMatches.length;
+    const sorted = [...playerStats]
+      .sort((a, b) => b.matchesPlayed - a.matchesPlayed || a.name.localeCompare(b.name))
+      .slice(0, 20);
+
+    return (
+      <div className="space-y-8 max-w-2xl mx-auto">
+        <div className="text-center space-y-4">
+            <div className="mx-auto w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center border border-emerald-500/20">
+                <Users className="h-10 w-10 text-emerald-500" />
+            </div>
+            <h1 className="text-4xl font-black italic uppercase tracking-tighter">Los Infaltables</h1>
+            <p className="text-muted-foreground italic">El ranking de compromiso. Los jugadores que siempre están listos para la batalla.</p>
+        </div>
+
+        <div className="space-y-4">
+            {sorted.map((p, i) => {
+                const percentage = totalMatches > 0 ? Math.round((p.matchesPlayed / totalMatches) * 100) : 0;
+                return (
+                    <Card key={p.playerId} className={cn("glass-card transition-all border-white/5", percentage === 100 && "border-emerald-500/30 bg-emerald-500/5")}>
+                        <CardContent className="p-6 flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <span className="text-2xl font-black italic text-muted-foreground/30 w-8">{i + 1}</span>
+                                <Avatar className={cn("h-12 w-12", percentage === 100 && "ring-2 ring-emerald-500/50")}>
+                                    <AvatarFallback className="bg-muted font-black">{getInitials(p.name)}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex flex-col">
+                                    <span className="font-black text-lg">{p.name}</span>
+                                    <span className="text-[10px] font-bold uppercase text-muted-foreground">{p.matchesPlayed} de {totalMatches} Partidos</span>
+                                </div>
+                            </div>
+                            <div className="text-right">
+                                <span className={cn("text-3xl font-black italic", percentage === 100 ? "text-emerald-500" : "text-white")}>{percentage}%</span>
+                                <p className="text-[8px] uppercase font-black text-muted-foreground leading-none">Asistencia</p>
                             </div>
                         </CardContent>
                     </Card>
@@ -418,6 +462,7 @@ export default function PulseDetailPage() {
       {type === 'league' && renderSpiciestMatch()}
       {type === 'partnership' && renderPartnership()}
       {type === 'mvp' && renderMvpRanking()}
+      {type === 'attendance' && renderAttendance()}
       {type === 'iman-derrotas' && renderImanDerrotas()}
       {type === 'riesgo' && renderRiesgo()}
       {type === 'polvora' && renderPolvora()}
