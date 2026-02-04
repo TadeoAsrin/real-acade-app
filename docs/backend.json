@@ -57,100 +57,13 @@
         "email"
       ]
     },
-    "Goal": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Goal",
+    "AdminRole": {
+      "title": "AdminRole",
       "type": "object",
-      "description": "Represents a goal scored in a match.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the goal."
-        },
-        "matchId": {
-          "type": "string",
-          "description": "Reference to Match. (Relationship: Match 1:N Goal)"
-        },
-        "playerId": {
-          "type": "string",
-          "description": "Reference to Player. (Relationship: Player 1:N Goal)"
-        },
-        "assistPlayerId": {
-          "type": "string",
-          "description": "Reference to Player who assisted. (Relationship: Player 1:N Assist)",
-          "format": "uuid"
-        }
+        "isAdmin": { "type": "boolean" }
       },
-      "required": [
-        "id",
-        "matchId",
-        "playerId"
-      ]
-    },
-    "Foul": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Foul",
-      "type": "object",
-      "description": "Represents a foul committed by a player in a match.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the foul."
-        },
-        "matchId": {
-          "type": "string",
-          "description": "Reference to Match. (Relationship: Match 1:N Foul)"
-        },
-        "playerId": {
-          "type": "string",
-          "description": "Reference to Player. (Relationship: Player 1:N Foul)"
-        },
-        "foulType": {
-          "type": "string",
-          "description": "Type of foul committed."
-        }
-      },
-      "required": [
-        "id",
-        "matchId",
-        "playerId",
-        "foulType"
-      ]
-    },
-    "MatchPlayerPerformance": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "MatchPlayerPerformance",
-      "type": "object",
-      "description": "Represents a player's performance rating after each match.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Match Player Performance."
-        },
-        "matchId": {
-          "type": "string",
-          "description": "Reference to Match. (Relationship: Match 1:N MatchPlayerPerformance)"
-        },
-        "playerId": {
-          "type": "string",
-          "description": "Reference to Player. (Relationship: Player 1:N MatchPlayerPerformance)"
-        },
-        "rating": {
-          "type": "number",
-          "description": "Rating given to the player."
-        },
-        "raterPlayerId": {
-          "type": "string",
-          "description": "Reference to Player that has rated the performance"
-        }
-      },
-      "required": [
-        "id",
-        "matchId",
-        "playerId",
-        "rating",
-        "raterPlayerId"
-      ]
+      "required": ["isAdmin"]
     }
   },
   "auth": {
@@ -168,13 +81,7 @@
           "schema": {
             "$ref": "#/backend/entities/Match"
           },
-          "description": "Stores data for each soccer match. Includes 'date', 'team1Score', and 'team2Score'.",
-          "params": [
-            {
-              "name": "matchId",
-              "description": "Unique identifier for the match."
-            }
-          ]
+          "description": "Stores data for each soccer match."
         }
       },
       {
@@ -184,76 +91,19 @@
           "schema": {
             "$ref": "#/backend/entities/Player"
           },
-          "description": "Stores data for each player, including 'name' and 'email'.",
-          "params": [
-            {
-              "name": "playerId",
-              "description": "Unique identifier for the player."
-            }
-          ]
+          "description": "Stores data for each player."
         }
       },
       {
-        "path": "/matches/{matchId}/goals/{goalId}",
+        "path": "/roles_admin/{uid}",
         "definition": {
-          "entityName": "Goal",
+          "entityName": "AdminRole",
           "schema": {
-            "$ref": "#/backend/entities/Goal"
+            "$ref": "#/backend/entities/AdminRole"
           },
-          "description": "Stores data for each goal scored in a match. Includes references to 'matchId' and 'playerId'.",
-          "params": [
-            {
-              "name": "matchId",
-              "description": "Unique identifier for the match."
-            },
-            {
-              "name": "goalId",
-              "description": "Unique identifier for the goal."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/matches/{matchId}/fouls/{foulId}",
-        "definition": {
-          "entityName": "Foul",
-          "schema": {
-            "$ref": "#/backend/entities/Foul"
-          },
-          "description": "Stores data for each foul committed in a match. Includes references to 'matchId' and 'playerId', and the 'foulType'.",
-          "params": [
-            {
-              "name": "matchId",
-              "description": "Unique identifier for the match."
-            },
-            {
-              "name": "foulId",
-              "description": "Unique identifier for the foul."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/matches/{matchId}/matchPlayerPerformances/{matchPlayerPerformanceId}",
-        "definition": {
-          "entityName": "MatchPlayerPerformance",
-          "schema": {
-            "$ref": "#/backend/entities/MatchPlayerPerformance"
-          },
-          "description": "Stores data for each player's performance rating in a match. Includes references to 'matchId', 'playerId' and 'raterPlayerId', and the 'rating'.",
-          "params": [
-            {
-              "name": "matchId",
-              "description": "Unique identifier for the match."
-            },
-            {
-              "name": "matchPlayerPerformanceId",
-              "description": "Unique identifier for the Match Player Performance."
-            }
-          ]
+          "description": "Stores administrative roles for users."
         }
       }
-    ],
-    "reasoning": "The Firestore structure is designed to support the Fut7Stats application, focusing on secure and efficient data management for soccer match statistics. The structure is optimized for querying match data, player profiles, and rankings. It leverages denormalization to ensure authorization independence and facilitate scalable list operations.\n\nThe core design principles of Authorization Independence, Clarity of Intent, DBAC, and QAPs are implemented as follows:\n\n*   **Authorization Independence:** The structure avoids hierarchical authorization dependencies by denormalizing relevant authorization data. Specifically, if access to 'goals', 'fouls', or 'matchPlayerPerformance' subcollections required checking parent document attributes, those attributes (e.g., match participants) would be copied into each document within the subcollection. Currently, no specific collaborative data or shared ownership scenarios are present in the data model, so denormalization focuses on player and match relationships.\n*   **Clarity of Intent:** The use of descriptive collection and document names (e.g., 'matches', 'players', 'goals') clearly indicates the purpose of each data store. Consistent naming conventions (e.g., `matchId`, `playerId`) enhance readability and maintainability.\n*   **DBAC:** Authorization relies solely on `request.auth.uid`. If roles were needed, they would be implemented using dedicated collections like `/roles_admin/{uid}`. Currently, all player-specific data is scoped within their own document. If Match data was collaborative, a membership map (`members: {uid: role}`) on the match document would be used.\n*   **QAPs:** The design supports secure `list` operations by ensuring that each collection has a homogeneous security posture. For example, all documents within the `/matches/{matchId}/goals` collection share the same access control requirements.\n\nGiven the current requirements, more complex ownership or group access patterns were not present in the schema. If these are added, the strategy is to use Membership Maps and apply denormalization to preserve Authorization Independence."
+    ]
   }
 }

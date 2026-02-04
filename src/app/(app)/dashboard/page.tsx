@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -10,18 +9,21 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Medal, Loader2, Zap, Calendar, Users, Brain, Heart, Crown, Link as LinkIcon, Flame, Target, Trophy, TrendingUp, Star, Skull, Ghost, CloudRain, Frown, Droplets } from "lucide-react";
+import { Medal, Loader2, Zap, Calendar, Users, Brain, Heart, Crown, Link as LinkIcon, Flame, Target, Trophy, TrendingUp, Star, Skull, Ghost, CloudRain, Frown, Droplets, Newspaper } from "lucide-react";
 import Link from "next/link";
 import { FieldView } from "@/components/dashboard/field-view";
 import { PowerRanking } from "@/components/dashboard/power-ranking";
+import { MatchNewsModal } from "@/components/dashboard/match-news-modal";
 import { useCollection, useMemoFirebase, useFirestore } from "@/firebase";
 import { collection, query, orderBy } from "firebase/firestore";
 import type { Match, Player } from "@/lib/definitions";
 import { getInitials, cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 
 export default function DashboardPage() {
   const firestore = useFirestore();
+  const [showGacetaManually, setShowGacetaManually] = React.useState(false);
 
   const playersQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -65,13 +67,11 @@ export default function DashboardPage() {
       return b.totalGoals - a.totalGoals;
     });
 
-  const topScorers = sortedByGoals.slice(0, 3);
-  const topScorer = topScorers[0];
-  const runnersUp = topScorers.slice(1);
+  const topScorer = sortedByGoals[0];
+  const runnersUp = sortedByGoals.slice(1, 3);
 
-  const topInfluencers = sortedByInfluence.slice(0, 3);
-  const influencer = topInfluencers[0];
-  const influencerRunnersUp = topInfluencers.slice(1);
+  const influencer = sortedByInfluence[0];
+  const influencerRunnersUp = sortedByInfluence.slice(1, 3);
 
   // Pulse Metrics - Shared MVP logic
   const maxMvps = Math.max(...playerStats.map(p => p.totalMvp), 0);
@@ -95,7 +95,7 @@ export default function DashboardPage() {
     ? Math.round((attendanceLeaders[0].matchesPlayed / totalMatches) * 100) 
     : 0;
 
-  // Nos Caemos a Pedazos - Shared Humility logic
+  // Nos Caemos a Pedazos
   const maxLosses = Math.max(...playerStats.map(p => p.losses), 0);
   const imanDeDerrotasLeaders = maxLosses > 0 ? playerStats.filter(p => p.losses === maxLosses) : [];
 
@@ -115,6 +115,43 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-8 lg:gap-12 pb-20 max-w-7xl mx-auto">
       
+      {/* GACETA MODAL */}
+      {lastMatch && (
+        <MatchNewsModal 
+          match={lastMatch} 
+          allPlayers={allPlayers} 
+          forceOpen={showGacetaManually} 
+          onClose={() => setShowGacetaManually(false)}
+        />
+      )}
+
+      {/* BANNER ÚLTIMA HORA */}
+      {lastMatch && (
+        <div className="bg-primary/10 border border-primary/20 p-2 rounded-xl flex items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-1000">
+          <div className="flex items-center gap-3 pl-2">
+            <div className="relative">
+              <Newspaper className="h-5 w-5 text-primary" />
+              <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+              </span>
+            </div>
+            <p className="text-[10px] md:text-xs font-black uppercase tracking-widest italic">
+              <span className="text-primary mr-2">¡ÚLTIMA HORA!</span>
+              La crónica del partido ya está disponible en La Gaceta
+            </p>
+          </div>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setShowGacetaManually(true)}
+            className="text-[10px] font-black uppercase hover:bg-primary/20 text-primary"
+          >
+            Leer Edición
+          </Button>
+        </div>
+      )}
+
       {/* SECCIÓN 1: EL OLIMPO (GLORIA INDIVIDUAL) */}
       <section className="space-y-4">
         <h2 className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground/50 px-1 italic">Nombres Propios de la Academia</h2>
@@ -308,7 +345,7 @@ export default function DashboardPage() {
                 </Card>
             </Link>
 
-            {/* Mejor Sociedad con lógica de empate */}
+            {/* Mejor Sociedad */}
             <Link href="/pulse/partnership">
                 <Card className="glass-card border-white/10 hover:border-white/20 transition-all group overflow-hidden cursor-pointer h-full">
                     <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
@@ -527,7 +564,7 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* SECCIÓN 4: MATCH CENTER (ACCIÓN Y TÁCTICA) */}
+      {/* SECCIÓN 4: HISTORIAL (ACCIÓN Y TÁCTICA) */}
       <section className="space-y-6">
         <h2 className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground/50 px-1 italic">Historial</h2>
         

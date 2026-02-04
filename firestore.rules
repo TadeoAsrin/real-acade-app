@@ -13,16 +13,8 @@ service cloud.firestore {
      * Data Structure:
      * - /matches/{matchId}: Root collection for game data.
      * - /players/{playerId}: Root collection for league participants.
+     * - /roles_admin/{uid}: Stores admin status.
      * - /matches/.../goals, /matches/.../fouls, /matches/.../matchPlayerPerformances: Sub-collections nested under matches.
-     * 
-     * Key Security Decisions:
-     * 1. Player Profiles: Managed exclusively by the authenticated user whose UID matches the document ID.
-     * 2. Performance Ratings: Only the 'raterPlayerId' (the player who provided the rating) is authorized to 
-     *    create or modify their specific performance review.
-     * 3. Public Stats: Match results, goals, and fouls are publicly readable to support league-wide rankings 
-     *    and match history, but writes are currently locked down due to missing administrative ownership fields.
-     * 4. Relational Integrity: On creation of user-linked data, rules enforce that the 'raterPlayerId' 
-     *    matches the authenticated user.
      */
 
     // --- Helper Functions ---
@@ -37,7 +29,7 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    /** @description Checks ownership for existing documents to ensure they exist before modification. */
+    /** @description Checks ownership for existing documents. */
     function isExistingOwner(userId) {
       return resource != null && isOwner(userId);
     }
@@ -45,51 +37,39 @@ service cloud.firestore {
     // --- Collection Rules ---
 
     /**
+     * @description Rules for Admin roles. Users can check their own status.
+     */
+    match /roles_admin/{uid} {
+      allow get: if isOwner(uid);
+      allow list, create, update, delete: if false;
+    }
+
+    /**
      * @description Rules for Match documents. These contain core game results.
-     * @path /matches/{matchId}
-     * @allow (get, list) for any user to see match results.
-     * @deny (create, update, delete) for all users currently.
-     * @principle Public Read with Owner-Only Writes (Pending Schema Update).
      */
     match /matches/{matchId} {
       allow get, list: if true;
-      // CRITICAL: Cannot implement owner-only writes. The 'Match' entity is missing an 'ownerId' or 'adminId' field.
-      allow create, update, delete: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
+      allow create, update, delete: if false;
 
       /**
-       * @description Rules for Goals scored within a match.
-       * @path /matches/{matchId}/goals/{goalId}
-       * @allow (get, list) for any user to see goal history.
-       * @deny (create, update, delete) for all users.
-       * @principle Inherited security posture from the parent Match.
+       * @description Rules for Votes within a match.
        */
+      match /votes/{userId} {
+        allow get, list: if true;
+        allow create, update: if isOwner(userId);
+        allow delete: if isExistingOwner(userId);
+      }
+
       match /goals/{goalId} {
         allow get, list: if true;
-        // CRITICAL: Missing ownership field to determine who can record goals for a match.
-        allow create, update, delete: if false; // TODO: Implement write access for match organizers/refs.
+        allow create, update, delete: if false;
       }
 
-      /**
-       * @description Rules for Fouls committed during a match.
-       * @path /matches/{matchId}/fouls/{foulId}
-       * @allow (get, list) for any user to see foul statistics.
-       * @deny (create, update, delete) for all users.
-       * @principle Inherited security posture from the parent Match.
-       */
       match /fouls/{foulId} {
         allow get, list: if true;
-        // CRITICAL: Missing ownership field to determine who can record fouls.
-        allow create, update, delete: if false; // TODO: Implement write access for match organizers/refs.
+        allow create, update, delete: if false;
       }
 
-      /**
-       * @description Rules for Player Performance ratings given after a match.
-       * @path /matches/{matchId}/matchPlayerPerformances/{mppId}
-       * @allow (get, list) for any user to view player ratings.
-       * @allow (create) if the user is the rater.
-       * @allow (update, delete) if the user is the original rater.
-       * @principle Validates relational integrity by ensuring the rater field matches the auth UID.
-       */
       match /matchPlayerPerformances/{mppId} {
         allow get, list: if true;
         allow create: if isSignedIn() && request.resource.data.raterPlayerId == request.auth.uid;
@@ -100,11 +80,6 @@ service cloud.firestore {
 
     /**
      * @description Rules for Player profiles.
-     * @path /players/{playerId}
-     * @allow (get, list) for any user to find players in the league.
-     * @allow (create) if the document ID matches the user's UID.
-     * @allow (update, delete) if the user owns the profile.
-     * @principle Enforces strict user-ownership for profile management.
      */
     match /players/{playerId} {
       allow get, list: if true;
