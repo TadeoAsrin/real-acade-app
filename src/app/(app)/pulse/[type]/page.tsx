@@ -100,6 +100,7 @@ export default function PulseDetailPage() {
   };
 
   const renderMvpRanking = () => {
+    const maxMvps = Math.max(...playerStats.map(p => p.totalMvp), 0);
     const sorted = [...playerStats]
       .filter(p => p.totalMvp > 0)
       .sort((a, b) => b.totalMvp - a.totalMvp || b.powerPoints - a.powerPoints)
@@ -116,28 +117,31 @@ export default function PulseDetailPage() {
         </div>
 
         <div className="space-y-4">
-            {sorted.map((p, i) => (
-                <Card key={p.playerId} className={cn("glass-card transition-all", i === 0 ? "border-yellow-500/50 bg-yellow-500/5 scale-105" : "border-white/5")}>
-                    <CardContent className="p-6 flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <div className="flex flex-col items-center w-8">
-                                {i === 0 ? <Crown className="h-5 w-5 text-yellow-500 mb-1" /> : <span className="text-2xl font-black italic text-muted-foreground/30">{i + 1}</span>}
+            {sorted.map((p, i) => {
+                const isLeader = p.totalMvp === maxMvps;
+                return (
+                    <Card key={p.playerId} className={cn("glass-card transition-all", isLeader ? "border-yellow-500/50 bg-yellow-500/5 scale-105" : "border-white/5")}>
+                        <CardContent className="p-6 flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="flex flex-col items-center w-8">
+                                    {isLeader ? <Crown className="h-5 w-5 text-yellow-500 mb-1" /> : <span className="text-2xl font-black italic text-muted-foreground/30">{i + 1}</span>}
+                                </div>
+                                <Avatar className={cn("h-12 w-12", isLeader && "border-2 border-yellow-500")}>
+                                    <AvatarFallback className="bg-muted font-black">{getInitials(p.name)}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex flex-col">
+                                    <span className="font-black text-lg">{p.name}</span>
+                                    <span className="text-[10px] font-bold uppercase text-muted-foreground">{p.matchesPlayed} Partidos Jugados</span>
+                                </div>
                             </div>
-                            <Avatar className={cn("h-12 w-12", i === 0 && "border-2 border-yellow-500")}>
-                                <AvatarFallback className="bg-muted font-black">{getInitials(p.name)}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex flex-col">
-                                <span className="font-black text-lg">{p.name}</span>
-                                <span className="text-[10px] font-bold uppercase text-muted-foreground">{p.matchesPlayed} Partidos Jugados</span>
+                            <div className="text-right">
+                                <span className={cn("text-3xl font-black italic", isLeader ? "text-yellow-500" : "text-white")}>{p.totalMvp}</span>
+                                <p className="text-[8px] uppercase font-black text-muted-foreground leading-none">Premios</p>
                             </div>
-                        </div>
-                        <div className="text-right">
-                            <span className={cn("text-3xl font-black italic", i === 0 ? "text-yellow-500" : "text-white")}>{p.totalMvp}</span>
-                            <p className="text-[8px] uppercase font-black text-muted-foreground leading-none">Premios</p>
-                        </div>
-                    </CardContent>
-                </Card>
-            ))}
+                        </CardContent>
+                    </Card>
+                );
+            })}
             {sorted.length === 0 && (
                 <div className="text-center py-20 border-2 border-dashed rounded-3xl opacity-30">
                     <p className="font-black uppercase italic">Nadie ha sido elegido MVP todavía.</p>

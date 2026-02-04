@@ -69,7 +69,10 @@ export default function DashboardPage() {
   const influencer = topInfluencers[0];
   const influencerRunnersUp = topInfluencers.slice(1);
 
-  const topMvpPlayer = [...playerStats].sort((a, b) => b.totalMvp - a.totalMvp || b.powerPoints - a.powerPoints)[0];
+  // MVP Logic: Find all leaders with the max number of MVPs
+  const maxMvps = Math.max(...playerStats.map(p => p.totalMvp), 0);
+  const mvpLeaders = maxMvps > 0 ? playerStats.filter(p => p.totalMvp === maxMvps) : [];
+  const topMvpPlayer = mvpLeaders[0]; // For fallback UI
 
   const totalMatches = allMatches.length;
   const attendanceLeaders = playerStats.length > 0 && totalMatches > 0
@@ -235,20 +238,33 @@ export default function DashboardPage() {
                     <CardHeader className="pb-2">
                         <CardTitle className="text-[10px] font-black uppercase tracking-widest text-yellow-500 flex items-center gap-2">
                             <Crown className="h-3 w-3" />
-                            Rey de los MVP
+                            {mvpLeaders.length > 1 ? "Reyes de los MVP" : "Rey de los MVP"}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="flex items-center gap-4">
-                            <Avatar className="h-12 w-12 border-2 border-yellow-500/30">
-                                <AvatarFallback className="bg-yellow-500/10 text-yellow-500 font-black">{getInitials(topMvpPlayer?.name || "??")}</AvatarFallback>
-                            </Avatar>
+                            <div className="flex -space-x-3 overflow-hidden">
+                                {mvpLeaders.slice(0, 3).map((leader) => (
+                                    <Avatar key={leader.playerId} className="h-12 w-12 border-2 border-background ring-2 ring-yellow-500/30 shrink-0">
+                                        <AvatarFallback className="bg-yellow-500/10 text-yellow-500 font-black text-xs">{getInitials(leader.name)}</AvatarFallback>
+                                    </Avatar>
+                                ))}
+                                {mvpLeaders.length === 0 && (
+                                    <Avatar className="h-12 w-12 border-2 border-yellow-500/30">
+                                        <AvatarFallback className="bg-yellow-500/10 text-yellow-500 font-black">??</AvatarFallback>
+                                    </Avatar>
+                                )}
+                            </div>
                             <div className="flex flex-col min-w-0">
-                                <span className="text-lg font-black tracking-tight leading-none group-hover:text-yellow-500 transition-colors truncate italic">{topMvpPlayer?.name || '-'}</span>
+                                <span className="text-lg font-black tracking-tight leading-none group-hover:text-yellow-500 transition-colors truncate italic">
+                                    {mvpLeaders.length > 1 
+                                        ? `${mvpLeaders[0].name.split(' ')[0]} + ${mvpLeaders.length - 1}`
+                                        : (topMvpPlayer?.name || '-')}
+                                </span>
                                 <span className="text-[10px] uppercase font-bold text-muted-foreground">Premios Oficiales</span>
                             </div>
                         </div>
-                        <div className="text-3xl font-black italic text-white">{topMvpPlayer?.totalMvp || 0}</div>
+                        <div className="text-3xl font-black italic text-white">{maxMvps}</div>
                     </CardContent>
                 </Card>
             </Link>
