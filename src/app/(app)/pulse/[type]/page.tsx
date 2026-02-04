@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -353,6 +354,8 @@ export default function PulseDetailPage() {
   };
 
   const renderPartnership = () => {
+    const maxWinRate = chemistryRankings.length > 0 ? chemistryRankings[0].winRate : 0;
+
     return (
       <div className="space-y-8 max-w-2xl mx-auto">
         <div className="text-center space-y-4">
@@ -365,33 +368,38 @@ export default function PulseDetailPage() {
 
         {chemistryRankings.length > 0 ? (
             <div className="space-y-4">
-                {chemistryRankings.map((pair, i) => (
-                    <Card key={i} className={cn("glass-card transition-all", i === 0 ? "border-primary/50 bg-primary/5 scale-105" : "border-white/5")}>
-                        <CardContent className="p-6 flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                <span className="text-2xl font-black italic text-muted-foreground/30 w-8">{i + 1}</span>
-                                <div className="flex -space-x-4">
-                                    <Avatar className="h-12 w-12 border-2 border-background ring-2 ring-primary/20">
-                                        <AvatarFallback className="bg-muted font-black">{getInitials(pair.player1.name)}</AvatarFallback>
-                                    </Avatar>
-                                    <Avatar className="h-12 w-12 border-2 border-background ring-2 ring-primary/20">
-                                        <AvatarFallback className="bg-muted font-black">{getInitials(pair.player2.name)}</AvatarFallback>
-                                    </Avatar>
+                {chemistryRankings.map((pair, i) => {
+                    const isLeader = pair.winRate === maxWinRate;
+                    return (
+                        <Card key={i} className={cn("glass-card transition-all", isLeader ? "border-primary/50 bg-primary/5 scale-105" : "border-white/5")}>
+                            <CardContent className="p-6 flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                    <div className="flex flex-col items-center w-8">
+                                        {isLeader ? <Crown className="h-5 w-5 text-primary mb-1" /> : <span className="text-2xl font-black italic text-muted-foreground/30">{i + 1}</span>}
+                                    </div>
+                                    <div className="flex -space-x-4">
+                                        <Avatar className={cn("h-12 w-12 border-2 border-background ring-2", isLeader ? "ring-primary/40" : "ring-white/10")}>
+                                            <AvatarFallback className="bg-muted font-black">{getInitials(pair.player1.name)}</AvatarFallback>
+                                        </Avatar>
+                                        <Avatar className={cn("h-12 w-12 border-2 border-background ring-2", isLeader ? "ring-primary/40" : "ring-white/10")}>
+                                            <AvatarFallback className="bg-muted font-black">{getInitials(pair.player2.name)}</AvatarFallback>
+                                        </Avatar>
+                                    </div>
+                                    <div className="flex flex-col min-w-0">
+                                        <span className="font-black text-lg truncate italic">
+                                            {pair.player1.name.split(' ')[0]} + {pair.player2.name.split(' ')[0]}
+                                        </span>
+                                        <span className="text-[10px] font-bold uppercase text-muted-foreground">{pair.wins}V en {pair.matches} PJ</span>
+                                    </div>
                                 </div>
-                                <div className="flex flex-col min-w-0">
-                                    <span className="font-black text-lg truncate italic">
-                                        {pair.player1.name.split(' ')[0]} + {pair.player2.name.split(' ')[0]}
-                                    </span>
-                                    <span className="text-[10px] font-bold uppercase text-muted-foreground">{pair.wins}V en {pair.matches} PJ</span>
+                                <div className="text-right">
+                                    <span className={cn("text-3xl font-black italic", isLeader ? "text-primary" : "text-white")}>{pair.winRate}%</span>
+                                    <p className="text-[8px] uppercase font-black text-muted-foreground leading-none">Efectividad</p>
                                 </div>
-                            </div>
-                            <div className="text-right">
-                                <span className={cn("text-3xl font-black italic", i === 0 ? "text-primary" : "text-white")}>{pair.winRate}%</span>
-                                <p className="text-[8px] uppercase font-black text-muted-foreground leading-none">Efectividad</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))}
+                            </CardContent>
+                        </Card>
+                    );
+                })}
             </div>
         ) : (
             <div className="h-64 border-2 border-dashed rounded-3xl flex items-center justify-center text-muted-foreground italic">No hay suficientes datos de parejas aún (mínimo 2 partidos juntos).</div>

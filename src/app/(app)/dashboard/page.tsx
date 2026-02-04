@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -72,7 +73,7 @@ export default function DashboardPage() {
   const influencer = topInfluencers[0];
   const influencerRunnersUp = topInfluencers.slice(1);
 
-  // Pulse Metrics
+  // Pulse Metrics - Shared MVP logic
   const maxMvps = Math.max(...playerStats.map(p => p.totalMvp), 0);
   const mvpLeaders = maxMvps > 0 ? playerStats.filter(p => p.totalMvp === maxMvps) : [];
   const topMvpPlayer = mvpLeaders[0];
@@ -94,7 +95,7 @@ export default function DashboardPage() {
     ? Math.round((attendanceLeaders[0].matchesPlayed / totalMatches) * 100) 
     : 0;
 
-  // HUMILDAD Metrics
+  // Nos Caemos a Pedazos - Shared Humility logic
   const maxLosses = Math.max(...playerStats.map(p => p.losses), 0);
   const imanDeDerrotasLeaders = maxLosses > 0 ? playerStats.filter(p => p.losses === maxLosses) : [];
 
@@ -241,6 +242,7 @@ export default function DashboardPage() {
           <h2 className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground/50 italic">Pulso de la Liga</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Reyes de los MVP */}
             <Link href="/pulse/mvp">
                 <Card className="glass-card border-yellow-500/20 hover:border-yellow-500/50 transition-all group overflow-hidden cursor-pointer h-full">
                     <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
@@ -280,6 +282,7 @@ export default function DashboardPage() {
                 </Card>
             </Link>
 
+            {/* Partido más Picante */}
             <Link href="/pulse/league">
                 <Card className="glass-card border-orange-500/20 hover:border-orange-500/50 transition-all group overflow-hidden cursor-pointer h-full bg-gradient-to-br from-card/60 to-orange-500/5">
                     <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
@@ -305,6 +308,7 @@ export default function DashboardPage() {
                 </Card>
             </Link>
 
+            {/* Mejor Sociedad con lógica de empate */}
             <Link href="/pulse/partnership">
                 <Card className="glass-card border-white/10 hover:border-white/20 transition-all group overflow-hidden cursor-pointer h-full">
                     <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
@@ -355,9 +359,16 @@ export default function DashboardPage() {
                                                     <AvatarFallback className="text-[6px] font-black">{getInitials(runnerUpChemistry.player2.name)}</AvatarFallback>
                                                 </Avatar>
                                             </div>
-                                            <span className="text-[8px] font-bold text-muted-foreground uppercase">En los talones</span>
+                                            <span className="text-[8px] font-bold text-muted-foreground uppercase">
+                                                {runnerUpChemistry.winRate === topChemistry?.winRate ? "Colíderes" : "En los talones"}
+                                            </span>
                                         </div>
-                                        <span className="text-[10px] font-black italic text-white/60">{runnerUpChemistry.winRate}%</span>
+                                        <span className={cn(
+                                            "text-[10px] font-black italic",
+                                            runnerUpChemistry.winRate === topChemistry?.winRate ? "text-primary" : "text-white/60"
+                                        )}>
+                                            {runnerUpChemistry.winRate}%
+                                        </span>
                                     </div>
                                 </div>
                             )}
@@ -366,6 +377,7 @@ export default function DashboardPage() {
                 </Card>
             </Link>
 
+            {/* Los Infaltables */}
             <Card className="glass-card border-emerald-500/20 bg-emerald-500/5 overflow-hidden h-full">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 pt-4">
                     <CardTitle className="text-[10px] font-black uppercase tracking-widest text-emerald-500">Los Infaltables</CardTitle>
