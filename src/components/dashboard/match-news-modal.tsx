@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Newspaper, Quote, Trophy, Star, Award, X } from 'lucide-react';
+import { Newspaper, Quote, Trophy, Star, X } from 'lucide-react';
 import { es } from 'date-fns/locale';
 import { format } from 'date-fns';
 import { Button } from '../ui/button';
@@ -94,8 +94,6 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
               <span className="font-sans font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] text-[9px] sm:text-xs">The Real Acade Gazette</span>
             </div>
             <div className="flex items-center gap-2 sm:gap-4 font-sans text-[8px] sm:text-[10px] font-bold uppercase text-black/40">
-              <span className="hidden xs:inline">Edición Nº {match.id.slice(-4).toUpperCase()}</span>
-              <span className="h-3 w-[1px] bg-black/10 hidden xs:inline" />
               <span>{format(new Date(match.date), "dd · MM · yyyy", { locale: es })}</span>
               <button 
                 onClick={handleClose} 

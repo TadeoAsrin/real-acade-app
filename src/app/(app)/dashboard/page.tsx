@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -126,7 +127,6 @@ export default function DashboardPage() {
         />
       )}
 
-      {/* Hero: Última Gaceta Card */}
       {lastMatch && (
         <Card className="glass-card border-none bg-gradient-to-br from-primary/20 via-background to-card overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/5 relative group">
           <div className="absolute inset-0 bg-dot-pattern opacity-10" />

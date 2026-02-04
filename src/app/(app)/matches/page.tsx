@@ -204,14 +204,11 @@ export default function MatchesPage() {
   }
 
   const matches = matchesData || [];
-  
-  // Lógica mejorada para filtrar partidos futuros y pasados
-  const now = new Date();
   const upcomingMatches = matches.filter(m => {
     const date = parseISO(m.date);
     const hasScore = m.teamAScore > 0 || m.teamBScore > 0;
     return !hasScore && (isFuture(date) || isToday(date));
-  }).reverse(); // Revertir para que el más cercano aparezca primero
+  }).reverse();
 
   const pastMatches = matches.filter(m => {
     const date = parseISO(m.date);
@@ -223,7 +220,7 @@ export default function MatchesPage() {
     <div className="flex flex-col gap-10 max-w-5xl mx-auto pb-20">
       <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-black tracking-tighter text-white uppercase italic">Timeline Temporada</h1>
+            <h1 className="text-4xl font-black tracking-tighter text-white uppercase italic">Historial de Partidos</h1>
             <p className="text-muted-foreground">El registro cronológico de la mística de Real Acade.</p>
           </div>
           {isAdmin && (
@@ -234,7 +231,6 @@ export default function MatchesPage() {
       </div>
 
       <div className="space-y-12 relative">
-        {/* Línea vertical de tiempo mejorada */}
         <div className="absolute left-[34px] md:left-[42px] top-4 bottom-0 w-0.5 bg-gradient-to-b from-primary/50 via-muted/20 to-transparent hidden md:block" />
 
         {upcomingMatches.length > 0 && (
