@@ -37,13 +37,16 @@ interface MatchCardProps {
 
 const MatchCard = ({ match, isAdmin, onDelete }: MatchCardProps) => {
   const date = parseISO(match.date);
-  const isCompleted = match.teamAScore > 0 || match.teamBScore > 0 || !isFuture(date);
-  const isUpcoming = isFuture(date) && !isToday(date);
+  const hasScore = match.teamAScore > 0 || match.teamBScore > 0;
   const isMatchToday = isToday(date);
+  
+  // Un partido es "Próximo" si no tiene goles Y (es hoy o es en el futuro)
+  const isUpcoming = !hasScore && (isFuture(date) || isMatchToday);
+  const isCompleted = hasScore || (!isFuture(date) && !isMatchToday);
   
   const teamAWon = match.teamAScore > match.teamBScore;
   const teamBWon = match.teamBScore > match.teamAScore;
-  const draw = match.teamAScore === match.teamBScore && isCompleted;
+  const draw = match.teamAScore === match.teamBScore && isCompleted && hasScore;
 
   return (
     <Card className="overflow-hidden border-l-4 border-l-primary/30 hover:border-l-primary transition-all group relative glass-card">
@@ -53,13 +56,13 @@ const MatchCard = ({ match, isAdmin, onDelete }: MatchCardProps) => {
             <div className="flex flex-col md:flex-row md:items-center gap-6">
               <div className="flex items-center gap-4 min-w-[180px]">
                   <div className={cn(
-                    "p-3 rounded-xl",
+                    "p-3 rounded-xl shrink-0",
                     isMatchToday ? "bg-orange-500 text-white animate-pulse" : "bg-muted text-muted-foreground"
                   )}>
                       {isMatchToday ? <Flame className="h-5 w-5" /> : <CalendarIcon className="h-5 w-5" />}
                   </div>
-                  <div className="flex flex-col">
-                      <span className="font-black text-white uppercase italic tracking-tighter">
+                  <div className="flex flex-col min-w-0">
+                      <span className="font-black text-white uppercase italic tracking-tighter truncate">
                         {format(date, "eeee d", { locale: es })}
                       </span>
                       <div className="flex items-center gap-2">
@@ -101,8 +104,8 @@ const MatchCard = ({ match, isAdmin, onDelete }: MatchCardProps) => {
                 </div>
               ) : (
                 <div className="flex-1 flex flex-col items-center justify-center py-2 md:py-0">
-                  <span className="text-xs font-black uppercase tracking-widest text-primary mb-1">Próximo Desafío</span>
-                  <span className="text-2xl font-black italic">{format(date, "HH:mm")} HS</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-primary mb-1">Próximo Desafío</span>
+                  <span className="text-2xl font-black italic text-white">{format(date, "HH:mm")} HS</span>
                 </div>
               )}
 
@@ -150,8 +153,8 @@ const MatchCard = ({ match, isAdmin, onDelete }: MatchCardProps) => {
                   </AlertDialog>
                 </>
               )}
-              <Button variant="outline" className="group-hover:bg-primary group-hover:border-primary group-hover:text-primary-foreground rounded-xl font-black uppercase italic text-xs gap-2">
-                <Link href={`/matches/${match.id}`} className="flex items-center gap-2">
+              <Button variant="outline" asChild className="group-hover:bg-primary group-hover:border-primary group-hover:text-primary-foreground rounded-xl font-black uppercase italic text-xs gap-2">
+                <Link href={`/matches/${match.id}`}>
                   {isUpcoming ? "Ver Info" : "Ver Crónica"} <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </Button>
@@ -201,8 +204,20 @@ export default function MatchesPage() {
   }
 
   const matches = matchesData || [];
-  const futureMatches = matches.filter(m => isFuture(parseISO(m.date)));
-  const pastMatches = matches.filter(m => !isFuture(parseISO(m.date)));
+  
+  // Lógica mejorada para filtrar partidos futuros y pasados
+  const now = new Date();
+  const upcomingMatches = matches.filter(m => {
+    const date = parseISO(m.date);
+    const hasScore = m.teamAScore > 0 || m.teamBScore > 0;
+    return !hasScore && (isFuture(date) || isToday(date));
+  }).reverse(); // Revertir para que el más cercano aparezca primero
+
+  const pastMatches = matches.filter(m => {
+    const date = parseISO(m.date);
+    const hasScore = m.teamAScore > 0 || m.teamBScore > 0;
+    return hasScore || (!isFuture(date) && !isToday(date));
+  });
 
   return (
     <div className="flex flex-col gap-10 max-w-5xl mx-auto pb-20">
@@ -219,17 +234,17 @@ export default function MatchesPage() {
       </div>
 
       <div className="space-y-12 relative">
-        {/* Timeline vertical line */}
+        {/* Línea vertical de tiempo mejorada */}
         <div className="absolute left-[34px] md:left-[42px] top-4 bottom-0 w-0.5 bg-gradient-to-b from-primary/50 via-muted/20 to-transparent hidden md:block" />
 
-        {futureMatches.length > 0 && (
+        {upcomingMatches.length > 0 && (
           <section className="space-y-6">
             <h2 className="text-xs font-black uppercase tracking-[0.3em] text-primary flex items-center gap-2 relative z-10">
               <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
               Próximos Desafíos
             </h2>
             <div className="grid grid-cols-1 gap-4">
-              {futureMatches.map(match => (
+              {upcomingMatches.map(match => (
                 <MatchCard 
                   key={match.id} 
                   match={match} 
@@ -253,7 +268,7 @@ export default function MatchesPage() {
               />
             ))}
           </div>
-          {pastMatches.length === 0 && futureMatches.length === 0 && (
+          {pastMatches.length === 0 && upcomingMatches.length === 0 && (
               <div className="text-center py-20 border-2 border-dashed rounded-3xl opacity-20">
                   <CalendarIcon className="h-12 w-12 mx-auto mb-4" />
                   <p className="font-bold uppercase italic tracking-widest">Sin registros aún</p>
