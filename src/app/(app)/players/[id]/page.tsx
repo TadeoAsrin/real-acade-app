@@ -1,12 +1,12 @@
-
 'use client';
 
 import * as React from 'react';
 import { useParams } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Trophy, History, TrendingUp, Loader2, MapPin, Target, Star, ChevronLeft, Calendar } from "lucide-react";
+import { Trophy, History, TrendingUp, Loader2, MapPin, Target, Star, ChevronLeft, Calendar, ChevronRight } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { PlayerPerformanceChart } from "@/components/players/player-performance-chart";
 import { Badge } from "@/components/ui/badge";
