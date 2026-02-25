@@ -32,7 +32,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn, getInitials } from "@/lib/utils";
-import { CalendarIcon, Loader2, Award, Star, Camera, MessageSquare, Plus, Trash2, Sparkles } from "lucide-react";
+import { CalendarIcon, Loader2, Award, Star, Camera, MessageSquare, Plus, Trash2, Sparkles, Upload } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -75,7 +75,7 @@ const formSchema = z.object({
   mvpPlayerId: z.string().optional(),
   bestGoalPlayerId: z.string().optional(),
   comment: z.string().optional(),
-  photos: z.array(z.string().url("Debe ser una URL válida")).max(5, "Máximo 5 fotos"),
+  photos: z.array(z.string()).max(5, "Máximo 5 fotos"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -87,6 +87,7 @@ export default function NewMatchPage() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
   const [photoUrl, setPhotoUrl] = React.useState("");
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const playersRef = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -159,7 +160,6 @@ export default function NewMatchPage() {
       const teamAScore = teamAPlayers.reduce((sum, p) => sum + p.goals, 0);
       const teamBScore = teamBPlayers.reduce((sum, p) => sum + p.goals, 0);
 
-      // Generar el resumen de IA antes de guardar
       let aiSummary;
       const aiInput = {
         date: data.date.toISOString(),
@@ -210,6 +210,37 @@ export default function NewMatchPage() {
     }
   };
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (watchedPhotos.length >= 5) {
+      toast({ variant: "destructive", title: "Límite alcanzado", description: "Máximo 5 fotos por partido." });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 1200;
+        const scaleSize = MAX_WIDTH / img.width;
+        canvas.width = MAX_WIDTH;
+        canvas.height = img.height * scaleSize;
+
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+        form.setValue("photos", [...watchedPhotos, dataUrl]);
+        toast({ title: "Foto Cargada", description: "La imagen local se ha procesado correctamente." });
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
+
   const removePhoto = (idx: number) => {
     form.setValue("photos", watchedPhotos.filter((_, i) => i !== idx));
   };
@@ -253,7 +284,6 @@ export default function NewMatchPage() {
                     isDisabled && "opacity-40 cursor-not-allowed"
                   )}>
                     <Avatar className="h-6 w-6">
-                      <AvatarImage src={player.avatar} alt={player.name} />
                       <AvatarFallback className="text-[8px] font-black">{getInitials(player.name)}</AvatarFallback>
                     </Avatar>
                     <span className={cn("text-xs font-bold", isSelectedInOtherTeam && "text-muted-foreground line-through")}>
@@ -300,7 +330,6 @@ export default function NewMatchPage() {
                         <FormControl><RadioGroupItem value={id} /></FormControl>
                         <FormLabel className="font-normal flex items-center gap-2 cursor-pointer w-full">
                           <Avatar className="h-6 w-6">
-                            <AvatarImage src={player.avatar} alt={player.name} />
                             <AvatarFallback className="text-[10px] font-black">{getInitials(player.name)}</AvatarFallback>
                           </Avatar>
                           <span className="text-sm font-bold">{player.name}</span>
@@ -325,7 +354,6 @@ export default function NewMatchPage() {
                 <div key={id} className="flex items-center justify-between p-3 border rounded-xl glass-card">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={player.avatar} alt={player.name} />
                       <AvatarFallback className="text-[10px] font-black">{getInitials(player.name)}</AvatarFallback>
                     </Avatar>
                     <span className="font-bold text-sm">{player.name}</span>
@@ -507,7 +535,7 @@ export default function NewMatchPage() {
                 <MessageSquare className="h-5 w-5 text-emerald-500" />
                 4. La Crónica Social
               </CardTitle>
-              <CardDescription>Añade contexto y fotos de la jornada.</CardDescription>
+              <CardDescription>Añade contexto y fotos de la jornada. La primera foto será la tapa del diario.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-8">
               <FormField
@@ -530,28 +558,54 @@ export default function NewMatchPage() {
 
               <div className="space-y-4">
                 <FormLabel className="text-xs font-black uppercase tracking-widest text-muted-foreground">Galería de Fotos (Máx 5)</FormLabel>
-                <div className="flex gap-2">
-                  <Input 
-                    placeholder="Pega la URL de la foto..." 
-                    value={photoUrl}
-                    onChange={(e) => setPhotoUrl(e.target.value)}
-                    className="h-12 rounded-xl"
-                  />
-                  <Button 
-                    type="button" 
-                    variant="secondary" 
-                    onClick={addPhoto}
-                    disabled={!photoUrl || watchedPhotos.length >= 5}
-                    className="h-12 px-6 font-black uppercase italic"
-                  >
-                    <Plus className="h-4 w-4 mr-2" /> Añadir
-                  </Button>
+                
+                <div className="flex flex-col md:flex-row gap-3">
+                  <div className="flex-1 flex gap-2">
+                    <Input 
+                      placeholder="Pega la URL de la foto..." 
+                      value={photoUrl}
+                      onChange={(e) => setPhotoUrl(e.target.value)}
+                      className="h-12 rounded-xl"
+                    />
+                    <Button 
+                      type="button" 
+                      variant="secondary" 
+                      onClick={addPhoto}
+                      disabled={!photoUrl || watchedPhotos.length >= 5}
+                      className="h-12 px-6 font-black uppercase italic"
+                    >
+                      <Plus className="h-4 w-4 mr-2" /> URL
+                    </Button>
+                  </div>
+                  <div className="relative">
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      className="hidden" 
+                      ref={fileInputRef}
+                      onChange={handleFileUpload}
+                    />
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={watchedPhotos.length >= 5}
+                      className="h-12 w-full md:w-auto px-6 font-black uppercase italic border-emerald-500/20 text-emerald-500 hover:bg-emerald-500/10"
+                    >
+                      <Upload className="h-4 w-4 mr-2" /> Subir desde Mac
+                    </Button>
+                  </div>
                 </div>
                 
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4 pt-2">
                   {watchedPhotos.map((url, idx) => (
                     <div key={idx} className="relative aspect-square rounded-xl overflow-hidden group border border-white/10">
                       <img src={url} alt={`Preview ${idx}`} className="w-full h-full object-cover" />
+                      {idx === 0 && (
+                        <div className="absolute top-0 left-0 bg-yellow-500 text-black text-[8px] font-black uppercase px-2 py-0.5 rounded-br-lg shadow-lg">
+                          Tapa del Diario
+                        </div>
+                      )}
                       <button 
                         type="button"
                         onClick={() => removePhoto(idx)}

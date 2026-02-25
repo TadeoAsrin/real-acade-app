@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -74,6 +75,7 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
   if (!match || !match.aiSummary) return null;
 
   const { aiSummary } = match;
+  const coverPhoto = match.photos && match.photos.length > 0 ? match.photos[0] : null;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
@@ -88,7 +90,7 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="bg-black text-white p-1.5 rounded-sm">
-                <Newspaper className="h-4 w-4 sm:h-5 sm:w-5" />
+                < Newspaper className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <span className="font-sans font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] text-[9px] sm:text-xs">The Real Acade Gazette</span>
             </div>
@@ -107,6 +109,23 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
 
         {/* Content Area - Scrollable */}
         <div className="flex-1 overflow-y-auto bg-[#fcfcf9] overscroll-contain">
+          {/* Cover Photo */}
+          {coverPhoto && (
+            <div className="w-full aspect-video sm:aspect-[21/9] overflow-hidden border-b border-black/10 relative group">
+              <img 
+                src={coverPhoto} 
+                alt="Tapa del Diario" 
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+              <div className="absolute bottom-4 left-6 flex items-center gap-2">
+                <Badge className="bg-yellow-500 text-black font-black uppercase italic tracking-widest text-[8px] sm:text-[10px] border-none">
+                  Foto de Tapa
+                </Badge>
+              </div>
+            </div>
+          )}
+
           <div className="p-6 sm:p-10 md:p-12">
             <article className="space-y-10">
               <div className="space-y-6 text-center max-w-2xl mx-auto">

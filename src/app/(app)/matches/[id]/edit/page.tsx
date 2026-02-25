@@ -32,7 +32,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn, getInitials } from "@/lib/utils";
-import { CalendarIcon, Loader2, Award, Star, ArrowLeft, Camera, Plus, Trash2, MessageSquare, Sparkles } from "lucide-react";
+import { CalendarIcon, Loader2, Award, Star, ArrowLeft, Camera, Plus, Trash2, MessageSquare, Sparkles, Upload } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
@@ -91,6 +91,7 @@ export default function EditMatchPage() {
   const [isRegeneratingAi, setIsRegeneratingAi] = React.useState(false);
   const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
   const [photoUrl, setPhotoUrl] = React.useState("");
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const matchRef = useMemoFirebase(() => {
     if (!firestore || !id) return null;
@@ -260,6 +261,37 @@ export default function EditMatchPage() {
     }
   };
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (watchedPhotos.length >= 5) {
+      toast({ variant: "destructive", title: "Límite alcanzado", description: "Máximo 5 fotos por partido." });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 1200;
+        const scaleSize = MAX_WIDTH / img.width;
+        canvas.width = MAX_WIDTH;
+        canvas.height = img.height * scaleSize;
+
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+        form.setValue("photos", [...watchedPhotos, dataUrl]);
+        toast({ title: "Foto Cargada", description: "La imagen local se ha procesado correctamente." });
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
+
   const removePhoto = (idx: number) => {
     form.setValue("photos", watchedPhotos.filter((_, i) => i !== idx));
   };
@@ -303,7 +335,6 @@ export default function EditMatchPage() {
                     isDisabled && "opacity-40 cursor-not-allowed"
                   )}>
                     <Avatar className="h-6 w-6">
-                      <AvatarImage src={player.avatar} alt={player.name} />
                       <AvatarFallback className="text-[8px] font-black">{getInitials(player.name)}</AvatarFallback>
                     </Avatar>
                     <span className={cn("text-xs font-bold", isSelectedInOtherTeam && "text-muted-foreground line-through")}>
@@ -348,7 +379,6 @@ export default function EditMatchPage() {
                         <FormControl><RadioGroupItem value={playerId} /></FormControl>
                         <FormLabel className="font-normal flex items-center gap-2 cursor-pointer w-full">
                           <Avatar className="h-6 w-6">
-                            <AvatarImage src={player.avatar} alt={player.name} />
                             <AvatarFallback className="text-[10px] font-black">{getInitials(player.name)}</AvatarFallback>
                           </Avatar>
                           <span className="text-sm font-bold">{player.name}</span>
@@ -373,7 +403,6 @@ export default function EditMatchPage() {
                 <div key={playerId} className="flex items-center justify-between p-3 border rounded-xl glass-card">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={player.avatar} alt={player.name} />
                       <AvatarFallback className="text-[10px] font-black">{getInitials(player.name)}</AvatarFallback>
                     </Avatar>
                     <span className="font-bold text-sm">{player.name}</span>
@@ -548,22 +577,48 @@ export default function EditMatchPage() {
 
               <div className="space-y-4">
                 <FormLabel className="text-xs font-black uppercase tracking-widest text-muted-foreground">Galería de Fotos (Máx 5)</FormLabel>
-                <div className="flex gap-2">
-                  <Input 
-                    placeholder="Pega la URL de la foto..." 
-                    value={photoUrl}
-                    onChange={(e) => setPhotoUrl(e.target.value)}
-                    className="h-12 rounded-xl"
-                  />
-                  <Button type="button" variant="secondary" onClick={addPhoto} disabled={!photoUrl || watchedPhotos.length >= 5} className="h-12 px-6 font-black uppercase italic">
-                    Añadir
-                  </Button>
+                
+                <div className="flex flex-col md:flex-row gap-3">
+                  <div className="flex-1 flex gap-2">
+                    <Input 
+                      placeholder="Pega la URL de la foto..." 
+                      value={photoUrl}
+                      onChange={(e) => setPhotoUrl(e.target.value)}
+                      className="h-12 rounded-xl"
+                    />
+                    <Button type="button" variant="secondary" onClick={addPhoto} disabled={!photoUrl || watchedPhotos.length >= 5} className="h-12 px-6 font-black uppercase italic">
+                      URL
+                    </Button>
+                  </div>
+                  <div className="relative">
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      className="hidden" 
+                      ref={fileInputRef}
+                      onChange={handleFileUpload}
+                    />
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={watchedPhotos.length >= 5}
+                      className="h-12 w-full md:w-auto px-6 font-black uppercase italic border-emerald-500/20 text-emerald-500 hover:bg-emerald-500/10"
+                    >
+                      <Upload className="h-4 w-4 mr-2" /> Subir desde Mac
+                    </Button>
+                  </div>
                 </div>
                 
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4 pt-2">
                   {watchedPhotos.map((url, idx) => (
                     <div key={idx} className="relative aspect-square rounded-xl overflow-hidden group border border-white/10">
                       <img src={url} alt={`Preview ${idx}`} className="w-full h-full object-cover" />
+                      {idx === 0 && (
+                        <div className="absolute top-0 left-0 bg-yellow-500 text-black text-[8px] font-black uppercase px-2 py-0.5 rounded-br-lg shadow-lg">
+                          Tapa del Diario
+                        </div>
+                      )}
                       <button 
                         type="button"
                         onClick={() => removePhoto(idx)}
