@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -59,7 +58,7 @@ const TrendIcon = ({ form }: { form: ('W' | 'D' | 'L')[] }) => {
 
 export default function StandingsPage() {
   const firestore = useFirestore();
-  const { user } = useUser();
+  const { user } = userUser();
   const [activeTab, setActiveTab] = React.useState("general");
   const [selectedMatchId, setSelectedMatchId] = React.useState<string | null>(null);
 
@@ -123,40 +122,38 @@ export default function StandingsPage() {
     .filter(p => p.totalGoals > 0)
     .sort((a, b) => b.totalGoals - a.totalGoals || b.goalsPerMatch - a.goalsPerMatch);
 
-  const sortedEfficiency = stats
-    .filter(p => p.matchesPlayed >= 3)
-    .sort((a, b) => b.efficiency - a.efficiency || b.matchesPlayed - a.matchesPlayed);
-
   const activeCaptains = stats
     .filter(p => p.isActive)
     .sort((a, b) => {
+      // 1. Mayor Score de Prioridad (incluye bonus por debut)
       if (b.captaincyPriorityScore !== a.captaincyPriorityScore) return b.captaincyPriorityScore - a.captaincyPriorityScore;
-      if (a.totalCaptaincies !== b.totalCaptaincies) return a.totalCaptaincies - b.totalCaptaincies;
-      if (!a.lastCaptainDate) return -1;
-      if (!b.lastCaptainDate) return 1;
-      return new Date(a.lastCaptainDate).getTime() - new Date(b.lastCaptainDate).getTime();
+      
+      // 2. Nunca fue capitán (Debutantes absolutos en tie-break)
+      if (!a.lastCaptainDate && b.lastCaptainDate) return -1;
+      if (a.lastCaptainDate && !b.lastCaptainDate) return 1;
+      
+      // 3. Más antiguo (más tiempo sin serlo)
+      if (a.lastCaptainDate && b.lastCaptainDate) {
+        return new Date(a.lastCaptainDate).getTime() - new Date(b.lastCaptainDate).getTime();
+      }
+      
+      // 4. Menor cantidad total
+      return a.totalCaptaincies - b.totalCaptaincies;
     });
 
   const occasionalCaptains = stats
     .filter(p => !p.isActive && p.matchesPlayed > 0)
     .sort((a, b) => b.matchesPlayed - a.matchesPlayed || a.totalCaptaincies - b.totalCaptaincies);
 
-  // Suggested Captain Logic (Top 2)
   const last2MatchDates = allMatches.slice(0, 2).map(m => m.date);
   const suggestedCaptains = activeCaptains
     .filter(p => !p.lastCaptainDate || !last2MatchDates.includes(p.lastCaptainDate))
     .slice(0, 2);
-  
-  if (suggestedCaptains.length < 2 && activeCaptains.length >= 2) {
-    const remainingNeeded = 2 - suggestedCaptains.length;
-    const others = activeCaptains.filter(p => !suggestedCaptains.some(s => s.playerId === p.playerId)).slice(0, remainingNeeded);
-    suggestedCaptains.push(...others);
-  }
 
   const getSuggestionReason = (player: AggregatedPlayerStats) => {
-    if (player.matchesInLast5 === 5) return "Lleva asistencia perfecta (5/5). Es momento de liderar.";
-    if (player.totalCaptaincies === 0) return "Jugador clave que aún no ha estrenado el brazalete.";
-    return "Alta participación reciente y baja rotación histórica.";
+    if (player.totalCaptaincies === 0) return "Nunca ha sido capitán: es el momento ideal para su debut como líder.";
+    if (player.matchesInLast5 === 5) return "Asistencia perfecta (5/5). Su compromiso merece el brazalete.";
+    return "Lleva tiempo sin liderar y mantiene una alta actividad reciente.";
   };
 
   const selectedMatch = allMatches.find(m => m.id === selectedMatchId);
@@ -477,7 +474,7 @@ export default function StandingsPage() {
 
           <TabsContent value="efectividad" className="animate-in fade-in slide-in-from-bottom-2">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {sortedEfficiency.map((player, index) => (
+              {stats.filter(p => p.matchesPlayed >= 3).sort((a,b) => b.efficiency - a.efficiency).map((player, index) => (
                 <Card key={player.playerId} className="glass-card border-none relative overflow-hidden group">
                   <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform">
                     <TrendingUp className="h-20 w-20 text-primary" />
@@ -517,7 +514,6 @@ export default function StandingsPage() {
           <TabsContent value="capitanes" className="animate-in fade-in slide-in-from-bottom-2 space-y-12">
             <div className="flex flex-col gap-8 items-start">
               
-              {/* Consejo de Capitanes (Suggested Dual Card) */}
               {suggestedCaptains.length >= 2 && (
                 <Card className="w-full glass-card border-yellow-500/30 bg-gradient-to-br from-yellow-500/10 via-card to-background overflow-hidden relative group">
                   <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform duration-500">
@@ -530,7 +526,7 @@ export default function StandingsPage() {
                       </CardTitle>
                       <Badge variant="outline" className="border-yellow-500/20 text-yellow-500 text-[8px] uppercase font-black">Designación Oficial</Badge>
                     </div>
-                    <CardDescription className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground/60">Sugerencia basada en compromiso y rotación justa</CardDescription>
+                    <CardDescription className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground/60">Sugerencia basada en rotación justa y compromiso</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-8 relative z-10">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -593,10 +589,9 @@ export default function StandingsPage() {
                       <TooltipContent className="max-w-xs bg-zinc-900 border-white/10 p-4 space-y-3">
                         <p className="font-bold text-primary uppercase text-xs italic">Prioridad de Capitanía</p>
                         <div className="space-y-2 text-[10px] leading-relaxed">
-                          <p><span className="text-emerald-500 font-black">Score = (Recientes x 3) + (Totales x 1) - (Capitanías x 4)</span></p>
-                          <p>• <span className="text-white font-bold italic">Recientes:</span> Partidos jugados de los últimos 5 globales.</p>
-                          <p>• <span className="text-white font-bold italic">Totales:</span> Trayectoria histórica en el club.</p>
-                          <p>• <span className="text-red-500 font-bold italic">Capitanías:</span> Haber sido capitán reduce tu prioridad para dar lugar a otros.</p>
+                          <p><span className="text-emerald-500 font-black">Score = (Recientes x 3) + (Totales x 1) - (Capitanías x 4) + (Debut ? 5 : 0)</span></p>
+                          <p>• <span className="text-white font-bold italic">Debut:</span> Los que nunca fueron capitanes reciben un bonus de prioridad.</p>
+                          <p>• <span className="text-white font-bold italic">Antigüedad:</span> Ante mismo score, se elige al que lleva más tiempo sin serlo.</p>
                         </div>
                       </TooltipContent>
                     </Tooltip>

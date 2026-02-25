@@ -47,7 +47,6 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
 
   const sortedMatches = [...allMatches].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   
-  // Identificar los últimos partidos globales para lógica de actividad
   const globalMatchesDesc = [...allMatches].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   const last3Ids = globalMatchesDesc.slice(0, 3).map(m => m.id);
   const last5Ids = globalMatchesDesc.slice(0, 5).map(m => m.id);
@@ -128,11 +127,11 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
           const pointsPossible = stats.matchesPlayed * 3;
           stats.efficiency = Math.round((pointsObtained / pointsPossible) * 100);
 
-          // Lógica de Jugador Activo: 3+ partidos totales Y 1 de los últimos 3 globales
           stats.isActive = stats.matchesPlayed >= 3 && stats.matchesInLast3 >= 1;
           
-          // Cálculo de Score de Prioridad de Capitanía
-          stats.captaincyPriorityScore = (stats.matchesInLast5 * 3) + (stats.matchesPlayed * 1) - (stats.totalCaptaincies * 4);
+          // NUEVA LÓGICA: Bonus de +5 si nunca fue capitán para priorizar debuts
+          const debutBonus = stats.totalCaptaincies === 0 ? 5 : 0;
+          stats.captaincyPriorityScore = (stats.matchesInLast5 * 3) + (stats.matchesPlayed * 1) - (stats.totalCaptaincies * 4) + debutBonus;
       }
       stats.form = [...stats.form].reverse();
   }
