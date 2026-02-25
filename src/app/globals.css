@@ -43,9 +43,9 @@
     --warning: 38 95% 56%; /* #F9A825 */
 
     /* Gaceta (Modo Claro - Editorial) */
-    --paper: 40 33% 94%; /* #F5F1E8 */
+    --paper: 40 33% 98%; /* #FAF9F6 - Aclarado para máximo contraste */
     --editorial-text: 0 0% 7%; /* #111111 */
-    --editorial-muted: 0 0% 33%; /* #555555 */
+    --editorial-muted: 0 0% 25%; /* #444444 */
 
     /* Sidebar */
     --sidebar-background: 221 60% 10%;
@@ -95,6 +95,7 @@
   .editorial-paper {
     @apply bg-[hsl(var(--paper))] text-[hsl(var(--editorial-text))] font-lora relative overflow-hidden;
     background-image: url("https://www.transparenttextures.com/patterns/paper-fibers.png");
+    background-blend-mode: multiply; /* Suaviza la textura para no enturbiar el texto */
   }
 
   .editorial-title {

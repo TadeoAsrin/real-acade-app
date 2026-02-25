@@ -280,12 +280,12 @@ export default function MatchDetailPage() {
           </div>
           <div className="p-8 sm:p-16 space-y-8">
             <div className="text-center space-y-4">
-                <h2 className="editorial-title text-4xl sm:text-6xl uppercase italic">
+                <h2 className="editorial-title text-4xl sm:text-6xl uppercase italic text-black">
                 {match.aiSummary.title}
                 </h2>
                 <div className="editorial-divider max-w-xs mx-auto" />
             </div>
-            <p className="text-xl sm:text-2xl leading-relaxed text-justify text-[#1a1a1a] font-lora first-letter:text-7xl first-letter:font-black first-letter:float-left first-letter:mr-3 first-letter:mt-2 first-letter:text-black first-letter:font-playfair">
+            <p className="text-xl sm:text-2xl leading-relaxed text-justify text-[#111111] font-lora first-letter:text-7xl first-letter:font-black first-letter:float-left first-letter:mr-3 first-letter:mt-2 first-letter:text-black first-letter:font-playfair">
               {match.aiSummary.summary}
             </p>
           </div>

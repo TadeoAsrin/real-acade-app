@@ -128,11 +128,11 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
           <div className="p-6 sm:p-10 md:p-12">
             <article className="space-y-10">
               <div className="space-y-6 text-center max-w-2xl mx-auto">
-                <h1 className="editorial-title text-4xl sm:text-6xl md:text-7xl font-black leading-[0.9] tracking-tighter uppercase italic">
+                <h1 className="editorial-title text-4xl sm:text-6xl md:text-7xl font-black leading-[0.9] tracking-tighter uppercase italic text-black">
                   {aiSummary.title}
                 </h1>
                 <div className="editorial-divider" />
-                <p className="font-lora text-lg sm:text-xl font-medium text-black/60 italic leading-tight">
+                <p className="font-lora text-lg sm:text-xl font-bold text-black/80 italic leading-tight">
                   {aiSummary.subtitle}
                 </p>
               </div>
@@ -141,7 +141,7 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
                 <div className="lg:col-span-8 space-y-6 border-r border-black/5 pr-4">
                   <div className="relative">
                     <Quote className="absolute -left-6 -top-4 h-12 w-12 text-black/[0.03] pointer-events-none" />
-                    <p className="text-lg sm:text-xl leading-relaxed text-justify text-[#1a1a1a] first-letter:text-7xl first-letter:font-black first-letter:float-left first-letter:mr-3 first-letter:mt-2 first-letter:text-black first-letter:font-playfair">
+                    <p className="text-lg sm:text-xl leading-relaxed text-justify text-[#111111] font-lora first-letter:text-7xl first-letter:font-black first-letter:float-left first-letter:mr-3 first-letter:mt-2 first-letter:text-black first-letter:font-playfair">
                       {aiSummary.summary}
                     </p>
                   </div>
