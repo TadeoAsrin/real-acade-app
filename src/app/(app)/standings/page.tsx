@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -11,11 +12,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc } from "@/firebase";
 import { collection, query, orderBy, doc } from "firebase/firestore";
 import type { Player, Match, AggregatedPlayerStats } from "@/lib/definitions";
-import { Loader2, Trophy, Target, Zap, Crown, TrendingUp, TrendingDown, Minus, Calendar, ChevronRight, Users, Star, Info } from "lucide-react";
+import { Loader2, Trophy, Target, Zap, Crown, TrendingUp, TrendingDown, Minus, Calendar, ChevronRight, Users, Star, Info, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { cn, getInitials } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -139,6 +140,18 @@ export default function StandingsPage() {
   const occasionalCaptains = stats
     .filter(p => !p.isActive && p.matchesPlayed > 0)
     .sort((a, b) => b.matchesPlayed - a.matchesPlayed || a.totalCaptaincies - b.totalCaptaincies);
+
+  // Suggested Captain Logic
+  const last2MatchDates = allMatches.slice(0, 2).map(m => m.date);
+  const suggestedCaptain = activeCaptains.find(p => 
+    !p.lastCaptainDate || !last2MatchDates.includes(p.lastCaptainDate)
+  ) || activeCaptains[0];
+
+  const getSuggestionReason = (player: AggregatedPlayerStats) => {
+    if (player.matchesInLast5 === 5) return "Lleva asistencia perfecta (5/5) y es el momento justo de liderar el equipo.";
+    if (player.totalCaptaincies === 0) return "Es un jugador clave con alta participación que aún no ha estrenado el brazalete esta temporada.";
+    return "Combina una alta participación reciente con muy pocas capitanías previas, ideal para una rotación justa.";
+  };
 
   const selectedMatch = allMatches.find(m => m.id === selectedMatchId);
   const matchScorers = selectedMatch ? [...selectedMatch.teamAPlayers, ...selectedMatch.teamBPlayers]
@@ -496,41 +509,110 @@ export default function StandingsPage() {
           </TabsContent>
 
           <TabsContent value="capitanes" className="animate-in fade-in slide-in-from-bottom-2 space-y-12">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="space-y-1">
-                <h3 className="text-xl font-black italic uppercase flex items-center gap-2">
-                  <Star className="h-5 w-5 text-yellow-500" />
-                  Rotación de Liderazgo
-                </h3>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">Score basado en actividad y capitanías recientes</p>
-              </div>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-8 border-white/10 text-[10px] font-black uppercase italic">
-                      <Info className="mr-2 h-3.5 w-3.5" /> ¿Cómo se calcula?
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-xs bg-zinc-900 border-white/10 p-4 space-y-3">
-                    <p className="font-bold text-primary uppercase text-xs italic">Prioridad de Capitanía</p>
-                    <div className="space-y-2 text-[10px] leading-relaxed">
-                      <p><span className="text-emerald-500 font-black">Score = (Recientes x 3) + (Totales x 1) - (Capitanías x 4)</span></p>
-                      <p>• <span className="text-white font-bold italic">Recientes:</span> Partidos jugados de los últimos 5 globales.</p>
-                      <p>• <span className="text-white font-bold italic">Totales:</span> Trayectoria histórica en el club.</p>
-                      <p>• <span className="text-red-500 font-bold italic">Capitanías:</span> Haber sido capitán reduce tu prioridad para dar lugar a otros.</p>
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              <div className="lg:col-span-8 space-y-12">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <h3 className="text-xl font-black italic uppercase flex items-center gap-2">
+                      <Star className="h-5 w-5 text-yellow-500" />
+                      Rotación de Liderazgo
+                    </h3>
+                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">Score basado en actividad y capitanías recientes</p>
+                  </div>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="outline" size="sm" className="h-8 border-white/10 text-[10px] font-black uppercase italic">
+                          <Info className="mr-2 h-3.5 w-3.5" /> ¿Cómo se calcula?
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs bg-zinc-900 border-white/10 p-4 space-y-3">
+                        <p className="font-bold text-primary uppercase text-xs italic">Prioridad de Capitanía</p>
+                        <div className="space-y-2 text-[10px] leading-relaxed">
+                          <p><span className="text-emerald-500 font-black">Score = (Recientes x 3) + (Totales x 1) - (Capitanías x 4)</span></p>
+                          <p>• <span className="text-white font-bold italic">Recientes:</span> Partidos jugados de los últimos 5 globales.</p>
+                          <p>• <span className="text-white font-bold italic">Totales:</span> Trayectoria histórica en el club.</p>
+                          <p>• <span className="text-red-500 font-bold italic">Capitanías:</span> Haber sido capitán reduce tu prioridad para dar lugar a otros.</p>
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
 
-            {renderCaptainsTable(activeCaptains, "Jugadores Activos", <Users className="h-4 w-4 text-primary" />)}
-            
-            {occasionalCaptains.length > 0 && (
-              <div className="pt-8 border-t border-white/5">
-                {renderCaptainsTable(occasionalCaptains, "Participación Ocasional", <Zap className="h-4 w-4 text-muted-foreground/40" />)}
+                {renderCaptainsTable(activeCaptains, "Jugadores Activos", <Users className="h-4 w-4 text-primary" />)}
+                
+                {occasionalCaptains.length > 0 && (
+                  <div className="pt-8 border-t border-white/5">
+                    {renderCaptainsTable(occasionalCaptains, "Participación Ocasional", <Zap className="h-4 w-4 text-muted-foreground/40" />)}
+                  </div>
+                )}
               </div>
-            )}
+
+              <div className="lg:col-span-4 space-y-6">
+                {suggestedCaptain && (
+                  <Card className="glass-card border-yellow-500/30 bg-gradient-to-br from-yellow-500/10 to-transparent overflow-hidden relative group">
+                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform duration-500">
+                      <Crown className="h-24 w-24 text-yellow-500" />
+                    </div>
+                    <CardHeader className="pb-4">
+                      <CardTitle className="text-xs font-black uppercase tracking-widest text-yellow-500 flex items-center gap-2">
+                        <Sparkles className="h-3 w-3 animate-pulse" /> Oráculo de Capitanes
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6 relative z-10">
+                      <div className="flex flex-col items-center text-center gap-4">
+                        <div className="relative">
+                          <Avatar className="h-24 w-24 border-4 border-yellow-500 shadow-2xl shadow-yellow-500/20">
+                            <AvatarFallback className="text-3xl font-black bg-yellow-500/10 text-yellow-500">{getInitials(suggestedCaptain.name)}</AvatarFallback>
+                          </Avatar>
+                          <div className="absolute -top-3 -right-3 bg-yellow-500 text-black p-1.5 rounded-full shadow-lg border-4 border-background rotate-12">
+                            <Crown className="h-5 w-5" />
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-yellow-500/60">Próximo Capitán Sugerido</p>
+                          <h4 className="text-3xl font-black italic uppercase tracking-tighter text-white">{suggestedCaptain.name}</h4>
+                        </div>
+                      </div>
+
+                      <div className="bg-black/40 backdrop-blur-md rounded-2xl p-4 border border-white/5 space-y-4">
+                        <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
+                          <span className="text-muted-foreground">Motivo de elección</span>
+                          <Badge variant="outline" className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20 text-[8px]">Ranking #{activeCaptains.indexOf(suggestedCaptain) + 1}</Badge>
+                        </div>
+                        <p className="text-xs font-medium italic text-white/80 leading-relaxed">
+                          "{getSuggestionReason(suggestedCaptain)}"
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-white/5 p-3 rounded-xl border border-white/5 text-center">
+                          <p className="text-[8px] font-black uppercase text-muted-foreground mb-1">Score Prioridad</p>
+                          <p className="text-xl font-black italic text-primary">{suggestedCaptain.captaincyPriorityScore}</p>
+                        </div>
+                        <div className="bg-white/5 p-3 rounded-xl border border-white/5 text-center">
+                          <p className="text-[8px] font-black uppercase text-muted-foreground mb-1">Últimos 5</p>
+                          <p className="text-xl font-black italic text-white">{suggestedCaptain.matchesInLast5}/5</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                <Card className="glass-card border-white/5">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                      <Trophy className="h-3 w-3" /> Transparencia de Liderazgo
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-[10px] text-muted-foreground leading-relaxed italic">
+                      El oráculo sugiere al jugador **Activo** con mayor score que no haya sido capitán en las últimas 2 jornadas globales. Esto garantiza que el compromiso siempre sea recompensado con autoridad en el campo.
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </TabsContent>
         </div>
       </Tabs>
