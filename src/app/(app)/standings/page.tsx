@@ -16,7 +16,7 @@ import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc } from "@
 import { collection, query, orderBy, doc } from "firebase/firestore";
 import type { Player, Match, AggregatedPlayerStats } from "@/lib/definitions";
 import { Loader2, Trophy, Target, Zap, Crown, TrendingUp, TrendingDown, Minus, Calendar, ChevronRight, Users, Star, Info, Sparkles, Swords } from "lucide-react";
-import Link from "next/link";
+import Link from 'next/link';
 import { cn, getInitials } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -31,20 +31,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-
-const FormDot = ({ result }: { result: 'W' | 'D' | 'L' }) => {
-  const colors = {
-    W: "bg-emerald-500",
-    D: "bg-orange-400",
-    L: "bg-red-500"
-  };
-  const labels = { W: "G", D: "E", L: "P" };
-  return (
-    <div className={cn("h-5 w-5 rounded-full flex items-center justify-center text-[8px] font-black text-white", colors[result])}>
-      {labels[result]}
-    </div>
-  );
-};
 
 const TrendIcon = ({ form }: { form: ('W' | 'D' | 'L')[] }) => {
   const last3 = form.slice(0, 3);
@@ -110,6 +96,7 @@ export default function StandingsPage() {
     );
   }
 
+  // Orden General: Puntos, luego DIF, luego GF
   const sortedGeneral = [...stats].sort((a, b) => {
     const pointsA = a.wins * 3 + a.draws;
     const pointsB = b.wins * 3 + b.draws;
@@ -118,22 +105,27 @@ export default function StandingsPage() {
     return b.totalGoals - a.totalGoals;
   });
 
+  // Orden Goleadores
   const sortedScorers = [...stats]
     .filter(p => p.totalGoals > 0)
     .sort((a, b) => b.totalGoals - a.totalGoals || b.goalsPerMatch - a.goalsPerMatch);
 
+  // Lógica de Capitanes: Primero Debutantes Activos, luego Veteranos Activos
   const activeCaptains = stats
     .filter(p => p.isActive)
     .sort((a, b) => {
+      // 1. Prioridad absoluta a debutantes
       const aNever = a.totalCaptaincies === 0;
       const bNever = b.totalCaptaincies === 0;
       if (aNever && !bNever) return -1;
       if (!aNever && bNever) return 1;
       
+      // 2. Entre iguales, por score de prioridad
       if (b.captaincyPriorityScore !== a.captaincyPriorityScore) {
         return b.captaincyPriorityScore - a.captaincyPriorityScore;
       }
       
+      // 3. Por antigüedad (quien lleva más tiempo sin serlo)
       if (a.lastCaptainDate && b.lastCaptainDate) {
         return new Date(a.lastCaptainDate).getTime() - new Date(b.lastCaptainDate).getTime();
       }
@@ -145,6 +137,7 @@ export default function StandingsPage() {
     .filter(p => !p.isActive && p.matchesPlayed > 0)
     .sort((a, b) => b.matchesPlayed - a.matchesPlayed || a.totalCaptaincies - b.totalCaptaincies);
 
+  // Sugerencia de Capitanes (Excluyendo últimos 2)
   const last2MatchDates = allMatches.slice(0, 2).map(m => m.date);
   const suggestedCaptains = activeCaptains
     .filter(p => !p.lastCaptainDate || !last2MatchDates.includes(p.lastCaptainDate))
@@ -156,6 +149,7 @@ export default function StandingsPage() {
     return "Rotación justa: Jugador comprometido que lleva tiempo esperando su turno.";
   };
 
+  // Goleadores de la fecha seleccionada
   const selectedMatch = allMatches.find(m => m.id === selectedMatchId);
   const matchScorers = selectedMatch ? [...selectedMatch.teamAPlayers, ...selectedMatch.teamBPlayers]
     .filter(p => p.goals > 0)
