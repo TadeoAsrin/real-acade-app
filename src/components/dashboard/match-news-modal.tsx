@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -54,7 +53,7 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
 
   const handleClose = () => {
     setIsOpen(false);
-    if (!forceOpen) {
+    if (!forceOpen && match) {
       localStorage.setItem('lastSeenGacetaId', match.id);
     }
     onClose?.();
@@ -78,7 +77,7 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-w-4xl p-0 overflow-hidden border-none bg-[#fcfcf9] text-[#1a1a1a] font-serif shadow-2xl flex flex-col h-[92vh] sm:h-auto sm:max-h-[85vh] sm:rounded-xl">
+      <DialogContent className="max-w-4xl p-0 overflow-hidden border-none bg-[#fcfcf9] text-[#1a1a1a] font-serif shadow-2xl flex flex-col h-[92vh] sm:h-auto sm:max-h-[85vh] sm:rounded-xl bottom-0 sm:bottom-auto translate-y-0 sm:translate-y-[-50%] top-auto sm:top-[50%]">
         <DialogHeader className="sr-only">
           <DialogTitle>La Gaceta de Real Acade</DialogTitle>
           <DialogDescription>Crónica oficial del encuentro</DialogDescription>
@@ -178,23 +177,22 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
         {/* Footer - Sticky Actions */}
         <div className="shrink-0 p-4 sm:p-6 bg-black/5 border-t border-black/10 flex flex-col sm:flex-row gap-3 z-20">
           {isAdmin && (
-            <Button 
+            <button 
               onClick={shareToWhatsApp}
-              className="flex-1 font-sans font-black uppercase tracking-widest text-[10px] bg-black text-white hover:bg-black/90 rounded-none h-12"
+              className="flex-1 font-sans font-black uppercase tracking-widest text-[10px] bg-black text-white hover:bg-black/90 rounded-none h-12 transition-colors"
             >
               Enviar a WhatsApp
-            </Button>
+            </button>
           )}
-          <Button 
-            variant={isAdmin ? "ghost" : "default"}
+          <button 
             onClick={handleClose} 
             className={cn(
-              "font-sans font-black uppercase tracking-widest text-[10px] rounded-none h-12 px-8",
-              isAdmin ? "hover:bg-black/5 text-black" : "bg-black text-white hover:bg-black/90 flex-1"
+              "font-sans font-black uppercase tracking-widest text-[10px] rounded-none h-12 px-8 transition-colors",
+              isAdmin ? "bg-transparent text-black border border-black/10 hover:bg-black/5" : "bg-black text-white hover:bg-black/90 flex-1"
             )}
           >
             Cerrar Edición
-          </Button>
+          </button>
         </div>
       </DialogContent>
     </Dialog>

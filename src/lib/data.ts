@@ -47,16 +47,15 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
 
   const sortedMatches = [...allMatches].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   
-  // Identificar IDs de los últimos partidos globales para lógica de actividad
-  const last3Matches = [...allMatches].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 3);
-  const last5Matches = [...allMatches].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 5);
-  const last3Ids = last3Matches.map(m => m.id);
-  const last5Ids = last5Matches.map(m => m.id);
+  // Identificar los últimos partidos globales para lógica de actividad
+  const globalMatchesDesc = [...allMatches].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const last3Ids = globalMatchesDesc.slice(0, 3).map(m => m.id);
+  const last5Ids = globalMatchesDesc.slice(0, 5).map(m => m.id);
 
   sortedMatches.forEach(match => {
     const teamAWon = match.teamAScore > match.teamBScore;
     const teamBWon = match.teamBScore > match.teamAScore;
-    const draw = match.teamAScore === match.teamBScore;
+    const draw = match.teamAScore === match.teamBScore && (match.teamAScore > 0 || match.teamBScore > 0);
 
     const processPlayer = (playerStat: PlayerStats, team: 'A' | 'B') => {
         const { playerId, goals, isCaptain, isMvp, hasBestGoal } = playerStat;
@@ -129,11 +128,10 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
           const pointsPossible = stats.matchesPlayed * 3;
           stats.efficiency = Math.round((pointsObtained / pointsPossible) * 100);
 
-          // Lógica de Jugador Activo
+          // Lógica de Jugador Activo: 3+ partidos totales Y 1 de los últimos 3 globales
           stats.isActive = stats.matchesPlayed >= 3 && stats.matchesInLast3 >= 1;
           
           // Cálculo de Score de Prioridad de Capitanía
-          // Score = (Recientes x 3) + (Totales x 1) - (Capitanías x 4)
           stats.captaincyPriorityScore = (stats.matchesInLast5 * 3) + (stats.matchesPlayed * 1) - (stats.totalCaptaincies * 4);
       }
       stats.form = [...stats.form].reverse();
@@ -196,11 +194,6 @@ export const getChemistryRankings = (players: Player[], matches: Match[], minMat
       if (b.matches !== a.matches) return b.matches - a.matches;
       return b.wins - a.wins;
     });
-};
-
-export const getTopChemistry = (players: Player[], matches: Match[], minMatches = 2): ChemistryPair | null => {
-  const rankings = getChemistryRankings(players, matches, minMatches);
-  return rankings.length > 0 ? rankings[0] : null;
 };
 
 export const getSpiciestMatch = (matches: Match[]) => {

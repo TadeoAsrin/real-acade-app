@@ -126,7 +126,6 @@ export default function StandingsPage() {
     .filter(p => p.matchesPlayed >= 3)
     .sort((a, b) => b.efficiency - a.efficiency || b.matchesPlayed - a.matchesPlayed);
 
-  // Lógica de Capitanes: Separar Activos de Ocasionales
   const activeCaptains = stats
     .filter(p => p.isActive)
     .sort((a, b) => {
@@ -173,7 +172,6 @@ export default function StandingsPage() {
             </TableHeader>
             <TableBody>
               {playerList.map((player) => {
-                const isRecent = player.matchesInLast5 >= 3;
                 const wasRecentCaptain = player.lastCaptainDate && allMatches.slice(0, 3).some(m => m.date === player.lastCaptainDate);
                 
                 return (
@@ -353,7 +351,7 @@ export default function StandingsPage() {
                             <span className="text-sm font-bold italic">{player.goalsPerMatch} <span className="text-[10px] opacity-40 not-italic uppercase">G/PJ</span></span>
                         </div>
                         <div className="flex flex-col items-end">
-                            <span className="text-[10px] font-black uppercase text-muted-foreground tracking-tighter leading-none">Partidos</span>
+                            <span className="text-[10px] font-black uppercase text-muted-foreground tracking-tighter nickname-none">Partidos</span>
                             <span className="text-sm font-bold italic">{player.matchesPlayed} <span className="text-[10px] opacity-40 not-italic uppercase">PJ</span></span>
                         </div>
                     </div>
