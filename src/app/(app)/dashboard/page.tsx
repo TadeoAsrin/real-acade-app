@@ -83,7 +83,7 @@ export default function DashboardPage() {
 
   const totalMatches = allMatches.length;
   const attendanceLeaders = [...playerStats]
-    .sort((a, b) => b.matchesPlayed - a.matchesPlayed || a.name.localeCompare(Partidos))
+    .sort((a, b) => b.matchesPlayed - a.matchesPlayed || a.name.localeCompare(b.name))
     .slice(0, 3);
 
   const maxPlayerAttendance = totalMatches > 0 ? Math.max(...playerStats.map(p => p.matchesPlayed), 0) : 0;
