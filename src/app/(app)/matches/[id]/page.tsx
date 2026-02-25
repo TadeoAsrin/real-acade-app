@@ -73,7 +73,7 @@ const PlayerStatsTable = ({
                   <TableCell className="pl-6 py-4">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={player.avatar} alt={player.name} />
+                        <AvatarImage src={player.avatar || undefined} alt={player.name} />
                         <AvatarFallback className="text-[10px] font-black bg-muted">{getInitials(player.name)}</AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col">
@@ -107,7 +107,7 @@ const PlayerStatsTable = ({
 };
 
 export function MatchGallery({ photos }: { photos: string[] }) {
-  const [selectedPhoto, setSelectedPlayer] = React.useState<string | null>(null);
+  const [selectedPhoto, setSelectedPhoto] = React.useState<string | null>(null);
 
   if (!photos || photos.length === 0) return null;
 
@@ -118,31 +118,36 @@ export function MatchGallery({ photos }: { photos: string[] }) {
         <h2 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">Galería de Combate</h2>
       </div>
       <div className="flex gap-4 overflow-x-auto pb-4 snap-x no-scrollbar">
-        {photos.map((url, idx) => (
-          <div 
-            key={idx} 
-            className="relative flex-none w-64 aspect-[4/3] rounded-2xl overflow-hidden cursor-zoom-in snap-center border-2 border-white/5 group"
-            onClick={() => setSelectedPlayer(url)}
-          >
-            <img 
-              src={url} 
-              alt={`Foto ${idx + 1}`} 
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              data-ai-hint="football match action"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          </div>
-        ))}
+        {photos.map((url, idx) => {
+          if (!url) return null;
+          return (
+            <div 
+              key={idx} 
+              className="relative flex-none w-64 aspect-[4/3] rounded-2xl overflow-hidden cursor-zoom-in snap-center border-2 border-white/5 group"
+              onClick={() => setSelectedPhoto(url)}
+            >
+              <img 
+                src={url} 
+                alt={`Foto ${idx + 1}`} 
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                data-ai-hint="football match action"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+          );
+        })}
       </div>
 
-      <Dialog open={!!selectedPhoto} onOpenChange={(open) => !open && setSelectedPlayer(null)}>
+      <Dialog open={!!selectedPhoto} onOpenChange={(open) => !open && setSelectedPhoto(null)}>
         <DialogContent className="max-w-screen-lg p-0 bg-transparent border-none shadow-none">
           <DialogHeader className="sr-only"><DialogTitle>Foto Ampliada</DialogTitle></DialogHeader>
           <div className="relative w-full h-full flex items-center justify-center">
-            <img src={selectedPhoto || ""} className="max-w-full max-h-[90vh] object-contain rounded-xl shadow-2xl" alt="Zoom" />
+            {selectedPhoto && (
+              <img src={selectedPhoto} className="max-w-full max-h-[90vh] object-contain rounded-xl shadow-2xl" alt="Zoom" />
+            )}
             <button 
               className="absolute top-4 right-4 bg-black/50 hover:bg-black p-2 rounded-full text-white transition-colors"
-              onClick={() => setSelectedPlayer(null)}
+              onClick={() => setSelectedPhoto(null)}
             >
               <X className="h-6 w-6" />
             </button>
@@ -348,6 +353,7 @@ export default function MatchDetailPage() {
                       <div className="flex items-center gap-4 group">
                         <div className="relative">
                           <Avatar className="h-12 w-12 border-2 border-yellow-500">
+                            <AvatarImage src={allPlayers.find(p => p.id === mvpStat.playerId)?.avatar || undefined} alt="MVP" />
                             <AvatarFallback className="bg-yellow-500/10 text-yellow-500 font-black">{getInitials(allPlayers.find(p => p.id === mvpStat.playerId)?.name || "?")}</AvatarFallback>
                           </Avatar>
                           <Star className="absolute -top-2 -right-2 h-5 w-5 text-yellow-500 fill-yellow-500 animate-pulse" />
@@ -361,6 +367,7 @@ export default function MatchDetailPage() {
                     {bestGoalStat && (
                       <div className="flex items-center gap-4">
                         <Avatar className="h-12 w-12 border-2 border-primary">
+                          <AvatarImage src={allPlayers.find(p => p.id === bestGoalStat.playerId)?.avatar || undefined} alt="Mejor Gol" />
                           <AvatarFallback className="bg-primary/10 text-primary font-black">{getInitials(allPlayers.find(p => p.id === bestGoalStat.playerId)?.name || "?")}</AvatarFallback>
                         </Avatar>
                         <div>

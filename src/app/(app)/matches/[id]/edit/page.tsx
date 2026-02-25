@@ -335,6 +335,7 @@ export default function EditMatchPage() {
                     isDisabled && "opacity-40 cursor-not-allowed"
                   )}>
                     <Avatar className="h-6 w-6">
+                      <AvatarImage src={player.avatar || undefined} alt={player.name} />
                       <AvatarFallback className="text-[8px] font-black">{getInitials(player.name)}</AvatarFallback>
                     </Avatar>
                     <span className={cn("text-xs font-bold", isSelectedInOtherTeam && "text-muted-foreground line-through")}>
@@ -379,6 +380,7 @@ export default function EditMatchPage() {
                         <FormControl><RadioGroupItem value={playerId} /></FormControl>
                         <FormLabel className="font-normal flex items-center gap-2 cursor-pointer w-full">
                           <Avatar className="h-6 w-6">
+                            <AvatarImage src={player.avatar || undefined} alt={player.name} />
                             <AvatarFallback className="text-[10px] font-black">{getInitials(player.name)}</AvatarFallback>
                           </Avatar>
                           <span className="text-sm font-bold">{player.name}</span>
@@ -403,6 +405,7 @@ export default function EditMatchPage() {
                 <div key={playerId} className="flex items-center justify-between p-3 border rounded-xl glass-card">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-8 w-8">
+                      <AvatarImage src={player.avatar || undefined} alt={player.name} />
                       <AvatarFallback className="text-[10px] font-black">{getInitials(player.name)}</AvatarFallback>
                     </Avatar>
                     <span className="font-bold text-sm">{player.name}</span>
@@ -611,23 +614,26 @@ export default function EditMatchPage() {
                 </div>
                 
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4 pt-2">
-                  {watchedPhotos.map((url, idx) => (
-                    <div key={idx} className="relative aspect-square rounded-xl overflow-hidden group border border-white/10">
-                      <img src={url} alt={`Preview ${idx}`} className="w-full h-full object-cover" />
-                      {idx === 0 && (
-                        <div className="absolute top-0 left-0 bg-yellow-500 text-black text-[8px] font-black uppercase px-2 py-0.5 rounded-br-lg shadow-lg">
-                          Tapa del Diario
-                        </div>
-                      )}
-                      <button 
-                        type="button"
-                        onClick={() => removePhoto(idx)}
-                        className="absolute top-1 right-1 bg-destructive p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <Trash2 className="h-3 w-3 text-white" />
-                      </button>
-                    </div>
-                  ))}
+                  {watchedPhotos.map((url, idx) => {
+                    if (!url) return null;
+                    return (
+                      <div key={idx} className="relative aspect-square rounded-xl overflow-hidden group border border-white/10">
+                        <img src={url} alt={`Preview ${idx}`} className="w-full h-full object-cover" />
+                        {idx === 0 && (
+                          <div className="absolute top-0 left-0 bg-yellow-500 text-black text-[8px] font-black uppercase px-2 py-0.5 rounded-br-lg shadow-lg">
+                            Tapa del Diario
+                          </div>
+                        )}
+                        <button 
+                          type="button"
+                          onClick={() => removePhoto(idx)}
+                          className="absolute top-1 right-1 bg-destructive p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <Trash2 className="h-3 w-3 text-white" />
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
