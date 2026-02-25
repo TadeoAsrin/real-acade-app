@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Medal, Loader2, Zap, Calendar, Users, Brain, Crown, Link as LinkIcon, Flame, Target, Trophy, TrendingUp, Star, Skull, Ghost, CloudRain, Frown, Droplets, Newspaper, ChevronRight, Sparkles } from "lucide-react";
+import { Medal, Loader2, Zap, Calendar, Users, Brain, Crown, Link as LinkIcon, Flame, Target, Trophy, TrendingUp, Star, Skull, Ghost, CloudRain, Frown, Droplets, Newspaper, ChevronRight, Sparkles, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { PowerRanking } from "@/components/dashboard/power-ranking";
 import { MatchNewsModal } from "@/components/dashboard/match-news-modal";
@@ -64,6 +64,9 @@ export default function DashboardPage() {
   const lastMatch = allMatches[0];
 
   const sortedByGoals = [...playerStats].sort((a, b) => b.totalGoals - a.totalGoals || b.goalsPerMatch - a.goalsPerMatch);
+  const topScorer = sortedByGoals[0];
+  const runnersUp = sortedByGoals.slice(1, 5); // Cambiado a Top 5 (1 líder + 4 perseguidores)
+
   const sortedByInfluence = [...playerStats]
     .filter(p => p.matchesPlayed >= 3)
     .sort((a, b) => {
@@ -72,9 +75,6 @@ export default function DashboardPage() {
       if (b.powerPoints !== a.powerPoints) return b.powerPoints - a.powerPoints;
       return b.totalGoals - a.totalGoals;
     });
-
-  const topScorer = sortedByGoals[0];
-  const runnersUp = sortedByGoals.slice(1, 3);
 
   const influencer = sortedByInfluence[0];
   const influencerRunnersUp = sortedByInfluence.slice(1, 3);
@@ -208,7 +208,7 @@ export default function DashboardPage() {
                 <Trophy className="h-3 w-3" /> Carrera por el Pichichi
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6 flex-1 flex flex-col">
+            <CardContent className="space-y-6 flex-1 flex flex-col pb-4">
               <Link href={topScorer ? `/players/${topScorer.playerId}` : "/players"} className="group">
                 <div className="flex items-center gap-4">
                   <Avatar className="h-16 w-16 border-4 border-yellow-500/30 group-hover:scale-105 transition-transform">
@@ -228,7 +228,7 @@ export default function DashboardPage() {
               </Link>
               {runnersUp.length > 0 && (
                 <div className="mt-auto pt-6 border-t border-yellow-500/10 space-y-3">
-                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-yellow-500/40 italic">En la mira</p>
+                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-yellow-500/40 italic">En la mira (Top 5)</p>
                   <div className="space-y-3">
                     {runnersUp.map((runner, idx) => (
                       <Link key={runner.playerId} href={`/players/${runner.playerId}`} className="flex items-center justify-between group/runner">
@@ -237,7 +237,7 @@ export default function DashboardPage() {
                           <Avatar className="h-8 w-8 border border-white/5">
                             <AvatarFallback className="text-[10px] font-black bg-muted">{getInitials(runner.name)}</AvatarFallback>
                           </Avatar>
-                          <span className="text-sm font-bold text-muted-foreground group-hover/runner:text-white transition-colors">{runner.name}</span>
+                          <span className="text-sm font-bold text-muted-foreground group-hover/runner:text-white transition-colors truncate max-w-[100px]">{runner.name}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-lg font-black italic text-white/80">{runner.totalGoals}</span>
@@ -248,6 +248,13 @@ export default function DashboardPage() {
                   </div>
                 </div>
               )}
+              <div className="pt-4 mt-auto">
+                <Button asChild variant="ghost" className="w-full text-[10px] font-black uppercase italic text-yellow-500/60 hover:text-yellow-500 hover:bg-yellow-500/5 h-8">
+                  <Link href="/standings?tab=goleadores">
+                    Ver Ranking Completo <ArrowRight className="ml-2 h-3 w-3" />
+                  </Link>
+                </Button>
+              </div>
             </CardContent>
           </Card>
 
@@ -666,7 +673,7 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
           </Link>
-          <Link href="/players?sort=totalGoals">
+          <Link href="/standings?tab=goleadores">
             <Card className="glass-card hover:bg-white/5 transition-all border-white/5 overflow-hidden group">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 px-4">
                 <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground group-hover:text-primary transition-colors">Goles Marcados</CardTitle>

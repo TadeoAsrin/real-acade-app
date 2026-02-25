@@ -1,6 +1,8 @@
+
 'use client';
 
 import * as React from 'react';
+import { useSearchParams } from 'next/navigation';
 import { calculateAggregatedStats } from "@/lib/data";
 import {
   Table,
@@ -42,16 +44,23 @@ const TrendIcon = ({ form }: { form: ('W' | 'D' | 'L')[] }) => {
   return <Minus className="h-4 w-4 text-muted-foreground/40" />;
 };
 
-export default function StandingsPage() {
+function StandingsContent() {
+  const searchParams = useSearchParams();
   const firestore = useFirestore();
   const { user } = useUser();
   const [activeTab, setActiveTab] = React.useState("general");
   const [selectedMatchId, setSelectedMatchId] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    const saved = localStorage.getItem("standingsActiveTab");
-    if (saved) setActiveTab(saved);
-  }, []);
+    // Primero revisamos si hay un parámetro de pestaña en la URL
+    const tabParam = searchParams.get('tab');
+    if (tabParam) {
+      setActiveTab(tabParam);
+    } else {
+      const saved = localStorage.getItem("standingsActiveTab");
+      if (saved) setActiveTab(saved);
+    }
+  }, [searchParams]);
 
   const handleTabChange = (val: string) => {
     setActiveTab(val);
@@ -613,5 +622,13 @@ export default function StandingsPage() {
         </div>
       </Tabs>
     </div>
+  );
+}
+
+export default function StandingsPage() {
+  return (
+    <React.Suspense fallback={<div className="flex h-[50vh] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
+      <StandingsContent />
+    </React.Suspense>
   );
 }
