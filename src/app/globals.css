@@ -14,8 +14,8 @@
     --popover: 210 17% 8%; /* Surface-900: #111418 */
     --popover-foreground: 210 40% 98%;
     
-    --primary: 45 65% 52%; /* Accent-Gold: #D4AF37 */
-    --primary-foreground: 221 60% 10%;
+    --primary: 221 83% 53%; /* Official-Blue: #2563EB */
+    --primary-foreground: 210 40% 98%;
     
     --secondary: 221 39% 15%; /* #162033 */
     --secondary-foreground: 210 40% 98%;
@@ -31,11 +31,11 @@
     
     --border: 217 33% 17%;
     --input: 217 33% 17%;
-    --ring: 45 65% 52%;
+    --ring: 221 83% 53%;
     --radius: 0.5rem; /* 8px exactos */
 
     /* Colores Especiales de Podio */
-    --gold: 45 65% 52%;
+    --gold: 45 65% 52%; /* #D4AF37 */
     --silver: 0 0% 75%;
     --bronze: 26 61% 50%;
     
@@ -46,6 +46,16 @@
     --paper: 40 33% 94%; /* #F5F1E8 */
     --editorial-text: 0 0% 7%; /* #111111 */
     --editorial-muted: 0 0% 33%; /* #555555 */
+
+    /* Sidebar */
+    --sidebar-background: 221 60% 10%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 221 39% 15%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217 33% 17%;
+    --sidebar-ring: 221 83% 53%;
   }
 }
 

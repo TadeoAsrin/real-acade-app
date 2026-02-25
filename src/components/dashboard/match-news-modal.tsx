@@ -89,7 +89,7 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="bg-black text-white p-1.5 rounded-none">
-                <Newspaper className="h-4 w-4 sm:h-5 sm:w-5" />
+                < Newspaper className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <span className="font-bebas font-black uppercase tracking-[0.3em] text-[10px] sm:text-sm text-black">THE ACADEMY GAZETTE</span>
             </div>
@@ -156,12 +156,12 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
                     
                     <div className="flex items-center justify-between font-bebas italic">
                       <div className="text-center">
-                        <p className="text-[10px] font-black text-black/40 uppercase not-italic mb-1">AZU</p>
+                        <p className="text-[10px] font-black text-primary uppercase not-italic mb-1">AZU</p>
                         <p className="text-4xl font-black text-black">{match.teamAScore}</p>
                       </div>
                       <div className="text-black/20 text-2xl font-light">vs</div>
                       <div className="text-center">
-                        <p className="text-[10px] font-black text-black/40 uppercase not-italic mb-1">ROJ</p>
+                        <p className="text-[10px] font-black text-accent uppercase not-italic mb-1">ROJ</p>
                         <p className="text-4xl font-black text-black">{match.teamBScore}</p>
                       </div>
                     </div>

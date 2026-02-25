@@ -142,16 +142,16 @@ export default function DashboardPage() {
             </div>
             
             <div className="flex flex-col items-center gap-4 min-w-[260px] bg-black/40 p-8 rounded-lg border border-white/5 shadow-2xl">
-              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/60 font-oswald">FINAL SCORE</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40 font-oswald">FINAL SCORE</span>
               <div className="flex items-center gap-8">
                 <div className="flex flex-col items-center">
                   <span className="text-6xl font-bebas text-primary">{lastMatch.teamAScore}</span>
-                  <span className="text-[10px] font-black uppercase text-muted-foreground font-oswald">AZUL</span>
+                  <span className="text-[10px] font-black uppercase text-primary font-oswald">AZUL</span>
                 </div>
                 <div className="h-12 w-[1px] bg-white/10" />
                 <div className="flex flex-col items-center">
                   <span className="text-6xl font-bebas text-accent">{lastMatch.teamBScore}</span>
-                  <span className="text-[10px] font-black uppercase text-muted-foreground font-oswald">ROJO</span>
+                  <span className="text-[10px] font-black uppercase text-accent font-oswald">ROJO</span>
                 </div>
               </div>
             </div>
