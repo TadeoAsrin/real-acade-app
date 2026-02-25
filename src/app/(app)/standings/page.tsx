@@ -119,15 +119,18 @@ function StandingsContent() {
   const activeCaptains = stats
     .filter(p => p.isActive)
     .sort((a, b) => {
+      // Prioridad 1: Debutantes (Nunca fueron capitanes)
       const aNever = a.totalCaptaincies === 0;
       const bNever = b.totalCaptaincies === 0;
       if (aNever && !bNever) return -1;
       if (!aNever && bNever) return 1;
       
+      // Prioridad 2: Score de Prioridad (Asistencia reciente)
       if (b.captaincyPriorityScore !== a.captaincyPriorityScore) {
         return b.captaincyPriorityScore - a.captaincyPriorityScore;
       }
       
+      // Prioridad 3: Antigüedad (Quien lleva más tiempo sin serlo)
       if (a.lastCaptainDate && b.lastCaptainDate) {
         return new Date(a.lastCaptainDate).getTime() - new Date(b.lastCaptainDate).getTime();
       }
@@ -345,7 +348,7 @@ function StandingsContent() {
                       const medals = ["🥇", "🥈", "🥉"];
                       return (
                         <TableRow key={player.playerId} className="group border-white/5 hover:bg-white/5 transition-colors">
-                          <TableCell className="text-center font-black italic text-lg md:text-xl">
+                          <TableCell className="text-center font-black italic text-xl md:text-xl">
                             {isTop3 ? medals[index] : index + 1}
                           </TableCell>
                           <TableCell>

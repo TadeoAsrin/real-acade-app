@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Medal, Loader2, Zap, Calendar, Users, Brain, Crown, Link as LinkIcon, Flame, Target, Trophy, TrendingUp, Star, Skull, Ghost, CloudRain, Frown, Droplets, Newspaper, ChevronRight, Sparkles, ArrowRight } from "lucide-react";
+import { Medal, Loader2, Zap, Calendar, Users, Brain, Crown, Link as LinkIcon, Flame, Target, Trophy, TrendingUp, Star, Skull, Ghost, CloudRain, Frown, Droplets, Newspaper, ChevronRight, Sparkles, ArrowRight, Swords } from "lucide-react";
 import Link from "next/link";
 import { PowerRanking } from "@/components/dashboard/power-ranking";
 import { MatchNewsModal } from "@/components/dashboard/match-news-modal";
@@ -51,6 +51,30 @@ export default function DashboardPage() {
 
   const allPlayers = playersData || [];
   const allMatches = matchesData || [];
+  
+  if (allMatches.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[70vh] text-center p-6 gap-8">
+        <div className="relative">
+          <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full animate-pulse" />
+          <Trophy className="h-32 w-32 text-primary relative z-10 drop-shadow-[0_0_20px_rgba(59,130,246,0.5)]" />
+        </div>
+        <div className="space-y-4 max-w-xl">
+          <h1 className="text-5xl font-black italic uppercase tracking-tighter text-white">¡Bienvenido a la Academia!</h1>
+          <p className="text-muted-foreground text-lg font-medium italic">Tu plataforma de élite está lista. Registra el primer partido para comenzar a generar estadísticas, rankings y crónicas con IA.</p>
+        </div>
+        <div className="flex flex-wrap gap-4 justify-center">
+          <Button asChild size="lg" className="h-16 px-10 font-black uppercase italic text-lg shadow-xl shadow-primary/20 gap-2">
+            <Link href="/matches/new"><Zap className="h-5 w-5" /> Iniciar Temporada</Link>
+          </Button>
+          <Button asChild variant="outline" size="lg" className="h-16 px-10 font-black uppercase italic border-white/10 hover:bg-white/5">
+            <Link href="/players">Gestionar Plantilla</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   const playerStats = calculateAggregatedStats(allPlayers, allMatches);
   const chemistryRankings = getChemistryRankings(allPlayers, allMatches, 2);
   
@@ -531,17 +555,17 @@ export default function DashboardPage() {
 
       <section className="space-y-4">
         <div className="flex items-center gap-3 px-1">
-          <Frown className="h-5 w-5 text-muted-foreground" />
-          <h2 className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground/50 italic">Nos Caemos a Pedazos</h2>
+          <Frown className="h-5 w-5 text-zinc-500" />
+          <h2 className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground/50 italic">Sala de Humildad</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Link href="/pulse/iman-derrotas">
-                <Card className="glass-card border-red-500/10 bg-red-500/5 relative overflow-hidden group hover:border-red-500/30 transition-all cursor-pointer h-full flex flex-col">
+                <Card className="glass-card border-zinc-500/10 bg-zinc-500/5 relative overflow-hidden group hover:border-zinc-500/30 transition-all cursor-pointer h-full flex flex-col">
                     <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                        <CloudRain className="h-20 w-20 text-red-500" />
+                        <CloudRain className="h-20 w-20 text-zinc-500" />
                     </div>
                     <CardHeader className="pb-4">
-                        <CardTitle className="text-[10px] font-black uppercase tracking-widest text-red-500 flex items-center gap-2">
+                        <CardTitle className="text-[10px] font-black uppercase tracking-widest text-zinc-400 flex items-center gap-2">
                             <Skull className="h-3 w-3" /> 
                             {imanLeaders.length > 1 && imanLeaders[0].losses === imanLeaders[1].losses ? "Imanes de Derrotas" : "El Imán de Derrotas"}
                         </CardTitle>
@@ -554,14 +578,14 @@ export default function DashboardPage() {
                                     <div key={p.playerId} className="flex items-center justify-between group/row">
                                         <div className="flex items-center gap-2">
                                             <div className="relative">
-                                                <Avatar className={cn("h-8 w-8 border", isLeader ? "border-red-500" : "border-white/10")}>
-                                                    <AvatarFallback className="bg-red-500/10 text-red-500 text-[10px] font-black">{getInitials(p.name)}</AvatarFallback>
+                                                <Avatar className={cn("h-8 w-8 border", isLeader ? "border-zinc-500" : "border-white/10")}>
+                                                    <AvatarFallback className="bg-zinc-500/10 text-zinc-500 text-[10px] font-black">{getInitials(p.name)}</AvatarFallback>
                                                 </Avatar>
                                             </div>
-                                            <span className="text-xs font-bold text-white/80 group-hover/row:text-red-500 transition-colors truncate max-w-[80px]">{p.name.split(' ')[0]}</span>
+                                            <span className="text-xs font-bold text-white/80 group-hover/row:text-zinc-400 transition-colors truncate max-w-[80px]">{p.name.split(' ')[0]}</span>
                                         </div>
                                         <div className="flex items-baseline gap-1">
-                                            <span className={cn("text-lg font-black italic", isLeader ? "text-red-500" : "text-white")}>{p.losses}</span>
+                                            <span className={cn("text-lg font-black italic", isLeader ? "text-zinc-400" : "text-white")}>{p.losses}</span>
                                             <span className="text-[8px] uppercase font-bold text-muted-foreground">Derrotas</span>
                                         </div>
                                     </div>
@@ -581,7 +605,7 @@ export default function DashboardPage() {
                         <Ghost className="h-20 w-20 text-zinc-500" />
                     </div>
                     <CardHeader className="pb-4">
-                        <CardTitle className="text-[10px] font-black uppercase tracking-widest text-zinc-500 flex items-center gap-2">
+                        <CardTitle className="text-[10px] font-black uppercase tracking-widest text-zinc-400 flex items-center gap-2">
                             <TrendingUp className="h-3 w-3 rotate-180" /> 
                             {riesgoLeaders.length > 1 && riesgoLeaders[0].winPercentage === riesgoLeaders[1].winPercentage ? "Factores de Riesgo" : "Factor de Riesgo"}
                         </CardTitle>
@@ -601,7 +625,7 @@ export default function DashboardPage() {
                                             <span className="text-xs font-bold text-white/80 group-hover/row:text-zinc-400 transition-colors truncate max-w-[80px]">{p.name.split(' ')[0]}</span>
                                         </div>
                                         <div className="flex items-baseline gap-1">
-                                            <span className={cn("text-lg font-black italic", isLeader ? "text-zinc-500" : "text-white")}>{p.winPercentage}%</span>
+                                            <span className={cn("text-lg font-black italic", isLeader ? "text-zinc-400" : "text-white")}>{p.winPercentage}%</span>
                                             <span className="text-[8px] uppercase font-bold text-muted-foreground">Victorias</span>
                                         </div>
                                     </div>
@@ -616,12 +640,12 @@ export default function DashboardPage() {
             </Link>
 
             <Link href="/pulse/polvora">
-                <Card className="glass-card border-blue-500/10 bg-blue-500/5 relative overflow-hidden group hover:border-blue-500/30 transition-all cursor-pointer h-full flex flex-col">
+                <Card className="glass-card border-zinc-500/10 bg-zinc-500/5 relative overflow-hidden group hover:border-zinc-500/30 transition-all cursor-pointer h-full flex flex-col">
                     <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                        <Droplets className="h-20 w-20 text-blue-500" />
+                        <Droplets className="h-20 w-20 text-zinc-500" />
                     </div>
                     <CardHeader className="pb-4">
-                        <CardTitle className="text-[10px] font-black uppercase tracking-widest text-blue-500 flex items-center gap-2">
+                        <CardTitle className="text-[10px] font-black uppercase tracking-widest text-zinc-400 flex items-center gap-2">
                             <Droplets className="h-3 w-3" /> 
                             {polvoraLeaders.length > 1 && polvoraLeaders[0].goalsPerMatch === polvoraLeaders[1].goalsPerMatch ? "Pólvoras Mojadas" : "Pólvora Mojada"}
                         </CardTitle>
@@ -634,14 +658,14 @@ export default function DashboardPage() {
                                     <div key={p.playerId} className="flex items-center justify-between group/row">
                                         <div className="flex items-center gap-2">
                                             <div className="relative">
-                                                <Avatar className={cn("h-8 w-8 border", isLeader ? "border-blue-500" : "border-white/10")}>
-                                                    <AvatarFallback className="bg-blue-500/10 text-blue-500 text-[10px] font-black">{getInitials(p.name)}</AvatarFallback>
+                                                <Avatar className={cn("h-8 w-8 border", isLeader ? "border-zinc-500" : "border-white/10")}>
+                                                    <AvatarFallback className="bg-zinc-500/10 text-zinc-500 text-[10px] font-black">{getInitials(p.name)}</AvatarFallback>
                                                 </Avatar>
                                             </div>
-                                            <span className="text-xs font-bold text-white/80 group-hover/row:text-blue-400 transition-colors truncate max-w-[80px]">{p.name.split(' ')[0]}</span>
+                                            <span className="text-xs font-bold text-white/80 group-hover/row:text-zinc-400 transition-colors truncate max-w-[80px]">{p.name.split(' ')[0]}</span>
                                         </div>
                                         <div className="flex items-baseline gap-1">
-                                            <span className={cn("text-lg font-black italic", isLeader ? "text-blue-500" : "text-white")}>{p.goalsPerMatch}</span>
+                                            <span className={cn("text-lg font-black italic", isLeader ? "text-zinc-400" : "text-white")}>{p.goalsPerMatch}</span>
                                             <span className="text-[8px] uppercase font-bold text-muted-foreground">Goles/PJ</span>
                                         </div>
                                     </div>
