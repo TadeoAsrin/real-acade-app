@@ -7,7 +7,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import {
   Table,
@@ -21,11 +20,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import type { Player, PlayerStats, Match } from "@/lib/definitions";
 import { cn, getInitials } from "@/lib/utils";
-import { Award, Star, Loader2, Share2, Pencil, Quote, Camera, ChevronLeft, ChevronRight, X, Newspaper, Trophy, Sparkles } from "lucide-react";
+import { Award, Star, Loader2, Share2, Pencil, Quote, Camera, ChevronLeft, Newspaper, Trophy, Sparkles, X } from "lucide-react";
 import { useDoc, useCollection, useMemoFirebase, useFirestore, useUser } from "@/firebase";
 import { doc, collection } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import { format, parseISO, differenceInHours } from "date-fns";
 import { es } from "date-fns/locale";
@@ -34,8 +32,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
-  DialogClose,
 } from "@/components/ui/dialog";
 
 const PlayerStatsTable = ({
@@ -50,16 +46,16 @@ const PlayerStatsTable = ({
   allPlayers: Player[];
 }) => {
   return (
-    <Card className="glass-card overflow-hidden">
-      <CardHeader className={cn("pb-4", teamColor === 'primary' ? "bg-primary/5" : "bg-accent/5")}>
-        <CardTitle className={cn("text-lg font-black uppercase italic tracking-tighter", teamColor === 'primary' ? "text-primary" : "text-accent")}>{title}</CardTitle>
+    <Card className="competition-card overflow-hidden">
+      <CardHeader className={cn("pb-4 border-b border-white/5", teamColor === 'primary' ? "bg-primary/5" : "bg-accent/5")}>
+        <CardTitle className={cn("text-lg font-bebas tracking-widest uppercase italic", teamColor === 'primary' ? "text-primary" : "text-accent")}>{title}</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
         <Table>
           <TableHeader>
-            <TableRow className="bg-muted/20 border-white/5">
-              <TableHead className="pl-6 text-[10px] font-black uppercase">Jugador</TableHead>
-              <TableHead className="text-center text-[10px] font-black uppercase">Goles</TableHead>
+            <TableRow className="bg-black/20 border-white/5">
+              <TableHead className="pl-6 font-bebas tracking-widest text-[10px] uppercase">Jugador</TableHead>
+              <TableHead className="text-center font-bebas tracking-widest text-[10px] uppercase">Goles</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -67,31 +63,31 @@ const PlayerStatsTable = ({
               const player = allPlayers.find(p => p.id === stat.playerId);
               if (!player) return null;
               return (
-                <TableRow key={player.id} className="border-white/5 hover:bg-white/5 transition-colors">
+                <TableRow key={player.id} className="official-table-row">
                   <TableCell className="pl-6 py-4">
                     <div className="flex items-center gap-3">
-                      <Avatar className="h-8 w-8">
+                      <Avatar className="h-8 w-8 border border-white/10">
                         <AvatarImage src={player.avatar || undefined} alt={player.name} />
-                        <AvatarFallback className="text-[10px] font-black bg-muted">{getInitials(player.name)}</AvatarFallback>
+                        <AvatarFallback className="text-[10px] font-bebas bg-muted">{getInitials(player.name)}</AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col">
-                        <span className="font-bold text-sm text-white/90">{player.name}</span>
+                        <span className="font-bold text-sm text-white/90 uppercase tracking-tight">{player.name}</span>
                         <div className="flex gap-1.5 mt-1">
                           {stat.isMvp && (
-                            <Badge variant="outline" className="h-4 text-[8px] border-yellow-500/50 text-yellow-500 bg-yellow-500/5 uppercase font-black">
+                            <Badge variant="outline" className="h-4 text-[8px] border-primary/50 text-primary bg-primary/5 uppercase font-black rounded-none">
                               MVP
                             </Badge>
                           )}
                           {stat.hasBestGoal && (
-                            <Badge variant="outline" className="h-4 text-[8px] border-primary/50 text-primary bg-primary/5 uppercase font-black">
-                              Golazo
+                            <Badge variant="outline" className="h-4 text-[8px] border-accent/50 text-accent bg-accent/5 uppercase font-black rounded-none">
+                              GOLAZO
                             </Badge>
                           )}
                         </div>
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="text-center font-black italic text-xl">
+                  <TableCell className="text-center font-bebas italic text-2xl">
                     {stat.goals}
                   </TableCell>
                 </TableRow>
@@ -113,7 +109,7 @@ export function MatchGallery({ photos }: { photos: string[] }) {
     <section className="space-y-4">
       <div className="flex items-center gap-2 px-1">
         <Camera className="h-4 w-4 text-primary" />
-        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">Galería de Combate</h2>
+        <h2 className="text-xs font-bebas tracking-[0.3em] uppercase text-muted-foreground">GALERÍA DE COMBATE</h2>
       </div>
       <div className="flex gap-4 overflow-x-auto pb-4 snap-x no-scrollbar">
         {photos.map((url, idx) => {
@@ -121,14 +117,13 @@ export function MatchGallery({ photos }: { photos: string[] }) {
           return (
             <div 
               key={idx} 
-              className="relative flex-none w-64 aspect-[4/3] rounded-2xl overflow-hidden cursor-zoom-in snap-center border-2 border-white/5 group"
+              className="relative flex-none w-64 aspect-[4/3] rounded-lg overflow-hidden cursor-zoom-in snap-center border border-white/10 group hover-lift"
               onClick={() => setSelectedPhoto(url)}
             >
               <img 
                 src={url} 
                 alt={`Foto ${idx + 1}`} 
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                data-ai-hint="football match action"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
@@ -138,10 +133,9 @@ export function MatchGallery({ photos }: { photos: string[] }) {
 
       <Dialog open={!!selectedPhoto} onOpenChange={(open) => !open && setSelectedPhoto(null)}>
         <DialogContent className="max-w-screen-lg p-0 bg-transparent border-none shadow-none">
-          <DialogHeader className="sr-only"><DialogTitle>Foto Ampliada</DialogTitle></DialogHeader>
           <div className="relative w-full h-full flex items-center justify-center">
             {selectedPhoto && (
-              <img src={selectedPhoto} className="max-w-full max-h-[90vh] object-contain rounded-xl shadow-2xl" alt="Zoom" />
+              <img src={selectedPhoto} className="max-w-full max-h-[90vh] object-contain rounded-none shadow-2xl" alt="Zoom" />
             )}
             <button 
               className="absolute top-4 right-4 bg-black/50 hover:bg-black p-2 rounded-full text-white transition-colors"
@@ -161,7 +155,6 @@ export default function MatchDetailPage() {
   const id = params.id as string;
   const firestore = useFirestore();
   const { user } = useUser();
-  const { toast } = useToast();
 
   const matchRef = useMemoFirebase(() => {
     if (!firestore || !id) return null;
@@ -203,7 +196,7 @@ export default function MatchDetailPage() {
     );
   }
 
-  if (!match) return <div className="text-center py-12 font-black uppercase italic opacity-20">Partido no encontrado.</div>;
+  if (!match) return <div className="text-center py-12 font-bebas text-2xl uppercase opacity-20">Partido no encontrado.</div>;
 
   const date = parseISO(match.date);
   const isPlayed = match.teamAScore > 0 || match.teamBScore > 0 || differenceInHours(new Date(), date) > 2;
@@ -221,21 +214,21 @@ export default function MatchDetailPage() {
       
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-2">
-            <Link href="/matches" className="flex items-center gap-2 text-xs font-black uppercase text-muted-foreground hover:text-primary transition-colors mb-4">
-              <ChevronLeft className="h-3 w-3" /> Volver al Timeline
+            <Link href="/matches" className="flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground hover:text-primary transition-colors mb-4 font-oswald tracking-widest">
+              <ChevronLeft className="h-3 w-3" /> VOLVER AL HISTORIAL
             </Link>
-            <h1 className="text-5xl md:text-6xl font-black italic tracking-tighter uppercase leading-none">Ficha Técnica</h1>
+            <h1 className="text-6xl font-bebas tracking-widest text-white">FICHA TÉCNICA</h1>
             <div className="flex items-center gap-3">
-                <Badge variant="outline" className="bg-white/5 border-white/10 uppercase font-black italic">
+                <Badge variant="outline" className="bg-white/5 border-white/10 uppercase font-oswald tracking-widest text-[10px] rounded-none">
                   {format(date, "PPPP", { locale: es })}
                 </Badge>
                 {isPlayed ? (
-                  <Badge className="bg-muted text-muted-foreground uppercase font-black italic">Jugado</Badge>
+                  <Badge className="bg-muted text-muted-foreground uppercase font-oswald tracking-widest text-[10px] rounded-none">FINALIZADO</Badge>
                 ) : (
-                  <Badge className="bg-primary text-white animate-pulse uppercase font-black italic">Próximo</Badge>
+                  <Badge className="bg-primary text-primary-foreground animate-pulse uppercase font-oswald tracking-widest text-[10px] rounded-none">PRÓXIMO</Badge>
                 )}
                 <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-emerald-500/10 hover:text-emerald-500" onClick={handleShare}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-primary/10 hover:text-primary text-muted-foreground" onClick={handleShare}>
                         <Share2 className="h-4 w-4" />
                     </Button>
                     {isAdmin && (
@@ -249,24 +242,23 @@ export default function MatchDetailPage() {
       </div>
 
       {/* Scoreboard Hero */}
-      <Card className="bg-gradient-to-br from-card to-background border-none shadow-[0_30px_100px_rgba(0,0,0,0.5)] overflow-hidden relative">
-          <div className="absolute inset-0 bg-dot-pattern opacity-10 pointer-events-none" />
-          <CardContent className="p-10 md:p-20 relative z-10">
+      <Card className="competition-card border-none overflow-hidden relative">
+          <CardContent className="p-10 md:p-16 relative z-10 bg-gradient-to-b from-black/20 to-transparent">
               <div className="flex items-center justify-around gap-4">
-                  <div className="flex flex-col items-center gap-6">
-                      <span className="text-xl md:text-2xl font-black text-primary uppercase tracking-[0.3em] italic">Azul</span>
-                      <span className="text-8xl md:text-[10rem] font-black text-primary drop-shadow-[0_0_30px_rgba(59,130,246,0.4)] leading-none italic">
+                  <div className="flex flex-col items-center gap-4">
+                      <span className="text-xl font-bebas text-primary tracking-[0.4em] uppercase italic">Azul</span>
+                      <span className="text-[8rem] md:text-[10rem] font-bebas text-white leading-none italic drop-shadow-2xl">
                           {isPlayed ? match.teamAScore : "-"}
                       </span>
                   </div>
                   <div className="flex flex-col items-center">
-                      <div className="h-24 w-[2px] bg-white/5 rotate-12 mb-4"></div>
-                      <span className="text-4xl font-light text-muted-foreground/20 italic">VS</span>
-                      <div className="h-24 w-[2px] bg-white/5 -rotate-12 mt-4"></div>
+                      <div className="h-20 w-[1px] bg-white/10 mb-4" />
+                      <span className="text-2xl font-oswald text-muted-foreground/40 italic tracking-widest">VS</span>
+                      <div className="h-20 w-[1px] bg-white/10 mt-4" />
                   </div>
-                  <div className="flex flex-col items-center gap-6">
-                      <span className="text-xl md:text-2xl font-black text-accent uppercase tracking-[0.3em] italic">Rojo</span>
-                      <span className="text-8xl md:text-[10rem] font-black text-accent drop-shadow-[0_0_30px_rgba(244,63,94,0.4)] leading-none italic">
+                  <div className="flex flex-col items-center gap-4">
+                      <span className="text-xl font-bebas text-accent tracking-[0.4em] uppercase italic">Rojo</span>
+                      <span className="text-[8rem] md:text-[10rem] font-bebas text-white leading-none italic drop-shadow-2xl">
                           {isPlayed ? match.teamBScore : "-"}
                       </span>
                   </div>
@@ -276,21 +268,24 @@ export default function MatchDetailPage() {
 
       {/* La Gaceta (Integrated Editorial) */}
       {match.aiSummary && (
-        <section className="bg-[#fcfcf9] text-[#1a1a1a] rounded-2xl overflow-hidden shadow-2xl font-serif border border-black/10">
-          <div className="p-4 sm:p-6 border-b border-black/5 flex items-center justify-between font-sans">
+        <section className="editorial-paper rounded-none shadow-2xl border-t-4 border-black">
+          <div className="p-4 sm:p-6 border-b border-black/5 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="bg-black text-white p-1 rounded-sm">
+              <div className="bg-black text-white p-1 rounded-none">
                 <Newspaper className="h-4 w-4" />
               </div>
-              <span className="text-[10px] font-black uppercase tracking-[0.2em]">The Gazette Editorial</span>
+              <span className="text-[10px] font-bebas tracking-[0.3em] uppercase text-black">THE ACADEMY GAZETTE EDITORIAL</span>
             </div>
-            <span className="text-[8px] font-bold uppercase text-black/40">Edición Especial • {format(date, "dd/MM/yy")}</span>
+            <span className="text-[8px] font-bold uppercase text-black/40 font-oswald">ESPECIAL JORNADA • {format(date, "dd/MM/yy")}</span>
           </div>
-          <div className="p-8 sm:p-12 space-y-6">
-            <h2 className="font-sans text-4xl sm:text-6xl font-black leading-none tracking-tighter uppercase italic text-center">
-              {match.aiSummary.title}
-            </h2>
-            <p className="text-lg sm:text-xl leading-relaxed text-justify first-letter:text-6xl first-letter:font-black first-letter:float-left first-letter:mr-2 first-letter:mt-1 first-letter:text-black first-letter:font-sans">
+          <div className="p-8 sm:p-16 space-y-8">
+            <div className="text-center space-y-4">
+                <h2 className="editorial-title text-4xl sm:text-6xl uppercase italic">
+                {match.aiSummary.title}
+                </h2>
+                <div className="editorial-divider max-w-xs mx-auto" />
+            </div>
+            <p className="text-xl sm:text-2xl leading-relaxed text-justify text-[#1a1a1a] font-lora first-letter:text-7xl first-letter:font-black first-letter:float-left first-letter:mr-3 first-letter:mt-2 first-letter:text-black first-letter:font-playfair">
               {match.aiSummary.summary}
             </p>
           </div>
@@ -319,10 +314,10 @@ export default function MatchDetailPage() {
                   />
               </div>
             ) : (
-              <Card className="glass-card p-12 text-center border-dashed">
+              <Card className="competition-card p-12 text-center border-dashed border-white/10 bg-transparent">
                 <Sparkles className="h-12 w-12 text-primary/30 mx-auto mb-4" />
-                <h3 className="text-xl font-black uppercase italic">Equipos en Preparación</h3>
-                <p className="text-muted-foreground text-sm max-w-xs mx-auto mt-2">
+                <h3 className="text-xl font-bebas tracking-widest uppercase italic text-white">Equipos en Preparación</h3>
+                <p className="text-muted-foreground text-xs font-oswald tracking-widest uppercase mt-2">
                   La alineación oficial se revelará 24 horas antes del pitazo inicial.
                 </p>
               </Card>
@@ -332,37 +327,37 @@ export default function MatchDetailPage() {
         <div className="lg:col-span-4 space-y-8">
             {isPlayed && (
               <>
-                <Card className="glass-card border-yellow-500/20 overflow-hidden">
-                  <CardHeader className="bg-yellow-500/5 pb-4">
-                    <CardTitle className="text-xs font-black uppercase tracking-widest text-yellow-500 flex items-center gap-2">
-                      <Award className="h-3 w-3" /> Honores de la Jornada
+                <Card className="competition-card border-t-4 border-t-primary">
+                  <CardHeader className="bg-white/5 pb-4 border-b border-white/5">
+                    <CardTitle className="text-xs font-bebas tracking-widest uppercase text-primary flex items-center gap-2">
+                      <Award className="h-3 w-3" /> HONORES DE LA JORNADA
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="pt-6 space-y-6">
                     {mvpStat && (
                       <div className="flex items-center gap-4 group">
                         <div className="relative">
-                          <Avatar className="h-12 w-12 border-2 border-yellow-500">
+                          <Avatar className="h-14 w-14 border-2 border-primary shadow-xl shadow-primary/20">
                             <AvatarImage src={allPlayers.find(p => p.id === mvpStat.playerId)?.avatar || undefined} alt="MVP" />
-                            <AvatarFallback className="bg-yellow-500/10 text-yellow-500 font-black">{getInitials(allPlayers.find(p => p.id === mvpStat.playerId)?.name || "?")}</AvatarFallback>
+                            <AvatarFallback className="bg-primary text-primary-foreground font-bebas text-lg">{getInitials(allPlayers.find(p => p.id === mvpStat.playerId)?.name || "?")}</AvatarFallback>
                           </Avatar>
-                          <Star className="absolute -top-2 -right-2 h-5 w-5 text-yellow-500 fill-yellow-500 animate-pulse" />
+                          <Star className="absolute -top-2 -right-2 h-5 w-5 text-primary fill-primary animate-pulse" />
                         </div>
                         <div>
-                          <p className="text-[10px] font-black uppercase text-yellow-500/60 leading-none mb-1">MVP Oficial</p>
-                          <p className="text-lg font-black italic text-white uppercase">{allPlayers.find(p => p.id === mvpStat.playerId)?.name}</p>
+                          <p className="text-[8px] font-black uppercase text-primary/60 tracking-widest mb-1 font-oswald">M.V.P. OFICIAL</p>
+                          <p className="text-xl font-bebas tracking-wide text-white uppercase italic leading-none">{allPlayers.find(p => p.id === mvpStat.playerId)?.name}</p>
                         </div>
                       </div>
                     )}
                     {bestGoalStat && (
                       <div className="flex items-center gap-4">
-                        <Avatar className="h-12 w-12 border-2 border-primary">
+                        <Avatar className="h-14 w-14 border-2 border-accent shadow-xl shadow-accent/20">
                           <AvatarImage src={allPlayers.find(p => p.id === bestGoalStat.playerId)?.avatar || undefined} alt="Mejor Gol" />
-                          <AvatarFallback className="bg-primary/10 text-primary font-black">{getInitials(allPlayers.find(p => p.id === bestGoalStat.playerId)?.name || "?")}</AvatarFallback>
+                          <AvatarFallback className="bg-accent text-accent-foreground font-bebas text-lg">{getInitials(allPlayers.find(p => p.id === bestGoalStat.playerId)?.name || "?")}</AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="text-[10px] font-black uppercase text-primary/60 leading-none mb-1">Mejor Gol</p>
-                          <p className="text-lg font-black italic text-white uppercase">{allPlayers.find(p => p.id === bestGoalStat.playerId)?.name}</p>
+                          <p className="text-[8px] font-black uppercase text-accent/60 tracking-widest mb-1 font-oswald">MEJOR GOL</p>
+                          <p className="text-xl font-bebas tracking-wide text-white uppercase italic leading-none">{allPlayers.find(p => p.id === bestGoalStat.playerId)?.name}</p>
                         </div>
                       </div>
                     )}
@@ -372,14 +367,14 @@ export default function MatchDetailPage() {
             )}
             
             {match.comment && (
-              <Card className="glass-card border-emerald-500/20">
+              <Card className="competition-card border-l-4 border-l-success">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-[10px] font-black uppercase tracking-widest text-emerald-500 flex items-center gap-2">
-                    <Quote className="h-3 w-3" /> La Voz del Admin
+                  <CardTitle className="text-[10px] font-black uppercase tracking-widest text-success flex items-center gap-2 font-oswald">
+                    <Quote className="h-3 w-3" /> LA VOZ DEL ADMIN
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm font-medium italic text-white/80 leading-relaxed">
+                  <p className="text-sm font-medium italic text-muted-foreground leading-relaxed font-inter">
                     "{match.comment}"
                   </p>
                 </CardContent>
