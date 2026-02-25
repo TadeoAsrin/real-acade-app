@@ -1,21 +1,25 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Bebas_Neue, Oswald, Playfair_Display, Lora } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/toaster";
 import { FirebaseClientProvider } from "@/firebase";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const bebasNeue = Bebas_Neue({ subsets: ["latin"], weight: "400", variable: "--font-bebas" });
+const oswald = Oswald({ subsets: ["latin"], variable: "--font-oswald" });
+const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" });
+const lora = Lora({ subsets: ["latin"], variable: "--font-lora" });
 
 export const metadata: Metadata = {
-  title: "Real Acade | Club de Fútbol 7",
-  description: "Plataforma oficial de estadísticas, rankings y crónicas de Real Acade.",
+  title: "Real Acade | Liga Oficial de Fútbol 7",
+  description: "Plataforma oficial de estadísticas y crónicas de la competición Real Acade.",
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#1a1c2e",
+  themeColor: "#0A1428",
 };
 
 export default function RootLayout({
@@ -25,15 +29,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className="dark">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body className={cn("font-body antialiased selection:bg-primary/30", inter.variable, inter.className)}>
+      <body className={cn(
+        "min-h-screen font-sans antialiased selection:bg-primary/30",
+        inter.variable,
+        bebasNeue.variable,
+        oswald.variable,
+        playfair.variable,
+        lora.variable
+      )}>
         <FirebaseClientProvider>
           {children}
           <Toaster />

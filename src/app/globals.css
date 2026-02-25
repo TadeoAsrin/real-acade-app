@@ -4,75 +4,108 @@
 
 @layer base {
   :root {
-    --background: 231 20% 12%;
-    --foreground: 0 0% 98%;
-    --card: 231 20% 16%;
-    --card-foreground: 0 0% 98%;
-    --popover: 231 20% 14%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 217 91% 60%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 231 20% 22%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 231 20% 22%;
-    --muted-foreground: 0 0% 65%;
-    --accent: 346 84% 61%;
+    /* Modo Oscuro (Competición) - Basado en los nuevos Design Tokens */
+    --background: 221 60% 10%; /* #0A1428 */
+    --foreground: 210 40% 98%;
+    
+    --card: 222 47% 17%; /* Surface-800: #1E293B */
+    --card-foreground: 210 40% 98%;
+    
+    --popover: 210 17% 8%; /* Surface-900: #111418 */
+    --popover-foreground: 210 40% 98%;
+    
+    --primary: 45 65% 52%; /* Accent-Gold: #D4AF37 */
+    --primary-foreground: 221 60% 10%;
+    
+    --secondary: 221 39% 15%; /* #162033 */
+    --secondary-foreground: 210 40% 98%;
+    
+    --muted: 221 39% 15%;
+    --muted-foreground: 215 20% 65%;
+    
+    --accent: 0 73% 41%; /* Editorial-Red: #B71C1C */
     --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 231 20% 22%;
-    --input: 231 20% 22%;
-    --ring: 217 91% 60%;
-    --radius: 0.75rem;
+    
+    --destructive: 0 63% 46%; /* Danger: #C62828 */
+    --destructive-foreground: 210 40% 98%;
+    
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 45 65% 52%;
+    --radius: 0.5rem; /* 8px según requerimiento */
 
-    --sidebar-background: 231 25% 10%;
-    --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 217 91% 60%;
-    --sidebar-primary-foreground: 210 40% 98%;
-    --sidebar-accent: 231 20% 18%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 231 20% 16%;
-    --sidebar-ring: 217 91% 60%;
+    /* Colores Especiales de Podio */
+    --gold: 45 65% 52%;
+    --silver: 0 0% 75%;
+    --bronze: 26 61% 50%;
+    
+    --success: 142 46% 33%; /* #2E7D32 */
+    --warning: 38 95% 56%; /* #F9A825 */
 
-    /* Colores para Gráficos */
-    --chart-1: 217 91% 60%;
-    --chart-2: 346 84% 61%;
-    --chart-3: 45 93% 47%;
-    --chart-4: 142 71% 45%;
-    --chart-5: 231 20% 65%;
-
-    --gold: 45 93% 47%;
-    --success: 142 71% 45%;
+    /* Gaceta (Modo Claro - Editorial) */
+    --paper: 40 33% 94%; /* #F5F1E8 */
+    --editorial-text: 0 0% 7%; /* #111111 */
+    --editorial-muted: 0 0% 33%; /* #555555 */
   }
 }
 
 @layer base {
   * { @apply border-border; }
   body { 
-    @apply bg-background text-foreground antialiased;
-    background-image: 
-      radial-gradient(at 0% 0%, hsla(217, 91%, 60%, 0.1) 0, transparent 50%),
-      radial-gradient(at 100% 100%, hsla(346, 84%, 61%, 0.1) 0, transparent 50%),
-      radial-gradient(circle at center, transparent 0%, hsla(231, 20%, 8%, 0.6) 100%);
-    background-attachment: fixed;
+    @apply bg-background text-foreground antialiased font-inter;
+  }
+
+  /* Jerarquía de Tipografía */
+  h1, .h-xl {
+    @apply font-bebas text-[56px] leading-[1] uppercase tracking-wider;
+  }
+  
+  h2, .h-l {
+    @apply font-bebas text-[36px] leading-[1.1] uppercase tracking-wide;
+  }
+  
+  h3, .h-m {
+    @apply font-oswald text-[24px] leading-tight uppercase;
+  }
+
+  .font-inter { font-family: var(--font-inter), sans-serif; }
+  .font-bebas { font-family: var(--font-bebas), sans-serif; }
+  .font-oswald { font-family: var(--font-oswald), sans-serif; }
+  .font-playfair { font-family: var(--font-playfair), serif; }
+  .font-lora { font-family: var(--font-lora), serif; }
+}
+
+@layer components {
+  /* Cards sólidas sin glassmorphism */
+  .competition-card {
+    @apply bg-card text-card-foreground shadow-xl border-none;
+  }
+
+  /* Estética Gaceta */
+  .editorial-paper {
+    @apply bg-[hsl(var(--paper))] text-[hsl(var(--editorial-text))] font-lora relative overflow-hidden;
+    background-image: url("https://www.transparenttextures.com/patterns/paper-fibers.png"); /* Sutil grano de papel */
+  }
+
+  .editorial-title {
+    @apply font-playfair font-black text-black leading-tight;
+  }
+
+  .editorial-divider {
+    @apply h-[3px] bg-[hsl(var(--accent))] w-full my-4;
   }
 }
 
-.glass-card {
-  @apply bg-card/60 backdrop-blur-xl border-white/5 shadow-2xl;
+/* Micro-interacciones suaves */
+.hover-lift {
+  @apply transition-all duration-200 ease-out;
 }
 
-.bg-dot-pattern {
-  background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.05) 1px, transparent 0);
-  background-size: 24px 24px;
+.hover-lift:hover {
+  @apply -translate-y-1 shadow-2xl;
 }
 
-.card-gold {
-  border-color: hsl(var(--gold) / 0.5);
-  box-shadow: 0 0 20px -5px hsl(var(--gold) / 0.3);
-}
-
-.card-success {
-  border-color: hsl(var(--success) / 0.5);
-  box-shadow: 0 0 20px -5px hsl(var(--success) / 0.3);
+/* Eliminar patrones futuristas */
+.bg-dot-pattern, .glass-card {
+  display: none !important;
 }
