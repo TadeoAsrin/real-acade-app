@@ -52,7 +52,6 @@ function StandingsContent() {
   const [selectedMatchId, setSelectedMatchId] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    // Primero revisamos si hay un parámetro de pestaña en la URL
     const tabParam = searchParams.get('tab');
     if (tabParam) {
       setActiveTab(tabParam);
@@ -105,7 +104,6 @@ function StandingsContent() {
     );
   }
 
-  // Orden General: Puntos, luego DIF, luego GF
   const sortedGeneral = [...stats].sort((a, b) => {
     const pointsA = a.wins * 3 + a.draws;
     const pointsB = b.wins * 3 + b.draws;
@@ -114,27 +112,22 @@ function StandingsContent() {
     return b.totalGoals - a.totalGoals;
   });
 
-  // Orden Goleadores
   const sortedScorers = [...stats]
     .filter(p => p.totalGoals > 0)
     .sort((a, b) => b.totalGoals - a.totalGoals || b.goalsPerMatch - a.goalsPerMatch);
 
-  // Lógica de Capitanes: Primero Debutantes Activos, luego Veteranos Activos
   const activeCaptains = stats
     .filter(p => p.isActive)
     .sort((a, b) => {
-      // 1. Prioridad absoluta a debutantes
       const aNever = a.totalCaptaincies === 0;
       const bNever = b.totalCaptaincies === 0;
       if (aNever && !bNever) return -1;
       if (!aNever && bNever) return 1;
       
-      // 2. Entre iguales, por score de prioridad
       if (b.captaincyPriorityScore !== a.captaincyPriorityScore) {
         return b.captaincyPriorityScore - a.captaincyPriorityScore;
       }
       
-      // 3. Por antigüedad (quien lleva más tiempo sin serlo)
       if (a.lastCaptainDate && b.lastCaptainDate) {
         return new Date(a.lastCaptainDate).getTime() - new Date(b.lastCaptainDate).getTime();
       }
@@ -146,7 +139,6 @@ function StandingsContent() {
     .filter(p => !p.isActive && p.matchesPlayed > 0)
     .sort((a, b) => b.matchesPlayed - a.matchesPlayed || a.totalCaptaincies - b.totalCaptaincies);
 
-  // Sugerencia de Capitanes (Excluyendo últimos 2)
   const last2MatchDates = allMatches.slice(0, 2).map(m => m.date);
   const suggestedCaptains = activeCaptains
     .filter(p => !p.lastCaptainDate || !last2MatchDates.includes(p.lastCaptainDate))
@@ -158,7 +150,6 @@ function StandingsContent() {
     return "Rotación justa: Jugador comprometido que lleva tiempo esperando su turno.";
   };
 
-  // Goleadores de la fecha seleccionada
   const selectedMatch = allMatches.find(m => m.id === selectedMatchId);
   const matchScorers = selectedMatch ? [...selectedMatch.teamAPlayers, ...selectedMatch.teamBPlayers]
     .filter(p => p.goals > 0)
@@ -203,7 +194,7 @@ function StandingsContent() {
                         </Avatar>
                         <div className="flex flex-col min-w-0">
                           <Link href={`/players/${player.playerId}`} className="font-bold text-xs md:text-sm hover:text-primary transition-colors truncate">{player.name}</Link>
-                          {isDebutante && <span className="text-[7px] font-black text-emerald-500 uppercase tracking-tighter">¡Debut!</span>}
+                          {isDebutante && <span className="text-[7px] font-black text-emerald-500 uppercase tracking-tighter">¡Nunca fue Capitán!</span>}
                         </div>
                       </div>
                     </TableCell>
@@ -336,54 +327,56 @@ function StandingsContent() {
           </TabsContent>
 
           <TabsContent value="goleadores" className="animate-in fade-in slide-in-from-bottom-2">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-              {sortedScorers.map((player, index) => (
-                <Card key={player.playerId} className="glass-card border-none overflow-hidden group hover:scale-[1.02] transition-all">
-                  <CardContent className="p-4 md:p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 md:gap-4">
-                        <div className="relative">
-                          <Avatar className="h-12 w-12 md:h-16 md:w-16 border-4 border-white/5 group-hover:border-primary/30">
-                            <AvatarFallback className="text-lg md:text-xl font-black bg-primary/10 text-primary">{getInitials(player.name)}</AvatarFallback>
-                          </Avatar>
-                          <div className={cn(
-                            "absolute -top-1.5 -left-1.5 h-6 w-6 md:h-8 md:w-8 rounded-full flex items-center justify-center text-sm md:text-lg shadow-xl",
-                            index === 0 ? "bg-yellow-500" : index === 1 ? "bg-zinc-300" : index === 2 ? "bg-orange-600" : "bg-muted"
-                          )}>
-                            {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : index + 1}
-                          </div>
-                        </div>
-                        <div className="min-w-0">
-                          <Link href={`/players/${player.playerId}`} className="text-base md:text-xl font-black italic uppercase truncate block hover:text-primary transition-colors">
-                            {player.name}
-                          </Link>
-                          <div className="flex items-center gap-2 mt-0.5">
-                            <Badge variant="outline" className="text-[7px] md:text-[8px] font-black uppercase border-white/10 px-1 py-0">{player.position}</Badge>
-                            {player.lastGoalDate && (
-                                <span className="text-[7px] md:text-[8px] font-bold text-muted-foreground uppercase">Últ: {format(parseISO(player.lastGoalDate), "d MMM", { locale: es })}</span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-3xl md:text-4xl font-black italic text-primary leading-none">{player.totalGoals}</p>
-                        <p className="text-[7px] md:text-[8px] font-black uppercase text-muted-foreground/60 tracking-widest mt-1">Goles</p>
-                      </div>
-                    </div>
-                    <div className="mt-4 md:mt-6 pt-3 md:pt-4 border-t border-white/5 flex items-center justify-between">
-                        <div className="flex flex-col">
-                            <span className="text-[8px] md:text-[10px] font-black uppercase text-muted-foreground tracking-tighter leading-none">Promedio</span>
-                            <span className="text-xs md:text-sm font-bold italic">{player.goalsPerMatch} <span className="text-[8px] opacity-40 not-italic uppercase">G/PJ</span></span>
-                        </div>
-                        <div className="flex flex-col items-end">
-                            <span className="text-[8px] md:text-[10px] font-black uppercase text-muted-foreground tracking-tighter">Partidos</span>
-                            <span className="text-xs md:text-sm font-bold italic">{player.matchesPlayed} <span className="text-[8px] opacity-40 not-italic uppercase">PJ</span></span>
-                        </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <Card className="glass-card border-none overflow-hidden">
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-primary/10 border-white/5">
+                      <TableHead className="w-12 md:w-16 text-center font-black uppercase text-[10px]">Pos</TableHead>
+                      <TableHead className="font-black uppercase text-[10px]">Jugador</TableHead>
+                      <TableHead className="text-center font-black uppercase text-[10px]">PJ</TableHead>
+                      <TableHead className="text-center font-black uppercase text-[10px] hidden sm:table-cell">Promedio</TableHead>
+                      <TableHead className="text-right pr-6 font-black uppercase text-[10px] text-primary">Goles</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {sortedScorers.map((player, index) => {
+                      const isTop3 = index < 3;
+                      const medals = ["🥇", "🥈", "🥉"];
+                      return (
+                        <TableRow key={player.playerId} className="group border-white/5 hover:bg-white/5 transition-colors">
+                          <TableCell className="text-center font-black italic text-lg md:text-xl">
+                            {isTop3 ? medals[index] : index + 1}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <Avatar className={cn("h-8 w-8 md:h-10 md:w-10 border-2 transition-all", isTop3 ? "border-primary/40" : "border-white/5")}>
+                                <AvatarFallback className="bg-muted text-[10px] font-black">{getInitials(player.name)}</AvatarFallback>
+                              </Avatar>
+                              <div className="flex flex-col min-w-0">
+                                <Link href={`/players/${player.playerId}`} className="font-black italic uppercase hover:text-primary transition-colors text-xs md:text-sm truncate">
+                                  {player.name}
+                                </Link>
+                                <Badge variant="outline" className="w-fit text-[7px] md:text-[8px] font-black uppercase border-white/5 px-1 py-0">{player.position}</Badge>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-center font-mono text-xs md:text-sm">{player.matchesPlayed}</TableCell>
+                          <TableCell className="text-center font-bold italic text-muted-foreground/60 text-xs hidden sm:table-cell">
+                            {player.goalsPerMatch} <span className="text-[8px] not-italic">G/PJ</span>
+                          </TableCell>
+                          <TableCell className="text-right pr-6">
+                            <span className="text-2xl md:text-3xl font-black italic text-primary leading-none">
+                              {player.totalGoals}
+                            </span>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="goles-fecha" className="animate-in fade-in slide-in-from-bottom-2 space-y-6 md:space-y-8">
