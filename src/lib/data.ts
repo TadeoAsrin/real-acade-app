@@ -38,10 +38,20 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
       efficiency: 0,
       lastCaptainDate: null,
       lastGoalDate: null,
+      isActive: false,
+      matchesInLast3: 0,
+      matchesInLast5: 0,
+      captaincyPriorityScore: 0,
     };
   });
 
   const sortedMatches = [...allMatches].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  
+  // Identificar IDs de los últimos partidos globales para lógica de actividad
+  const last3Matches = [...allMatches].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 3);
+  const last5Matches = [...allMatches].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 5);
+  const last3Ids = last3Matches.map(m => m.id);
+  const last5Ids = last5Matches.map(m => m.id);
 
   sortedMatches.forEach(match => {
     const teamAWon = match.teamAScore > match.teamBScore;
@@ -82,6 +92,9 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
             if (team === 'A') stats.matchesAsBlue++;
             else stats.matchesAsRed++;
 
+            if (last3Ids.includes(match.id)) stats.matchesInLast3++;
+            if (last5Ids.includes(match.id)) stats.matchesInLast5++;
+
             let result: 'W' | 'D' | 'L' = 'L';
             if (draw) {
                 stats.draws++;
@@ -115,6 +128,13 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
           const pointsObtained = stats.wins * 3 + stats.draws;
           const pointsPossible = stats.matchesPlayed * 3;
           stats.efficiency = Math.round((pointsObtained / pointsPossible) * 100);
+
+          // Lógica de Jugador Activo
+          stats.isActive = stats.matchesPlayed >= 3 && stats.matchesInLast3 >= 1;
+          
+          // Cálculo de Score de Prioridad de Capitanía
+          // Score = (Recientes x 3) + (Totales x 1) - (Capitanías x 4)
+          stats.captaincyPriorityScore = (stats.matchesInLast5 * 3) + (stats.matchesPlayed * 1) - (stats.totalCaptaincies * 4);
       }
       stats.form = [...stats.form].reverse();
   }

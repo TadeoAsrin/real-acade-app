@@ -10,12 +10,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useCollection, useMemoFirebase, useFirestore } from "@/firebase";
-import { collection, query, orderBy } from "firebase/firestore";
+import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc } from "@/firebase";
+import { collection, query, orderBy, doc } from "firebase/firestore";
 import type { Player, Match, AggregatedPlayerStats } from "@/lib/definitions";
-import { Loader2, Trophy, Target, Zap, Crown, TrendingUp, TrendingDown, Minus, Calendar, ChevronRight, User } from "lucide-react";
+import { Loader2, Trophy, Target, Zap, Crown, TrendingUp, TrendingDown, Minus, Calendar, ChevronRight, Users, Star, Info } from "lucide-react";
 import Link from "next/link";
 import { cn, getInitials } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -25,6 +25,12 @@ import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const FormDot = ({ result }: { result: 'W' | 'D' | 'L' }) => {
   const colors = {
@@ -52,6 +58,7 @@ const TrendIcon = ({ form }: { form: ('W' | 'D' | 'L')[] }) => {
 
 export default function StandingsPage() {
   const firestore = useFirestore();
+  const { user } = useUser();
   const [activeTab, setActiveTab] = React.useState("general");
   const [selectedMatchId, setSelectedMatchId] = React.useState<string | null>(null);
 
@@ -75,12 +82,19 @@ export default function StandingsPage() {
     return query(collection(firestore, 'matches'), orderBy('date', 'desc'));
   }, [firestore]);
 
+  const adminRoleRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'roles_admin', user.uid);
+  }, [firestore, user]);
+
   const { data: playersData, isLoading: playersLoading } = useCollection<Player>(playersQuery);
   const { data: matchesData, isLoading: matchesLoading } = useCollection<Match>(matchesQuery);
+  const { data: adminRole } = useDoc<{isAdmin: boolean}>(adminRoleRef);
 
   const allPlayers = playersData || [];
   const allMatches = matchesData || [];
   const stats = React.useMemo(() => calculateAggregatedStats(allPlayers, allMatches), [allPlayers, allMatches]);
+  const isAdmin = !!adminRole?.isAdmin;
 
   React.useEffect(() => {
     if (allMatches.length > 0 && !selectedMatchId) {
@@ -112,12 +126,20 @@ export default function StandingsPage() {
     .filter(p => p.matchesPlayed >= 3)
     .sort((a, b) => b.efficiency - a.efficiency || b.matchesPlayed - a.matchesPlayed);
 
-  const sortedCaptains = [...stats].sort((a, b) => {
-    if (a.totalCaptaincies !== b.totalCaptaincies) return a.totalCaptaincies - b.totalCaptaincies;
-    if (!a.lastCaptainDate) return -1;
-    if (!b.lastCaptainDate) return 1;
-    return new Date(a.lastCaptainDate).getTime() - new Date(b.lastCaptainDate).getTime();
-  });
+  // Lógica de Capitanes: Separar Activos de Ocasionales
+  const activeCaptains = stats
+    .filter(p => p.isActive)
+    .sort((a, b) => {
+      if (b.captaincyPriorityScore !== a.captaincyPriorityScore) return b.captaincyPriorityScore - a.captaincyPriorityScore;
+      if (a.totalCaptaincies !== b.totalCaptaincies) return a.totalCaptaincies - b.totalCaptaincies;
+      if (!a.lastCaptainDate) return -1;
+      if (!b.lastCaptainDate) return 1;
+      return new Date(a.lastCaptainDate).getTime() - new Date(b.lastCaptainDate).getTime();
+    });
+
+  const occasionalCaptains = stats
+    .filter(p => !p.isActive && p.matchesPlayed > 0)
+    .sort((a, b) => b.matchesPlayed - a.matchesPlayed || a.totalCaptaincies - b.totalCaptaincies);
 
   const selectedMatch = allMatches.find(m => m.id === selectedMatchId);
   const matchScorers = selectedMatch ? [...selectedMatch.teamAPlayers, ...selectedMatch.teamBPlayers]
@@ -128,6 +150,81 @@ export default function StandingsPage() {
       team: selectedMatch.teamAPlayers.some(p => p.playerId === s.playerId) ? 'Azul' : 'Rojo'
     }))
     .sort((a, b) => b.goals - a.goals) : [];
+
+  const renderCaptainsTable = (playerList: AggregatedPlayerStats[], title: string, icon: any) => (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2 px-1">
+        {icon}
+        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60 italic">{title}</h3>
+      </div>
+      <Card className="glass-card border-none overflow-hidden">
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-white/5 border-white/5">
+                <TableHead className="pl-6 font-black uppercase text-[10px]">Jugador</TableHead>
+                <TableHead className="text-center font-black uppercase text-[10px]">Asist. Reciente</TableHead>
+                <TableHead className="text-center font-black uppercase text-[10px] hidden md:table-cell">PJ Totales</TableHead>
+                <TableHead className="text-center font-black uppercase text-[10px]">Capitanías</TableHead>
+                <TableHead className="text-center font-black uppercase text-[10px] hidden sm:table-cell">Última Vez</TableHead>
+                {isAdmin && <TableHead className="text-center font-black uppercase text-[10px] text-primary">Score</TableHead>}
+                <TableHead className="text-right pr-6 font-black uppercase text-[10px]">Estado</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {playerList.map((player) => {
+                const isRecent = player.matchesInLast5 >= 3;
+                const wasRecentCaptain = player.lastCaptainDate && allMatches.slice(0, 3).some(m => m.date === player.lastCaptainDate);
+                
+                return (
+                  <TableRow key={player.playerId} className="border-white/5 group hover:bg-white/5 transition-colors">
+                    <TableCell className="pl-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback className="bg-muted text-[10px] font-black">{getInitials(player.name)}</AvatarFallback>
+                        </Avatar>
+                        <Link href={`/players/${player.playerId}`} className="font-bold text-sm hover:text-primary transition-colors">{player.name}</Link>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <div className="flex flex-col items-center gap-1">
+                        <span className={cn("text-xs font-black italic", player.matchesInLast5 >= 4 ? "text-emerald-500" : "text-white")}>
+                          {player.matchesInLast5}/5
+                        </span>
+                        <div className="flex gap-0.5">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <div key={i} className={cn("h-1 w-2 rounded-full", i < player.matchesInLast5 ? "bg-primary" : "bg-white/5")} />
+                          ))}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center font-mono text-xs hidden md:table-cell opacity-60">{player.matchesPlayed}</TableCell>
+                    <TableCell className="text-center font-black italic text-lg">{player.totalCaptaincies}</TableCell>
+                    <TableCell className="text-center text-[10px] font-medium text-muted-foreground uppercase hidden sm:table-cell">
+                      {player.lastCaptainDate ? format(parseISO(player.lastCaptainDate), "d MMM yy", { locale: es }) : "Nunca"}
+                    </TableCell>
+                    {isAdmin && (
+                      <TableCell className="text-center font-black text-primary italic text-xs">
+                        {player.isActive ? player.captaincyPriorityScore : '-'}
+                      </TableCell>
+                    )}
+                    <TableCell className="text-right pr-6">
+                      <Badge className={cn(
+                          "uppercase font-black text-[8px] italic",
+                          !wasRecentCaptain ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20" : "bg-red-500/10 text-red-500 border border-red-500/20"
+                      )}>
+                          {!wasRecentCaptain ? "Disponible" : "Reciente"}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
+  );
 
   return (
     <div className="flex flex-col gap-10 max-w-7xl mx-auto pb-20">
@@ -400,55 +497,42 @@ export default function StandingsPage() {
             </div>
           </TabsContent>
 
-          <TabsContent value="capitanes" className="animate-in fade-in slide-in-from-bottom-2">
-            <Card className="glass-card border-none overflow-hidden">
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-emerald-500/10 border-white/5">
-                      <TableHead className="pl-6 font-black uppercase text-[10px]">Jugador</TableHead>
-                      <TableHead className="text-center font-black uppercase text-[10px]">Capitanías</TableHead>
-                      <TableHead className="text-center font-black uppercase text-[10px] hidden md:table-cell">Liderazgo (%)</TableHead>
-                      <TableHead className="text-center font-black uppercase text-[10px]">Última Vez</TableHead>
-                      <TableHead className="text-right pr-6 font-black uppercase text-[10px]">Estado</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {sortedCaptains.map((player) => {
-                      const participation = player.matchesPlayed > 0 ? Math.round((player.totalCaptaincies / player.matchesPlayed) * 100) : 0;
-                      // Lógica de "Disponible": Si no ha sido capitán en los últimos 3 partidos que jugó o no ha sido nunca
-                      const isAvailable = player.totalCaptaincies === 0 || (player.lastCaptainDate && allMatches.indexOf(allMatches.find(m => m.date === player.lastCaptainDate)!) > 2);
-                      
-                      return (
-                        <TableRow key={player.playerId} className="border-white/5 group hover:bg-white/5 transition-colors">
-                          <TableCell className="pl-6 py-4">
-                            <div className="flex items-center gap-3">
-                              <Avatar className="h-8 w-8">
-                                <AvatarFallback className="bg-muted text-[10px] font-black">{getInitials(player.name)}</AvatarFallback>
-                              </Avatar>
-                              <span className="font-bold text-sm">{player.name}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-center font-black italic text-lg">{player.totalCaptaincies}</TableCell>
-                          <TableCell className="text-center font-mono text-xs hidden md:table-cell opacity-60">{participation}%</TableCell>
-                          <TableCell className="text-center text-xs font-medium text-muted-foreground uppercase">
-                            {player.lastCaptainDate ? format(parseISO(player.lastCaptainDate), "d MMM yy", { locale: es }) : "Nunca"}
-                          </TableCell>
-                          <TableCell className="text-right pr-6">
-                            <Badge className={cn(
-                                "uppercase font-black text-[8px] italic",
-                                isAvailable ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20" : "bg-red-500/10 text-red-500 border border-red-500/20"
-                            )}>
-                                {isAvailable ? "Disponible" : "Reciente"}
-                            </Badge>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+          <TabsContent value="capitanes" className="animate-in fade-in slide-in-from-bottom-2 space-y-12">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <h3 className="text-xl font-black italic uppercase flex items-center gap-2">
+                  <Star className="h-5 w-5 text-yellow-500" />
+                  Rotación de Liderazgo
+                </h3>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">Score basado en actividad y capitanías recientes</p>
+              </div>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-8 border-white/10 text-[10px] font-black uppercase italic">
+                      <Info className="mr-2 h-3.5 w-3.5" /> ¿Cómo se calcula?
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs bg-zinc-900 border-white/10 p-4 space-y-3">
+                    <p className="font-bold text-primary uppercase text-xs italic">Prioridad de Capitanía</p>
+                    <div className="space-y-2 text-[10px] leading-relaxed">
+                      <p><span className="text-emerald-500 font-black">Score = (Recientes x 3) + (Totales x 1) - (Capitanías x 4)</span></p>
+                      <p>• <span className="text-white font-bold italic">Recientes:</span> Partidos jugados de los últimos 5 globales.</p>
+                      <p>• <span className="text-white font-bold italic">Totales:</span> Trayectoria histórica en el club.</p>
+                      <p>• <span className="text-red-500 font-bold italic">Capitanías:</span> Haber sido capitán reduce tu prioridad para dar lugar a otros.</p>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+
+            {renderCaptainsTable(activeCaptains, "Jugadores Activos", <Users className="h-4 w-4 text-primary" />)}
+            
+            {occasionalCaptains.length > 0 && (
+              <div className="pt-8 border-t border-white/5">
+                {renderCaptainsTable(occasionalCaptains, "Participación Ocasional", <Zap className="h-4 w-4 text-muted-foreground/40" />)}
+              </div>
+            )}
           </TabsContent>
         </div>
       </Tabs>

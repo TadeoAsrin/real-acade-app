@@ -61,6 +61,11 @@ export type AggregatedPlayerStats = {
   efficiency: number;
   lastCaptainDate?: string | null;
   lastGoalDate?: string | null;
+  // Campos para lógica de capitanes
+  isActive: boolean;
+  matchesInLast3: number;
+  matchesInLast5: number;
+  captaincyPriorityScore: number;
 };
 
 export type ChemistryPair = {
