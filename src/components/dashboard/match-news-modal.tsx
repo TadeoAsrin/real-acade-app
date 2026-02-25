@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -13,6 +12,7 @@ import { Newspaper, Quote, Trophy, Star, X } from 'lucide-react';
 import { es } from 'date-fns/locale';
 import { format } from 'date-fns';
 import { Button } from '../ui/button';
+import { Badge } from '@/components/ui/badge';
 import type { Match, Player } from '@/lib/definitions';
 import { cn } from '@/lib/utils';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
