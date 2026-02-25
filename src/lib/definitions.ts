@@ -1,4 +1,3 @@
-
 export type PlayerPosition = 'Arquero' | 'Lateral Derecho' | 'Defensor Central' | 'Lateral Izquierdo' | 'Mediocampista' | 'Delantero';
 
 export type Player = {
@@ -55,6 +54,13 @@ export type AggregatedPlayerStats = {
   matchesAsRed: number;
   powerPoints: number;
   form: ('W' | 'D' | 'L')[];
+  // Nuevos campos para estadísticas avanzadas
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDifference: number;
+  efficiency: number;
+  lastCaptainDate?: string | null;
+  lastGoalDate?: string | null;
 };
 
 export type ChemistryPair = {

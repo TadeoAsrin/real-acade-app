@@ -32,6 +32,12 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
       matchesAsRed: 0,
       powerPoints: 0,
       form: [],
+      goalsFor: 0,
+      goalsAgainst: 0,
+      goalDifference: 0,
+      efficiency: 0,
+      lastCaptainDate: null,
+      lastGoalDate: null,
     };
   });
 
@@ -50,7 +56,20 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
             stats.totalGoals += goals;
             stats.powerPoints += goals * POINTS.GOAL;
 
-            if (isCaptain) stats.totalCaptaincies++;
+            const myTeamScore = team === 'A' ? match.teamAScore : match.teamBScore;
+            const otherTeamScore = team === 'A' ? match.teamBScore : match.teamAScore;
+            
+            stats.goalsFor += myTeamScore;
+            stats.goalsAgainst += otherTeamScore;
+
+            if (isCaptain) {
+              stats.totalCaptaincies++;
+              stats.lastCaptainDate = match.date;
+            }
+            if (goals > 0) {
+              stats.lastGoalDate = match.date;
+            }
+
             if (isMvp) {
               stats.totalMvp++;
               stats.powerPoints += POINTS.MVP;
@@ -91,6 +110,11 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
           stats.winPercentage = Math.round((stats.wins / stats.matchesPlayed) * 100);
           stats.goalsPerMatch = Number((stats.totalGoals / stats.matchesPlayed).toFixed(2));
           stats.mvpPerMatch = Number((stats.totalMvp / stats.matchesPlayed).toFixed(2));
+          stats.goalDifference = stats.goalsFor - stats.goalsAgainst;
+          
+          const pointsObtained = stats.wins * 3 + stats.draws;
+          const pointsPossible = stats.matchesPlayed * 3;
+          stats.efficiency = Math.round((pointsObtained / pointsPossible) * 100);
       }
       stats.form = [...stats.form].reverse();
   }
@@ -154,7 +178,6 @@ export const getChemistryRankings = (players: Player[], matches: Match[], minMat
     });
 };
 
-// Mantenemos getTopChemistry por compatibilidad pero que use la nueva lógica interna
 export const getTopChemistry = (players: Player[], matches: Match[], minMatches = 2): ChemistryPair | null => {
   const rankings = getChemistryRankings(players, matches, minMatches);
   return rankings.length > 0 ? rankings[0] : null;
