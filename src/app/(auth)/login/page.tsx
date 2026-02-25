@@ -13,31 +13,34 @@ import { Button } from "@/components/ui/button";
 
 export default function LoginPage() {
   return (
-    <div className="flex flex-col items-center gap-6">
-      <Card className="w-full max-w-sm glass-card border-white/10">
-        <CardHeader className="text-center">
-          <div className="mb-4 flex justify-center">
-            <Link href="/dashboard" className="transition-transform hover:scale-110 active:scale-95">
-              <Fut7StatsLogo className="h-12 w-12 text-primary" />
+    <div className="flex flex-col items-center gap-8 w-full px-4">
+      <Card className="w-full max-w-sm bg-surface-800 border-none rounded-none shadow-[0_30px_60px_rgba(0,0,0,0.5)] overflow-hidden">
+        <div className="h-2 bg-primary w-full" />
+        <CardHeader className="text-center pt-10">
+          <div className="mb-6 flex justify-center">
+            <Link href="/dashboard" className="transition-transform hover:scale-105 active:scale-95 bg-primary p-4 rounded-none shadow-xl shadow-primary/20">
+              <Fut7StatsLogo className="h-16 w-16 text-primary-foreground" />
             </Link>
           </div>
-          <CardTitle className="text-2xl font-black italic uppercase tracking-tighter">Acceso Miembros</CardTitle>
-          <CardDescription>
-            Ingresa tus credenciales para gestionar el club.
+          <CardTitle className="text-4xl font-bebas tracking-widest text-white">ACCESO MIEMBROS</CardTitle>
+          <CardDescription className="font-oswald uppercase text-[10px] tracking-widest text-muted-foreground/60 mt-2">
+            GESTIÓN OFICIAL DEL CLUB REAL ACADE
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pb-10">
           <UserAuthForm mode="login" />
-          <div className="mt-6 flex flex-col gap-4 text-center">
-            <Button variant="link" asChild className="text-muted-foreground hover:text-primary text-xs">
-              <Link href="/dashboard" className="flex items-center gap-2">
+          <div className="mt-8 flex flex-col gap-4 text-center">
+            <Button variant="link" asChild className="text-muted-foreground hover:text-primary text-[10px] font-oswald uppercase tracking-widest">
+              <Link href="/dashboard" className="flex items-center justify-center gap-2">
                 <ArrowLeft className="h-3 w-3" />
                 Volver al Dashboard público
               </Link>
             </Button>
-            <p className="text-[10px] text-muted-foreground/50 uppercase tracking-widest font-bold">
-              App en fase privada - Real Acade
-            </p>
+            <div className="pt-6 border-t border-white/5">
+              <p className="text-[9px] text-muted-foreground/30 uppercase tracking-[0.4em] font-black">
+                SISTEMA OFICIAL EST. 2010
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
@@ -24,14 +23,14 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 const getPageTitle = (pathname: string) => {
-  if (pathname.includes("/dashboard")) return "Real Acade";
-  if (pathname.includes("/matches/new")) return "Nuevo Partido";
-  if (pathname.includes("/matches")) return "Partidos";
-  if (pathname.includes("/players")) return "Jugadores";
-  if (pathname.includes("/compare")) return "Versus";
-  if (pathname.includes("/generator")) return "Equilibrador";
-  if (pathname.includes("/standings")) return "Tabla";
-  return "Real Acade";
+  if (pathname.includes("/dashboard")) return "PANEL DE CONTROL";
+  if (pathname.includes("/matches/new")) return "REGISTRO DE BATALLA";
+  if (pathname.includes("/matches")) return "HISTORIAL OFICIAL";
+  if (pathname.includes("/players")) return "PLANTILLA ÉLITE";
+  if (pathname.includes("/compare")) return "VERSUS MODE";
+  if (pathname.includes("/generator")) return "EQUILIBRADOR PRO";
+  if (pathname.includes("/standings")) return "TABLA DE POSICIONES";
+  return "REAL ACADE";
 };
 
 export function Header() {
@@ -69,10 +68,10 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-20 flex h-14 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm md:h-16 md:px-6">
-      <div className="flex items-center gap-2">
-        <SidebarTrigger className="h-8 w-8" />
-        <h1 className="text-base font-black uppercase italic tracking-tight md:text-xl text-white">
+    <header className="sticky top-0 z-20 flex h-14 items-center gap-4 border-b border-border bg-background px-4 md:h-16 md:px-6 shadow-xl">
+      <div className="flex items-center gap-4">
+        <SidebarTrigger className="h-9 w-9 text-primary hover:bg-white/5" />
+        <h1 className="text-xl md:text-3xl font-bebas uppercase tracking-wider text-white">
           {getPageTitle(pathname)}
         </h1>
       </div>
@@ -82,72 +81,69 @@ export function Header() {
       {isUserLoading ? (
         <Loader2 className="h-4 w-4 animate-spin text-primary" />
       ) : user ? (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <div className="hidden md:flex flex-col items-end mr-1">
-             <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Logueado como:</span>
+             <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 font-oswald">USUARIO ACTIVO</span>
              <span className={cn(
-               "text-xs font-bold leading-none mt-0.5",
-               isAdmin ? "text-yellow-500" : "text-primary"
+               "text-sm font-black leading-none mt-0.5 font-bebas tracking-wide",
+               isAdmin ? "text-primary" : "text-white"
              )}>
                {currentUser?.name || user.email?.split('@')[0]}
              </span>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-8 w-8 rounded-full md:h-10 md:w-10">
-                <Avatar className={cn(
-                  "h-8 w-8 border-2 md:h-10 md:w-10 transition-all",
-                  isAdmin ? "border-yellow-500 shadow-lg shadow-yellow-500/20" : "border-primary/20"
-                )}>
-                  <AvatarFallback className="bg-muted text-primary font-black text-[10px] md:text-xs">
+              <Button variant="ghost" className="relative h-9 w-9 rounded-none border border-white/10 p-0 overflow-hidden">
+                <Avatar className="h-full w-full rounded-none">
+                  <AvatarFallback className="bg-surface-800 text-primary font-bebas text-lg">
                     {getInitials(currentUser?.name || user?.email || "U")}
                   </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end" forceMount>
+            <DropdownMenuContent className="w-56 rounded-none bg-surface-900 border-border" align="end" forceMount>
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-bold leading-none text-white">
+                  <p className="text-sm font-black font-bebas tracking-wider text-white">
                     {currentUser?.name || user?.email || "Usuario"}
                   </p>
                   <div className="flex items-center gap-1.5 mt-1">
                     {isAdmin ? (
-                      <span className="flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-yellow-500">
-                        <ShieldCheck className="h-2.5 w-2.5" /> Administrador
+                      <span className="flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-primary font-oswald">
+                        <ShieldCheck className="h-2.5 w-2.5" /> ADMINISTRADOR
                       </span>
                     ) : (
-                      <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
-                        Jugador del Club
+                      <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground font-oswald">
+                        JUGADOR OFICIAL
                       </span>
                     )}
                   </div>
                 </div>
               </DropdownMenuLabel>
-              <DropdownMenuSeparator />
+              <DropdownMenuSeparator className="bg-white/5" />
               <DropdownMenuItem 
-                className="cursor-pointer"
+                className="cursor-pointer hover:bg-white/5 focus:bg-white/5 rounded-none"
                 onClick={() => currentUser && router.push(`/players/${currentUser.id}`)}
               >
                 <User className="mr-2 h-4 w-4" />
-                <span>Ver Mi Perfil</span>
+                <span className="font-oswald uppercase text-xs">Mi Perfil</span>
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
+              <DropdownMenuSeparator className="bg-white/5" />
               <DropdownMenuItem 
                 onClick={handleLogout} 
-                className="text-destructive focus:text-destructive cursor-pointer font-bold"
+                className="text-destructive focus:text-destructive focus:bg-destructive/5 cursor-pointer font-black rounded-none"
               >
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>Cerrar Sesión</span>
+                <span className="font-oswald uppercase text-xs">Cerrar Sesión</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       ) : (
-        <Button asChild variant="default" size="sm" className="h-8 gap-2 font-black uppercase italic text-[10px] md:text-xs tracking-tighter">
+        <Button asChild variant="default" size="sm" className="h-9 px-6 rounded-none font-bebas text-base tracking-widest transition-transform active:scale-95 shadow-lg shadow-primary/20">
           <Link href="/login">
-            <LogIn className="h-3.5 w-3.5" />
-            <span>Acceder</span>
+            <LogIn className="h-4 w-4 mr-2" />
+            <span>ACCEDER</span>
           </Link>
         </Button>
       )}
