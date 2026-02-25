@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -25,6 +24,7 @@ import { Progress } from "@/components/ui/progress";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 
 const FormDot = ({ result }: { result: 'W' | 'D' | 'L' }) => {
   const colors = {
