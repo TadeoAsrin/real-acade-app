@@ -16,7 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc } from "@/firebase";
 import { collection, query, orderBy, doc } from "firebase/firestore";
 import type { Player, Match, AggregatedPlayerStats } from "@/lib/definitions";
-import { Loader2, Trophy, Target, Zap, Crown, TrendingUp, TrendingDown, Minus, Calendar, ChevronRight, Users, Star, Info, Sparkles } from "lucide-react";
+import { Loader2, Trophy, Target, Zap, Crown, TrendingUp, TrendingDown, Minus, Calendar, ChevronRight, Users, Star, Info, Sparkles, Swords } from "lucide-react";
 import Link from "next/link";
 import { cn, getInitials } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -141,16 +141,22 @@ export default function StandingsPage() {
     .filter(p => !p.isActive && p.matchesPlayed > 0)
     .sort((a, b) => b.matchesPlayed - a.matchesPlayed || a.totalCaptaincies - b.totalCaptaincies);
 
-  // Suggested Captain Logic
+  // Suggested Captain Logic (Top 2)
   const last2MatchDates = allMatches.slice(0, 2).map(m => m.date);
-  const suggestedCaptain = activeCaptains.find(p => 
-    !p.lastCaptainDate || !last2MatchDates.includes(p.lastCaptainDate)
-  ) || activeCaptains[0];
+  const suggestedCaptains = activeCaptains
+    .filter(p => !p.lastCaptainDate || !last2MatchDates.includes(p.lastCaptainDate))
+    .slice(0, 2);
+  
+  if (suggestedCaptains.length < 2 && activeCaptains.length >= 2) {
+    const remainingNeeded = 2 - suggestedCaptains.length;
+    const others = activeCaptains.filter(p => !suggestedCaptains.some(s => s.playerId === p.playerId)).slice(0, remainingNeeded);
+    suggestedCaptains.push(...others);
+  }
 
   const getSuggestionReason = (player: AggregatedPlayerStats) => {
-    if (player.matchesInLast5 === 5) return "Lleva asistencia perfecta (5/5) y es el momento justo de liderar el equipo.";
-    if (player.totalCaptaincies === 0) return "Es un jugador clave con alta participación que aún no ha estrenado el brazalete esta temporada.";
-    return "Combina una alta participación reciente con muy pocas capitanías previas, ideal para una rotación justa.";
+    if (player.matchesInLast5 === 5) return "Lleva asistencia perfecta (5/5). Es momento de liderar.";
+    if (player.totalCaptaincies === 0) return "Jugador clave que aún no ha estrenado el brazalete.";
+    return "Alta participación reciente y baja rotación histórica.";
   };
 
   const selectedMatch = allMatches.find(m => m.id === selectedMatchId);
@@ -509,8 +515,66 @@ export default function StandingsPage() {
           </TabsContent>
 
           <TabsContent value="capitanes" className="animate-in fade-in slide-in-from-bottom-2 space-y-12">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-              <div className="lg:col-span-8 space-y-12">
+            <div className="flex flex-col gap-8 items-start">
+              
+              {/* Consejo de Capitanes (Suggested Dual Card) */}
+              {suggestedCaptains.length >= 2 && (
+                <Card className="w-full glass-card border-yellow-500/30 bg-gradient-to-br from-yellow-500/10 via-card to-background overflow-hidden relative group">
+                  <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform duration-500">
+                    <Crown className="h-32 w-32 text-yellow-500" />
+                  </div>
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm font-black uppercase tracking-[0.2em] text-yellow-500 flex items-center gap-2">
+                        <Sparkles className="h-4 w-4 animate-pulse" /> Consejo de Capitanes
+                      </CardTitle>
+                      <Badge variant="outline" className="border-yellow-500/20 text-yellow-500 text-[8px] uppercase font-black">Designación Oficial</Badge>
+                    </div>
+                    <CardDescription className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground/60">Sugerencia basada en compromiso y rotación justa</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-8 relative z-10">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {suggestedCaptains.map((cap, idx) => (
+                        <div key={cap.playerId} className="flex flex-col gap-4 p-6 bg-black/40 backdrop-blur-md rounded-2xl border border-white/5 group/cap hover:border-yellow-500/20 transition-all">
+                          <div className="flex items-center gap-4">
+                            <div className="relative">
+                              <Avatar className="h-16 w-16 border-2 border-yellow-500 shadow-xl">
+                                <AvatarFallback className="text-xl font-black bg-yellow-500/10 text-yellow-500">{getInitials(cap.name)}</AvatarFallback>
+                              </Avatar>
+                              <div className={cn(
+                                "absolute -top-2 -right-2 p-1.5 rounded-full shadow-lg border-2 border-background",
+                                idx === 0 ? "bg-primary text-white" : "bg-accent text-white"
+                              )}>
+                                <span className="text-[8px] font-black uppercase">{idx === 0 ? 'A' : 'B'}</span>
+                              </div>
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-[8px] font-black uppercase tracking-[0.2em] text-yellow-500/60 mb-1">Capitán Sugerido {idx + 1}</p>
+                              <h4 className="text-xl font-black italic uppercase tracking-tighter text-white truncate">{cap.name}</h4>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className="text-[9px] font-bold text-muted-foreground uppercase">{cap.matchesInLast5}/5 Recientes</span>
+                                <span className="text-[9px] font-black text-primary/60">• {cap.captaincyPriorityScore} Score</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="bg-white/5 p-3 rounded-xl border border-white/5">
+                            <p className="text-[10px] font-medium italic text-white/70 leading-relaxed">
+                              "{getSuggestionReason(cap)}"
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="pt-4 border-t border-white/5 flex items-center justify-center gap-2 text-muted-foreground italic text-[9px] uppercase tracking-widest font-bold">
+                      <Swords className="h-3 w-3" />
+                      Dúo designado para el próximo "Pan y Queso"
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              <div className="w-full space-y-12">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="space-y-1">
                     <h3 className="text-xl font-black italic uppercase flex items-center gap-2">
@@ -546,71 +610,6 @@ export default function StandingsPage() {
                     {renderCaptainsTable(occasionalCaptains, "Participación Ocasional", <Zap className="h-4 w-4 text-muted-foreground/40" />)}
                   </div>
                 )}
-              </div>
-
-              <div className="lg:col-span-4 space-y-6">
-                {suggestedCaptain && (
-                  <Card className="glass-card border-yellow-500/30 bg-gradient-to-br from-yellow-500/10 to-transparent overflow-hidden relative group">
-                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform duration-500">
-                      <Crown className="h-24 w-24 text-yellow-500" />
-                    </div>
-                    <CardHeader className="pb-4">
-                      <CardTitle className="text-xs font-black uppercase tracking-widest text-yellow-500 flex items-center gap-2">
-                        <Sparkles className="h-3 w-3 animate-pulse" /> Oráculo de Capitanes
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-6 relative z-10">
-                      <div className="flex flex-col items-center text-center gap-4">
-                        <div className="relative">
-                          <Avatar className="h-24 w-24 border-4 border-yellow-500 shadow-2xl shadow-yellow-500/20">
-                            <AvatarFallback className="text-3xl font-black bg-yellow-500/10 text-yellow-500">{getInitials(suggestedCaptain.name)}</AvatarFallback>
-                          </Avatar>
-                          <div className="absolute -top-3 -right-3 bg-yellow-500 text-black p-1.5 rounded-full shadow-lg border-4 border-background rotate-12">
-                            <Crown className="h-5 w-5" />
-                          </div>
-                        </div>
-                        <div className="space-y-1">
-                          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-yellow-500/60">Próximo Capitán Sugerido</p>
-                          <h4 className="text-3xl font-black italic uppercase tracking-tighter text-white">{suggestedCaptain.name}</h4>
-                        </div>
-                      </div>
-
-                      <div className="bg-black/40 backdrop-blur-md rounded-2xl p-4 border border-white/5 space-y-4">
-                        <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
-                          <span className="text-muted-foreground">Motivo de elección</span>
-                          <Badge variant="outline" className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20 text-[8px]">Ranking #{activeCaptains.indexOf(suggestedCaptain) + 1}</Badge>
-                        </div>
-                        <p className="text-xs font-medium italic text-white/80 leading-relaxed">
-                          "{getSuggestionReason(suggestedCaptain)}"
-                        </p>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="bg-white/5 p-3 rounded-xl border border-white/5 text-center">
-                          <p className="text-[8px] font-black uppercase text-muted-foreground mb-1">Score Prioridad</p>
-                          <p className="text-xl font-black italic text-primary">{suggestedCaptain.captaincyPriorityScore}</p>
-                        </div>
-                        <div className="bg-white/5 p-3 rounded-xl border border-white/5 text-center">
-                          <p className="text-[8px] font-black uppercase text-muted-foreground mb-1">Últimos 5</p>
-                          <p className="text-xl font-black italic text-white">{suggestedCaptain.matchesInLast5}/5</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-
-                <Card className="glass-card border-white/5">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                      <Trophy className="h-3 w-3" /> Transparencia de Liderazgo
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-[10px] text-muted-foreground leading-relaxed italic">
-                      El oráculo sugiere al jugador **Activo** con mayor score que no haya sido capitán en las últimas 2 jornadas globales. Esto garantiza que el compromiso siempre sea recompensado con autoridad en el campo.
-                    </p>
-                  </CardContent>
-                </Card>
               </div>
             </div>
           </TabsContent>
