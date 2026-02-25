@@ -58,7 +58,7 @@ const TrendIcon = ({ form }: { form: ('W' | 'D' | 'L')[] }) => {
 
 export default function StandingsPage() {
   const firestore = useFirestore();
-  const { user } = userUser();
+  const { user } = useUser();
   const [activeTab, setActiveTab] = React.useState("general");
   const [selectedMatchId, setSelectedMatchId] = React.useState<string | null>(null);
 
