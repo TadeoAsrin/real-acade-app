@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -22,7 +21,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import type { Player, PlayerStats, Match } from "@/lib/definitions";
 import { cn, getInitials } from "@/lib/utils";
-import { BestGoalVote } from "@/components/matches/best-goal-vote";
 import { Award, Star, Loader2, Share2, Pencil, Quote, Camera, ChevronLeft, ChevronRight, X, Newspaper, Trophy, Sparkles } from "lucide-react";
 import { useDoc, useCollection, useMemoFirebase, useFirestore, useUser } from "@/firebase";
 import { doc, collection } from "firebase/firestore";
@@ -215,14 +213,6 @@ export default function MatchDetailPage() {
   const allPlayers = players || [];
   const allPlayerStats = [...match.teamAPlayers, ...match.teamBPlayers];
   
-  const scorers = allPlayerStats
-    .filter(stat => stat.goals > 0)
-    .map(stat => {
-      const player = allPlayers.find(p => p.id === stat.playerId);
-      return player ? { ...player, goals: stat.goals } : null;
-    })
-    .filter(Boolean) as (Player & { goals: number })[];
-
   const mvpStat = allPlayerStats.find(s => s.isMvp);
   const bestGoalStat = allPlayerStats.find(s => s.hasBestGoal);
 
@@ -378,7 +368,6 @@ export default function MatchDetailPage() {
                     )}
                   </CardContent>
                 </Card>
-                <BestGoalVote matchId={id} scorers={scorers} />
               </>
             )}
             
