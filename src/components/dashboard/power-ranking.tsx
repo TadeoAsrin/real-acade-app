@@ -1,4 +1,3 @@
-
 'use client';
 
 import { calculateAggregatedStats } from "@/lib/data";
@@ -10,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Flame, Crown, Info } from "lucide-react";
+import { Flame, Crown, Info, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { cn, getInitials } from "@/lib/utils";
 import type { Player, Match } from "@/lib/definitions";
@@ -33,12 +32,12 @@ export function PowerRanking({ players, matches }: PowerRankingProps) {
     .slice(0, 5);
 
   return (
-    <Card className="h-full glass-card border-orange-500/10">
-      <CardHeader>
+    <Card className="competition-card h-full border-t-4 border-t-orange-500 bg-gradient-to-b from-orange-500/5 to-card">
+      <CardHeader className="pb-4">
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Flame className="h-6 w-6 text-orange-500 fill-orange-500 animate-pulse" />
-            <span className="font-black uppercase tracking-tighter italic text-2xl text-orange-500">On Fire</span>
+            <TrendingUp className="h-5 w-5 text-orange-500" />
+            <span className="font-bebas text-2xl tracking-widest text-orange-500">ON FIRE</span>
           </div>
           <TooltipProvider>
             <Tooltip>
@@ -47,50 +46,55 @@ export function PowerRanking({ players, matches }: PowerRankingProps) {
                   <Info className="h-4 w-4" />
                 </button>
               </TooltipTrigger>
-              <TooltipContent className="bg-black/90 border-white/10 text-[10px] p-3 space-y-1">
-                <p className="font-bold text-orange-500 uppercase">¿Cómo se puntúa?</p>
-                <p>• MVP: +15 pts</p>
-                <p>• Victoria: +10 pts</p>
-                <p>• Empate: +5 pts</p>
-                <p>• Mejor Gol: +5 pts</p>
-                <p>• Gol: +2 pts</p>
+              <TooltipContent className="bg-zinc-900 border-white/10 text-[10px] p-4 space-y-2">
+                <p className="font-black text-orange-500 uppercase tracking-widest font-oswald">SISTEMA DE PUNTUACIÓN</p>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 font-bold">
+                  <span>MVP:</span> <span className="text-orange-500">+15 PTS</span>
+                  <span>VICTORIA:</span> <span className="text-orange-500">+10 PTS</span>
+                  <span>EMPATE:</span> <span className="text-orange-500">+5 PTS</span>
+                  <span>GOL:</span> <span className="text-orange-500">+2 PTS</span>
+                </div>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
         </CardTitle>
-        <CardDescription>Los 5 líderes por impacto: MVP, Victorias y Goles.</CardDescription>
+        <CardDescription className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 font-oswald">TOP 5 RENDIMIENTO GLOBAL</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-6">
-          {topRanking.map((player, index) => (
-            <div key={player.playerId} className="flex items-center justify-between group">
-              <div className="flex items-center gap-4">
-                <div className="relative">
+        <div className="space-y-5">
+          {topRanking.map((player, index) => {
+            const isLeader = index === 0;
+            return (
+              <div key={player.playerId} className={cn(
+                "flex items-center justify-between p-3 rounded-md transition-all",
+                isLeader ? "bg-orange-500/10 border border-orange-500/20 shadow-inner" : "border border-white/5"
+              )}>
+                <div className="flex items-center gap-4">
+                  <div className="relative">
                     <Avatar className={cn(
-                        "h-12 w-12 border-2",
-                        index === 0 ? "border-yellow-500 shadow-lg shadow-yellow-500/20" : "border-muted"
+                      "h-10 w-10 border-2",
+                      isLeader ? "border-orange-500 shadow-lg shadow-orange-500/20" : "border-muted"
                     )}>
-                    <AvatarFallback className="bg-muted text-lg font-black">{getInitials(player.name)}</AvatarFallback>
+                      <AvatarFallback className="bg-muted text-sm font-bebas">{getInitials(player.name)}</AvatarFallback>
                     </Avatar>
-                    {index === 0 && (
-                        <div className="absolute -top-3 -right-2 rotate-12">
-                            <Crown className="h-6 w-6 text-yellow-500 fill-yellow-500" />
-                        </div>
-                    )}
+                    <span className="absolute -top-2 -left-2 bg-background border border-white/10 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bebas text-orange-500">
+                      {index + 1}
+                    </span>
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <Link href={`/players/${player.playerId}`} className="font-bold text-sm hover:text-orange-500 transition-colors truncate uppercase tracking-tighter">
+                      {player.name}
+                    </Link>
+                    <span className="text-[8px] text-muted-foreground uppercase font-black font-oswald">{player.position || 'COMODÍN'}</span>
+                  </div>
                 </div>
-                <div className="flex flex-col">
-                  <Link href={`/players/${player.playerId}`} className="font-bold hover:text-primary transition-colors">
-                    {player.name}
-                  </Link>
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">Puesto #{index + 1}</span>
+                <div className="text-right">
+                  <span className="text-2xl font-bebas text-orange-500 leading-none">{player.powerPoints}</span>
+                  <p className="text-[8px] uppercase font-black text-muted-foreground/40 font-oswald">PTS</p>
                 </div>
               </div>
-              <div className="flex flex-col items-end">
-                <span className="text-2xl font-black text-orange-500 italic leading-none">{player.powerPoints}</span>
-                <span className="text-[10px] text-muted-foreground uppercase font-black">Pts</span>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </CardContent>
     </Card>
