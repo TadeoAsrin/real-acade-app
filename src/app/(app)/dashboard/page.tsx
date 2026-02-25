@@ -65,7 +65,7 @@ export default function DashboardPage() {
 
   const sortedByGoals = [...playerStats].sort((a, b) => b.totalGoals - a.totalGoals || b.goalsPerMatch - a.goalsPerMatch);
   const topScorer = sortedByGoals[0];
-  const runnersUp = sortedByGoals.slice(1, 5); // Cambiado a Top 5 (1 líder + 4 perseguidores)
+  const runnersUp = sortedByGoals.slice(1, 5); 
 
   const sortedByInfluence = [...playerStats]
     .filter(p => p.matchesPlayed >= 3)
@@ -83,7 +83,7 @@ export default function DashboardPage() {
 
   const totalMatches = allMatches.length;
   const attendanceLeaders = [...playerStats]
-    .sort((a, b) => b.matchesPlayed - a.matchesPlayed || a.name.localeCompare(b.name))
+    .sort((a, b) => b.matchesPlayed - a.matchesPlayed || a.name.localeCompare(Partidos))
     .slice(0, 3);
 
   const maxPlayerAttendance = totalMatches > 0 ? Math.max(...playerStats.map(p => p.matchesPlayed), 0) : 0;
