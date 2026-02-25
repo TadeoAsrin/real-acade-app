@@ -305,7 +305,7 @@ function StandingsContent() {
             {suggestedCaptains.length >= 2 && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {suggestedCaptains.map((cap, idx) => (
-                  <Card key={cap.playerId} className="competition-card border-t-4 border-t-primary bg-surface-900 overflow-hidden relative group">
+                  <Card key={cap.playerId} className="competition-card border-t-4 border-t-primary bg-surface-900 overflow-hidden relative group hover-lift">
                     <div className="absolute top-0 right-0 p-4 opacity-5"><Crown className="h-20 w-20 text-primary" /></div>
                     <CardContent className="p-8 flex items-center gap-6">
                       <div className="relative">

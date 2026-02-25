@@ -92,7 +92,7 @@ export default function ComparePage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-        <Card className="glass-card border-primary/20 bg-primary/5">
+        <Card className="competition-card border-primary/20 bg-primary/5 hover-lift">
             <CardHeader className="text-center">
                 <Select onValueChange={setPlayer1Id} value={player1Id}>
                     <SelectTrigger className="w-full font-black italic uppercase">
@@ -126,7 +126,7 @@ export default function ComparePage() {
             </CardContent>
         </Card>
 
-        <Card className="glass-card border-accent/20 bg-accent/5">
+        <Card className="competition-card border-accent/20 bg-accent/5 hover-lift">
             <CardHeader className="text-center">
                  <Select onValueChange={setPlayer2Id} value={player2Id}>
                     <SelectTrigger className="w-full font-black italic uppercase">
@@ -162,7 +162,7 @@ export default function ComparePage() {
       </div>
 
       {p1 && p2 ? (
-          <Card className="glass-card p-10 space-y-12">
+          <Card className="competition-card p-10 space-y-12">
             <StatRow label="Partidos Jugados" val1={p1.matchesPlayed} val2={p2.matchesPlayed} icon={Shield} />
             <StatRow label="Goles Totales" val1={p1.totalGoals} val2={p2.totalGoals} icon={Target} />
             <StatRow label="Victorias" val1={p1.wins} val2={p2.wins} icon={Trophy} />

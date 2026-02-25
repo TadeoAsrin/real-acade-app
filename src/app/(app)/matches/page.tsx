@@ -48,7 +48,7 @@ const MatchCard = ({ match, isAdmin, onDelete }: MatchCardProps) => {
   const draw = match.teamAScore === match.teamBScore && isCompleted && hasScore;
 
   return (
-    <Card className="overflow-hidden border-l-4 border-l-primary/30 hover:border-l-primary transition-all group relative glass-card">
+    <Card className="competition-card border-l-4 border-l-primary/30 hover:border-l-primary transition-all group relative hover-lift">
       <CardContent className="p-0">
         <div className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <Link href={`/matches/${match.id}`} className="flex-1">

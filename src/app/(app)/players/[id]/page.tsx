@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -87,7 +86,7 @@ export default function PlayerProfilePage() {
     });
 
   const StatBox = ({ label, value, icon: Icon, color = "primary", sub }: { label: string, value: string | number, icon: any, color?: string, sub?: string }) => (
-    <Card className="glass-card overflow-hidden group border-white/5 hover:border-white/10 transition-all">
+    <Card className="competition-card group hover-lift">
       <CardContent className="p-6 relative">
         <div className={cn("absolute -right-4 -bottom-4 opacity-5 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12", `text-${color}`)}>
           <Icon className="h-24 w-24" />
@@ -165,7 +164,7 @@ export default function PlayerProfilePage() {
         <div className="lg:col-span-2 space-y-8">
           <PlayerPerformanceChart matchHistory={playerMatchHistory} />
           
-          <Card className="glass-card border-white/5">
+          <Card className="competition-card">
             <CardHeader>
               <CardTitle className="text-xl font-black uppercase italic tracking-tighter">Historial de Combates</CardTitle>
               <CardDescription>Desempeño cronológico en la liga.</CardDescription>
@@ -184,7 +183,7 @@ export default function PlayerProfilePage() {
                   </TableHeader>
                   <TableBody>
                     {playerMatchHistory.map((match) => (
-                      <TableRow key={match.matchId} className="border-white/5 hover:bg-white/5 transition-colors group">
+                      <TableRow key={match.matchId} className="official-table-row group">
                         <TableCell className="pl-6 font-bold text-sm">
                           {format(parseISO(match.date), "dd MMM yyyy", { locale: es })}
                         </TableCell>
@@ -220,7 +219,7 @@ export default function PlayerProfilePage() {
         </div>
 
         <div className="space-y-8">
-          <Card className="glass-card border-primary/20 overflow-hidden bg-primary/5">
+          <Card className="competition-card border-t-4 border-t-primary bg-primary/5">
             <CardHeader className="bg-primary/10 pb-4">
               <CardTitle className="text-xs font-black uppercase tracking-widest text-primary flex items-center gap-2">
                 <Trophy className="h-3 w-3" /> Distribución de Power
@@ -253,7 +252,7 @@ export default function PlayerProfilePage() {
             </CardContent>
           </Card>
 
-          <Card className="glass-card border-white/5 overflow-hidden">
+          <Card className="competition-card">
             <CardHeader className="pb-2">
               <CardTitle className="text-xs font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                 <Calendar className="h-3 w-3" /> Fidelidad al Club
