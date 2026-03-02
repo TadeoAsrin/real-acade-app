@@ -261,8 +261,13 @@ export default function DashboardPage() {
               </Link>
               <div className="pt-6 border-t border-white/5 space-y-3">
                 {influencerRunnersUp.map((runner, idx) => (
-                  <div key={runner.playerId} className="flex items-center justify-between text-sm">
-                    <span className="font-bold text-muted-foreground">#{idx + 2} {runner.name}</span>
+                  <div key={runner.playerId} className="flex items-center justify-between">
+                    <div className="flex flex-col">
+                      <span className="font-bold text-muted-foreground text-sm">#{idx + 2} {runner.name}</span>
+                      <span className="text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest">
+                        {runner.wins}V - {runner.draws}E - {runner.losses}D ({runner.matchesPlayed} PJ)
+                      </span>
+                    </div>
                     <span className="font-bebas text-xl text-primary/80">{runner.winPercentage}%</span>
                   </div>
                 ))}
