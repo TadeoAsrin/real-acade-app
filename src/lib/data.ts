@@ -127,11 +127,11 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
           const pointsPossible = stats.matchesPlayed * 3;
           stats.efficiency = Math.round((pointsObtained / pointsPossible) * 100);
 
-          stats.isActive = stats.matchesPlayed >= 3 && stats.matchesInLast3 >= 1;
+          // LOGICA DE ELEGIBILIDAD: Al menos 1 partido en los últimos 5 del club
+          stats.isActive = stats.matchesInLast5 >= 1;
           
-          // NUEVA LÓGICA: Bonus de +5 si nunca fue capitán para priorizar debuts
-          const debutBonus = stats.totalCaptaincies === 0 ? 5 : 0;
-          stats.captaincyPriorityScore = (stats.matchesInLast5 * 3) + (stats.matchesPlayed * 1) - (stats.totalCaptaincies * 4) + debutBonus;
+          // Puntaje base de prioridad para veteranos
+          stats.captaincyPriorityScore = (stats.matchesInLast5 * 3) + (stats.matchesPlayed * 1) - (stats.totalCaptaincies * 4);
       }
       stats.form = [...stats.form].reverse();
   }

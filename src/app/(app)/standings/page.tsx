@@ -110,13 +110,26 @@ function StandingsContent() {
     .filter(p => p.matchesPlayed >= 3)
     .sort((a, b) => b.efficiency - a.efficiency || b.matchesPlayed - a.matchesPlayed);
 
+  // JERARQUÍA DE CAPITANES: Debutantes primero, luego por Ranking de Deuda (partidos jugados)
   const activeCaptains = stats.filter(p => p.isActive).sort((a, b) => {
     const aNever = a.totalCaptaincies === 0;
     const bNever = b.totalCaptaincies === 0;
+    
+    // 1. Debutantes (0 capitanías) siempre al frente
     if (aNever && !bNever) return -1;
     if (!aNever && bNever) return 1;
+    
+    // 2. Entre debutantes, priorizamos por Partidos Jugados (Ranking de Deuda)
+    if (aNever && bNever) {
+      if (b.matchesPlayed !== a.matchesPlayed) return b.matchesPlayed - a.matchesPlayed;
+    }
+    
+    // 3. Entre veteranos, usamos el puntaje de prioridad (asistencia vs capitanías previas)
     if (b.captaincyPriorityScore !== a.captaincyPriorityScore) return b.captaincyPriorityScore - a.captaincyPriorityScore;
+    
+    // 4. Último recurso: por fecha de última capitanía
     if (a.lastCaptainDate && b.lastCaptainDate) return new Date(a.lastCaptainDate).getTime() - new Date(b.lastCaptainDate).getTime();
+    
     return 0;
   });
 
@@ -160,7 +173,7 @@ function StandingsContent() {
                   <TableCell className="text-right pr-6">
                     <Badge variant="outline" className={cn(
                       "font-oswald uppercase text-[8px] tracking-widest",
-                      player.totalCaptaincies === 0 ? "border-emerald-500 text-emerald-500" : "border-white/10 text-muted-foreground"
+                      player.totalCaptaincies === 0 ? "border-emerald-500 text-emerald-500 bg-emerald-500/5" : "border-white/10 text-muted-foreground"
                     )}>
                       {player.totalCaptaincies === 0 ? "DEBUTANTE" : "VETERANO"}
                     </Badge>
