@@ -6,9 +6,9 @@ import { calculateAggregatedStats, getChemistryRankings, getSpiciestMatch } from
 import { useCollection, useMemoFirebase, useFirestore } from "@/firebase";
 import { collection, query, orderBy } from "firebase/firestore";
 import type { Match, Player } from "@/lib/definitions";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Brain, Link as LinkIcon, Zap, Crown, Flame, Trophy, Calendar, Star, Heart, Skull, Ghost, CloudRain, Droplets, TrendingUp, Users, Target } from "lucide-react";
+import { ArrowLeft, Brain, Link as LinkIcon, Zap, Crown, Flame, Calendar, Star, Users, Target, Skull, Ghost, Droplets } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials, cn } from "@/lib/utils";
 import Link from "next/link";
@@ -32,11 +32,21 @@ export default function PulseDetailPage() {
   const { data: playersData, isLoading: playersLoading } = useCollection<Player>(playersQuery);
   const { data: matchesData, isLoading: matchesLoading } = useCollection<Match>(matchesQuery);
 
-  // Calculamos los datos derivados directamente para evitar problemas de sincronización de useMemo
   const allPlayers = playersData || [];
   const allMatches = matchesData || [];
-  const playerStats = calculateAggregatedStats(allPlayers, allMatches);
-  const spiciestMatch = getSpiciestMatch(allMatches);
+
+  const playerStats = React.useMemo(() => {
+    if (allPlayers.length === 0) return [];
+    return calculateAggregatedStats(allPlayers, allMatches);
+  }, [allPlayers, allMatches]);
+
+  const spiciestMatch = React.useMemo(() => {
+    return getSpiciestMatch(allMatches);
+  }, [allMatches]);
+
+  const chemistryRankings = React.useMemo(() => {
+    return getChemistryRankings(allPlayers, allMatches, 2);
+  }, [allPlayers, allMatches]);
 
   if (playersLoading || matchesLoading) {
     return (
@@ -108,7 +118,7 @@ export default function PulseDetailPage() {
         </div>
 
         <div className="space-y-4">
-            {sorted.map((p, i) => (
+            {sorted.length > 0 ? sorted.map((p, i) => (
                 <Card key={p.playerId} className="glass-card border-white/5 hover:border-yellow-500/30 transition-all">
                     <CardContent className="p-6 flex items-center justify-between">
                         <div className="flex items-center gap-4">
@@ -127,7 +137,11 @@ export default function PulseDetailPage() {
                         </div>
                     </CardContent>
                 </Card>
-            ))}
+            )) : (
+              <div className="h-40 flex flex-col items-center justify-center border-2 border-dashed rounded-3xl opacity-30 italic">
+                Aún no se han registrado premios MVP.
+              </div>
+            )}
         </div>
       </div>
     );
@@ -179,9 +193,7 @@ export default function PulseDetailPage() {
   };
 
   const renderPartnership = () => {
-    // Calculamos el ranking de sociedades en tiempo real para evitar inconsistencias
-    const chemistry = getChemistryRankings(allPlayers, allMatches, 2);
-    const maxWinRate = chemistry.length > 0 ? chemistry[0].winRate : 0;
+    const maxWinRate = chemistryRankings.length > 0 ? chemistryRankings[0].winRate : 0;
 
     return (
       <div className="space-y-8 max-w-2xl mx-auto">
@@ -193,9 +205,9 @@ export default function PulseDetailPage() {
             <p className="text-muted-foreground italic">La química perfecta. Parejas de jugadores que dominan el campo cuando juegan juntos.</p>
         </div>
 
-        {chemistry.length > 0 ? (
+        {chemistryRankings.length > 0 ? (
             <div className="space-y-4">
-                {chemistry.map((pair, i) => {
+                {chemistryRankings.map((pair, i) => {
                     const isLeader = pair.winRate === maxWinRate && maxWinRate > 0;
                     const isNew = pair.matches === 1;
                     return (
@@ -291,7 +303,7 @@ export default function PulseDetailPage() {
                     </div>
                     <Button asChild variant="outline" className="border-orange-500/20 hover:bg-orange-500/10">
                         <Link href={`/matches/${spiciestMatch.id}`}>
-                            <Trophy className="mr-2 h-4 w-4" /> Ver Ficha Técnica
+                            <Target className="mr-2 h-4 w-4" /> Ver Ficha Técnica
                         </Link>
                     </Button>
                 </div>

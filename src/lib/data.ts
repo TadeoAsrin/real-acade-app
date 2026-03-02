@@ -161,7 +161,9 @@ export const getChemistryRankings = (players: Player[], matches: Match[], minMat
     const teamBWon = match.teamBScore > match.teamAScore;
 
     const processTeam = (teamPlayers: PlayerStats[], won: boolean) => {
-      const ids = teamPlayers.map(p => p.playerId).filter(Boolean);
+      // Usamos los IDs de los jugadores presentes en el partido
+      const ids = teamPlayers.map(p => p.playerId).filter(id => players.some(pl => pl.id === id));
+      
       for (let i = 0; i < ids.length; i++) {
         for (let j = i + 1; j < ids.length; j++) {
           const key = [ids[i], ids[j]].sort().join('_::_');
@@ -197,16 +199,14 @@ export const getChemistryRankings = (players: Player[], matches: Match[], minMat
     })
     .filter((pair): pair is ChemistryPair => pair !== null);
 
-  // Intentamos filtrar por el umbral solicitado
-  let filtered = allPairs.filter(p => p.matches >= minMatchesThreshold);
-
-  // Si no hay nada con el umbral (ej. 2), bajamos a 1
-  if (filtered.length === 0 && minMatchesThreshold > 1) {
-    filtered = allPairs.filter(p => p.matches >= 1);
+  // Fallback inteligente: si no hay nada con minMatchesThreshold, bajamos a 1
+  let result = allPairs.filter(p => p.matches >= minMatchesThreshold);
+  if (result.length === 0 && minMatchesThreshold > 1) {
+    result = allPairs.filter(p => p.matches >= 1);
   }
 
   // Ordenamos por: 1. Win Rate, 2. Cantidad de Partidos, 3. Power Ranking Combinado
-  return filtered.sort((a, b) => 
+  return result.sort((a, b) => 
     b.winRate - a.winRate || 
     b.matches - a.matches || 
     b.combinedPower - a.combinedPower
