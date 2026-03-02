@@ -95,7 +95,11 @@ export default function DashboardPage() {
   // Humildad
   const imanLeaders = [...playerStats].filter(p => p.losses > 0).sort((a, b) => b.losses - a.losses).slice(0, 3);
   const riesgoLeaders = [...playerStats].filter(p => p.matchesPlayed >= 3).sort((a, b) => a.winPercentage - b.winPercentage).slice(0, 3);
-  const polvoraLeaders = [...playerStats].filter(p => p.matchesPlayed >= 3 && p.position !== 'Arquero').sort((a, b) => a.goalsPerMatch - b.goalsPerMatch).slice(0, 3);
+  // Pólvora Mojada: Solo Mediocampistas y Delanteros
+  const polvoraLeaders = [...playerStats]
+    .filter(p => p.matchesPlayed >= 3 && (p.position === 'Mediocampista' || p.position === 'Delantero'))
+    .sort((a, b) => a.goalsPerMatch - b.goalsPerMatch)
+    .slice(0, 3);
 
   return (
     <div className="flex flex-col gap-12 pb-20 max-w-7xl mx-auto">
@@ -159,7 +163,7 @@ export default function DashboardPage() {
         </Card>
       )}
 
-      {/* LOS INTOCABLES (TRADING CARDS STYLE) */}
+      {/* ESTRELLAS DE LA ACADEMIA */}
       <section className="space-y-6">
         <h2 className="text-xs font-black uppercase tracking-[0.4em] text-muted-foreground/50 px-1 font-oswald">ESTRELLAS DE LA ACADEMIA</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -285,8 +289,13 @@ export default function DashboardPage() {
           ].map((sec, i) => (
             <Card key={i} className="competition-card border-t border-white/5 bg-surface-900/50">
               <CardHeader className="pb-4">
-                <CardTitle className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground flex items-center gap-2 font-oswald">
-                  <sec.icon className="h-3 w-3" /> {sec.label}
+                <CardTitle className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground flex items-center justify-between font-oswald">
+                  <div className="flex items-center gap-2">
+                    <sec.icon className="h-3 w-3" /> {sec.label}
+                  </div>
+                  {sec.label === "PÓLVORA MOJADA" && (
+                    <span className="text-[7px] font-bold bg-white/5 px-1.5 py-0.5 rounded text-white/40">ATAQUE</span>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">

@@ -79,10 +79,9 @@ function StandingsContent() {
 
   const sortedGeneral = [...stats].sort((a, b) => (b.wins * 3 + b.draws) - (a.wins * 3 + a.draws) || b.goalDifference - a.goalDifference);
   const sortedScorers = [...stats].filter(p => p.totalGoals > 0).sort((a, b) => b.totalGoals - a.totalGoals || b.goalsPerMatch - a.goalsPerMatch);
-  const sortedEfficiency = [...stats].filter(p => p.matchesPlayed >= 3).sort((a, b) => b.efficiency - a.efficiency);
+  const sortedEfficiency = [...stats].filter(p => p.matchesPlayed >= 1).sort((a, b) => b.efficiency - a.efficiency);
 
   const leadershipRanking = [...stats]
-    .filter(p => p.matchesPlayed > 0)
     .sort((a, b) => {
       const aNever = a.totalCaptaincies === 0;
       const bNever = b.totalCaptaincies === 0;

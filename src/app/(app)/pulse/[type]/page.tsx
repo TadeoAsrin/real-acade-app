@@ -8,7 +8,7 @@ import { collection, query, orderBy } from "firebase/firestore";
 import type { Match, Player } from "@/lib/definitions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Brain, Link as LinkIcon, Zap, Crown, Flame, Trophy, Calendar, Star, Heart, Skull, Ghost, CloudRain, Droplets, TrendingUp, Users } from "lucide-react";
+import { ArrowLeft, Brain, Link as LinkIcon, Zap, Crown, Flame, Trophy, Calendar, Star, Heart, Skull, Ghost, CloudRain, Droplets, TrendingUp, Users, Target } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials, cn } from "@/lib/utils";
 import Link from "next/link";
@@ -296,8 +296,9 @@ export default function PulseDetailPage() {
   };
 
   const renderPolvora = () => {
+    // Pólvora Mojada: Solo Mediocampistas y Delanteros
     const sorted = [...playerStats]
-      .filter(p => p.matchesPlayed >= 3 && p.position !== 'Arquero')
+      .filter(p => p.matchesPlayed >= 3 && (p.position === 'Mediocampista' || p.position === 'Delantero'))
       .sort((a, b) => a.goalsPerMatch - b.goalsPerMatch || a.totalGoals - b.totalGoals)
       .slice(0, 10);
 
@@ -310,10 +311,15 @@ export default function PulseDetailPage() {
                 <Droplets className="h-10 w-10 text-blue-500" />
             </div>
             <h1 className="text-4xl font-black italic uppercase tracking-tighter">Sala de Humildad: Pólvora Mojada</h1>
-            <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 text-xs text-blue-400 font-bold uppercase tracking-widest inline-block">
-                Mínimo 3 PJ • No Arqueros
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 text-xs text-blue-400 font-bold uppercase tracking-widest inline-block">
+                  Mínimo 3 Partidos Jugados
+              </div>
+              <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 text-xs text-white font-bold uppercase tracking-widest inline-block">
+                  Solo Mediocampistas y Delanteros
+              </div>
             </div>
-            <p className="text-muted-foreground italic">Menor promedio de gol por partido. Jugadores de campo con la brújula un poco desviada.</p>
+            <p className="text-muted-foreground italic">Menor promedio de gol por partido. Analizamos exclusivamente a los roles ofensivos que tienen el arco entre ceja y ceja.</p>
         </div>
 
         <div className="space-y-4">
@@ -331,7 +337,10 @@ export default function PulseDetailPage() {
                                 </Avatar>
                                 <div className="flex flex-col">
                                     <span className="font-black text-lg">{p.name}</span>
-                                    <span className="text-[10px] font-bold uppercase text-muted-foreground">{p.totalGoals} Goles en {p.matchesPlayed} PJ</span>
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-[10px] font-bold uppercase text-muted-foreground">{p.totalGoals} Goles en {p.matchesPlayed} PJ</span>
+                                      <Badge variant="outline" className="text-[7px] h-3 uppercase border-white/10">{p.position}</Badge>
+                                    </div>
                                 </div>
                             </div>
                             <div className="text-right">
