@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -187,16 +188,16 @@ export default function StandingsPage() {
 
           {/* GOLES FECHA (DESGLOSE POR JORNADA) */}
           <TabsContent value="goles-fecha" className="animate-in fade-in slide-in-from-bottom-2 space-y-8">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-surface-800 p-6 rounded-lg border border-white/5">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-card p-6 rounded-lg border border-white/5">
               <div className="flex items-center gap-3">
                 <Calendar className="h-5 w-5 text-primary" />
-                <span className="font-bebas text-xl tracking-widest uppercase">Seleccionar Jornada</span>
+                <span className="font-bebas text-xl tracking-widest uppercase text-white">Seleccionar Jornada</span>
               </div>
               <Select value={selectedMatchId} onValueChange={setSelectedMatchId}>
-                <SelectTrigger className="w-full md:w-[300px] font-bold h-12 bg-black/40">
+                <SelectTrigger className="w-full md:w-[300px] font-bold h-12 bg-black/40 border-white/10">
                   <SelectValue placeholder="Elegir partido" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-surface-900 border-white/10">
                   {allMatches.map(m => (
                     <SelectItem key={m.id} value={m.id}>
                       {format(parseISO(m.date), "dd MMM yyyy", { locale: es })} • {m.teamAScore}-{m.teamBScore}
@@ -231,7 +232,7 @@ export default function StandingsPage() {
                           <TableCell className="pl-8">
                             <div className="flex items-center gap-3">
                               <Avatar className="h-8 w-8"><AvatarFallback className="text-[10px]">{getInitials(player?.name || "?")}</AvatarFallback></Avatar>
-                              <span className="font-bold uppercase text-sm">{player?.name}</span>
+                              <span className="font-bold uppercase text-sm text-white">{player?.name}</span>
                             </div>
                           </TableCell>
                           <TableCell className="text-center">
@@ -255,7 +256,7 @@ export default function StandingsPage() {
             ) : (
               <div className="h-60 flex flex-col items-center justify-center border-2 border-dashed rounded-3xl opacity-20">
                 <Target className="h-12 w-12 mb-4" />
-                <p className="font-bebas text-xl tracking-widest">Selecciona un partido para ver los artilleros</p>
+                <p className="font-bebas text-xl tracking-widest text-white">Selecciona un partido para ver los artilleros</p>
               </div>
             )}
           </TabsContent>
@@ -295,7 +296,7 @@ export default function StandingsPage() {
                 </TableBody>
               </Table>
             </Card>
-            <div className="mt-6 p-4 bg-surface-800/50 rounded-lg border border-white/5 flex items-start gap-3">
+            <div className="mt-6 p-4 bg-card/50 rounded-lg border border-white/5 flex items-start gap-3">
               <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
               <p className="text-[10px] text-muted-foreground leading-relaxed uppercase font-bold tracking-wider">
                 La efectividad se calcula sobre el porcentaje de puntos obtenidos (3 pts por victoria, 1 por empate) respecto al máximo posible. Mínimo 3 partidos jugados.
@@ -326,7 +327,7 @@ export default function StandingsPage() {
               </div>
             )}
 
-            <div className="bg-surface-800/50 border border-white/5 p-6 rounded-lg flex items-center gap-6">
+            <div className="bg-card/50 border border-white/5 p-6 rounded-lg flex items-center gap-6">
               <Sparkles className="h-8 w-8 text-emerald-500 shrink-0" />
               <p className="text-xs text-muted-foreground leading-relaxed">
                 Ranking de <strong>Justicia Total</strong>. Los debutantes tienen prioridad absoluta y se ordenan por deuda histórica (PJ). 
@@ -351,7 +352,7 @@ export default function StandingsPage() {
                         <div className="flex items-center gap-3">
                           <Avatar className="h-8 w-8"><AvatarFallback className="text-[10px]">{getInitials(player.name)}</AvatarFallback></Avatar>
                           <div className="flex flex-col">
-                            <Link href={`/players/${player.playerId}`} className="font-bold text-xs uppercase hover:text-primary">{player.name}</Link>
+                            <Link href={`/players/${player.playerId}`} className="font-bold text-xs uppercase hover:text-primary text-white">{player.name}</Link>
                             {!player.isActive && <span className="text-[7px] font-black text-muted-foreground uppercase">En Reserva</span>}
                           </div>
                         </div>

@@ -1,10 +1,13 @@
+
+import { redirect } from "next/navigation";
+
 /**
- * Este archivo ha sido desactivado para evitar conflictos con el archivo raíz src/app/page.tsx.
- * En Next.js 15, tener dos archivos page.tsx resolviendo a la misma ruta causa errores de compilación.
- * Mantenemos una exportación mínima para evitar errores de carga de módulo.
+ * Este archivo ha sido modificado para evitar conflictos con el archivo raíz src/app/page.tsx.
+ * Ambos resuelven a la misma ruta (/), lo que causa errores de compilación en Next.js 15.
+ * Redirigimos al dashboard para mantener la consistencia.
  */
-export default function AppPlaceholder() {
-  return null;
+export default function AppPageRedirect() {
+  redirect("/dashboard");
 }
 
 export const dynamic = 'force-static';
