@@ -8,7 +8,7 @@ import { collection, query, orderBy } from "firebase/firestore";
 import type { Match, Player, AggregatedPlayerStats, ChemistryPair } from "@/lib/definitions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Brain, Link as LinkIcon, Star, Users, Flame, Skull, Ghost, Droplets, Loader2, ChevronLeft, Zap, TrendingUp, Info } from "lucide-react";
+import { Brain, Link as LinkIcon, Star, Users, Flame, Skull, Ghost, Droplets, Loader2, ChevronLeft, Zap, TrendingUp, Info, ShieldAlert } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials, cn } from "@/lib/utils";
 import Link from "next/link";
@@ -54,7 +54,7 @@ export default function PulseDetailPage() {
     icon: any, 
     sortedData: AggregatedPlayerStats[], 
     valueFn: (p: AggregatedPlayerStats) => string | number,
-    label: string,
+    labelFn: (p: AggregatedPlayerStats) => string,
     colorClass: string,
     isHumility: boolean = false
   ) => (
@@ -95,7 +95,7 @@ export default function PulseDetailPage() {
                       </div>
                       <div className="text-right">
                           <span className={cn("text-4xl font-black italic leading-none", colorClass)}>{valueFn(p)}</span>
-                          <p className="text-[10px] uppercase font-black text-muted-foreground/40 mt-1">{label}</p>
+                          <p className="text-[10px] uppercase font-black text-muted-foreground/40 mt-1">{labelFn(p)}</p>
                       </div>
                   </CardContent>
               </Card>
@@ -111,35 +111,35 @@ export default function PulseDetailPage() {
 
   if (type === 'influencer') {
     const sorted = [...playerStats].sort((a, b) => b.winPercentage - a.winPercentage || b.matchesPlayed - a.matchesPlayed);
-    return renderRankingList("Cerebros del Campo", "Efectividad pura. Jugadores con mayor % de victoria histórico en la academia.", Brain, sorted, (p) => `${p.winPercentage}%`, "Victorias", "text-primary");
+    return renderRankingList("Cerebros del Campo", "Efectividad pura. Jugadores con mayor % de victoria histórico en la academia.", Brain, sorted, (p) => `${p.winPercentage}%`, () => "Victorias", "text-primary");
   }
 
   if (type === 'mvp') {
     const sorted = [...playerStats].sort((a, b) => b.totalMvp - a.totalMvp || b.powerPoints - a.powerPoints);
-    return renderRankingList("Reyes del MVP", "El trono de los mejores del partido. Ranking acumulado de premios oficiales.", Star, sorted, (p) => p.totalMvp, "Premios", "text-yellow-500");
+    return renderRankingList("Reyes del MVP", "El trono de los mejores del partido. Ranking acumulado de premios oficiales.", Star, sorted, (p) => p.totalMvp, () => "Premios", "text-yellow-500");
   }
 
   if (type === 'attendance') {
     const total = allMatches.filter(m => m.teamAScore > 0 || m.teamBScore > 0).length;
     const sorted = [...playerStats].sort((a, b) => b.matchesPlayed - a.matchesPlayed || a.name.localeCompare(b.name));
-    return renderRankingList("Los Infaltables", "El compromiso no se negocia. Ranking de asistencia histórica al club.", Users, sorted, (p) => `${total > 0 ? Math.round((p.matchesPlayed / total) * 100) : 0}%`, "Asistencia", "text-emerald-500");
+    return renderRankingList("Los Infaltables", "El compromiso no se negocia. Ranking de asistencia histórica al club.", Users, sorted, (p) => `${total > 0 ? Math.round((p.matchesPlayed / total) * 100) : 0}%`, () => "Asistencia", "text-emerald-500");
   }
 
   if (type === 'iman-derrotas') {
     const sorted = [...playerStats].filter(p => p.matchesPlayed >= 2).sort((a, b) => b.losses - a.losses || b.matchesPlayed - a.matchesPlayed);
-    return renderRankingList("Imán de Derrotas", "La mala racha no perdona. Jugadores con más caídas acumuladas (Mín. 2 PJ).", Skull, sorted, (p) => p.losses, "Derrotas", "text-red-500", true);
+    return renderRankingList("Imán de Derrotas", "Récord adverso acumulado. Jugadores con más caídas en la academia (Mín. 2 PJ).", Skull, sorted, (p) => p.losses, (p) => `${p.wins}V - ${p.draws}E - ${p.losses}D`, "text-red-500", true);
   }
 
-  if (type === 'riesgo') {
-    const sorted = [...playerStats].filter(p => p.matchesPlayed >= 2).sort((a, b) => a.winPercentage - b.winPercentage || b.matchesPlayed - a.matchesPlayed);
-    return renderRankingList("Factor de Riesgo", "Menor porcentaje de victorias histórico. Los que más sufren para sumar de a tres (Mín. 2 PJ).", Ghost, sorted, (p) => `${p.winPercentage}%`, "% Victorias", "text-zinc-400", true);
+  if (type === 'deuda-mando') {
+    const sorted = [...playerStats].filter(p => p.matchesPlayed >= 2 && p.totalCaptaincies === 0).sort((a, b) => b.matchesPlayed - a.matchesPlayed);
+    return renderRankingList("Deuda de Mando", "Veteranos sin brazalete. Jugadores con más batallas que nunca han liderado un equipo (Mín. 2 PJ).", ShieldAlert, sorted, (p) => p.matchesPlayed, () => "PJ SIN BRAZALETE", "text-orange-500", true);
   }
 
   if (type === 'polvora') {
     const sorted = [...playerStats]
       .filter(p => (p.position === 'Mediocampista' || p.position === 'Delantero') && p.matchesPlayed >= 2)
       .sort((a, b) => a.goalsPerMatch - b.goalsPerMatch || a.totalGoals - b.totalGoals);
-    return renderRankingList("Pólvora Mojada", "Baja producción ofensiva en roles de ataque. Jugadores con menor promedio de gol (Mín. 2 PJ).", Droplets, sorted, (p) => p.goalsPerMatch, "Goles/PJ", "text-blue-400", true);
+    return renderRankingList("Pólvora Mojada", "Sequía ofensiva en roles de ataque. Jugadores con menor promedio de gol (Mín. 2 PJ).", Droplets, sorted, (p) => p.goalsPerMatch, (p) => `${p.totalGoals} GOLES EN ${p.matchesPlayed} PJ`, "text-blue-400", true);
   }
 
   if (type === 'partnership') {

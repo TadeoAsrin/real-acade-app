@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Medal, Loader2, Zap, Calendar, Users, Brain, Crown, Link as LinkIcon, Flame, Target, Trophy, TrendingUp, Star, Skull, Ghost, CloudRain, Frown, Droplets, Newspaper, ChevronRight, Sparkles, ArrowRight, Swords } from "lucide-react";
+import { Medal, Loader2, Zap, Calendar, Users, Brain, Crown, Link as LinkIcon, Flame, Target, Trophy, TrendingUp, Star, Skull, Ghost, CloudRain, Frown, Droplets, Newspaper, ChevronRight, Sparkles, ArrowRight, Swords, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 import { PowerRanking } from "@/components/dashboard/power-ranking";
 import { MatchNewsModal } from "@/components/dashboard/match-news-modal";
@@ -91,11 +91,11 @@ export default function DashboardPage() {
 
   // Sala de Humildad (MÍNIMO 2 PJ)
   const humilityQualified = playerStats.filter(p => p.matchesPlayed >= 2);
-  const imanLeaders = [...humilityQualified].sort((a, b) => b.losses - a.losses).slice(0, 3);
-  const riesgoLeaders = [...humilityQualified].sort((a, b) => a.winPercentage - b.winPercentage).slice(0, 3);
+  const imanLeaders = [...humilityQualified].sort((a, b) => b.losses - a.losses || b.matchesPlayed - a.matchesPlayed).slice(0, 3);
+  const deudaMandoLeaders = [...humilityQualified].filter(p => p.totalCaptaincies === 0).sort((a, b) => b.matchesPlayed - a.matchesPlayed).slice(0, 3);
   const polvoraLeaders = [...humilityQualified]
     .filter(p => p.position === 'Mediocampista' || p.position === 'Delantero')
-    .sort((a, b) => a.goalsPerMatch - b.goalsPerMatch)
+    .sort((a, b) => a.goalsPerMatch - b.goalsPerMatch || a.totalGoals - b.totalGoals)
     .slice(0, 3);
 
   return (
@@ -323,9 +323,31 @@ export default function DashboardPage() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
-            { label: "IMÁN DE DERROTAS", data: imanLeaders, icon: Skull, unit: "Derrotas", href: "/pulse/iman-derrotas" },
-            { label: "FACTOR DE RIESGO", data: riesgoLeaders, icon: Ghost, unit: "% Victorias", href: "/pulse/riesgo" },
-            { label: "PÓLVORA MOJADA", data: polvoraLeaders, icon: Droplets, unit: "Goles/PJ", href: "/pulse/polvora", sub: "SOLO ROLES OFENSIVOS" }
+            { 
+              label: "IMÁN DE DERROTAS", 
+              data: imanLeaders, 
+              icon: Skull, 
+              valueFn: (p: any) => p.losses, 
+              subFn: (p: any) => `${p.wins}V - ${p.draws}E - ${p.losses}D (${p.matchesPlayed} PJ)`,
+              href: "/pulse/iman-derrotas" 
+            },
+            { 
+              label: "DEUDA DE MANDO", 
+              data: deudaMandoLeaders, 
+              icon: ShieldAlert, 
+              valueFn: (p: any) => p.matchesPlayed, 
+              subFn: () => "PJ SIN BRAZALETE",
+              href: "/pulse/deuda-mando" 
+            },
+            { 
+              label: "PÓLVORA MOJADA", 
+              data: polvoraLeaders, 
+              icon: Droplets, 
+              valueFn: (p: any) => p.goalsPerMatch, 
+              subFn: (p: any) => `${p.totalGoals} GOLES EN ${p.matchesPlayed} PJ`,
+              href: "/pulse/polvora", 
+              subLabel: "SOLO ROLES OFENSIVOS" 
+            }
           ].map((sec, i) => (
             <Link key={i} href={sec.href}>
               <Card className="competition-card border-t border-white/5 bg-surface-900/50 hover-lift h-full">
@@ -334,18 +356,21 @@ export default function DashboardPage() {
                     <div className="flex items-center gap-2">
                       <sec.icon className="h-3 w-3" /> {sec.label}
                     </div>
-                    {sec.sub && (
-                      <span className="text-[7px] font-bold bg-white/5 px-1.5 py-0.5 rounded text-white/40">{sec.sub}</span>
+                    {sec.subLabel && (
+                      <span className="text-[7px] font-bold bg-white/5 px-1.5 py-0.5 rounded text-white/40">{sec.subLabel}</span>
                     )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {sec.data.length > 0 ? sec.data.map((p, idx) => (
-                    <div key={idx} className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-muted-foreground/60">{p.name}</span>
-                      <span className="font-bebas text-lg text-white">
-                        {sec.unit === "% Victorias" ? `${p.winPercentage}%` : sec.unit === "Goles/PJ" ? p.goalsPerMatch : p.losses}
-                      </span>
+                    <div key={idx} className="flex flex-col gap-1 border-b border-white/5 pb-2 last:border-0 last:pb-0">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-muted-foreground/60">{p.name}</span>
+                        <span className="font-bebas text-xl text-white">
+                          {sec.valueFn(p)}
+                        </span>
+                      </div>
+                      <span className="text-[7px] font-black text-muted-foreground/30 uppercase tracking-widest">{sec.subFn(p)}</span>
                     </div>
                   )) : (
                     <p className="text-[10px] italic text-muted-foreground/30 text-center py-4">Sin datos suficientes (Mín. 2 PJ)</p>
