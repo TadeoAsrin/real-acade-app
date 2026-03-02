@@ -84,23 +84,25 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
           <DialogDescription>Crónica oficial del encuentro</DialogDescription>
         </DialogHeader>
         
-        {/* Masthead - Sticky Header */}
-        <div className="shrink-0 p-4 sm:p-6 border-b border-black/10 z-20">
+        {/* Masthead - Solid High Contrast Header */}
+        <div className="shrink-0 p-4 sm:p-6 bg-black z-20">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-2 sm:gap-3">
-              <div className="bg-black text-white p-1.5 rounded-none">
-                < Newspaper className="h-4 w-4 sm:h-5 sm:w-5" />
+              <div className="bg-white text-black p-1.5 rounded-none">
+                <Newspaper className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
-              <span className="font-bebas font-black uppercase tracking-[0.3em] text-[10px] sm:text-sm text-black">THE ACADEMY GAZETTE</span>
+              <span className="font-bebas font-black uppercase tracking-[0.3em] text-[10px] sm:text-sm text-white">THE ACADEMY GAZETTE</span>
             </div>
-            <div className="flex items-center gap-2 sm:gap-4 font-oswald text-[8px] sm:text-[10px] font-bold uppercase text-black/40">
+            <div className="flex items-center gap-2 sm:gap-4 font-oswald text-[8px] sm:text-[10px] font-bold uppercase text-white/60">
+              <span className="text-primary font-black">SPECIAL EDITION</span>
+              <span className="h-1 w-1 rounded-full bg-white/20" />
               <span>{format(new Date(match.date), "eeee, dd MMMM yyyy", { locale: es })}</span>
               <button 
                 onClick={handleClose} 
-                className="ml-2 p-2 hover:bg-black/5 rounded-full transition-colors touch-none"
+                className="ml-2 p-2 hover:bg-white/10 rounded-full transition-colors touch-none text-white"
                 aria-label="Cerrar noticia"
               >
-                <X className="h-5 w-5 text-black" />
+                <X className="h-5 w-5" />
               </button>
             </div>
           </div>
@@ -132,51 +134,57 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
                   {aiSummary.title}
                 </h1>
                 <div className="editorial-divider" />
-                <p className="font-lora text-lg sm:text-xl font-bold text-black/80 italic leading-tight">
+                <p className="font-lora text-xl sm:text-2xl font-bold text-black italic leading-tight">
                   {aiSummary.subtitle}
                 </p>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-                <div className="lg:col-span-8 space-y-6 border-r border-black/5 pr-4">
+                <div className="lg:col-span-8 space-y-6 lg:border-r lg:border-black/10 lg:pr-10">
                   <div className="relative">
-                    <Quote className="absolute -left-6 -top-4 h-12 w-12 text-black/[0.03] pointer-events-none" />
-                    <p className="text-lg sm:text-xl leading-relaxed text-justify text-[#111111] font-lora first-letter:text-7xl first-letter:font-black first-letter:float-left first-letter:mr-3 first-letter:mt-2 first-letter:text-black first-letter:font-playfair">
+                    <Quote className="absolute -left-8 -top-6 h-16 w-16 text-black/[0.05] pointer-events-none" />
+                    <p className="text-xl sm:text-2xl leading-relaxed text-justify text-black font-lora first-letter:text-8xl first-letter:font-black first-letter:float-left first-letter:mr-4 first-letter:mt-3 first-letter:text-black first-letter:font-playfair">
                       {aiSummary.summary}
                     </p>
                   </div>
                 </div>
 
                 <div className="lg:col-span-4 space-y-6">
-                  <div className="bg-black/5 p-5 rounded-none border-t-2 border-black space-y-5">
-                    <h3 className="font-bebas text-xs font-black uppercase tracking-widest flex items-center justify-between border-b border-black/10 pb-2 text-black">
-                      MATCH REPORT
-                      <Trophy className="h-3 w-3" />
+                  <div className="bg-black/5 p-6 rounded-none border-t-4 border-black space-y-6">
+                    <h3 className="font-bebas text-sm font-black uppercase tracking-widest flex items-center justify-between border-b border-black/10 pb-3 text-black">
+                      OFFICIAL REPORT
+                      <Trophy className="h-4 w-4 text-accent" />
                     </h3>
                     
                     <div className="flex items-center justify-between font-bebas italic">
                       <div className="text-center">
-                        <p className="text-[10px] font-black text-primary uppercase not-italic mb-1">AZU</p>
-                        <p className="text-4xl font-black text-black">{match.teamAScore}</p>
+                        <p className="text-[10px] font-black text-primary uppercase not-italic mb-1 tracking-widest">AZUL</p>
+                        <p className="text-5xl font-black text-black leading-none">{match.teamAScore}</p>
                       </div>
-                      <div className="text-black/20 text-2xl font-light">vs</div>
+                      <div className="text-black/20 text-3xl font-light">vs</div>
                       <div className="text-center">
-                        <p className="text-[10px] font-black text-accent uppercase not-italic mb-1">ROJ</p>
-                        <p className="text-4xl font-black text-black">{match.teamBScore}</p>
+                        <p className="text-[10px] font-black text-accent uppercase not-italic mb-1 tracking-widest">ROJO</p>
+                        <p className="text-5xl font-black text-black leading-none">{match.teamBScore}</p>
                       </div>
                     </div>
 
-                    <div className="space-y-3 pt-3 border-t border-black/10 font-oswald">
+                    <div className="space-y-4 pt-4 border-t border-black/10 font-oswald">
                       {match.teamAPlayers.find(p => p.isMvp) || match.teamBPlayers.find(p => p.isMvp) ? (
-                        <div className="space-y-0.5">
-                          <span className="text-[8px] uppercase font-black text-black/40 tracking-widest">PLAYER OF THE MATCH</span>
-                          <div className="flex items-center gap-2 text-[12px] font-black italic text-black uppercase">
-                            <Star className="h-3 w-3 text-accent fill-current" />
+                        <div className="space-y-1">
+                          <span className="text-[10px] uppercase font-black text-black/40 tracking-widest">MAN OF THE MATCH</span>
+                          <div className="flex items-center gap-2 text-[14px] font-black italic text-black uppercase">
+                            <Star className="h-4 w-4 text-accent fill-current" />
                             <span>{allPlayers.find(p => p.id === (match.teamAPlayers.find(s => s.isMvp)?.playerId || match.teamBPlayers.find(s => s.isMvp)?.playerId))?.name}</span>
                           </div>
                         </div>
                       ) : null}
                     </div>
+                  </div>
+                  
+                  <div className="pt-4">
+                    <p className="text-[9px] font-black uppercase tracking-[0.3em] text-black/30 text-center font-oswald">
+                      AUTHENTIC ACADEMY GAZETTE PIECE • EST. 2010
+                    </p>
                   </div>
                 </div>
               </div>
@@ -185,11 +193,11 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
         </div>
 
         {/* Footer - Sticky Actions */}
-        <div className="shrink-0 p-4 sm:p-6 bg-black/5 border-t border-black/10 flex flex-col sm:flex-row gap-3 z-20">
+        <div className="shrink-0 p-4 sm:p-6 bg-white border-t border-black/10 flex flex-col sm:flex-row gap-3 z-20">
           {isAdmin && (
             <button 
               onClick={shareToWhatsApp}
-              className="flex-1 font-bebas font-black uppercase tracking-[0.2em] text-xs bg-black text-white hover:bg-black/90 rounded-none h-12 transition-colors"
+              className="flex-1 font-bebas font-black uppercase tracking-[0.2em] text-sm bg-black text-white hover:bg-black/90 rounded-none h-14 transition-colors shadow-lg active:scale-[0.98]"
             >
               BROADCAST TO WHATSAPP
             </button>
@@ -197,11 +205,11 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
           <button 
             onClick={handleClose} 
             className={cn(
-              "font-bebas font-black uppercase tracking-[0.2em] text-xs rounded-none h-12 px-8 transition-colors",
-              isAdmin ? "bg-transparent text-black border border-black/10 hover:bg-black/5" : "bg-black text-white hover:bg-black/90 flex-1"
+              "font-bebas font-black uppercase tracking-[0.2em] text-sm rounded-none h-14 px-10 transition-colors",
+              isAdmin ? "bg-transparent text-black border-2 border-black hover:bg-black/5" : "bg-black text-white hover:bg-black/90 flex-1"
             )}
           >
-            DISMISS
+            CLOSE GAZETTE
           </button>
         </div>
       </DialogContent>
