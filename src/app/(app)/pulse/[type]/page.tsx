@@ -8,7 +8,7 @@ import { collection, query, orderBy } from "firebase/firestore";
 import type { Match, Player, AggregatedPlayerStats, ChemistryPair } from "@/lib/definitions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Brain, Link as LinkIcon, Star, Users, Flame, Skull, Ghost, Droplets, Loader2, ChevronLeft, Zap, TrendingUp } from "lucide-react";
+import { Brain, Link as LinkIcon, Star, Users, Flame, Skull, Ghost, Droplets, Loader2, ChevronLeft, Zap, TrendingUp, Info } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials, cn } from "@/lib/utils";
 import Link from "next/link";
@@ -55,7 +55,8 @@ export default function PulseDetailPage() {
     sortedData: AggregatedPlayerStats[], 
     valueFn: (p: AggregatedPlayerStats) => string | number,
     label: string,
-    colorClass: string
+    colorClass: string,
+    isHumility: boolean = false
   ) => (
     <div className="space-y-8 max-w-2xl mx-auto pb-20">
       <Link href="/dashboard" className="flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground hover:text-primary transition-colors mb-4 font-oswald tracking-widest">
@@ -68,6 +69,11 @@ export default function PulseDetailPage() {
           </div>
           <h1 className="text-4xl font-black italic uppercase tracking-tighter">{title}</h1>
           <p className="text-muted-foreground italic text-sm">{description}</p>
+          {isHumility && (
+            <Badge variant="outline" className="mx-auto border-orange-500/20 text-orange-500 uppercase font-black text-[10px] py-1 px-4">
+              REQUISITO: MÍNIMO 2 PARTIDOS JUGADOS
+            </Badge>
+          )}
       </div>
 
       <div className="space-y-4">
@@ -94,8 +100,9 @@ export default function PulseDetailPage() {
                   </CardContent>
               </Card>
           )) : (
-            <div className="h-40 flex flex-col items-center justify-center border-2 border-dashed rounded-3xl opacity-30 italic">
-              Aún no hay suficientes batallas para generar este ranking.
+            <div className="h-60 flex flex-col items-center justify-center border-2 border-dashed rounded-3xl opacity-30 italic text-center px-10 gap-4">
+              <Info className="h-10 w-10 text-muted-foreground" />
+              <p className="text-sm">Aún no hay suficientes batallas que cumplan con el criterio de {isHumility ? "mínimo 2 partidos" : "datos suficientes"} para generar este ranking.</p>
             </div>
           )}
       </div>
@@ -119,28 +126,25 @@ export default function PulseDetailPage() {
   }
 
   if (type === 'iman-derrotas') {
-    const sorted = [...playerStats].sort((a, b) => b.losses - a.losses || b.matchesPlayed - a.matchesPlayed);
-    return renderRankingList("Imán de Derrotas", "La mala racha no perdona. Jugadores con más caídas en el historial.", Skull, sorted, (p) => p.losses, "Derrotas", "text-red-500");
+    const sorted = [...playerStats].filter(p => p.matchesPlayed >= 2).sort((a, b) => b.losses - a.losses || b.matchesPlayed - a.matchesPlayed);
+    return renderRankingList("Imán de Derrotas", "La mala racha no perdona. Jugadores con más caídas acumuladas (Mín. 2 PJ).", Skull, sorted, (p) => p.losses, "Derrotas", "text-red-500", true);
   }
 
   if (type === 'riesgo') {
-    const sorted = [...playerStats].filter(p => p.matchesPlayed >= 1).sort((a, b) => a.winPercentage - b.winPercentage || b.matchesPlayed - a.matchesPlayed);
-    return renderRankingList("Factor de Riesgo", "Menor porcentaje de victorias. Los que más sufren para sumar de a tres.", Ghost, sorted, (p) => `${p.winPercentage}%`, "Efectividad", "text-zinc-400");
+    const sorted = [...playerStats].filter(p => p.matchesPlayed >= 2).sort((a, b) => a.winPercentage - b.winPercentage || b.matchesPlayed - a.matchesPlayed);
+    return renderRankingList("Factor de Riesgo", "Menor porcentaje de victorias histórico. Los que más sufren para sumar de a tres (Mín. 2 PJ).", Ghost, sorted, (p) => `${p.winPercentage}%`, "% Victorias", "text-zinc-400", true);
   }
 
   if (type === 'polvora') {
     const sorted = [...playerStats]
-      .filter(p => (p.position === 'Mediocampista' || p.position === 'Delantero') && p.matchesPlayed >= 1)
+      .filter(p => (p.position === 'Mediocampista' || p.position === 'Delantero') && p.matchesPlayed >= 2)
       .sort((a, b) => a.goalsPerMatch - b.goalsPerMatch || a.totalGoals - b.totalGoals);
-    return renderRankingList("Pólvora Mojada", "Baja producción ofensiva en roles de ataque. Ranking de Goles por Partido.", Droplets, sorted, (p) => p.goalsPerMatch, "Goles/PJ", "text-blue-400");
+    return renderRankingList("Pólvora Mojada", "Baja producción ofensiva en roles de ataque. Jugadores con menor promedio de gol (Mín. 2 PJ).", Droplets, sorted, (p) => p.goalsPerMatch, "Goles/PJ", "text-blue-400", true);
   }
 
   if (type === 'partnership') {
-    // Calculamos el ranking de química con un fallback a 1 partido si es necesario
     let pairs = getChemistryRankings(allPlayers, allMatches, 2);
     if (pairs.length === 0) pairs = getChemistryRankings(allPlayers, allMatches, 1);
-    
-    // Limitamos a los mejores 15 para mantener la exclusividad
     const topPairs = pairs.slice(0, 15);
 
     return (

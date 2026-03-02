@@ -89,10 +89,11 @@ export default function DashboardPage() {
   const totalMatches = allMatches.filter(m => m.teamAScore > 0 || m.teamBScore > 0).length;
   const maxAttendanceRate = totalMatches > 0 ? Math.round((Math.max(...playerStats.map(p => p.matchesPlayed)) / totalMatches) * 100) : 0;
 
-  // Sala de Humildad
-  const imanLeaders = [...playerStats].sort((a, b) => b.losses - a.losses).slice(0, 3);
-  const riesgoLeaders = [...playerStats].filter(p => p.matchesPlayed >= 1).sort((a, b) => a.winPercentage - b.winPercentage).slice(0, 3);
-  const polvoraLeaders = [...playerStats]
+  // Sala de Humildad (MÍNIMO 2 PJ)
+  const humilityQualified = playerStats.filter(p => p.matchesPlayed >= 2);
+  const imanLeaders = [...humilityQualified].sort((a, b) => b.losses - a.losses).slice(0, 3);
+  const riesgoLeaders = [...humilityQualified].sort((a, b) => a.winPercentage - b.winPercentage).slice(0, 3);
+  const polvoraLeaders = [...humilityQualified]
     .filter(p => p.position === 'Mediocampista' || p.position === 'Delantero')
     .sort((a, b) => a.goalsPerMatch - b.goalsPerMatch)
     .slice(0, 3);
@@ -316,7 +317,10 @@ export default function DashboardPage() {
 
       {/* SALA DE HUMILDAD */}
       <section className="space-y-6">
-        <h2 className="text-xs font-black uppercase tracking-[0.4em] text-muted-foreground/50 px-1 font-oswald">SALA DE HUMILDAD</h2>
+        <div className="flex items-center justify-between px-1">
+          <h2 className="text-xs font-black uppercase tracking-[0.4em] text-muted-foreground/50 font-oswald">SALA DE HUMILDAD</h2>
+          <Badge variant="outline" className="text-[8px] font-black uppercase border-white/10 text-muted-foreground/40">FILTRO: MÍNIMO 2 PJ</Badge>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
             { label: "IMÁN DE DERROTAS", data: imanLeaders, icon: Skull, unit: "Derrotas", href: "/pulse/iman-derrotas" },
@@ -344,7 +348,7 @@ export default function DashboardPage() {
                       </span>
                     </div>
                   )) : (
-                    <p className="text-[10px] italic text-muted-foreground/30 text-center py-4">Sin datos suficientes</p>
+                    <p className="text-[10px] italic text-muted-foreground/30 text-center py-4">Sin datos suficientes (Mín. 2 PJ)</p>
                   )}
                 </CardContent>
               </Card>
