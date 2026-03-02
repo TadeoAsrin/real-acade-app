@@ -143,29 +143,40 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
   return Object.values(statsMap);
 };
 
-export const getChemistryRankings = (players: Player[], matches: Match[], minMatches = 2): ChemistryPair[] => {
-  const statsMap: { [key: string]: { matches: number, wins: number } } = {};
+/**
+ * Calcula el ranking de duplas basándose en su química (partidos jugados juntos y victorias).
+ * Es robusta y adaptativa: si no hay duplas con minMatches, baja el umbral automáticamente.
+ */
+export const getChemistryRankings = (players: Player[], matches: Match[], minMatchesThreshold = 2): ChemistryPair[] => {
+  if (!players.length || !matches.length) return [];
+
+  const chemistryMap: { [key: string]: { matches: number, wins: number } } = {};
   const playerStats = calculateAggregatedStats(players, matches);
   
   matches.forEach(match => {
-    const processTeam = (playerStats: PlayerStats[], teamWon: boolean) => {
-      const ids = playerStats.map(p => p.playerId).filter(Boolean);
+    // Solo contamos partidos que tengan algún marcador para evitar ruido de partidos futuros
+    if (match.teamAScore === 0 && match.teamBScore === 0) return;
+
+    const teamAWon = match.teamAScore > match.teamBScore;
+    const teamBWon = match.teamBScore > match.teamAScore;
+
+    const processTeam = (teamPlayers: PlayerStats[], won: boolean) => {
+      const ids = teamPlayers.map(p => p.playerId).filter(Boolean);
       for (let i = 0; i < ids.length; i++) {
         for (let j = i + 1; j < ids.length; j++) {
           const key = [ids[i], ids[j]].sort().join('_::_');
-          if (!statsMap[key]) statsMap[key] = { matches: 0, wins: 0 };
-          statsMap[key].matches++;
-          if (teamWon) statsMap[key].wins++;
+          if (!chemistryMap[key]) chemistryMap[key] = { matches: 0, wins: 0 };
+          chemistryMap[key].matches++;
+          if (won) chemistryMap[key].wins++;
         }
       }
     };
 
-    processTeam(match.teamAPlayers, match.teamAScore > match.teamBScore);
-    processTeam(match.teamBPlayers, match.teamBScore > match.teamAScore);
+    processTeam(match.teamAPlayers, teamAWon);
+    processTeam(match.teamBPlayers, teamBWon);
   });
 
-  const rankings = Object.entries(statsMap)
-    .filter(([_, stats]) => stats.matches >= minMatches)
+  const allPairs = Object.entries(chemistryMap)
     .map(([key, stats]) => {
       const [id1, id2] = key.split('_::_');
       const player1 = players.find(p => p.id === id1);
@@ -173,24 +184,33 @@ export const getChemistryRankings = (players: Player[], matches: Match[], minMat
       const s1 = playerStats.find(s => s.playerId === id1);
       const s2 = playerStats.find(s => s.playerId === id2);
       
+      if (!player1 || !player2) return null;
+
       return { 
-        player1: player1!, 
-        player2: player2!, 
+        player1, 
+        player2, 
         wins: stats.wins, 
         matches: stats.matches,
         winRate: Math.round((stats.wins / stats.matches) * 100),
         combinedPower: (s1?.powerPoints || 0) + (s2?.powerPoints || 0)
       };
     })
-    .filter(pair => pair.player1 && pair.player2)
-    .sort((a, b) => b.winRate - a.winRate || b.matches - a.matches || b.combinedPower - a.combinedPower);
+    .filter((pair): pair is ChemistryPair => pair !== null);
 
-  // Lógica adaptativa: si no hay parejas con minMatches, bajamos el umbral
-  if (rankings.length === 0 && minMatches > 1) {
-    return getChemistryRankings(players, matches, 1);
+  // Intentamos filtrar por el umbral solicitado
+  let filtered = allPairs.filter(p => p.matches >= minMatchesThreshold);
+
+  // Si no hay nada con el umbral (ej. 2), bajamos a 1
+  if (filtered.length === 0 && minMatchesThreshold > 1) {
+    filtered = allPairs.filter(p => p.matches >= 1);
   }
 
-  return rankings;
+  // Ordenamos por: 1. Win Rate, 2. Cantidad de Partidos, 3. Power Ranking Combinado
+  return filtered.sort((a, b) => 
+    b.winRate - a.winRate || 
+    b.matches - a.matches || 
+    b.combinedPower - a.combinedPower
+  );
 };
 
 export const getSpiciestMatch = (matches: Match[]) => {
