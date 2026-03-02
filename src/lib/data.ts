@@ -143,10 +143,6 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
   return Object.values(statsMap);
 };
 
-/**
- * Calcula el ranking de duplas basándose en su química (partidos jugados juntos y victorias).
- * Es robusta y adaptativa: si no hay duplas con minMatches, baja el umbral automáticamente.
- */
 export const getChemistryRankings = (players: Player[], matches: Match[], minMatchesThreshold = 2): ChemistryPair[] => {
   if (!players.length || !matches.length) return [];
 
@@ -154,14 +150,15 @@ export const getChemistryRankings = (players: Player[], matches: Match[], minMat
   const playerStats = calculateAggregatedStats(players, matches);
   
   matches.forEach(match => {
-    // Solo contamos partidos que tengan algún marcador para evitar ruido de partidos futuros
-    if (match.teamAScore === 0 && match.teamBScore === 0) return;
+    // Validar que el partido sea válido para química (jugado)
+    const hasScore = match.teamAScore > 0 || match.teamBScore > 0;
+    const isPast = new Date(match.date).getTime() < new Date().getTime();
+    if (!hasScore && !isPast) return;
 
     const teamAWon = match.teamAScore > match.teamBScore;
     const teamBWon = match.teamBScore > match.teamAScore;
 
     const processTeam = (teamPlayers: PlayerStats[], won: boolean) => {
-      // Usamos los IDs de los jugadores presentes en el partido
       const ids = teamPlayers.map(p => p.playerId).filter(id => players.some(pl => pl.id === id));
       
       for (let i = 0; i < ids.length; i++) {
@@ -199,13 +196,11 @@ export const getChemistryRankings = (players: Player[], matches: Match[], minMat
     })
     .filter((pair): pair is ChemistryPair => pair !== null);
 
-  // Fallback inteligente: si no hay nada con minMatchesThreshold, bajamos a 1
   let result = allPairs.filter(p => p.matches >= minMatchesThreshold);
   if (result.length === 0 && minMatchesThreshold > 1) {
     result = allPairs.filter(p => p.matches >= 1);
   }
 
-  // Ordenamos por: 1. Win Rate, 2. Cantidad de Partidos, 3. Power Ranking Combinado
   return result.sort((a, b) => 
     b.winRate - a.winRate || 
     b.matches - a.matches || 

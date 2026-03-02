@@ -8,7 +8,7 @@ import { collection, query, orderBy } from "firebase/firestore";
 import type { Match, Player } from "@/lib/definitions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Brain, Link as LinkIcon, Zap, Crown, Flame, Calendar, Star, Users, Target, Skull, Ghost, Droplets } from "lucide-react";
+import { ArrowLeft, Brain, Link as LinkIcon, Zap, Crown, Flame, Calendar, Star, Users, Target, Skull, Ghost, Droplets, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials, cn } from "@/lib/utils";
 import Link from "next/link";
@@ -32,8 +32,8 @@ export default function PulseDetailPage() {
   const { data: playersData, isLoading: playersLoading } = useCollection<Player>(playersQuery);
   const { data: matchesData, isLoading: matchesLoading } = useCollection<Match>(matchesQuery);
 
-  const allPlayers = playersData || [];
-  const allMatches = matchesData || [];
+  const allPlayers = React.useMemo(() => playersData || [], [playersData]);
+  const allMatches = React.useMemo(() => matchesData || [], [matchesData]);
 
   const playerStats = React.useMemo(() => {
     if (allPlayers.length === 0) return [];
@@ -51,16 +51,16 @@ export default function PulseDetailPage() {
   if (playersLoading || matchesLoading) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
-        <Zap className="animate-pulse text-primary h-12 w-12" />
+        <Loader2 className="animate-spin text-primary h-12 w-12" />
       </div>
     );
   }
 
   const renderInfluencer = () => {
     const sorted = [...playerStats]
-      .filter(p => p.matchesPlayed >= 3)
+      .filter(p => p.matchesPlayed >= 1)
       .sort((a, b) => b.winPercentage - a.winPercentage || b.matchesPlayed - a.matchesPlayed)
-      .slice(0, 10);
+      .slice(0, 20);
 
     return (
       <div className="space-y-8 max-w-2xl mx-auto">
@@ -68,10 +68,7 @@ export default function PulseDetailPage() {
             <div className="mx-auto w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center">
                 <Brain className="h-10 w-10 text-primary" />
             </div>
-            <h1 className="text-4xl font-black italic uppercase tracking-tighter">Jugadores Más Influyentes</h1>
-            <Badge variant="outline" className="text-xs text-primary font-bold uppercase tracking-widest px-4 py-1">
-                Mínimo 3 Partidos Jugados
-            </Badge>
+            <h1 className="text-4xl font-black italic uppercase tracking-tighter">Cerebros del Campo</h1>
             <p className="text-muted-foreground italic">El factor determinante. Jugadores con mayor porcentaje de victoria en la competición.</p>
         </div>
 
@@ -103,9 +100,8 @@ export default function PulseDetailPage() {
 
   const renderMvpRanking = () => {
     const sorted = [...playerStats]
-      .filter(p => p.totalMvp > 0)
       .sort((a, b) => b.totalMvp - a.totalMvp || b.powerPoints - a.powerPoints)
-      .slice(0, 10);
+      .slice(0, 20);
 
     return (
       <div className="space-y-8 max-w-2xl mx-auto">
@@ -113,13 +109,13 @@ export default function PulseDetailPage() {
             <div className="mx-auto w-20 h-20 bg-yellow-500/10 rounded-full flex items-center justify-center">
                 <Star className="h-10 w-10 text-yellow-500 fill-yellow-500" />
             </div>
-            <h1 className="text-4xl font-black italic uppercase tracking-tighter">Rey de los MVP</h1>
-            <p className="text-muted-foreground italic">El reconocimiento máximo de los compañeros. Jugadores elegidos como el mejor del partido.</p>
+            <h1 className="text-4xl font-black italic uppercase tracking-tighter">Reyes del MVP</h1>
+            <p className="text-muted-foreground italic">El reconocimiento máximo de la jornada. Ranking histórico de premios al mejor del partido.</p>
         </div>
 
         <div className="space-y-4">
             {sorted.length > 0 ? sorted.map((p, i) => (
-                <Card key={p.playerId} className="glass-card border-white/5 hover:border-yellow-500/30 transition-all">
+                <Card key={p.playerId} className={cn("glass-card border-white/5 hover:border-yellow-500/30 transition-all", p.totalMvp > 0 && "bg-yellow-500/5 border-yellow-500/20")}>
                     <CardContent className="p-6 flex items-center justify-between">
                         <div className="flex items-center gap-4">
                             <span className="text-2xl font-black italic text-muted-foreground/30 w-8">{i + 1}</span>
@@ -139,7 +135,7 @@ export default function PulseDetailPage() {
                 </Card>
             )) : (
               <div className="h-40 flex flex-col items-center justify-center border-2 border-dashed rounded-3xl opacity-30 italic">
-                Aún no se han registrado premios MVP.
+                Aún no hay batallas registradas.
               </div>
             )}
         </div>
@@ -151,7 +147,7 @@ export default function PulseDetailPage() {
     const totalMatches = allMatches.length;
     const sorted = [...playerStats]
       .sort((a, b) => b.matchesPlayed - a.matchesPlayed || a.name.localeCompare(b.name))
-      .slice(0, 20);
+      .slice(0, 30);
 
     return (
       <div className="space-y-8 max-w-2xl mx-auto">
@@ -160,7 +156,7 @@ export default function PulseDetailPage() {
                 <Users className="h-10 w-10 text-emerald-500" />
             </div>
             <h1 className="text-4xl font-black italic uppercase tracking-tighter">Los Infaltables</h1>
-            <p className="text-muted-foreground italic">El ranking de compromiso. Los jugadores que siempre están listos para la batalla.</p>
+            <p className="text-muted-foreground italic">El ranking de compromiso. Los jugadores que siempre están listos para saltar a la cancha.</p>
         </div>
 
         <div className="space-y-4">
@@ -193,35 +189,32 @@ export default function PulseDetailPage() {
   };
 
   const renderPartnership = () => {
-    const maxWinRate = chemistryRankings.length > 0 ? chemistryRankings[0].winRate : 0;
-
     return (
       <div className="space-y-8 max-w-2xl mx-auto">
         <div className="text-center space-y-4">
             <div className="mx-auto w-20 h-20 bg-white/10 rounded-full flex items-center justify-center">
                 <LinkIcon className="h-10 w-10 text-white" />
             </div>
-            <h1 className="text-4xl font-black italic uppercase tracking-tighter">Ranking de Sociedades</h1>
-            <p className="text-muted-foreground italic">La química perfecta. Parejas de jugadores que dominan el campo cuando juegan juntos.</p>
+            <h1 className="text-4xl font-black italic uppercase tracking-tighter">Sociedades de Élite</h1>
+            <p className="text-muted-foreground italic">La química perfecta. Duplas de jugadores que dominan el campo cuando comparten equipo.</p>
         </div>
 
         {chemistryRankings.length > 0 ? (
             <div className="space-y-4">
                 {chemistryRankings.map((pair, i) => {
-                    const isLeader = pair.winRate === maxWinRate && maxWinRate > 0;
                     const isNew = pair.matches === 1;
                     return (
-                        <Card key={i} className={cn("glass-card transition-all", isLeader ? "border-primary/50 bg-primary/5 scale-105" : "border-white/5")}>
+                        <Card key={i} className={cn("glass-card transition-all", i === 0 ? "border-primary/50 bg-primary/5 scale-105" : "border-white/5")}>
                             <CardContent className="p-6 flex items-center justify-between">
                                 <div className="flex items-center gap-4">
                                     <div className="flex flex-col items-center w-8">
-                                        {isLeader ? <Crown className="h-5 w-5 text-primary mb-1" /> : <span className="text-2xl font-black italic text-muted-foreground/30">{i + 1}</span>}
+                                        {i === 0 ? <Crown className="h-5 w-5 text-primary mb-1" /> : <span className="text-2xl font-black italic text-muted-foreground/30">{i + 1}</span>}
                                     </div>
                                     <div className="flex -space-x-4">
-                                        <Avatar className={cn("h-12 w-12 border-2 border-background ring-2", isLeader ? "ring-primary/40" : "ring-white/10")}>
+                                        <Avatar className={cn("h-12 w-12 border-2 border-background ring-2", i === 0 ? "ring-primary/40" : "ring-white/10")}>
                                             <AvatarFallback className="bg-muted font-black">{getInitials(pair.player1.name)}</AvatarFallback>
                                         </Avatar>
-                                        <Avatar className={cn("h-12 w-12 border-2 border-background ring-2", isLeader ? "ring-primary/40" : "ring-white/10")}>
+                                        <Avatar className={cn("h-12 w-12 border-2 border-background ring-2", i === 0 ? "ring-primary/40" : "ring-white/10")}>
                                             <AvatarFallback className="bg-muted font-black">{getInitials(pair.player2.name)}</AvatarFallback>
                                         </Avatar>
                                     </div>
@@ -236,7 +229,7 @@ export default function PulseDetailPage() {
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <span className={cn("text-3xl font-black italic", isLeader ? "text-primary" : "text-white")}>{pair.winRate}%</span>
+                                    <span className={cn("text-3xl font-black italic", i === 0 ? "text-primary" : "text-white")}>{pair.winRate}%</span>
                                     <p className="text-[8px] uppercase font-black text-muted-foreground leading-none">Efectividad</p>
                                 </div>
                             </CardContent>
@@ -249,7 +242,7 @@ export default function PulseDetailPage() {
                 <LinkIcon className="h-12 w-12 text-muted-foreground/20 mx-auto" />
                 <div className="space-y-1">
                   <p className="font-black uppercase italic text-muted-foreground">Analizando Química...</p>
-                  <p className="text-xs text-muted-foreground/60 max-w-xs mx-auto">Se necesitan partidos registrados con marcadores para identificar las mejores sociedades del club.</p>
+                  <p className="text-xs text-muted-foreground/60 max-w-xs mx-auto">Se necesitan partidos registrados para identificar las mejores sociedades del club.</p>
                 </div>
             </div>
         )}
@@ -317,9 +310,9 @@ export default function PulseDetailPage() {
 
   const renderImanDerrotas = () => {
     const sorted = [...playerStats]
-      .filter(p => p.losses > 0)
+      .filter(p => p.losses >= 0)
       .sort((a, b) => b.losses - a.losses || b.matchesPlayed - a.matchesPlayed)
-      .slice(0, 10);
+      .slice(0, 20);
 
     return (
       <div className="space-y-8 max-w-2xl mx-auto">
@@ -328,7 +321,7 @@ export default function PulseDetailPage() {
                 <Skull className="h-10 w-10 text-red-500" />
             </div>
             <h1 className="text-4xl font-black italic uppercase tracking-tighter">Sala de Humildad: Imán de Derrotas</h1>
-            <p className="text-muted-foreground italic">El registro de la mala suerte o el bajo rendimiento. Los que más veces han visto caer su arco.</p>
+            <p className="text-muted-foreground italic">El registro de la mala racha. Los jugadores que más veces han visto caer su arco.</p>
         </div>
 
         <div className="space-y-4">
@@ -359,9 +352,9 @@ export default function PulseDetailPage() {
 
   const renderRiesgo = () => {
     const sorted = [...playerStats]
-      .filter(p => p.matchesPlayed >= 3)
-      .sort((a, b) => a.winPercentage - b.winPercentage || a.matchesPlayed - b.matchesPlayed)
-      .slice(0, 10);
+      .filter(p => p.matchesPlayed >= 1)
+      .sort((a, b) => a.winPercentage - b.winPercentage || b.matchesPlayed - a.matchesPlayed)
+      .slice(0, 20);
 
     return (
       <div className="space-y-8 max-w-2xl mx-auto">
@@ -370,9 +363,6 @@ export default function PulseDetailPage() {
                 <Ghost className="h-10 w-10 text-zinc-500" />
             </div>
             <h1 className="text-4xl font-black italic uppercase tracking-tighter">Sala de Humildad: Factor de Riesgo</h1>
-            <Badge variant="outline" className="text-zinc-400 font-bold uppercase tracking-widest px-4 py-1">
-                Mínimo 3 Partidos Jugados
-            </Badge>
             <p className="text-muted-foreground italic">Menor porcentaje de victorias. Los que más sufren para sumar de a tres.</p>
         </div>
 
@@ -404,9 +394,9 @@ export default function PulseDetailPage() {
 
   const renderPolvora = () => {
     const sorted = [...playerStats]
-      .filter(p => p.matchesPlayed >= 3 && (p.position === 'Mediocampista' || p.position === 'Delantero'))
+      .filter(p => p.matchesPlayed >= 1 && (p.position === 'Mediocampista' || p.position === 'Delantero'))
       .sort((a, b) => a.goalsPerMatch - b.goalsPerMatch || a.totalGoals - b.totalGoals)
-      .slice(0, 10);
+      .slice(0, 20);
 
     return (
       <div className="space-y-8 max-w-2xl mx-auto">
@@ -415,15 +405,7 @@ export default function PulseDetailPage() {
                 <Droplets className="h-10 w-10 text-blue-500" />
             </div>
             <h1 className="text-4xl font-black italic uppercase tracking-tighter">Sala de Humildad: Pólvora Mojada</h1>
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              <Badge variant="outline" className="text-blue-400 font-bold uppercase tracking-widest px-4 py-1">
-                  Mínimo 3 Partidos
-              </Badge>
-              <Badge variant="outline" className="text-white font-bold uppercase tracking-widest px-4 py-1">
-                  Solo Mediocampistas y Delanteros
-              </Badge>
-            </div>
-            <p className="text-muted-foreground italic">Menor promedio de gol por partido entre los jugadores con rol ofensivo.</p>
+            <p className="text-muted-foreground italic">Menor promedio de gol por partido entre los jugadores con rol ofensivo (Medios y Delanteros).</p>
         </div>
 
         <div className="space-y-4">

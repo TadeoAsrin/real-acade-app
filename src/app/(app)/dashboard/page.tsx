@@ -95,7 +95,6 @@ export default function DashboardPage() {
   // Humildad
   const imanLeaders = [...playerStats].filter(p => p.losses > 0).sort((a, b) => b.losses - a.losses).slice(0, 3);
   const riesgoLeaders = [...playerStats].filter(p => p.matchesPlayed >= 3).sort((a, b) => a.winPercentage - b.winPercentage).slice(0, 3);
-  // Pólvora Mojada: Solo Mediocampistas y Delanteros
   const polvoraLeaders = [...playerStats]
     .filter(p => p.matchesPlayed >= 3 && (p.position === 'Mediocampista' || p.position === 'Delantero'))
     .sort((a, b) => a.goalsPerMatch - b.goalsPerMatch)
@@ -290,32 +289,36 @@ export default function DashboardPage() {
         <h2 className="text-xs font-black uppercase tracking-[0.4em] text-muted-foreground/50 px-1 font-oswald">SALA DE HUMILDAD</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
-            { label: "IMÁN DE DERROTAS", data: imanLeaders, icon: Skull, unit: "Derrotas" },
-            { label: "FACTOR DE RIESGO", data: riesgoLeaders, icon: Ghost, unit: "% Victorias" },
-            { label: "PÓLVORA MOJADA", data: polvoraLeaders, icon: Droplets, unit: "Goles/PJ" }
+            { label: "IMÁN DE DERROTAS", data: imanLeaders, icon: Skull, unit: "Derrotas", href: "/pulse/iman-derrotas" },
+            { label: "FACTOR DE RIESGO", data: riesgoLeaders, icon: Ghost, unit: "% Victorias", href: "/pulse/riesgo" },
+            { label: "PÓLVORA MOJADA", data: polvoraLeaders, icon: Droplets, unit: "Goles/PJ", href: "/pulse/polvora" }
           ].map((sec, i) => (
-            <Card key={i} className="competition-card border-t border-white/5 bg-surface-900/50">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground flex items-center justify-between font-oswald">
-                  <div className="flex items-center gap-2">
-                    <sec.icon className="h-3 w-3" /> {sec.label}
-                  </div>
-                  {sec.label === "PÓLVORA MOJADA" && (
-                    <span className="text-[7px] font-bold bg-white/5 px-1.5 py-0.5 rounded text-white/40">ATAQUE</span>
+            <Link key={i} href={sec.href}>
+              <Card className="competition-card border-t border-white/5 bg-surface-900/50 hover-lift h-full">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground flex items-center justify-between font-oswald">
+                    <div className="flex items-center gap-2">
+                      <sec.icon className="h-3 w-3" /> {sec.label}
+                    </div>
+                    {sec.label === "PÓLVORA MOJADA" && (
+                      <span className="text-[7px] font-bold bg-white/5 px-1.5 py-0.5 rounded text-white/40">ATAQUE</span>
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {sec.data.length > 0 ? sec.data.map((p, idx) => (
+                    <div key={idx} className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-muted-foreground/60">{p.name}</span>
+                      <span className="font-bebas text-lg text-white">
+                        {sec.unit === "% Victorias" ? `${p.winPercentage}%` : sec.unit === "Goles/PJ" ? p.goalsPerMatch : p.losses}
+                      </span>
+                    </div>
+                  )) : (
+                    <p className="text-[10px] italic text-muted-foreground/30 text-center py-4">Sin datos suficientes</p>
                   )}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {sec.data.map((p, idx) => (
-                  <div key={idx} className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-muted-foreground/60">{p.name}</span>
-                    <span className="font-bebas text-lg text-white">
-                      {sec.unit === "% Victorias" ? p.winPercentage : sec.unit === "Goles/PJ" ? p.goalsPerMatch : p.losses}
-                    </span>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
       </section>
