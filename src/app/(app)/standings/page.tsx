@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -16,7 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc } from "@/firebase";
 import { collection, query, orderBy, doc } from "firebase/firestore";
 import type { Player, Match, AggregatedPlayerStats } from "@/lib/definitions";
-import { Loader2, Trophy, Target, Zap, Crown, TrendingUp, TrendingDown, Minus, Calendar, ChevronRight, Users, Star, Info, Sparkles, Swords, Percent } from "lucide-react";
+import { Loader2, Trophy, Target, Zap, Crown, TrendingUp, TrendingDown, Minus, Calendar, ChevronRight, Users, Star, Info, Sparkles, Swords, Percent, ShieldAlert } from "lucide-react";
 import Link from 'next/link';
 import { cn, getInitials } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -110,28 +111,30 @@ function StandingsContent() {
     .filter(p => p.matchesPlayed >= 3)
     .sort((a, b) => b.efficiency - a.efficiency || b.matchesPlayed - a.matchesPlayed);
 
-  // JERARQUÍA DE CAPITANES: Debutantes primero, luego por Ranking de Deuda (partidos jugados)
-  const activeCaptains = stats.filter(p => p.isActive).sort((a, b) => {
-    const aNever = a.totalCaptaincies === 0;
-    const bNever = b.totalCaptaincies === 0;
-    
-    // 1. Debutantes (0 capitanías) siempre al frente
-    if (aNever && !bNever) return -1;
-    if (!aNever && bNever) return 1;
-    
-    // 2. Entre debutantes, priorizamos por Partidos Jugados (Ranking de Deuda)
-    if (aNever && bNever) {
-      if (b.matchesPlayed !== a.matchesPlayed) return b.matchesPlayed - a.matchesPlayed;
-    }
-    
-    // 3. Entre veteranos, usamos el puntaje de prioridad (asistencia vs capitanías previas)
-    if (b.captaincyPriorityScore !== a.captaincyPriorityScore) return b.captaincyPriorityScore - a.captaincyPriorityScore;
-    
-    // 4. Último recurso: por fecha de última capitanía
-    if (a.lastCaptainDate && b.lastCaptainDate) return new Date(a.lastCaptainDate).getTime() - new Date(b.lastCaptainDate).getTime();
-    
-    return 0;
-  });
+  // Lógica de Liderazgo Inclusiva
+  const leadershipRanking = [...stats]
+    .filter(p => p.matchesPlayed > 0) // Todos los que hayan jugado al menos un partido
+    .sort((a, b) => {
+      const aNever = a.totalCaptaincies === 0;
+      const bNever = b.totalCaptaincies === 0;
+      
+      // 1. Debutantes (0 capitanías) siempre al frente
+      if (aNever && !bNever) return -1;
+      if (!aNever && bNever) return 1;
+      
+      // 2. Entre debutantes, priorizamos por total de Partidos Jugados (Ranking de Deuda Histórica)
+      if (aNever && bNever) {
+        if (b.matchesPlayed !== a.matchesPlayed) return b.matchesPlayed - a.matchesPlayed;
+      }
+      
+      // 3. Entre veteranos, usamos el puntaje de prioridad (asistencia reciente vs capitanías previas)
+      if (b.captaincyPriorityScore !== a.captaincyPriorityScore) return b.captaincyPriorityScore - a.captaincyPriorityScore;
+      
+      return 0;
+    });
+
+  // Candidatos Sugeridos (Solo activos)
+  const suggestedCandidates = leadershipRanking.filter(p => p.isActive).slice(0, 2);
 
   const selectedMatch = allMatches.find(m => m.id === selectedMatchId);
   const matchScorers = selectedMatch 
@@ -152,31 +155,43 @@ function StandingsContent() {
             <TableHeader>
               <TableRow className="bg-black/20 border-white/5">
                 <TableHead className="pl-6 font-bebas tracking-widest text-sm uppercase">Jugador</TableHead>
-                <TableHead className="text-center font-bebas tracking-widest text-sm uppercase">Asist.</TableHead>
+                <TableHead className="text-center font-bebas tracking-widest text-sm uppercase">PJ</TableHead>
                 <TableHead className="text-center font-bebas tracking-widest text-sm uppercase">Capi</TableHead>
-                <TableHead className="text-right pr-6 font-bebas tracking-widest text-sm uppercase">Estado</TableHead>
+                <TableHead className="text-right pr-6 font-bebas tracking-widest text-sm uppercase">Estado Selección</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {playerList.map((player) => (
-                <TableRow key={player.playerId} className="official-table-row">
+                <TableRow key={player.playerId} className={cn("official-table-row", !player.isActive && "opacity-50")}>
                   <TableCell className="pl-6 py-4">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-8 w-8 border border-white/10">
                         <AvatarFallback className="bg-muted text-[10px] font-bebas">{getInitials(player.name)}</AvatarFallback>
                       </Avatar>
-                      <Link href={`/players/${player.playerId}`} className="font-bold text-xs uppercase tracking-tight hover:text-primary transition-colors">{player.name}</Link>
+                      <div className="flex flex-col">
+                        <Link href={`/players/${player.playerId}`} className="font-bold text-xs uppercase tracking-tight hover:text-primary transition-colors">
+                          {player.name}
+                        </Link>
+                        {!player.isActive && (
+                          <span className="text-[7px] font-black text-muted-foreground uppercase tracking-widest">En Reserva (Inactivo)</span>
+                        )}
+                      </div>
                     </div>
                   </TableCell>
-                  <TableCell className="text-center font-bebas text-lg italic text-muted-foreground">{player.matchesInLast5}/5</TableCell>
+                  <TableCell className="text-center font-bebas text-lg italic text-muted-foreground">{player.matchesPlayed}</TableCell>
                   <TableCell className="text-center font-bebas text-xl text-white">{player.totalCaptaincies}</TableCell>
                   <TableCell className="text-right pr-6">
-                    <Badge variant="outline" className={cn(
-                      "font-oswald uppercase text-[8px] tracking-widest",
-                      player.totalCaptaincies === 0 ? "border-emerald-500 text-emerald-500 bg-emerald-500/5" : "border-white/10 text-muted-foreground"
-                    )}>
-                      {player.totalCaptaincies === 0 ? "DEBUTANTE" : "VETERANO"}
-                    </Badge>
+                    <div className="flex flex-col items-end gap-1">
+                      <Badge variant="outline" className={cn(
+                        "font-oswald uppercase text-[8px] tracking-widest",
+                        player.totalCaptaincies === 0 ? "border-emerald-500 text-emerald-500 bg-emerald-500/5" : "border-white/10 text-muted-foreground"
+                      )}>
+                        {player.totalCaptaincies === 0 ? "DEBUTANTE" : "VETERANO"}
+                      </Badge>
+                      {player.isActive && player.totalCaptaincies === 0 && (
+                        <span className="text-[7px] font-black text-emerald-500 uppercase animate-pulse">¡LISTO PARA EL MANDO!</span>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -453,9 +468,9 @@ function StandingsContent() {
           </TabsContent>
 
           <TabsContent value="capitanes" className="animate-in fade-in slide-in-from-bottom-2 space-y-12">
-            {activeCaptains.length >= 2 && (
+            {suggestedCandidates.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {activeCaptains.slice(0, 2).map((cap, idx) => (
+                {suggestedCandidates.map((cap, idx) => (
                   <Card key={cap.playerId} className="competition-card border-t-4 border-t-primary bg-surface-900 overflow-hidden relative group hover-lift">
                     <div className="absolute top-0 right-0 p-4 opacity-5"><Crown className="h-20 w-20 text-primary" /></div>
                     <CardContent className="p-8 flex items-center gap-6">
@@ -468,7 +483,9 @@ function StandingsContent() {
                       <div className="space-y-1">
                         <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary font-oswald">CANDIDATO {idx + 1}</p>
                         <h3 className="text-4xl font-bebas text-white uppercase tracking-wider">{cap.name}</h3>
-                        <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest font-oswald">SUGERIDO PARA PORTAR LA CINTA</p>
+                        <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest font-oswald">
+                          {cap.totalCaptaincies === 0 ? "PRÓXIMO DEBUTANTE" : "SUGERIDO POR ASISTENCIA"}
+                        </p>
                       </div>
                     </CardContent>
                   </Card>
@@ -476,7 +493,20 @@ function StandingsContent() {
               </div>
             )}
 
-            {renderCaptainsTable(activeCaptains, "RANKING DE LIDERAZGO", <Users className="h-5 w-5 text-primary" />)}
+            <div className="bg-surface-800/50 border border-white/5 p-6 rounded-lg flex flex-col md:flex-row items-center gap-6">
+              <div className="p-4 bg-emerald-500/10 rounded-full shrink-0">
+                <Sparkles className="h-8 w-8 text-emerald-500" />
+              </div>
+              <div>
+                <h4 className="font-bebas text-xl tracking-widest text-white mb-1">CRITERIO DE JUSTICIA TOTAL</h4>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  La tabla muestra la jerarquía de mando del club. Los **Debutantes** (0 capitanías) tienen prioridad absoluta y se ordenan por su "deuda histórica" (partidos jugados sin portar la cinta). 
+                  Los jugadores en <span className="text-white font-bold opacity-50 italic">opacidad reducida</span> no han tenido actividad en los últimos 5 partidos y no son elegibles como candidatos inmediatos.
+                </p>
+              </div>
+            </div>
+
+            {renderCaptainsTable(leadershipRanking, "JERARQUÍA DE MANDO COMPLETA", <Users className="h-5 w-5 text-primary" />)}
           </TabsContent>
         </div>
       </Tabs>
