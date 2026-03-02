@@ -8,7 +8,7 @@ import { collection, query, orderBy } from "firebase/firestore";
 import type { Match, Player, AggregatedPlayerStats } from "@/lib/definitions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Brain, Link as LinkIcon, Zap, Crown, Flame, Calendar, Star, Users, Target, Skull, Ghost, Droplets, Loader2, Trophy } from "lucide-react";
+import { ArrowLeft, Brain, Link as LinkIcon, Zap, Crown, Flame, Calendar, Star, Users, Target, Skull, Ghost, Droplets, Loader2, Trophy, ChevronLeft } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials, cn } from "@/lib/utils";
 import Link from "next/link";
@@ -48,8 +48,6 @@ export default function PulseDetailPage() {
     );
   }
 
-  // --- RENDERS DE RANKING ---
-
   const renderRankingList = (
     title: string, 
     description: string, 
@@ -59,38 +57,42 @@ export default function PulseDetailPage() {
     label: string,
     colorClass: string
   ) => (
-    <div className="space-y-8 max-w-2xl mx-auto">
+    <div className="space-y-8 max-w-2xl mx-auto pb-20">
+      <Link href="/dashboard" className="flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground hover:text-primary transition-colors mb-4 font-oswald tracking-widest">
+        <ChevronLeft className="h-3 w-3" /> VOLVER AL PANEL
+      </Link>
+      
       <div className="text-center space-y-4">
           <div className={cn("mx-auto w-20 h-20 rounded-full flex items-center justify-center border", colorClass.replace('text-', 'bg-').replace('text-', 'border-') + '/20')}>
               {React.createElement(icon, { className: cn("h-10 w-10", colorClass) })}
           </div>
           <h1 className="text-4xl font-black italic uppercase tracking-tighter">{title}</h1>
-          <p className="text-muted-foreground italic">{description}</p>
+          <p className="text-muted-foreground italic text-sm">{description}</p>
       </div>
 
       <div className="space-y-4">
           {sortedData.length > 0 ? sortedData.map((p, i) => (
-              <Card key={p.playerId} className={cn("glass-card border-white/5 hover:border-white/20 transition-all", i < 3 && "border-primary/20 bg-primary/5")}>
+              <Card key={p.playerId} className={cn("competition-card border-l-4 transition-all hover-lift", i === 0 ? "border-l-yellow-500 bg-yellow-500/5" : "border-l-primary/20")}>
                   <CardContent className="p-6 flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                          <span className="text-2xl font-black italic text-muted-foreground/30 w-8">{i + 1}</span>
+                          <span className="text-2xl font-black italic text-muted-foreground/30 w-8">#{i + 1}</span>
                           <Avatar className="h-14 w-14 border-2 border-white/10">
                               <AvatarFallback className="bg-muted font-black text-lg">{getInitials(p.name)}</AvatarFallback>
                           </Avatar>
                           <div className="flex flex-col">
-                              <Link href={`/players/${p.playerId}`} className="font-black text-xl hover:underline italic">{p.name}</Link>
-                              <span className="text-[10px] font-bold uppercase text-muted-foreground">{p.matchesPlayed} Partidos Jugados</span>
+                              <Link href={`/players/${p.playerId}`} className="font-black text-xl hover:underline italic uppercase tracking-tighter">{p.name}</Link>
+                              <span className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">{p.matchesPlayed} Partidos Jugados</span>
                           </div>
                       </div>
                       <div className="text-right">
-                          <span className={cn("text-4xl font-black italic", colorClass)}>{valueFn(p)}</span>
-                          <p className="text-[10px] uppercase font-black text-muted-foreground leading-none">{label}</p>
+                          <span className={cn("text-4xl font-black italic leading-none", colorClass)}>{valueFn(p)}</span>
+                          <p className="text-[10px] uppercase font-black text-muted-foreground/40 mt-1">{label}</p>
                       </div>
                   </CardContent>
               </Card>
           )) : (
             <div className="h-40 flex flex-col items-center justify-center border-2 border-dashed rounded-3xl opacity-30 italic">
-              Sin datos registrados.
+              Sin datos registrados en esta categoría.
             </div>
           )}
       </div>
@@ -99,54 +101,57 @@ export default function PulseDetailPage() {
 
   if (type === 'influencer') {
     const sorted = [...playerStats].sort((a, b) => b.winPercentage - a.winPercentage || b.matchesPlayed - a.matchesPlayed);
-    return renderRankingList("Cerebros del Campo", "Ranking de efectividad pura. Los jugadores con mayor porcentaje de victoria.", Brain, sorted, (p) => `${p.winPercentage}%`, "Victorias", "text-primary");
+    return renderRankingList("Cerebros del Campo", "Ranking de efectividad pura. Los jugadores con mayor porcentaje de victoria cuando están en cancha.", Brain, sorted, (p) => `${p.winPercentage}%`, "Victorias", "text-primary");
   }
 
   if (type === 'mvp') {
     const sorted = [...playerStats].sort((a, b) => b.totalMvp - a.totalMvp || b.powerPoints - a.powerPoints);
-    return renderRankingList("Reyes del MVP", "El trono de los mejores del partido. Ranking acumulado de premios oficiales.", Star, sorted, (p) => p.totalMvp, "Premios", "text-yellow-500");
+    return renderRankingList("Reyes del MVP", "El trono de los mejores del partido. Ranking acumulado de premios oficiales de la jornada.", Star, sorted, (p) => p.totalMvp, "Premios", "text-yellow-500");
   }
 
   if (type === 'attendance') {
-    const total = allMatches.length;
+    const total = allMatches.filter(m => m.teamAScore > 0 || m.teamBScore > 0).length;
     const sorted = [...playerStats].sort((a, b) => b.matchesPlayed - a.matchesPlayed || a.name.localeCompare(b.name));
-    return renderRankingList("Los Infaltables", "El compromiso no se negocia. Ranking de asistencia a la academia.", Users, sorted, (p) => `${total > 0 ? Math.round((p.matchesPlayed / total) * 100) : 0}%`, "Asistencia", "text-emerald-500");
+    return renderRankingList("Los Infaltables", "El compromiso no se negocia. Ranking de asistencia histórica a la academia.", Users, sorted, (p) => `${total > 0 ? Math.round((p.matchesPlayed / total) * 100) : 0}%`, "Asistencia", "text-emerald-500");
   }
 
   if (type === 'iman-derrotas') {
     const sorted = [...playerStats].sort((a, b) => b.losses - a.losses || b.matchesPlayed - a.matchesPlayed);
-    return renderRankingList("Imán de Derrotas", "La mala racha no perdona. Jugadores con más caídas en el historial.", Skull, sorted, (p) => p.losses, "Derrotas", "text-red-500");
+    return renderRankingList("Imán de Derrotas", "La mala racha no perdona. Jugadores con más caídas registradas en el historial.", Skull, sorted, (p) => p.losses, "Derrotas", "text-red-500");
   }
 
   if (type === 'riesgo') {
-    const sorted = [...playerStats].filter(p => p.matchesPlayed >= 1).sort((a, b) => a.winPercentage - b.winPercentage || a.matchesPlayed - b.matchesPlayed);
-    return renderRankingList("Factor de Riesgo", "Menor porcentaje de victorias. Los que más sufren para sumar de a tres.", Ghost, sorted, (p) => `${p.winPercentage}%`, "Efectividad", "text-zinc-400");
+    const sorted = [...playerStats].sort((a, b) => a.winPercentage - b.winPercentage || a.matchesPlayed - b.matchesPlayed);
+    return renderRankingList("Factor de Riesgo", "Menor porcentaje de victorias. Los que más sufren para sumar de a tres puntos.", Ghost, sorted, (p) => `${p.winPercentage}%`, "Efectividad", "text-zinc-400");
   }
 
   if (type === 'polvora') {
     const sorted = [...playerStats]
       .filter(p => p.position === 'Mediocampista' || p.position === 'Delantero')
       .sort((a, b) => a.goalsPerMatch - b.goalsPerMatch || a.totalGoals - b.totalGoals);
-    return renderRankingList("Pólvora Mojada", "Baja producción ofensiva en roles de ataque (Medios y Delanteros).", Droplets, sorted, (p) => p.goalsPerMatch, "Goles/PJ", "text-blue-400");
+    return renderRankingList("Pólvora Mojada", "Baja producción ofensiva en roles de ataque (Medios y Delanteros). Ranking de Goles por Partido.", Droplets, sorted, (p) => p.goalsPerMatch, "Goles/PJ", "text-blue-400");
   }
 
   if (type === 'partnership') {
-    const pairs = getChemistryRankings(allPlayers, allMatches, 1); // Bajamos umbral a 1 para que siempre haya datos
+    const pairs = getChemistryRankings(allPlayers, allMatches, 1);
     return (
-      <div className="space-y-8 max-w-2xl mx-auto">
+      <div className="space-y-8 max-w-2xl mx-auto pb-20">
+        <Link href="/dashboard" className="flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground hover:text-primary transition-colors mb-4 font-oswald tracking-widest">
+          <ChevronLeft className="h-3 w-3" /> VOLVER AL PANEL
+        </Link>
         <div className="text-center space-y-4">
-            <div className="mx-auto w-20 h-20 bg-white/10 rounded-full flex items-center justify-center">
+            <div className="mx-auto w-20 h-20 bg-white/10 rounded-full flex items-center justify-center border border-white/10">
                 <LinkIcon className="h-10 w-10 text-white" />
             </div>
             <h1 className="text-4xl font-black italic uppercase tracking-tighter">Sociedades de Élite</h1>
-            <p className="text-muted-foreground italic">La química perfecta. Duplas de jugadores que dominan el campo cuando comparten equipo.</p>
+            <p className="text-muted-foreground italic text-sm">La química perfecta. Duplas de jugadores que dominan el campo cuando comparten equipo.</p>
         </div>
         <div className="space-y-4">
-            {pairs.map((pair, i) => (
-                <Card key={i} className={cn("glass-card transition-all", i === 0 ? "border-primary/50 bg-primary/5 scale-105" : "border-white/5")}>
+            {pairs.length > 0 ? pairs.map((pair, i) => (
+                <Card key={i} className={cn("competition-card transition-all hover-lift", i === 0 ? "border-l-4 border-l-primary bg-primary/5" : "border-l-4 border-l-transparent")}>
                     <CardContent className="p-6 flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                            <span className="text-2xl font-black italic text-muted-foreground/30 w-8">{i + 1}</span>
+                            <span className="text-2xl font-black italic text-muted-foreground/30 w-8">#{i + 1}</span>
                             <div className="flex -space-x-4">
                                 <Avatar className="h-12 w-12 border-2 border-background ring-2 ring-white/10">
                                     <AvatarFallback className="bg-muted font-black">{getInitials(pair.player1.name)}</AvatarFallback>
@@ -156,17 +161,26 @@ export default function PulseDetailPage() {
                                 </Avatar>
                             </div>
                             <div className="flex flex-col min-w-0">
-                                <span className="font-black text-lg truncate italic">{pair.player1.name.split(' ')[0]} + {pair.player2.name.split(' ')[0]}</span>
-                                <span className="text-[10px] font-bold uppercase text-muted-foreground">{pair.wins}V en {pair.matches} PJ</span>
+                                <span className="font-black text-lg truncate italic uppercase tracking-tighter">
+                                  {pair.player1.name.split(' ')[0]} + {pair.player2.name.split(' ')[0]}
+                                </span>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">{pair.wins}V en {pair.matches} PJ</span>
+                                  {pair.matches === 1 && <Badge className="h-3 text-[6px] bg-primary/20 text-primary border-none">NUEVA DUPLA</Badge>}
+                                </div>
                             </div>
                         </div>
                         <div className="text-right">
-                            <span className={cn("text-3xl font-black italic", i === 0 ? "text-primary" : "text-white")}>{pair.winRate}%</span>
-                            <p className="text-[8px] uppercase font-black text-muted-foreground leading-none">Efectividad</p>
+                            <span className={cn("text-3xl font-black italic leading-none", i === 0 ? "text-primary" : "text-white")}>{pair.winRate}%</span>
+                            <p className="text-[8px] uppercase font-black text-muted-foreground/40 mt-1">Efectividad</p>
                         </div>
                     </CardContent>
                 </Card>
-            ))}
+            )) : (
+              <div className="h-40 flex flex-col items-center justify-center border-2 border-dashed rounded-3xl opacity-30 italic">
+                Aún no hay suficientes batallas para detectar química.
+              </div>
+            )}
         </div>
       </div>
     );
@@ -175,32 +189,35 @@ export default function PulseDetailPage() {
   if (type === 'league') {
     const spiciest = getSpiciestMatch(allMatches);
     return (
-      <div className="space-y-8 max-w-2xl mx-auto text-center">
+      <div className="space-y-8 max-w-2xl mx-auto text-center pb-20">
+        <Link href="/dashboard" className="flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground hover:text-primary transition-colors mb-4 font-oswald tracking-widest w-fit mx-auto">
+          <ChevronLeft className="h-3 w-3" /> VOLVER AL PANEL
+        </Link>
         <div className="space-y-4">
-            <div className="mx-auto w-20 h-20 bg-orange-500/10 rounded-full flex items-center justify-center">
+            <div className="mx-auto w-20 h-20 bg-orange-500/10 rounded-full flex items-center justify-center border border-orange-500/20">
                 <Flame className="h-10 w-10 text-orange-500 fill-orange-500" />
             </div>
             <h1 className="text-4xl font-black italic uppercase tracking-tighter">Partido más picante</h1>
-            <p className="text-muted-foreground italic">El encuentro con mayor producción ofensiva registrado en la historia.</p>
+            <p className="text-muted-foreground italic text-sm">El encuentro con mayor producción ofensiva registrado en la historia del club.</p>
         </div>
         {spiciest ? (
-            <Card className="glass-card border-orange-500/30 bg-gradient-to-br from-orange-500/10 to-transparent p-10">
+            <Card className="competition-card border-orange-500/30 bg-gradient-to-br from-orange-500/10 to-transparent p-10">
                 <div className="flex flex-col items-center gap-6">
-                    <span className="text-8xl font-black italic text-white leading-none">{spiciest.teamAScore + spiciest.teamBScore}</span>
-                    <span className="text-sm font-black uppercase text-orange-500 tracking-widest">Goles Totales</span>
-                    <div className="flex items-center gap-16 pt-4 border-t border-white/10 w-full justify-center">
+                    <span className="text-[10rem] font-black italic text-white leading-none drop-shadow-2xl">{spiciest.teamAScore + spiciest.teamBScore}</span>
+                    <span className="text-sm font-black uppercase text-orange-500 tracking-[0.4em]">Goles Totales</span>
+                    <div className="flex items-center gap-16 pt-8 border-t border-white/10 w-full justify-center">
                         <div className="flex flex-col items-center">
-                            <span className="text-xs font-black uppercase text-primary">Azul: {spiciest.teamAScore}</span>
+                            <span className="text-lg font-bebas text-primary tracking-widest">Azul: {spiciest.teamAScore}</span>
                         </div>
                         <div className="text-2xl font-light text-muted-foreground/30 italic">VS</div>
                         <div className="flex flex-col items-center">
-                            <span className="text-xs font-black uppercase text-accent">Rojo: {spiciest.teamBScore}</span>
+                            <span className="text-lg font-bebas text-accent tracking-widest">Rojo: {spiciest.teamBScore}</span>
                         </div>
                     </div>
-                    <Button asChild variant="outline" className="mt-4"><Link href={`/matches/${spiciest.id}`}>Ver Ficha Técnica</Link></Button>
+                    <Button asChild variant="outline" className="mt-8 border-white/10 hover:bg-white/5"><Link href={`/matches/${spiciest.id}`}>VER FICHA TÉCNICA</Link></Button>
                 </div>
             </Card>
-        ) : <p className="italic opacity-30">Sin partidos registrados.</p>}
+        ) : <p className="italic opacity-30 py-20">Sin partidos registrados aún.</p>}
       </div>
     );
   }

@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -208,7 +207,7 @@ export default function DraftDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* Team Azul */}
-        <Card className="lg:col-span-3 glass-card border-primary/20 bg-primary/5">
+        <Card className="lg:col-span-3 competition-card border-primary/20 bg-primary/5">
           <CardHeader className="text-center pb-2">
             <Badge className="mx-auto mb-2 bg-primary">Equipo Azul</Badge>
             <CardTitle className="text-2xl font-black italic">{draft.captainA.name.split(' ')[0]}</CardTitle>
@@ -239,7 +238,7 @@ export default function DraftDetailPage() {
               <Card 
                 key={p.id} 
                 className={cn(
-                  "group transition-all cursor-pointer relative overflow-hidden",
+                  "group transition-all cursor-pointer relative overflow-hidden competition-card",
                   isMyTurn ? "hover:border-primary hover:scale-105 active:scale-95" : "opacity-50 grayscale pointer-events-none"
                 )}
                 onClick={() => handlePick(p)}
@@ -265,7 +264,7 @@ export default function DraftDetailPage() {
         </div>
 
         {/* Team Rojo */}
-        <Card className="lg:col-span-3 glass-card border-accent/20 bg-accent/5">
+        <Card className="lg:col-span-3 competition-card border-accent/20 bg-accent/5">
           <CardHeader className="text-center pb-2">
             <Badge className="mx-auto mb-2 bg-accent">Equipo Rojo</Badge>
             <CardTitle className="text-2xl font-black italic">{draft.captainB.name.split(' ')[0]}</CardTitle>

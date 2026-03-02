@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -104,7 +103,7 @@ export default function TeamGeneratorPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        <Card className="lg:col-span-1 glass-card border-white/5">
+        <Card className="lg:col-span-1 competition-card border-white/5">
           <CardHeader>
             <CardTitle className="text-xl font-bold">Convocatoria</CardTitle>
             <CardDescription>Marca a los que han venido hoy.</CardDescription>
@@ -145,7 +144,7 @@ export default function TeamGeneratorPage() {
         <div className="lg:col-span-2 space-y-8">
           {teams ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <Card className="glass-card border-primary/30 overflow-hidden relative">
+              <Card className="competition-card border-primary/30 overflow-hidden relative">
                 <div className="absolute top-0 right-0 p-4 opacity-10">
                     <Shield className="h-20 w-20 text-primary" />
                 </div>
@@ -173,7 +172,7 @@ export default function TeamGeneratorPage() {
                 </CardContent>
               </Card>
 
-              <Card className="glass-card border-accent/30 overflow-hidden relative">
+              <Card className="competition-card border-accent/30 overflow-hidden relative">
                 <div className="absolute top-0 right-0 p-4 opacity-10">
                     <Shield className="h-20 w-20 text-accent" />
                 </div>

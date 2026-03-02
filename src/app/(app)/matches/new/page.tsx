@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -327,7 +326,7 @@ export default function NewMatchPage() {
                     const player = players.find(p => p.id === id);
                     if (!player) return null;
                     return (
-                      <FormItem key={id} className="flex items-center space-x-3 space-y-0 border p-3 rounded-xl hover:bg-accent/50 transition-colors cursor-pointer glass-card">
+                      <FormItem key={id} className="flex items-center space-x-3 space-y-0 border p-3 rounded-xl hover:bg-accent/50 transition-colors cursor-pointer competition-card">
                         <FormControl><RadioGroupItem value={id} /></FormControl>
                         <FormLabel className="font-normal flex items-center gap-2 cursor-pointer w-full">
                           <Avatar className="h-6 w-6">
@@ -353,7 +352,7 @@ export default function NewMatchPage() {
               const player = players.find(p => p.id === id);
               if (!player) return null;
               return (
-                <div key={id} className="flex items-center justify-between p-3 border rounded-xl glass-card">
+                <div key={id} className="flex items-center justify-between p-3 border rounded-xl competition-card">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={player.avatar || undefined} alt={player.name} />
@@ -406,7 +405,7 @@ export default function NewMatchPage() {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
-          <Card className="glass-card border-t-4 border-t-primary">
+          <Card className="competition-card border-t-4 border-t-primary">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <CalendarIcon className="h-5 w-5 text-primary" />
@@ -485,7 +484,7 @@ export default function NewMatchPage() {
             </Accordion>
           </div>
 
-          <Card className="glass-card">
+          <Card className="competition-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Award className="h-5 w-5 text-yellow-500" />
@@ -532,7 +531,7 @@ export default function NewMatchPage() {
             </CardContent>
           </Card>
 
-          <Card className="glass-card border-emerald-500/20">
+          <Card className="competition-card border-emerald-500/20">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MessageSquare className="h-5 w-5 text-emerald-500" />

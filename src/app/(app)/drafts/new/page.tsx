@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -142,7 +141,7 @@ export default function NewDraftPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <Card className="glass-card">
+        <Card className="competition-card">
           <CardHeader>
             <CardTitle>1. Seleccionar Plantilla ({selectedPlayerIds.length}/14)</CardTitle>
             <CardDescription>Marca a los que juegan hoy.</CardDescription>
@@ -169,7 +168,7 @@ export default function NewDraftPage() {
           </CardContent>
         </Card>
 
-        <Card className="glass-card">
+        <Card className="competition-card">
           <CardHeader>
             <CardTitle>2. Definir Capitanes</CardTitle>
             <CardDescription>Los que armarán los equipos.</CardDescription>

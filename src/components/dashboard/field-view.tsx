@@ -122,7 +122,7 @@ export function FieldView({ team, players, topScorerId, date }: FieldViewProps) 
   };
 
   return (
-    <Card className="glass-card overflow-hidden border-white/5 bg-black/20 shadow-2xl">
+    <Card className="competition-card overflow-hidden border-white/5 bg-black/20 shadow-2xl">
       <CardHeader className="p-4 lg:pb-4">
         <CardTitle className={cn(
           "text-sm lg:text-lg font-black uppercase tracking-tighter italic flex flex-col items-start gap-1", 
