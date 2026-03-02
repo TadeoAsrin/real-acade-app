@@ -12,7 +12,7 @@ import { ShieldAlert } from "lucide-react";
 
 export default function RegisterPage() {
   return (
-    <Card className="w-full max-w-sm glass-card border-orange-500/20">
+    <Card className="w-full max-w-sm competition-card border-orange-500/20">
       <CardHeader className="text-center">
          <div className="mb-4 flex justify-center">
             <ShieldAlert className="h-12 w-12 text-orange-500" />

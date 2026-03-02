@@ -81,6 +81,7 @@ export default function DashboardPage() {
   const runnersUp = sortedByGoals.slice(1, 5); 
 
   const sortedByInfluence = [...playerStats]
+    .filter(p => p.matchesPlayed > 0)
     .sort((a, b) => b.winPercentage - a.winPercentage || b.matchesPlayed - a.matchesPlayed);
   const influencer = sortedByInfluence[0];
   const influencerRunnersUp = sortedByInfluence.slice(1, 3);

@@ -16,7 +16,6 @@ import { Badge } from "@/components/ui/badge";
 
 export default function PulseDetailPage() {
   const { type } = useParams();
-  const router = useRouter();
   const firestore = useFirestore();
 
   const playersQuery = useMemoFirebase(() => {
@@ -56,7 +55,7 @@ export default function PulseDetailPage() {
     valueFn: (p: AggregatedPlayerStats) => string | number,
     labelFn: (p: AggregatedPlayerStats) => string,
     colorClass: string,
-    isHumility: boolean = false
+    requirementLabel?: string
   ) => (
     <div className="space-y-8 max-w-2xl mx-auto pb-20">
       <Link href="/dashboard" className="flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground hover:text-primary transition-colors mb-4 font-oswald tracking-widest">
@@ -69,9 +68,9 @@ export default function PulseDetailPage() {
           </div>
           <h1 className="text-4xl font-black italic uppercase tracking-tighter">{title}</h1>
           <p className="text-muted-foreground italic text-sm">{description}</p>
-          {isHumility && (
+          {requirementLabel && (
             <Badge variant="outline" className="mx-auto border-orange-500/20 text-orange-500 uppercase font-black text-[10px] py-1 px-4">
-              REQUISITO: MÍNIMO 2 PARTIDOS JUGADOS
+              REQUISITO: {requirementLabel}
             </Badge>
           )}
       </div>
@@ -102,7 +101,7 @@ export default function PulseDetailPage() {
           )) : (
             <div className="h-60 flex flex-col items-center justify-center border-2 border-dashed rounded-3xl opacity-30 italic text-center px-10 gap-4">
               <Info className="h-10 w-10 text-muted-foreground" />
-              <p className="text-sm">Aún no hay suficientes batallas que cumplan con el criterio de {isHumility ? "mínimo 2 partidos" : "datos suficientes"} para generar este ranking.</p>
+              <p className="text-sm">Aún no hay suficientes datos para generar este ranking de élite.</p>
             </div>
           )}
       </div>
@@ -110,42 +109,41 @@ export default function PulseDetailPage() {
   );
 
   if (type === 'influencer') {
-    const sorted = [...playerStats].sort((a, b) => b.winPercentage - a.winPercentage || b.matchesPlayed - a.matchesPlayed);
-    return renderRankingList("Cerebros del Campo", "Efectividad pura. Jugadores con mayor % de victoria histórico en la academia.", Brain, sorted, (p) => `${p.winPercentage}%`, () => "Victorias", "text-primary");
+    const sorted = [...playerStats].filter(p => p.matchesPlayed > 0).sort((a, b) => b.winPercentage - a.winPercentage || b.matchesPlayed - a.matchesPlayed);
+    return renderRankingList("Cerebros del Campo", "Efectividad pura. Jugadores con mayor porcentaje de victoria histórico.", Brain, sorted, (p) => `${p.winPercentage}%`, (p) => `${p.wins}V - ${p.draws}E - ${p.losses}D`, "text-primary");
   }
 
   if (type === 'mvp') {
-    const sorted = [...playerStats].sort((a, b) => b.totalMvp - a.totalMvp || b.powerPoints - a.powerPoints);
+    const sorted = [...playerStats].filter(p => p.matchesPlayed > 0).sort((a, b) => b.totalMvp - a.totalMvp || b.powerPoints - a.powerPoints);
     return renderRankingList("Reyes del MVP", "El trono de los mejores del partido. Ranking acumulado de premios oficiales.", Star, sorted, (p) => p.totalMvp, () => "Premios", "text-yellow-500");
   }
 
   if (type === 'attendance') {
     const total = allMatches.filter(m => m.teamAScore > 0 || m.teamBScore > 0).length;
-    const sorted = [...playerStats].sort((a, b) => b.matchesPlayed - a.matchesPlayed || a.name.localeCompare(b.name));
+    const sorted = [...playerStats].filter(p => p.matchesPlayed > 0).sort((a, b) => b.matchesPlayed - a.matchesPlayed);
     return renderRankingList("Los Infaltables", "El compromiso no se negocia. Ranking de asistencia histórica al club.", Users, sorted, (p) => `${total > 0 ? Math.round((p.matchesPlayed / total) * 100) : 0}%`, () => "Asistencia", "text-emerald-500");
   }
 
   if (type === 'iman-derrotas') {
     const sorted = [...playerStats].filter(p => p.matchesPlayed >= 2).sort((a, b) => b.losses - a.losses || b.matchesPlayed - a.matchesPlayed);
-    return renderRankingList("Imán de Derrotas", "Récord adverso acumulado. Jugadores con más caídas en la academia (Mín. 2 PJ).", Skull, sorted, (p) => p.losses, (p) => `${p.wins}V - ${p.draws}E - ${p.losses}D`, "text-red-500", true);
+    return renderRankingList("Imán de Derrotas", "Récord adverso acumulado. Quienes más han sufrido el sabor de la caída.", Skull, sorted, (p) => p.losses, (p) => `${p.wins}V - ${p.draws}E - ${p.losses}D`, "text-red-500", "MÍNIMO 2 PARTIDOS JUGADOS");
   }
 
   if (type === 'deuda-mando') {
     const sorted = [...playerStats].filter(p => p.matchesPlayed >= 2 && p.totalCaptaincies === 0).sort((a, b) => b.matchesPlayed - a.matchesPlayed);
-    return renderRankingList("Deuda de Mando", "Veteranos sin brazalete. Jugadores con más batallas que nunca han liderado un equipo (Mín. 2 PJ).", ShieldAlert, sorted, (p) => p.matchesPlayed, () => "PJ SIN BRAZALETE", "text-orange-500", true);
+    return renderRankingList("Deuda de Mando", "Veteranos sin brazalete. Jugadores con muchas batallas que nunca han liderado.", ShieldAlert, sorted, (p) => p.matchesPlayed, () => "PJ SIN BRAZALETE", "text-orange-500", "MÍNIMO 2 PARTIDOS JUGADOS");
   }
 
   if (type === 'polvora') {
     const sorted = [...playerStats]
       .filter(p => (p.position === 'Mediocampista' || p.position === 'Delantero') && p.matchesPlayed >= 2)
       .sort((a, b) => a.goalsPerMatch - b.goalsPerMatch || a.totalGoals - b.totalGoals);
-    return renderRankingList("Pólvora Mojada", "Sequía ofensiva en roles de ataque. Jugadores con menor promedio de gol (Mín. 2 PJ).", Droplets, sorted, (p) => p.goalsPerMatch, (p) => `${p.totalGoals} GOLES EN ${p.matchesPlayed} PJ`, "text-blue-400", true);
+    return renderRankingList("Pólvora Mojada", "Sequía ofensiva en roles de ataque. Ranking de promedios de gol bajos.", Droplets, sorted, (p) => p.goalsPerMatch, (p) => `${p.totalGoals} GOLES EN ${p.matchesPlayed} PJ`, "text-blue-400", "MÍNIMO 2 PJ Y ROL OFENSIVO");
   }
 
   if (type === 'partnership') {
-    let pairs = getChemistryRankings(allPlayers, allMatches, 2);
-    if (pairs.length === 0) pairs = getChemistryRankings(allPlayers, allMatches, 1);
-    const topPairs = pairs.slice(0, 15);
+    let pairs = getChemistryRankings(allPlayers, allMatches, 1);
+    const topPairs = pairs.filter(p => p.winRate >= 50).slice(0, 15);
 
     return (
       <div className="space-y-8 max-w-2xl mx-auto pb-20">
@@ -157,7 +155,10 @@ export default function PulseDetailPage() {
                 <LinkIcon className="h-10 w-10 text-primary" />
             </div>
             <h1 className="text-4xl font-black italic uppercase tracking-tighter">Sociedades de Élite</h1>
-            <p className="text-muted-foreground italic text-sm">El Top 15 de química pura. Duplas activas con Win Rate superior al 50%.</p>
+            <p className="text-muted-foreground italic text-sm">El Top 15 de química pura. Duplas activas con éxito superior al 50%.</p>
+            <Badge variant="outline" className="mx-auto border-primary/20 text-primary uppercase font-black text-[10px] py-1 px-4">
+              RANKING DE EXCLUSIVIDAD: TOP 15
+            </Badge>
         </div>
         <div className="space-y-4">
             {topPairs.length > 0 ? topPairs.map((pair, i) => (
@@ -192,7 +193,7 @@ export default function PulseDetailPage() {
             )) : (
               <div className="h-40 flex flex-col items-center justify-center border-2 border-dashed rounded-3xl opacity-30 italic px-10 text-center">
                 <LinkIcon className="h-10 w-10 mb-2 opacity-50" />
-                <p>No se han detectado sociedades activas que superen el 50% de efectividad.</p>
+                <p>No se han detectado sociedades activas con éxito demostrado.</p>
               </div>
             )}
         </div>
@@ -212,7 +213,7 @@ export default function PulseDetailPage() {
                 <Flame className="h-10 w-10 text-orange-500 fill-orange-500" />
             </div>
             <h1 className="text-4xl font-black italic uppercase tracking-tighter">Partido más picante</h1>
-            <p className="text-muted-foreground italic text-sm">El encuentro con mayor producción ofensiva registrado en la historia del club.</p>
+            <p className="text-muted-foreground italic text-sm">El encuentro con mayor producción ofensiva registrado.</p>
         </div>
         {spiciest ? (
             <Card className="competition-card border-orange-500/30 bg-gradient-to-br from-orange-500/10 to-transparent p-10">
