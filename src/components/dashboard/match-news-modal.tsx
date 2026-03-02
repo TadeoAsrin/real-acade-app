@@ -39,36 +39,18 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
 
   React.useEffect(() => {
     if (!match) return;
-
     if (forceOpen) {
       setIsOpen(true);
       return;
     }
-
     const lastSeenMatchId = localStorage.getItem('lastSeenGacetaId');
-    if (lastSeenMatchId !== match.id) {
-      setIsOpen(true);
-    }
+    if (lastSeenMatchId !== match.id) setIsOpen(true);
   }, [match, forceOpen]);
 
   const handleClose = () => {
     setIsOpen(false);
-    if (!forceOpen && match) {
-      localStorage.setItem('lastSeenGacetaId', match.id);
-    }
+    if (!forceOpen && match) localStorage.setItem('lastSeenGacetaId', match.id);
     onClose?.();
-  };
-
-  const shareToWhatsApp = () => {
-    if (!match.aiSummary) return;
-    const text = `🗞️ *LA GACETA DE REAL ACADE* 🗞️\n\n` +
-      `🔥 *${match.aiSummary.title}*\n` +
-      `📅 ${format(new Date(match.date), "dd/MM/yyyy")}\n\n` +
-      `"${match.aiSummary.summary}"\n\n` +
-      `🏆 *Final:* Azul ${match.teamAScore} - ${match.teamBScore} Rojo\n` +
-      `🔗 Mirá las fotos e estadísticas acá: ${window.location.origin}/matches/${match.id}`;
-    
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
   };
 
   if (!match || !match.aiSummary) return null;
@@ -78,17 +60,12 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      {/* 
-        CRÍTICO: Añadimos bg-white y text-black para anular el modo oscuro del DialogContent 
-        y aplicamos !important mediante editorial-paper en el CSS global.
-      */}
-      <DialogContent className="max-w-4xl p-0 overflow-hidden border-none editorial-paper shadow-2xl flex flex-col h-[92vh] sm:h-auto sm:max-h-[85vh] sm:rounded-none bottom-0 sm:bottom-auto translate-y-0 sm:translate-y-[-50%] top-auto sm:top-[50%] bg-white text-black">
+      <DialogContent className="max-w-4xl p-0 overflow-hidden border-none editorial-paper shadow-2xl flex flex-col h-[92vh] sm:h-auto sm:max-h-[85vh] bottom-0 sm:bottom-auto translate-y-0 sm:translate-y-[-50%] top-auto sm:top-[50%] bg-white text-black">
         <DialogHeader className="sr-only">
           <DialogTitle>La Gaceta de Real Acade</DialogTitle>
           <DialogDescription>Crónica oficial del encuentro</DialogDescription>
         </DialogHeader>
         
-        {/* Masthead - Solid High Contrast Header */}
         <div className="shrink-0 p-4 sm:p-6 bg-black z-20">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-2 sm:gap-3">
@@ -99,35 +76,17 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
             </div>
             <div className="flex items-center gap-2 sm:gap-4 font-oswald text-[8px] sm:text-[10px] font-bold uppercase text-white/60">
               <span className="text-primary font-black">SPECIAL EDITION</span>
-              <span className="h-1 w-1 rounded-full bg-white/20" />
               <span>{format(new Date(match.date), "eeee, dd MMMM yyyy", { locale: es })}</span>
-              <button 
-                onClick={handleClose} 
-                className="ml-2 p-2 hover:bg-white/10 rounded-full transition-colors touch-none text-white"
-                aria-label="Cerrar noticia"
-              >
-                <X className="h-5 w-5" />
-              </button>
+              <button onClick={handleClose} className="ml-2 p-2 hover:bg-white/10 rounded-full transition-colors text-white"><X className="h-5 w-5" /></button>
             </div>
           </div>
         </div>
 
-        {/* Content Area - Scrollable */}
         <div className="flex-1 overflow-y-auto overscroll-contain bg-white">
-          {/* Cover Photo */}
           {coverPhoto && (
-            <div className="w-full aspect-video sm:aspect-[21/9] overflow-hidden border-b-4 border-black relative group">
-              <img 
-                src={coverPhoto} 
-                alt="Tapa del Diario" 
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-              />
+            <div className="w-full aspect-video sm:aspect-[21/9] overflow-hidden border-b-4 border-black relative">
+              <img src={coverPhoto} alt="Tapa" className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-              <div className="absolute bottom-4 left-6 flex items-center gap-2">
-                <Badge className="bg-accent text-white font-bebas uppercase tracking-widest text-[8px] sm:text-[10px] border-none rounded-none px-3">
-                  EXCLUSIVE FOOTAGE
-                </Badge>
-              </div>
             </div>
           )}
 
@@ -147,7 +106,7 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
                 <div className="lg:col-span-8 space-y-6 lg:border-r lg:border-black/10 lg:pr-10">
                   <div className="relative">
                     <Quote className="absolute -left-8 -top-6 h-16 w-16 text-black/[0.05] pointer-events-none" />
-                    <p className="text-xl sm:text-2xl leading-relaxed text-justify text-black font-lora first-letter:text-8xl first-letter:font-black first-letter:float-left first-letter:mr-4 first-letter:mt-3 first-letter:text-black first-letter:font-playfair">
+                    <p className="text-xl sm:text-2xl leading-relaxed text-justify text-black font-lora first-letter:text-8xl first-letter:font-black first-letter:float-left first-letter:mr-4 first-letter:mt-3 first-letter:text-black">
                       {aiSummary.summary}
                     </p>
                   </div>
@@ -156,39 +115,19 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
                 <div className="lg:col-span-4 space-y-6">
                   <div className="bg-black/5 p-6 rounded-none border-t-4 border-black space-y-6">
                     <h3 className="font-bebas text-sm font-black uppercase tracking-widest flex items-center justify-between border-b border-black/10 pb-3 text-black">
-                      OFFICIAL REPORT
-                      <Trophy className="h-4 w-4 text-accent" />
+                      OFFICIAL REPORT <Trophy className="h-4 w-4 text-accent" />
                     </h3>
-                    
                     <div className="flex items-center justify-between font-bebas italic">
                       <div className="text-center">
-                        <p className="text-[10px] font-black text-primary uppercase not-italic mb-1 tracking-widest">AZUL</p>
-                        <p className="text-5xl font-black text-black leading-none">{match.teamAScore}</p>
+                        <p className="text-[10px] font-black text-primary uppercase mb-1 tracking-widest">AZUL</p>
+                        <p className="text-5xl font-black text-black">{match.teamAScore}</p>
                       </div>
                       <div className="text-black/20 text-3xl font-light">vs</div>
                       <div className="text-center">
-                        <p className="text-[10px] font-black text-accent uppercase not-italic mb-1 tracking-widest">ROJO</p>
-                        <p className="text-5xl font-black text-black leading-none">{match.teamBScore}</p>
+                        <p className="text-[10px] font-black text-accent uppercase mb-1 tracking-widest">ROJO</p>
+                        <p className="text-5xl font-black text-black">{match.teamBScore}</p>
                       </div>
                     </div>
-
-                    <div className="space-y-4 pt-4 border-t border-black/10 font-oswald text-black">
-                      {match.teamAPlayers.find(p => p.isMvp) || match.teamBPlayers.find(p => p.isMvp) ? (
-                        <div className="space-y-1">
-                          <span className="text-[10px] uppercase font-black text-black/40 tracking-widest">MAN OF THE MATCH</span>
-                          <div className="flex items-center gap-2 text-[14px] font-black italic text-black uppercase">
-                            <Star className="h-4 w-4 text-accent fill-current" />
-                            <span>{allPlayers.find(p => p.id === (match.teamAPlayers.find(s => s.isMvp)?.playerId || match.teamBPlayers.find(s => s.isMvp)?.playerId))?.name}</span>
-                          </div>
-                        </div>
-                      ) : null}
-                    </div>
-                  </div>
-                  
-                  <div className="pt-4">
-                    <p className="text-[9px] font-black uppercase tracking-[0.3em] text-black/30 text-center font-oswald">
-                      AUTHENTIC ACADEMY GAZETTE PIECE • EST. 2010
-                    </p>
                   </div>
                 </div>
               </div>
@@ -196,23 +135,8 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
           </div>
         </div>
 
-        {/* Footer - Sticky Actions */}
         <div className="shrink-0 p-4 sm:p-6 bg-white border-t border-black/10 flex flex-col sm:flex-row gap-3 z-20">
-          {isAdmin && (
-            <button 
-              onClick={shareToWhatsApp}
-              className="flex-1 font-bebas font-black uppercase tracking-[0.2em] text-sm bg-black text-white hover:bg-black/90 rounded-none h-14 transition-colors shadow-lg active:scale-[0.98]"
-            >
-              BROADCAST TO WHATSAPP
-            </button>
-          )}
-          <button 
-            onClick={handleClose} 
-            className={cn(
-              "font-bebas font-black uppercase tracking-[0.2em] text-sm rounded-none h-14 px-10 transition-colors",
-              isAdmin ? "bg-transparent text-black border-2 border-black hover:bg-black/5" : "bg-black text-white hover:bg-black/90 flex-1"
-            )}
-          >
+          <button onClick={handleClose} className="bg-black text-white hover:bg-black/90 font-bebas font-black uppercase tracking-[0.2em] text-sm rounded-none h-14 w-full transition-colors">
             CLOSE GAZETTE
           </button>
         </div>

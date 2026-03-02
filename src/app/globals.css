@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    /* Modo Oscuro (Competición) */
+    /* Modo Oscuro (Competición - UEFA Style) */
     --background: 221 60% 10%; /* #0A1428 */
     --foreground: 210 40% 98%;
     
@@ -32,30 +32,19 @@
     --border: 217 33% 17%;
     --input: 217 33% 17%;
     --ring: 221 83% 53%;
-    --radius: 0.5rem; /* 8px exactos */
+    --radius: 0.5rem;
 
-    /* Colores Especiales de Podio */
-    --gold: 45 65% 52%; /* #D4AF37 */
+    /* Colores de Podio */
+    --gold: 45 65% 52%;
     --silver: 0 0% 75%;
     --bronze: 26 61% 50%;
     
-    --success: 142 46% 33%; /* #2E7D32 */
-    --warning: 38 95% 56%; /* #F9A825 */
+    --success: 142 46% 33%;
+    --warning: 38 95% 56%;
 
-    /* Gaceta (Modo Claro - Editorial) */
-    --paper: 0 0% 100%; /* #FFFFFF - Blanco puro */
-    --editorial-text: 0 0% 0%; /* #000000 - Negro absoluto */
-    --editorial-muted: 0 0% 20%; /* #333333 */
-
-    /* Sidebar */
-    --sidebar-background: 221 60% 10%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 221 83% 53%;
-    --sidebar-primary-foreground: 210 40% 98%;
-    --sidebar-accent: 221 39% 15%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217 33% 17%;
-    --sidebar-ring: 221 83% 53%;
+    /* Gaceta (Modo Claro Editorial - Alta Legibilidad) */
+    --paper: 0 0% 100%;
+    --editorial-text: 0 0% 0%;
   }
 }
 
@@ -65,18 +54,9 @@
     @apply bg-background text-foreground antialiased font-inter;
   }
 
-  /* Jerarquía de Tipografía de Transmisión */
-  h1, .h-xl {
-    @apply font-bebas text-[56px] leading-[1] uppercase tracking-wider;
-  }
-  
-  h2, .h-l {
-    @apply font-bebas text-[36px] leading-[1.1] uppercase tracking-wide;
-  }
-  
-  h3, .h-m {
-    @apply font-oswald text-[24px] leading-tight uppercase;
-  }
+  h1, .h-xl { @apply font-bebas text-[56px] leading-[1] uppercase tracking-wider; }
+  h2, .h-l { @apply font-bebas text-[36px] leading-[1.1] uppercase tracking-wide; }
+  h3, .h-m { @apply font-oswald text-[24px] leading-tight uppercase; }
 
   .font-inter { font-family: var(--font-inter), sans-serif; }
   .font-bebas { font-family: var(--font-bebas), sans-serif; }
@@ -86,12 +66,11 @@
 }
 
 @layer components {
-  /* Cards sólidas de competición */
   .competition-card {
     @apply bg-card text-card-foreground shadow-2xl border-none rounded-lg overflow-hidden transition-all duration-200;
   }
 
-  /* Estética Gaceta Editorial - FORZADA PARA CONTRASTE */
+  /* Estética Gaceta Editorial - FORZADA PARA MODO OSCURO */
   .editorial-paper {
     background-color: #FFFFFF !important;
     color: #000000 !important;
@@ -104,16 +83,15 @@
   }
 
   .editorial-title {
-    @apply font-playfair font-black text-black leading-tight;
+    @apply font-playfair font-black leading-tight;
     color: #000000 !important;
   }
 
   .editorial-divider {
-    @apply h-[4px] bg-[hsl(var(--accent))] w-full my-6;
+    @apply h-[4px] bg-[#B71C1C] w-full my-6;
   }
 }
 
-/* Micro-interacciones sutiles */
 .hover-lift {
   @apply transition-all duration-200 ease-out;
 }
@@ -130,7 +108,5 @@
 .podium-2 { @apply bg-gradient-to-r from-gray-400/10 to-transparent border-l-4 border-l-gray-400; }
 .podium-3 { @apply bg-gradient-to-r from-orange-700/10 to-transparent border-l-4 border-l-orange-700; }
 
-/* Eliminar definitivamente glassmorphism de cualquier componente */
-.glass-card, .bg-dot-pattern {
-  display: none !important;
-}
+/* Eliminar definitivamente rastro de estética SaaS */
+.glass-card, .bg-dot-pattern { display: none !important; }

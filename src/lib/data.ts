@@ -52,7 +52,6 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
   const sortedMatches = [...allMatches].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   
   const globalMatchesDesc = [...allMatches].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  const last3Ids = globalMatchesDesc.slice(0, 3).map(m => m.id);
   const last5Ids = globalMatchesDesc.slice(0, 5).map(m => m.id);
 
   sortedMatches.forEach(match => {
@@ -98,9 +97,7 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
               stats.matchesSinceLastCaptain++;
             }
 
-            if (goals > 0) {
-              stats.lastGoalDate = match.date;
-            }
+            if (goals > 0) stats.lastGoalDate = match.date;
 
             if (isMvp) {
               stats.totalMvp++;
@@ -114,7 +111,6 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
             if (team === 'A') stats.matchesAsBlue++;
             else stats.matchesAsRed++;
 
-            if (last3Ids.includes(match.id)) stats.matchesInLast3++;
             if (last5Ids.includes(match.id)) stats.matchesInLast5++;
             
             stats.form.push(result);
@@ -138,30 +134,16 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
           const pointsPossible = stats.matchesPlayed * 3;
           stats.efficiency = Math.round((pointsObtained / pointsPossible) * 100);
 
-          // LOGICA DE ELEGIBILIDAD: Al menos 1 partido en los últimos 5 del club
+          // JUSTICIA TOTAL: Activo si vino al menos 1 de los últimos 5
           stats.isActive = stats.matchesInLast5 >= 1;
           
-          // Puntaje base de prioridad para veteranos
+          // Puntaje para veteranos (asistencia vs capitanías previas)
           stats.captaincyPriorityScore = (stats.matchesInLast5 * 3) + (stats.matchesPlayed * 1) - (stats.totalCaptaincies * 4);
       }
       stats.form = [...stats.form].reverse();
   }
 
   return Object.values(statsMap);
-};
-
-export const getTeamGlobalStats = (allMatches: Match[]) => {
-    let blueWins = 0;
-    let redWins = 0;
-    let draws = 0;
-
-    allMatches.forEach(match => {
-        if (match.teamAScore > match.teamBScore) blueWins++;
-        else if (match.teamBScore > match.teamAScore) redWins++;
-        else draws++;
-    });
-
-    return { blueWins, redWins, draws, total: allMatches.length };
 };
 
 export const getChemistryRankings = (players: Player[], matches: Match[], minMatches = 2): ChemistryPair[] => {
@@ -199,53 +181,29 @@ export const getChemistryRankings = (players: Player[], matches: Match[], minMat
       };
     })
     .filter(pair => pair.player1 && pair.player2)
-    .sort((a, b) => {
-      if (b.winRate !== a.winRate) return b.winRate - a.winRate;
-      if (b.matches !== a.matches) return b.matches - a.matches;
-      return b.wins - a.wins;
-    });
+    .sort((a, b) => b.winRate - a.winRate || b.matches - a.matches);
 };
 
 export const getSpiciestMatch = (matches: Match[]) => {
   if (matches.length === 0) return null;
-  return [...matches].sort((a, b) => {
-    const totalA = a.teamAScore + a.teamBScore;
-    const totalB = b.teamAScore + b.teamBScore;
-    if (totalB !== totalA) return totalB - totalA;
-    return new Date(b.date).getTime() - new Date(a.date).getTime();
-  })[0];
+  return [...matches].sort((a, b) => (b.teamAScore + b.teamBScore) - (a.teamAScore + a.teamBScore))[0];
 };
 
 export const balanceTeams = (selectedPlayers: AggregatedPlayerStats[]) => {
   const goalkeepers = selectedPlayers.filter(p => p.position === 'Arquero');
   const outfieldPlayers = selectedPlayers.filter(p => p.position !== 'Arquero');
-  
   const teamA: AggregatedPlayerStats[] = [];
   const teamB: AggregatedPlayerStats[] = [];
-  
-  let scoreA = 0;
-  let scoreB = 0;
+  let scoreA = 0; let scoreB = 0;
 
-  const sortedGKs = [...goalkeepers].sort((a, b) => b.powerPoints - a.powerPoints);
-  sortedGKs.forEach(gk => {
-    if (scoreA <= scoreB) {
-      teamA.push(gk);
-      scoreA += gk.powerPoints;
-    } else {
-      teamB.push(gk);
-      scoreB += gk.powerPoints;
-    }
+  [...goalkeepers].sort((a, b) => b.powerPoints - a.powerPoints).forEach(gk => {
+    if (scoreA <= scoreB) { teamA.push(gk); scoreA += gk.powerPoints; }
+    else { teamB.push(gk); scoreB += gk.powerPoints; }
   });
 
-  const sortedOutfield = [...outfieldPlayers].sort((a, b) => b.powerPoints - a.powerPoints);
-  sortedOutfield.forEach((player) => {
-    if (scoreA <= scoreB) {
-      teamA.push(player);
-      scoreA += player.powerPoints;
-    } else {
-      teamB.push(player);
-      scoreB += player.powerPoints;
-    }
+  [...outfieldPlayers].sort((a, b) => b.powerPoints - a.powerPoints).forEach(p => {
+    if (scoreA <= scoreB) { teamA.push(p); scoreA += p.powerPoints; }
+    else { teamB.push(p); scoreB += p.powerPoints; }
   });
 
   return { teamA, teamB, scoreA, scoreB };
