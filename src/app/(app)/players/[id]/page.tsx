@@ -4,7 +4,7 @@ import * as React from 'react';
 import { useParams } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Trophy, History, TrendingUp, Loader2, MapPin, Target, Star, ChevronLeft, Calendar, ChevronRight, Zap } from "lucide-react";
+import { Trophy, History, TrendingUp, Loader2, MapPin, Target, Star, ChevronLeft, Calendar, ChevronRight, Zap, ShieldCheck, Crown } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -157,7 +157,7 @@ export default function PlayerProfilePage() {
         <StatBox label="Partidos" value={playerStats.matchesPlayed} icon={History} color="primary" sub="PJ" />
         <StatBox label="Goles" value={playerStats.totalGoals} icon={Target} color="accent" sub="GF" />
         <StatBox label="Premios MVP" value={playerStats.totalMvp} icon={Star} color="yellow-500" sub="MVP" />
-        <StatBox label="Efectividad" value={`${playerStats.winPercentage}%`} icon={TrendingUp} color="emerald-500" />
+        <StatBox label="Capitanías" value={playerStats.totalCaptaincies} icon={ShieldCheck} color="emerald-500" sub="CAP" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -185,7 +185,14 @@ export default function PlayerProfilePage() {
                     {playerMatchHistory.map((match) => (
                       <TableRow key={match.matchId} className="official-table-row group">
                         <TableCell className="pl-6 font-bold text-sm">
-                          {format(parseISO(match.date), "dd MMM yyyy", { locale: es })}
+                          <div className="flex flex-col">
+                            <span>{format(parseISO(match.date), "dd MMM yyyy", { locale: es })}</span>
+                            {match.isCaptain && (
+                              <div className="flex items-center gap-1 text-emerald-500 text-[8px] font-black uppercase tracking-widest mt-0.5">
+                                <ShieldCheck className="h-2.5 w-2.5" /> Brazalete de Capitán
+                              </div>
+                            )}
+                          </div>
                         </TableCell>
                         <TableCell className="text-center">
                           <Badge variant="outline" className={cn(
@@ -219,6 +226,44 @@ export default function PlayerProfilePage() {
         </div>
 
         <div className="space-y-8">
+          <Card className="competition-card border-t-4 border-t-emerald-500 bg-emerald-500/5">
+            <CardHeader className="bg-emerald-500/10 pb-4">
+              <CardTitle className="text-xs font-black uppercase tracking-widest text-emerald-500 flex items-center gap-2">
+                <Crown className="h-3 w-3" /> Récord de Mando
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6 space-y-6">
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div className="bg-emerald-500/10 p-2 rounded-lg">
+                  <p className="text-[8px] font-black uppercase text-emerald-500/60 mb-1">V</p>
+                  <p className="text-xl font-bebas text-emerald-500">{playerStats.winsAsCaptain}</p>
+                </div>
+                <div className="bg-orange-500/10 p-2 rounded-lg">
+                  <p className="text-[8px] font-black uppercase text-orange-500/60 mb-1">E</p>
+                  <p className="text-xl font-bebas text-orange-500">{playerStats.drawsAsCaptain}</p>
+                </div>
+                <div className="bg-red-500/10 p-2 rounded-lg">
+                  <p className="text-[8px] font-black uppercase text-red-500/60 mb-1">D</p>
+                  <p className="text-xl font-bebas text-red-500">{playerStats.lossesAsCaptain}</p>
+                </div>
+              </div>
+              <div className="pt-4 border-t border-white/5 space-y-2">
+                <div className="flex items-center justify-between text-[10px] font-bold uppercase text-muted-foreground/60">
+                  <span>Estado de Turno:</span>
+                  {playerStats.totalCaptaincies === 0 ? (
+                    <span className="text-emerald-500">Debut Pendiente</span>
+                  ) : (
+                    <span>Último mando: {format(parseISO(playerStats.lastCaptainDate!), "dd/MM", { locale: es })}</span>
+                  )}
+                </div>
+                <div className="flex items-center justify-between text-[10px] font-black uppercase text-white">
+                  <span>Partidos en deuda:</span>
+                  <span className="text-lg font-bebas italic text-emerald-500">{playerStats.matchesSinceLastCaptain}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           <Card className="competition-card border-t-4 border-t-primary bg-primary/5">
             <CardHeader className="bg-primary/10 pb-4">
               <CardTitle className="text-xs font-black uppercase tracking-widest text-primary flex items-center gap-2">
@@ -249,25 +294,6 @@ export default function PlayerProfilePage() {
                   <span className="text-3xl font-black italic text-primary">{playerStats.powerPoints}</span>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-
-          <Card className="competition-card">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xs font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                <Calendar className="h-3 w-3" /> Fidelidad al Club
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-center py-8">
-              <div className="relative inline-flex">
-                <span className="text-7xl font-black italic tracking-tighter text-white">
-                  {allMatches.length > 0 ? Math.round((playerStats.matchesPlayed / allMatches.length) * 100) : 0}%
-                </span>
-                <div className="absolute -top-4 -right-4 h-8 w-8 bg-primary rounded-full flex items-center justify-center animate-bounce">
-                  <Star className="h-4 w-4 text-white fill-white" />
-                </div>
-              </div>
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mt-2">Compromiso Total</p>
             </CardContent>
           </Card>
         </div>

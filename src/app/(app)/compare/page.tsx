@@ -5,7 +5,7 @@ import { calculateAggregatedStats } from "@/lib/data";
 import { useCollection, useMemoFirebase, useFirestore } from "@/firebase";
 import { collection } from "firebase/firestore";
 import type { Player, Match, AggregatedPlayerStats } from "@/lib/definitions";
-import { Loader2, ArrowLeftRight, Trophy, Zap, Shield, Target, TrendingUp, MapPin } from "lucide-react";
+import { Loader2, ArrowLeftRight, Trophy, Zap, Shield, Target, TrendingUp, MapPin, ShieldCheck, Star } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -166,9 +166,10 @@ export default function ComparePage() {
             <StatRow label="Partidos Jugados" val1={p1.matchesPlayed} val2={p2.matchesPlayed} icon={Shield} />
             <StatRow label="Goles Totales" val1={p1.totalGoals} val2={p2.totalGoals} icon={Target} />
             <StatRow label="Victorias" val1={p1.wins} val2={p2.wins} icon={Trophy} />
+            <StatRow label="Capitanías" val1={p1.totalCaptaincies} val2={p2.totalCaptaincies} icon={ShieldCheck} />
+            <StatRow label="Premios MVP" val1={p1.totalMvp} val2={p2.totalMvp} icon={Star} />
             <StatRow label="Efectividad" val1={p1.winPercentage} val2={p2.winPercentage} icon={TrendingUp} unit="%" />
             <StatRow label="Puntos de Poder" val1={p1.powerPoints} val2={p2.powerPoints} icon={Zap} />
-            <StatRow label="Premios MVP" val1={p1.totalMvp} val2={p2.totalMvp} icon={Target} />
           </Card>
       ) : (
           <div className="h-40 flex flex-col items-center justify-center border-2 border-dashed rounded-3xl opacity-30 text-center">

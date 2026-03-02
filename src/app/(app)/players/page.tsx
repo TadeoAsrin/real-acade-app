@@ -17,7 +17,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc, setDocumentNonBlocking, updateDocumentNonBlocking, deleteDocumentNonBlocking } from "@/firebase";
 import { collection, doc, query, orderBy } from "firebase/firestore";
 import type { Player, Match, AggregatedPlayerStats, PlayerPosition } from "@/lib/definitions";
-import { Loader2, UserPlus, Trash2, Pencil, ArrowUpDown, ChevronUp, ChevronDown } from "lucide-react";
+import { Loader2, UserPlus, Trash2, Pencil, ArrowUpDown, ChevronUp, ChevronDown, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -172,7 +172,21 @@ function PlayersList() {
   const allPlayers = playersData || [];
   const allMatches = matchesData || [];
   
-  const playerStats = calculateAggregatedStats(allPlayers, allMatches).sort((a, b) => {
+  const rawStats = calculateAggregatedStats(allPlayers, allMatches);
+  
+  // Jerarquía de capitanes sugeridos (top 2)
+  const suggestedLeaderIds = rawStats
+    .filter(p => p.isActive)
+    .sort((a, b) => {
+      if (a.totalCaptaincies === 0 && b.totalCaptaincies > 0) return -1;
+      if (a.totalCaptaincies > 0 && b.totalCaptaincies === 0) return 1;
+      if (a.totalCaptaincies === 0 && b.totalCaptaincies === 0) return b.matchesPlayed - a.matchesPlayed;
+      return b.captaincyPriorityScore - a.captaincyPriorityScore;
+    })
+    .slice(0, 2)
+    .map(p => p.playerId);
+
+  const playerStats = rawStats.sort((a, b) => {
     const aValue = a[sortConfig.key];
     const bValue = b[sortConfig.key];
 
@@ -239,7 +253,7 @@ function PlayersList() {
         )}
       </div>
 
-      <Card>
+      <Card className="competition-card">
           <CardContent className="p-0">
               <Table>
                   <TableHeader>
@@ -257,109 +271,126 @@ function PlayersList() {
                       <TableHead className="text-center cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('totalGoals')}>
                         <div className="flex items-center justify-center">Goles {getSortIcon('totalGoals')}</div>
                       </TableHead>
-                      <TableHead className="text-center cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('winPercentage')}>
-                        <div className="flex items-center justify-center">Efectividad {getSortIcon('winPercentage')}</div>
+                      <TableHead className="text-center cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('totalCaptaincies')}>
+                        <div className="flex items-center justify-center">Mando {getSortIcon('totalCaptaincies')}</div>
                       </TableHead>
                       {isAdmin && <TableHead className="text-right pr-6">Acciones</TableHead>}
                       </TableRow>
                   </TableHeader>
                   <TableBody>
-                      {playerStats.map((player) => (
-                      <TableRow key={player.playerId}>
-                          <TableCell className="pl-6">
-                          <div className="flex items-center gap-3">
-                              <Avatar className="h-9 w-9">
-                                <AvatarFallback className="bg-primary/20 text-primary font-black">{getInitials(player.name)}</AvatarFallback>
-                              </Avatar>
-                              <Link href={`/players/${player.playerId}`} className="font-medium hover:underline">{player.name}</Link>
-                          </div>
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {player.position ? (
-                                <Badge variant="outline" className="font-medium text-[10px] uppercase tracking-wider">
-                                    {player.position}
-                                </Badge>
-                            ) : (
-                                <span className="text-muted-foreground text-xs italic">Sin asignar</span>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-center font-mono">{player.matchesPlayed}</TableCell>
-                          <TableCell className="text-center font-mono">{player.totalGoals}</TableCell>
-                          <TableCell className="text-center font-mono">{player.winPercentage}%</TableCell>
-                          {isAdmin && (
-                            <TableCell className="text-right pr-6">
-                              <div className="flex justify-end gap-2">
-                                <Dialog open={editingPlayerId === player.playerId} onOpenChange={(open) => {
-                                  if (open) {
-                                    setEditingPlayerId(player.playerId);
-                                    setEditPlayerName(player.name);
-                                    setEditPlayerPosition(player.position || '');
-                                  } else {
-                                    setEditingPlayerId(null);
-                                  }
-                                }}>
-                                  <DialogTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
-                                      <Pencil className="h-4 w-4" />
-                                    </Button>
-                                  </DialogTrigger>
-                                  <DialogContent>
-                                    <DialogHeader>
-                                      <DialogTitle>Editar Jugador</DialogTitle>
-                                      <DialogDescription>Modifica los datos de {player.name}.</DialogDescription>
-                                    </DialogHeader>
-                                    <div className="grid gap-4 py-4">
-                                      <div className="grid gap-2">
-                                        <Label htmlFor="edit-name">Nombre Completo</Label>
-                                        <Input id="edit-name" value={editPlayerName} onChange={(e) => setEditPlayerName(e.target.value)} />
-                                      </div>
-                                      <div className="grid gap-2">
-                                        <Label htmlFor="edit-position">Posición</Label>
-                                        <Select onValueChange={(val) => setEditPlayerPosition(val as PlayerPosition)} value={editPlayerPosition}>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Selecciona una posición" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {POSITIONS.map(pos => (
-                                                    <SelectItem key={pos} value={pos}>{pos}</SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                      </div>
-                                    </div>
-                                    <DialogFooter>
-                                      <Button onClick={handleUpdatePlayer} disabled={isUpdatingPlayer || !editPlayerName}>
-                                        {isUpdatingPlayer && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                        Guardar Cambios
-                                      </Button>
-                                    </DialogFooter>
-                                  </DialogContent>
-                                </Dialog>
-
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
-                                      <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>¿Eliminar a {player.name}?</AlertDialogTitle>
-                                      <AlertDialogDescription>Atención: Si eliminas al jugador, sus datos se perderán en los partidos pasados.</AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                      <AlertDialogAction onClick={() => handleDeletePlayer(player.playerId)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                                        Eliminar permanentemente
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
+                      {playerStats.map((player) => {
+                        const isSuggested = suggestedLeaderIds.includes(player.playerId);
+                        return (
+                          <TableRow key={player.playerId} className="official-table-row">
+                              <TableCell className="pl-6">
+                              <div className="flex items-center gap-3">
+                                  <Avatar className="h-9 w-9">
+                                    <AvatarFallback className="bg-primary/20 text-primary font-black">{getInitials(player.name)}</AvatarFallback>
+                                  </Avatar>
+                                  <div className="flex flex-col">
+                                    <Link href={`/players/${player.playerId}`} className="font-medium hover:underline flex items-center gap-2">
+                                      {player.name}
+                                      {isSuggested && (
+                                        <Badge variant="outline" className="h-4 border-emerald-500/50 text-emerald-500 bg-emerald-500/5 text-[7px] font-black uppercase px-1.5 py-0 rounded-none">
+                                          LÍDER SUGERIDO
+                                        </Badge>
+                                      )}
+                                    </Link>
+                                  </div>
                               </div>
-                            </TableCell>
-                          )}
-                      </TableRow>
-                      ))}
+                              </TableCell>
+                              <TableCell className="text-center">
+                                {player.position ? (
+                                    <Badge variant="outline" className="font-medium text-[10px] uppercase tracking-wider">
+                                        {player.position}
+                                    </Badge>
+                                ) : (
+                                    <span className="text-muted-foreground text-xs italic">Sin asignar</span>
+                                )}
+                              </TableCell>
+                              <TableCell className="text-center font-mono font-bold">{player.matchesPlayed}</TableCell>
+                              <TableCell className="text-center font-mono font-bold">{player.totalGoals}</TableCell>
+                              <TableCell className="text-center">
+                                <div className="flex items-center justify-center gap-1.5">
+                                  <span className="font-mono font-bold">{player.totalCaptaincies}</span>
+                                  {player.totalCaptaincies > 0 && <ShieldCheck className="h-3 w-3 text-emerald-500" />}
+                                </div>
+                              </TableCell>
+                              {isAdmin && (
+                                <TableCell className="text-right pr-6">
+                                  <div className="flex justify-end gap-2">
+                                    <Dialog open={editingPlayerId === player.playerId} onOpenChange={(open) => {
+                                      if (open) {
+                                        setEditingPlayerId(player.playerId);
+                                        setEditPlayerName(player.name);
+                                        setEditPlayerPosition(player.position || '');
+                                      } else {
+                                        setEditingPlayerId(null);
+                                      }
+                                    }}>
+                                      <DialogTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
+                                          <Pencil className="h-4 w-4" />
+                                        </Button>
+                                      </DialogTrigger>
+                                      <DialogContent>
+                                        <DialogHeader>
+                                          <DialogTitle>Editar Jugador</DialogTitle>
+                                          <DialogDescription>Modifica los datos de {player.name}.</DialogDescription>
+                                        </DialogHeader>
+                                        <div className="grid gap-4 py-4">
+                                          <div className="grid gap-2">
+                                            <Label htmlFor="edit-name">Nombre Completo</Label>
+                                            <Input id="edit-name" value={editPlayerName} onChange={(e) => setEditPlayerName(e.target.value)} />
+                                          </div>
+                                          <div className="grid gap-2">
+                                            <Label htmlFor="edit-position">Posición</Label>
+                                            <Select onValueChange={(val) => setEditPlayerPosition(val as PlayerPosition)} value={editPlayerPosition}>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Selecciona una posición" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {POSITIONS.map(pos => (
+                                                        <SelectItem key={pos} value={pos}>{pos}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                          </div>
+                                        </div>
+                                        <DialogFooter>
+                                          <Button onClick={handleUpdatePlayer} disabled={isUpdatingPlayer || !editPlayerName}>
+                                            {isUpdatingPlayer && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                            Guardar Cambios
+                                          </Button>
+                                        </DialogFooter>
+                                      </DialogContent>
+                                    </Dialog>
+
+                                    <AlertDialog>
+                                      <AlertDialogTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
+                                          <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                      </AlertDialogTrigger>
+                                      <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                          <AlertDialogTitle>¿Eliminar a {player.name}?</AlertDialogTitle>
+                                          <AlertDialogDescription>Atención: Si eliminas al jugador, sus datos se perderán en los partidos pasados.</AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                          <AlertDialogAction onClick={() => handleDeletePlayer(player.playerId)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                            Eliminar permanentemente
+                                          </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                      </AlertDialogContent>
+                                    </AlertDialog>
+                                  </div>
+                                </TableCell>
+                              )}
+                          </TableRow>
+                        );
+                      })}
                   </TableBody>
               </Table>
           </CardContent>

@@ -66,6 +66,11 @@ export type AggregatedPlayerStats = {
   matchesInLast3: number;
   matchesInLast5: number;
   captaincyPriorityScore: number;
+  // Estadísticas de liderazgo
+  winsAsCaptain: number;
+  lossesAsCaptain: number;
+  drawsAsCaptain: number;
+  matchesSinceLastCaptain: number;
 };
 
 export type ChemistryPair = {

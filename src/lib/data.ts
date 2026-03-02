@@ -42,6 +42,10 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
       matchesInLast3: 0,
       matchesInLast5: 0,
       captaincyPriorityScore: 0,
+      winsAsCaptain: 0,
+      lossesAsCaptain: 0,
+      drawsAsCaptain: 0,
+      matchesSinceLastCaptain: 0,
     };
   });
 
@@ -70,10 +74,30 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
             stats.goalsFor += myTeamScore;
             stats.goalsAgainst += otherTeamScore;
 
+            let result: 'W' | 'D' | 'L' = 'L';
+            if (draw) {
+                stats.draws++;
+                stats.powerPoints += POINTS.DRAW;
+                result = 'D';
+            } else if ((team === 'A' && teamAWon) || (team === 'B' && teamBWon)) {
+                stats.wins++;
+                stats.powerPoints += POINTS.WIN;
+                result = 'W';
+            } else {
+                stats.losses++;
+            }
+
             if (isCaptain) {
               stats.totalCaptaincies++;
               stats.lastCaptainDate = match.date;
+              stats.matchesSinceLastCaptain = 0;
+              if (result === 'W') stats.winsAsCaptain++;
+              if (result === 'D') stats.drawsAsCaptain++;
+              if (result === 'L') stats.lossesAsCaptain++;
+            } else {
+              stats.matchesSinceLastCaptain++;
             }
+
             if (goals > 0) {
               stats.lastGoalDate = match.date;
             }
@@ -92,19 +116,6 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
 
             if (last3Ids.includes(match.id)) stats.matchesInLast3++;
             if (last5Ids.includes(match.id)) stats.matchesInLast5++;
-
-            let result: 'W' | 'D' | 'L' = 'L';
-            if (draw) {
-                stats.draws++;
-                stats.powerPoints += POINTS.DRAW;
-                result = 'D';
-            } else if ((team === 'A' && teamAWon) || (team === 'B' && teamBWon)) {
-                stats.wins++;
-                stats.powerPoints += POINTS.WIN;
-                result = 'W';
-            } else {
-                stats.losses++;
-            }
             
             stats.form.push(result);
             if (stats.form.length > 5) stats.form.shift();
