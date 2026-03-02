@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -35,7 +34,7 @@ const TrendIcon = ({ form }: { form: ('W' | 'D' | 'L')[] }) => {
   return <Minus className="h-4 w-4 text-muted-foreground/40" />;
 };
 
-export default function StandingsPage() {
+function StandingsContent() {
   const searchParams = useSearchParams();
   const firestore = useFirestore();
   const { user } = useUser();
@@ -114,7 +113,6 @@ export default function StandingsPage() {
         </TabsList>
 
         <div className="mt-10">
-          {/* TABLA GENERAL */}
           <TabsContent value="general" className="animate-in fade-in slide-in-from-bottom-2">
             <Card className="competition-card">
               <Table>
@@ -153,7 +151,6 @@ export default function StandingsPage() {
             </Card>
           </TabsContent>
 
-          {/* GOLEADORES (PICHICHI) */}
           <TabsContent value="goleadores" className="animate-in fade-in slide-in-from-bottom-2">
             <Card className="competition-card">
               <Table>
@@ -186,7 +183,6 @@ export default function StandingsPage() {
             </Card>
           </TabsContent>
 
-          {/* GOLES FECHA (DESGLOSE POR JORNADA) */}
           <TabsContent value="goles-fecha" className="animate-in fade-in slide-in-from-bottom-2 space-y-8">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-card p-6 rounded-lg border border-white/5">
               <div className="flex items-center gap-3">
@@ -261,7 +257,6 @@ export default function StandingsPage() {
             )}
           </TabsContent>
 
-          {/* EFECTIVIDAD (RENDIMIENTO PURO) */}
           <TabsContent value="efectividad" className="animate-in fade-in slide-in-from-bottom-2">
             <Card className="competition-card">
               <Table>
@@ -296,15 +291,8 @@ export default function StandingsPage() {
                 </TableBody>
               </Table>
             </Card>
-            <div className="mt-6 p-4 bg-card/50 rounded-lg border border-white/5 flex items-start gap-3">
-              <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-              <p className="text-[10px] text-muted-foreground leading-relaxed uppercase font-bold tracking-wider">
-                La efectividad se calcula sobre el porcentaje de puntos obtenidos (3 pts por victoria, 1 por empate) respecto al máximo posible. Mínimo 3 partidos jugados.
-              </p>
-            </div>
           </TabsContent>
 
-          {/* CAPITANES (JUSTICIA TOTAL) */}
           <TabsContent value="capitanes" className="animate-in fade-in slide-in-from-bottom-2 space-y-12">
             {suggestedCandidates.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -373,5 +361,13 @@ export default function StandingsPage() {
         </div>
       </Tabs>
     </div>
+  );
+}
+
+export default function StandingsPage() {
+  return (
+    <React.Suspense fallback={<div className="flex h-[50vh] items-center justify-center"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div>}>
+      <StandingsContent />
+    </React.Suspense>
   );
 }

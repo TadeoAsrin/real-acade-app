@@ -8,12 +8,10 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Newspaper, Quote, Trophy, Star, X } from 'lucide-react';
+import { Newspaper, Trophy, X, Quote } from 'lucide-react';
 import { es } from 'date-fns/locale';
 import { format } from 'date-fns';
-import { Badge } from '@/components/ui/badge';
 import type { Match, Player } from '@/lib/definitions';
-import { cn } from '@/lib/utils';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 
@@ -35,7 +33,6 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
   }, [firestore, user]);
 
   const { data: adminRole } = useDoc<{isAdmin: boolean}>(adminRoleRef);
-  const isAdmin = !!adminRole?.isAdmin;
 
   React.useEffect(() => {
     if (!match) return;
@@ -60,7 +57,7 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-w-4xl p-0 overflow-hidden border-none editorial-paper shadow-2xl flex flex-col h-[92vh] sm:h-auto sm:max-h-[85vh] bottom-0 sm:bottom-auto translate-y-0 sm:translate-y-[-50%] top-auto sm:top-[50%] bg-white text-black">
+      <DialogContent className="max-w-4xl p-0 overflow-hidden border-none shadow-2xl flex flex-col h-[92vh] sm:h-auto sm:max-h-[85vh] bottom-0 sm:bottom-auto translate-y-0 sm:translate-y-[-50%] top-auto sm:top-[50%] bg-white text-black editorial-paper">
         <DialogHeader className="sr-only">
           <DialogTitle>La Gaceta de Real Acade</DialogTitle>
           <DialogDescription>Crónica oficial del encuentro</DialogDescription>

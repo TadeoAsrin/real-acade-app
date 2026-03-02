@@ -1,13 +1,9 @@
-
-import { redirect } from "next/navigation";
-
 /**
- * Este archivo ha sido modificado para evitar conflictos con el archivo raíz src/app/page.tsx.
- * Ambos resuelven a la misma ruta (/), lo que causa errores de compilación en Next.js 15.
- * Redirigimos al dashboard para mantener la consistencia.
+ * Este archivo se mantiene vacío de exportaciones por defecto 
+ * para evitar el conflicto de rutas con src/app/page.tsx en Next.js 15.
+ * La ruta raíz (/) se gestiona exclusivamente en src/app/page.tsx.
  */
-export default function AppPageRedirect() {
-  redirect("/dashboard");
-}
-
 export const dynamic = 'force-static';
+export function AppGroupRoot() {
+  return null;
+}
