@@ -259,7 +259,14 @@ export default function DashboardPage() {
           {[
             { label: "REYES MVP", value: mvpLeaders[0]?.totalMvp || 0, sub: "Premios", icon: Star, color: "text-yellow-500", href: "/pulse/mvp" },
             { label: "RÉCORD GOLES", value: spiciestMatch ? spiciestMatch.teamAScore + spiciestMatch.teamBScore : 0, sub: "En un partido", icon: Flame, color: "text-orange-500", href: "/pulse/league" },
-            { label: "SOCIEDAD IDEAL", value: topChemistry?.winRate || 0, sub: topChemistry ? "% Efectividad" : "Analizando...", icon: LinkIcon, color: "text-primary", href: "/pulse/partnership" },
+            { 
+              label: "SOCIEDAD IDEAL", 
+              value: topChemistry ? `${topChemistry.winRate}%` : "0%", 
+              sub: topChemistry ? `${topChemistry.player1.name.split(' ')[0]} + ${topChemistry.player2.name.split(' ')[0]}` : "Analizando...", 
+              icon: LinkIcon, 
+              color: "text-primary", 
+              href: "/pulse/partnership" 
+            },
             { label: "INFALTABLES", value: maxAttendanceRate, sub: "% Asistencia", icon: Users, color: "text-emerald-500", href: "/pulse/attendance" }
           ].map((item, i) => (
             <Link key={i} href={item.href}>
@@ -267,7 +274,7 @@ export default function DashboardPage() {
                 <CardContent className="p-6 flex flex-col items-center text-center gap-4">
                   <item.icon className={cn("h-8 w-8", item.color)} />
                   <div className="space-y-1">
-                    <p className="text-4xl font-bebas text-white">{item.value}</p>
+                    <p className="text-4xl font-bebas text-white uppercase">{item.value}</p>
                     <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground font-oswald">{item.label}</p>
                     <p className="text-[8px] uppercase font-bold text-muted-foreground/40 font-oswald">{item.sub}</p>
                   </div>

@@ -134,10 +134,7 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
           const pointsPossible = stats.matchesPlayed * 3;
           stats.efficiency = Math.round((pointsObtained / pointsPossible) * 100);
 
-          // JUSTICIA TOTAL: Activo si vino al menos 1 de los últimos 5
           stats.isActive = stats.matchesInLast5 >= 1;
-          
-          // Puntaje para veteranos (asistencia vs capitanías previas)
           stats.captaincyPriorityScore = (stats.matchesInLast5 * 3) + (stats.matchesPlayed * 1) - (stats.totalCaptaincies * 4);
       }
       stats.form = [...stats.form].reverse();
