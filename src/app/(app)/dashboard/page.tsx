@@ -73,7 +73,7 @@ export default function DashboardPage() {
   const playerStats = calculateAggregatedStats(allPlayers, allMatches);
   const lastMatch = allMatches[0];
   const spiciestMatch = getSpiciestMatch(allMatches);
-  const chemistryRankings = getChemistryRankings(allPlayers, allMatches, 2);
+  const chemistryRankings = getChemistryRankings(allPlayers, allMatches, 1);
   const topChemistry = chemistryRankings[0];
 
   const sortedByGoals = [...playerStats].sort((a, b) => b.totalGoals - a.totalGoals || b.goalsPerMatch - a.goalsPerMatch);
@@ -81,22 +81,19 @@ export default function DashboardPage() {
   const runnersUp = sortedByGoals.slice(1, 5); 
 
   const sortedByInfluence = [...playerStats]
-    .filter(p => p.matchesPlayed >= 3)
     .sort((a, b) => b.winPercentage - a.winPercentage || b.matchesPlayed - a.matchesPlayed);
   const influencer = sortedByInfluence[0];
   const influencerRunnersUp = sortedByInfluence.slice(1, 3);
 
   const mvpLeaders = [...playerStats].sort((a, b) => b.totalMvp - a.totalMvp || b.powerPoints - a.powerPoints).slice(0, 3);
-  const attendanceLeaders = [...playerStats].sort((a, b) => b.matchesPlayed - a.matchesPlayed || a.name.localeCompare(b.name)).slice(0, 3);
-  
   const totalMatches = allMatches.length;
   const maxAttendanceRate = totalMatches > 0 ? Math.round((Math.max(...playerStats.map(p => p.matchesPlayed)) / totalMatches) * 100) : 0;
 
-  // Humildad
-  const imanLeaders = [...playerStats].filter(p => p.losses > 0).sort((a, b) => b.losses - a.losses).slice(0, 3);
-  const riesgoLeaders = [...playerStats].filter(p => p.matchesPlayed >= 3).sort((a, b) => a.winPercentage - b.winPercentage).slice(0, 3);
+  // Sala de Humildad
+  const imanLeaders = [...playerStats].sort((a, b) => b.losses - a.losses).slice(0, 3);
+  const riesgoLeaders = [...playerStats].filter(p => p.matchesPlayed >= 1).sort((a, b) => a.winPercentage - b.winPercentage).slice(0, 3);
   const polvoraLeaders = [...playerStats]
-    .filter(p => p.matchesPlayed >= 3 && (p.position === 'Mediocampista' || p.position === 'Delantero'))
+    .filter(p => p.position === 'Mediocampista' || p.position === 'Delantero')
     .sort((a, b) => a.goalsPerMatch - b.goalsPerMatch)
     .slice(0, 3);
 
@@ -218,22 +215,24 @@ export default function DashboardPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="flex items-center gap-5">
-                <Avatar className="h-20 w-20 border-4 border-primary/20">
-                  <AvatarFallback className="bg-primary/10 text-primary text-3xl font-bebas">{getInitials(influencer?.name || "?")}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3 className="text-4xl font-bebas text-white uppercase leading-none">{influencer?.name || '-'}</h3>
-                  <p className="text-[10px] font-black text-primary/60 uppercase tracking-widest mt-1 font-oswald">FACTOR DE VICTORIA</p>
+              <Link href="/pulse/influencer" className="block group">
+                <div className="flex items-center gap-5">
+                  <Avatar className="h-20 w-20 border-4 border-primary/20 group-hover:border-primary transition-all">
+                    <AvatarFallback className="bg-primary/10 text-primary text-3xl font-bebas">{getInitials(influencer?.name || "?")}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h3 className="text-4xl font-bebas text-white group-hover:text-primary uppercase leading-none">{influencer?.name || '-'}</h3>
+                    <p className="text-[10px] font-black text-primary/60 uppercase tracking-widest mt-1 font-oswald">FACTOR DE VICTORIA</p>
+                  </div>
                 </div>
-              </div>
-              <div className="space-y-3">
-                <div className="flex items-baseline justify-between">
-                  <span className="text-6xl font-bebas text-primary leading-none">{influencer?.winPercentage || 0}%</span>
-                  <span className="text-[10px] font-black text-muted-foreground uppercase font-oswald">{influencer?.wins} VICTORIAS</span>
+                <div className="mt-6 space-y-3">
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-6xl font-bebas text-primary leading-none">{influencer?.winPercentage || 0}%</span>
+                    <span className="text-[10px] font-black text-muted-foreground uppercase font-oswald">{influencer?.wins} VICTORIAS</span>
+                  </div>
+                  <Progress value={influencer?.winPercentage || 0} className="h-2 bg-white/5" />
                 </div>
-                <Progress value={influencer?.winPercentage || 0} className="h-2 bg-white/5" />
-              </div>
+              </Link>
               <div className="pt-6 border-t border-white/5 space-y-3">
                 {influencerRunnersUp.map((runner, idx) => (
                   <div key={runner.playerId} className="flex items-center justify-between text-sm">
@@ -266,16 +265,16 @@ export default function DashboardPage() {
               color: "text-primary", 
               href: "/pulse/partnership" 
             },
-            { label: "INFALTABLES", value: maxAttendanceRate, sub: "% Asistencia", icon: Users, color: "text-emerald-500", href: "/pulse/attendance" }
+            { label: "INFALTABLES", value: `${maxAttendanceRate}%`, sub: "Asistencia", icon: Users, color: "text-emerald-500", href: "/pulse/attendance" }
           ].map((item, i) => (
             <Link key={i} href={item.href}>
-              <Card className="competition-card hover-lift h-full">
+              <Card className="competition-card hover-lift h-full border-b-2 border-transparent hover:border-white/10">
                 <CardContent className="p-6 flex flex-col items-center text-center gap-4">
                   <item.icon className={cn("h-8 w-8", item.color)} />
                   <div className="space-y-1">
                     <p className="text-4xl font-bebas text-white uppercase">{item.value}</p>
                     <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground font-oswald">{item.label}</p>
-                    <p className="text-[8px] uppercase font-bold text-muted-foreground/40 font-oswald">{item.sub}</p>
+                    <p className="text-[8px] uppercase font-bold text-muted-foreground/40 font-oswald truncate max-w-[140px]">{item.sub}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -291,7 +290,7 @@ export default function DashboardPage() {
           {[
             { label: "IMÁN DE DERROTAS", data: imanLeaders, icon: Skull, unit: "Derrotas", href: "/pulse/iman-derrotas" },
             { label: "FACTOR DE RIESGO", data: riesgoLeaders, icon: Ghost, unit: "% Victorias", href: "/pulse/riesgo" },
-            { label: "PÓLVORA MOJADA", data: polvoraLeaders, icon: Droplets, unit: "Goles/PJ", href: "/pulse/polvora" }
+            { label: "PÓLVORA MOJADA", data: polvoraLeaders, icon: Droplets, unit: "Goles/PJ", href: "/pulse/polvora", sub: "SOLO ROLES OFENSIVOS" }
           ].map((sec, i) => (
             <Link key={i} href={sec.href}>
               <Card className="competition-card border-t border-white/5 bg-surface-900/50 hover-lift h-full">
@@ -300,8 +299,8 @@ export default function DashboardPage() {
                     <div className="flex items-center gap-2">
                       <sec.icon className="h-3 w-3" /> {sec.label}
                     </div>
-                    {sec.label === "PÓLVORA MOJADA" && (
-                      <span className="text-[7px] font-bold bg-white/5 px-1.5 py-0.5 rounded text-white/40">ATAQUE</span>
+                    {sec.sub && (
+                      <span className="text-[7px] font-bold bg-white/5 px-1.5 py-0.5 rounded text-white/40">{sec.sub}</span>
                     )}
                   </CardTitle>
                 </CardHeader>

@@ -5,10 +5,10 @@ import { useParams, useRouter } from "next/navigation";
 import { calculateAggregatedStats, getChemistryRankings, getSpiciestMatch } from "@/lib/data";
 import { useCollection, useMemoFirebase, useFirestore } from "@/firebase";
 import { collection, query, orderBy } from "firebase/firestore";
-import type { Match, Player } from "@/lib/definitions";
+import type { Match, Player, AggregatedPlayerStats } from "@/lib/definitions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Brain, Link as LinkIcon, Zap, Crown, Flame, Calendar, Star, Users, Target, Skull, Ghost, Droplets, Loader2 } from "lucide-react";
+import { ArrowLeft, Brain, Link as LinkIcon, Zap, Crown, Flame, Calendar, Star, Users, Target, Skull, Ghost, Droplets, Loader2, Trophy } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials, cn } from "@/lib/utils";
 import Link from "next/link";
@@ -40,14 +40,6 @@ export default function PulseDetailPage() {
     return calculateAggregatedStats(allPlayers, allMatches);
   }, [allPlayers, allMatches]);
 
-  const spiciestMatch = React.useMemo(() => {
-    return getSpiciestMatch(allMatches);
-  }, [allMatches]);
-
-  const chemistryRankings = React.useMemo(() => {
-    return getChemistryRankings(allPlayers, allMatches, 2);
-  }, [allPlayers, allMatches]);
-
   if (playersLoading || matchesLoading) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
@@ -56,139 +48,90 @@ export default function PulseDetailPage() {
     );
   }
 
-  const renderInfluencer = () => {
-    const sorted = [...playerStats]
-      .filter(p => p.matchesPlayed >= 1)
-      .sort((a, b) => b.winPercentage - a.winPercentage || b.matchesPlayed - a.matchesPlayed)
-      .slice(0, 20);
+  // --- RENDERS DE RANKING ---
 
-    return (
-      <div className="space-y-8 max-w-2xl mx-auto">
-        <div className="text-center space-y-4">
-            <div className="mx-auto w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center">
-                <Brain className="h-10 w-10 text-primary" />
-            </div>
-            <h1 className="text-4xl font-black italic uppercase tracking-tighter">Cerebros del Campo</h1>
-            <p className="text-muted-foreground italic">El factor determinante. Jugadores con mayor porcentaje de victoria en la competición.</p>
-        </div>
-
-        <div className="space-y-4">
-            {sorted.map((p, i) => (
-                <Card key={p.playerId} className="glass-card border-white/5 hover:border-primary/30 transition-all">
-                    <CardContent className="p-6 flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <span className="text-2xl font-black italic text-muted-foreground/30 w-8">{i + 1}</span>
-                            <Avatar className="h-12 w-12">
-                                <AvatarFallback className="bg-muted font-black">{getInitials(p.name)}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex flex-col">
-                                <span className="font-black text-lg">{p.name}</span>
-                                <span className="text-[10px] font-bold uppercase text-muted-foreground">{p.wins}V en {p.matchesPlayed} PJ</span>
-                            </div>
-                        </div>
-                        <div className="text-right">
-                            <span className="text-3xl font-black italic text-primary">{p.winPercentage}%</span>
-                            <p className="text-[8px] uppercase font-black text-muted-foreground leading-none">Efectividad</p>
-                        </div>
-                    </CardContent>
-                </Card>
-            ))}
-        </div>
+  const renderRankingList = (
+    title: string, 
+    description: string, 
+    icon: any, 
+    sortedData: AggregatedPlayerStats[], 
+    valueFn: (p: AggregatedPlayerStats) => string | number,
+    label: string,
+    colorClass: string
+  ) => (
+    <div className="space-y-8 max-w-2xl mx-auto">
+      <div className="text-center space-y-4">
+          <div className={cn("mx-auto w-20 h-20 rounded-full flex items-center justify-center border", colorClass.replace('text-', 'bg-').replace('text-', 'border-') + '/20')}>
+              {React.createElement(icon, { className: cn("h-10 w-10", colorClass) })}
+          </div>
+          <h1 className="text-4xl font-black italic uppercase tracking-tighter">{title}</h1>
+          <p className="text-muted-foreground italic">{description}</p>
       </div>
-    );
-  };
 
-  const renderMvpRanking = () => {
-    const sorted = [...playerStats]
-      .sort((a, b) => b.totalMvp - a.totalMvp || b.powerPoints - a.powerPoints)
-      .slice(0, 20);
-
-    return (
-      <div className="space-y-8 max-w-2xl mx-auto">
-        <div className="text-center space-y-4">
-            <div className="mx-auto w-20 h-20 bg-yellow-500/10 rounded-full flex items-center justify-center">
-                <Star className="h-10 w-10 text-yellow-500 fill-yellow-500" />
+      <div className="space-y-4">
+          {sortedData.length > 0 ? sortedData.map((p, i) => (
+              <Card key={p.playerId} className={cn("glass-card border-white/5 hover:border-white/20 transition-all", i < 3 && "border-primary/20 bg-primary/5")}>
+                  <CardContent className="p-6 flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                          <span className="text-2xl font-black italic text-muted-foreground/30 w-8">{i + 1}</span>
+                          <Avatar className="h-14 w-14 border-2 border-white/10">
+                              <AvatarFallback className="bg-muted font-black text-lg">{getInitials(p.name)}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex flex-col">
+                              <Link href={`/players/${p.playerId}`} className="font-black text-xl hover:underline italic">{p.name}</Link>
+                              <span className="text-[10px] font-bold uppercase text-muted-foreground">{p.matchesPlayed} Partidos Jugados</span>
+                          </div>
+                      </div>
+                      <div className="text-right">
+                          <span className={cn("text-4xl font-black italic", colorClass)}>{valueFn(p)}</span>
+                          <p className="text-[10px] uppercase font-black text-muted-foreground leading-none">{label}</p>
+                      </div>
+                  </CardContent>
+              </Card>
+          )) : (
+            <div className="h-40 flex flex-col items-center justify-center border-2 border-dashed rounded-3xl opacity-30 italic">
+              Sin datos registrados.
             </div>
-            <h1 className="text-4xl font-black italic uppercase tracking-tighter">Reyes del MVP</h1>
-            <p className="text-muted-foreground italic">El reconocimiento máximo de la jornada. Ranking histórico de premios al mejor del partido.</p>
-        </div>
-
-        <div className="space-y-4">
-            {sorted.length > 0 ? sorted.map((p, i) => (
-                <Card key={p.playerId} className={cn("glass-card border-white/5 hover:border-yellow-500/30 transition-all", p.totalMvp > 0 && "bg-yellow-500/5 border-yellow-500/20")}>
-                    <CardContent className="p-6 flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <span className="text-2xl font-black italic text-muted-foreground/30 w-8">{i + 1}</span>
-                            <Avatar className="h-12 w-12">
-                                <AvatarFallback className="bg-muted font-black">{getInitials(p.name)}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex flex-col">
-                                <span className="font-black text-lg">{p.name}</span>
-                                <span className="text-[10px] font-bold uppercase text-muted-foreground">{p.matchesPlayed} Partidos Jugados</span>
-                            </div>
-                        </div>
-                        <div className="text-right">
-                            <span className="text-3xl font-black italic text-yellow-500">{p.totalMvp}</span>
-                            <p className="text-[8px] uppercase font-black text-muted-foreground leading-none">Premios</p>
-                        </div>
-                    </CardContent>
-                </Card>
-            )) : (
-              <div className="h-40 flex flex-col items-center justify-center border-2 border-dashed rounded-3xl opacity-30 italic">
-                Aún no hay batallas registradas.
-              </div>
-            )}
-        </div>
+          )}
       </div>
-    );
-  };
+    </div>
+  );
 
-  const renderAttendance = () => {
-    const totalMatches = allMatches.length;
+  if (type === 'influencer') {
+    const sorted = [...playerStats].sort((a, b) => b.winPercentage - a.winPercentage || b.matchesPlayed - a.matchesPlayed);
+    return renderRankingList("Cerebros del Campo", "Ranking de efectividad pura. Los jugadores con mayor porcentaje de victoria.", Brain, sorted, (p) => `${p.winPercentage}%`, "Victorias", "text-primary");
+  }
+
+  if (type === 'mvp') {
+    const sorted = [...playerStats].sort((a, b) => b.totalMvp - a.totalMvp || b.powerPoints - a.powerPoints);
+    return renderRankingList("Reyes del MVP", "El trono de los mejores del partido. Ranking acumulado de premios oficiales.", Star, sorted, (p) => p.totalMvp, "Premios", "text-yellow-500");
+  }
+
+  if (type === 'attendance') {
+    const total = allMatches.length;
+    const sorted = [...playerStats].sort((a, b) => b.matchesPlayed - a.matchesPlayed || a.name.localeCompare(b.name));
+    return renderRankingList("Los Infaltables", "El compromiso no se negocia. Ranking de asistencia a la academia.", Users, sorted, (p) => `${total > 0 ? Math.round((p.matchesPlayed / total) * 100) : 0}%`, "Asistencia", "text-emerald-500");
+  }
+
+  if (type === 'iman-derrotas') {
+    const sorted = [...playerStats].sort((a, b) => b.losses - a.losses || b.matchesPlayed - a.matchesPlayed);
+    return renderRankingList("Imán de Derrotas", "La mala racha no perdona. Jugadores con más caídas en el historial.", Skull, sorted, (p) => p.losses, "Derrotas", "text-red-500");
+  }
+
+  if (type === 'riesgo') {
+    const sorted = [...playerStats].filter(p => p.matchesPlayed >= 1).sort((a, b) => a.winPercentage - b.winPercentage || a.matchesPlayed - b.matchesPlayed);
+    return renderRankingList("Factor de Riesgo", "Menor porcentaje de victorias. Los que más sufren para sumar de a tres.", Ghost, sorted, (p) => `${p.winPercentage}%`, "Efectividad", "text-zinc-400");
+  }
+
+  if (type === 'polvora') {
     const sorted = [...playerStats]
-      .sort((a, b) => b.matchesPlayed - a.matchesPlayed || a.name.localeCompare(b.name))
-      .slice(0, 30);
+      .filter(p => p.position === 'Mediocampista' || p.position === 'Delantero')
+      .sort((a, b) => a.goalsPerMatch - b.goalsPerMatch || a.totalGoals - b.totalGoals);
+    return renderRankingList("Pólvora Mojada", "Baja producción ofensiva en roles de ataque (Medios y Delanteros).", Droplets, sorted, (p) => p.goalsPerMatch, "Goles/PJ", "text-blue-400");
+  }
 
-    return (
-      <div className="space-y-8 max-w-2xl mx-auto">
-        <div className="text-center space-y-4">
-            <div className="mx-auto w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center border border-emerald-500/20">
-                <Users className="h-10 w-10 text-emerald-500" />
-            </div>
-            <h1 className="text-4xl font-black italic uppercase tracking-tighter">Los Infaltables</h1>
-            <p className="text-muted-foreground italic">El ranking de compromiso. Los jugadores que siempre están listos para saltar a la cancha.</p>
-        </div>
-
-        <div className="space-y-4">
-            {sorted.map((p, i) => {
-                const percentage = totalMatches > 0 ? Math.round((p.matchesPlayed / totalMatches) * 100) : 0;
-                return (
-                    <Card key={p.playerId} className="glass-card transition-all border-white/5">
-                        <CardContent className="p-6 flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                <span className="text-2xl font-black italic text-muted-foreground/30 w-8">{i + 1}</span>
-                                <Avatar className="h-12 w-12">
-                                    <AvatarFallback className="bg-muted font-black">{getInitials(p.name)}</AvatarFallback>
-                                </Avatar>
-                                <div className="flex flex-col">
-                                    <span className="font-black text-lg">{p.name}</span>
-                                    <span className="text-[10px] font-bold uppercase text-muted-foreground">{p.matchesPlayed} de {totalMatches} Partidos</span>
-                                </div>
-                            </div>
-                            <div className="text-right">
-                                <span className="text-3xl font-black italic text-emerald-500">{percentage}%</span>
-                                <p className="text-[8px] uppercase font-black text-muted-foreground leading-none">Asistencia</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                );
-            })}
-        </div>
-      </div>
-    );
-  };
-
-  const renderPartnership = () => {
+  if (type === 'partnership') {
+    const pairs = getChemistryRankings(allPlayers, allMatches, 1); // Bajamos umbral a 1 para que siempre haya datos
     return (
       <div className="space-y-8 max-w-2xl mx-auto">
         <div className="text-center space-y-4">
@@ -198,190 +141,27 @@ export default function PulseDetailPage() {
             <h1 className="text-4xl font-black italic uppercase tracking-tighter">Sociedades de Élite</h1>
             <p className="text-muted-foreground italic">La química perfecta. Duplas de jugadores que dominan el campo cuando comparten equipo.</p>
         </div>
-
-        {chemistryRankings.length > 0 ? (
-            <div className="space-y-4">
-                {chemistryRankings.map((pair, i) => {
-                    const isNew = pair.matches === 1;
-                    return (
-                        <Card key={i} className={cn("glass-card transition-all", i === 0 ? "border-primary/50 bg-primary/5 scale-105" : "border-white/5")}>
-                            <CardContent className="p-6 flex items-center justify-between">
-                                <div className="flex items-center gap-4">
-                                    <div className="flex flex-col items-center w-8">
-                                        {i === 0 ? <Crown className="h-5 w-5 text-primary mb-1" /> : <span className="text-2xl font-black italic text-muted-foreground/30">{i + 1}</span>}
-                                    </div>
-                                    <div className="flex -space-x-4">
-                                        <Avatar className={cn("h-12 w-12 border-2 border-background ring-2", i === 0 ? "ring-primary/40" : "ring-white/10")}>
-                                            <AvatarFallback className="bg-muted font-black">{getInitials(pair.player1.name)}</AvatarFallback>
-                                        </Avatar>
-                                        <Avatar className={cn("h-12 w-12 border-2 border-background ring-2", i === 0 ? "ring-primary/40" : "ring-white/10")}>
-                                            <AvatarFallback className="bg-muted font-black">{getInitials(pair.player2.name)}</AvatarFallback>
-                                        </Avatar>
-                                    </div>
-                                    <div className="flex flex-col min-w-0">
-                                        <div className="flex items-center gap-2">
-                                          <span className="font-black text-lg truncate italic">
-                                              {pair.player1.name.split(' ')[0]} + {pair.player2.name.split(' ')[0]}
-                                          </span>
-                                          {isNew && <Badge variant="outline" className="text-[7px] border-primary/20 text-primary uppercase">Nueva Sociedad</Badge>}
-                                        </div>
-                                        <span className="text-[10px] font-bold uppercase text-muted-foreground">{pair.wins}V en {pair.matches} PJ</span>
-                                    </div>
-                                </div>
-                                <div className="text-right">
-                                    <span className={cn("text-3xl font-black italic", i === 0 ? "text-primary" : "text-white")}>{pair.winRate}%</span>
-                                    <p className="text-[8px] uppercase font-black text-muted-foreground leading-none">Efectividad</p>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    );
-                })}
-            </div>
-        ) : (
-            <div className="h-64 border-2 border-dashed rounded-3xl flex items-center justify-center text-center p-10 space-y-4">
-                <LinkIcon className="h-12 w-12 text-muted-foreground/20 mx-auto" />
-                <div className="space-y-1">
-                  <p className="font-black uppercase italic text-muted-foreground">Analizando Química...</p>
-                  <p className="text-xs text-muted-foreground/60 max-w-xs mx-auto">Se necesitan partidos registrados para identificar las mejores sociedades del club.</p>
-                </div>
-            </div>
-        )}
-      </div>
-    );
-  };
-
-  const renderSpiciestMatch = () => {
-    return (
-      <div className="space-y-8 max-w-2xl mx-auto text-center">
         <div className="space-y-4">
-            <div className="mx-auto w-20 h-20 bg-orange-500/10 rounded-full flex items-center justify-center">
-                <Flame className="h-10 w-10 text-orange-500 fill-orange-500" />
-            </div>
-            <h1 className="text-4xl font-black italic uppercase tracking-tighter">Partido más picante</h1>
-            <p className="text-muted-foreground italic">El encuentro con mayor producción ofensiva registrado en la historia de Real Acade.</p>
-        </div>
-
-        {spiciestMatch ? (
-            <div className="space-y-6">
-                <Card className="glass-card border-orange-500/30 bg-gradient-to-br from-orange-500/10 to-transparent p-10">
-                    <div className="flex flex-col items-center gap-6">
-                        <div className="bg-orange-500 text-white px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest animate-pulse">
-                            🔥 Récord histórico
-                        </div>
-                        <span className="text-8xl font-black italic text-white leading-none drop-shadow-[0_0_20px_rgba(249,115,22,0.4)]">
-                            {spiciestMatch.teamAScore + spiciestMatch.teamBScore}
-                        </span>
-                        <span className="text-sm font-black uppercase text-orange-500 tracking-widest">Goles Totales</span>
-                        
-                        <div className="flex items-center gap-8 md:gap-16 pt-4 border-t border-white/10 w-full justify-center">
-                            <div className="flex flex-col items-center">
-                                <span className="text-xs font-black uppercase text-primary mb-1">Azul</span>
-                                <span className="text-4xl font-black">{spiciestMatch.teamAScore}</span>
-                            </div>
-                            <div className="text-2xl font-light text-muted-foreground/30 italic">VS</div>
-                            <div className="flex flex-col items-center">
-                                <span className="text-xs font-black uppercase text-accent mb-1">Rojo</span>
-                                <span className="text-4xl font-black">{spiciestMatch.teamBScore}</span>
-                            </div>
-                        </div>
-                    </div>
-                </Card>
-
-                <div className="flex flex-col md:flex-row gap-4 items-center justify-center">
-                    <div className="flex items-center gap-2 text-muted-foreground bg-white/5 px-4 py-2 rounded-full border border-white/5">
-                        <Calendar className="h-4 w-4" />
-                        <span className="text-xs font-bold uppercase tracking-tight">
-                            {new Date(spiciestMatch.date).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-                        </span>
-                    </div>
-                    <Button asChild variant="outline" className="border-orange-500/20 hover:bg-orange-500/10">
-                        <Link href={`/matches/${spiciestMatch.id}`}>
-                            <Target className="mr-2 h-4 w-4" /> Ver Ficha Técnica
-                        </Link>
-                    </Button>
-                </div>
-            </div>
-        ) : (
-            <div className="h-64 border-2 border-dashed rounded-3xl flex items-center justify-center text-muted-foreground italic">No hay partidos registrados para calcular el récord.</div>
-        )}
-      </div>
-    );
-  };
-
-  const renderImanDerrotas = () => {
-    const sorted = [...playerStats]
-      .filter(p => p.losses >= 0)
-      .sort((a, b) => b.losses - a.losses || b.matchesPlayed - a.matchesPlayed)
-      .slice(0, 20);
-
-    return (
-      <div className="space-y-8 max-w-2xl mx-auto">
-        <div className="text-center space-y-4">
-            <div className="mx-auto w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center border border-red-500/20">
-                <Skull className="h-10 w-10 text-red-500" />
-            </div>
-            <h1 className="text-4xl font-black italic uppercase tracking-tighter">Sala de Humildad: Imán de Derrotas</h1>
-            <p className="text-muted-foreground italic">El registro de la mala racha. Los jugadores que más veces han visto caer su arco.</p>
-        </div>
-
-        <div className="space-y-4">
-            {sorted.map((p, i) => (
-                <Card key={p.playerId} className="glass-card transition-all border-white/5 hover:border-red-500/30">
+            {pairs.map((pair, i) => (
+                <Card key={i} className={cn("glass-card transition-all", i === 0 ? "border-primary/50 bg-primary/5 scale-105" : "border-white/5")}>
                     <CardContent className="p-6 flex items-center justify-between">
                         <div className="flex items-center gap-4">
                             <span className="text-2xl font-black italic text-muted-foreground/30 w-8">{i + 1}</span>
-                            <Avatar className="h-12 w-12">
-                                <AvatarFallback className="bg-muted font-black">{getInitials(p.name)}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex flex-col">
-                                <span className="font-black text-lg">{p.name}</span>
-                                <span className="text-[10px] font-bold uppercase text-muted-foreground">{p.matchesPlayed} Partidos Jugados</span>
+                            <div className="flex -space-x-4">
+                                <Avatar className="h-12 w-12 border-2 border-background ring-2 ring-white/10">
+                                    <AvatarFallback className="bg-muted font-black">{getInitials(pair.player1.name)}</AvatarFallback>
+                                </Avatar>
+                                <Avatar className="h-12 w-12 border-2 border-background ring-2 ring-white/10">
+                                    <AvatarFallback className="bg-muted font-black">{getInitials(pair.player2.name)}</AvatarFallback>
+                                </Avatar>
+                            </div>
+                            <div className="flex flex-col min-w-0">
+                                <span className="font-black text-lg truncate italic">{pair.player1.name.split(' ')[0]} + {pair.player2.name.split(' ')[0]}</span>
+                                <span className="text-[10px] font-bold uppercase text-muted-foreground">{pair.wins}V en {pair.matches} PJ</span>
                             </div>
                         </div>
                         <div className="text-right">
-                            <span className="text-3xl font-black italic text-red-500">{p.losses}</span>
-                            <p className="text-[8px] uppercase font-black text-muted-foreground leading-none">Derrotas</p>
-                        </div>
-                    </CardContent>
-                </Card>
-            ))}
-        </div>
-      </div>
-    );
-  };
-
-  const renderRiesgo = () => {
-    const sorted = [...playerStats]
-      .filter(p => p.matchesPlayed >= 1)
-      .sort((a, b) => a.winPercentage - b.winPercentage || b.matchesPlayed - a.matchesPlayed)
-      .slice(0, 20);
-
-    return (
-      <div className="space-y-8 max-w-2xl mx-auto">
-        <div className="text-center space-y-4">
-            <div className="mx-auto w-20 h-20 bg-zinc-500/10 rounded-full flex items-center justify-center border border-zinc-500/20">
-                <Ghost className="h-10 w-10 text-zinc-500" />
-            </div>
-            <h1 className="text-4xl font-black italic uppercase tracking-tighter">Sala de Humildad: Factor de Riesgo</h1>
-            <p className="text-muted-foreground italic">Menor porcentaje de victorias. Los que más sufren para sumar de a tres.</p>
-        </div>
-
-        <div className="space-y-4">
-            {sorted.map((p, i) => (
-                <Card key={p.playerId} className="glass-card transition-all border-white/5">
-                    <CardContent className="p-6 flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <span className="text-2xl font-black italic text-muted-foreground/30 w-8">{i + 1}</span>
-                            <Avatar className="h-12 w-12">
-                                <AvatarFallback className="bg-muted font-black">{getInitials(p.name)}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex flex-col">
-                                <span className="font-black text-lg">{p.name}</span>
-                                <span className="text-[10px] font-bold uppercase text-muted-foreground">{p.wins}V en {p.matchesPlayed} PJ</span>
-                            </div>
-                        </div>
-                        <div className="text-right">
-                            <span className="text-3xl font-black italic text-zinc-400">{p.winPercentage}%</span>
+                            <span className={cn("text-3xl font-black italic", i === 0 ? "text-primary" : "text-white")}>{pair.winRate}%</span>
                             <p className="text-[8px] uppercase font-black text-muted-foreground leading-none">Efectividad</p>
                         </div>
                     </CardContent>
@@ -390,67 +170,40 @@ export default function PulseDetailPage() {
         </div>
       </div>
     );
-  };
+  }
 
-  const renderPolvora = () => {
-    const sorted = [...playerStats]
-      .filter(p => p.matchesPlayed >= 1 && (p.position === 'Mediocampista' || p.position === 'Delantero'))
-      .sort((a, b) => a.goalsPerMatch - b.goalsPerMatch || a.totalGoals - b.totalGoals)
-      .slice(0, 20);
-
+  if (type === 'league') {
+    const spiciest = getSpiciestMatch(allMatches);
     return (
-      <div className="space-y-8 max-w-2xl mx-auto">
-        <div className="text-center space-y-4">
-            <div className="mx-auto w-20 h-20 bg-blue-500/10 rounded-full flex items-center justify-center border border-blue-500/20">
-                <Droplets className="h-10 w-10 text-blue-500" />
-            </div>
-            <h1 className="text-4xl font-black italic uppercase tracking-tighter">Sala de Humildad: Pólvora Mojada</h1>
-            <p className="text-muted-foreground italic">Menor promedio de gol por partido entre los jugadores con rol ofensivo (Medios y Delanteros).</p>
-        </div>
-
+      <div className="space-y-8 max-w-2xl mx-auto text-center">
         <div className="space-y-4">
-            {sorted.map((p, i) => (
-                <Card key={p.playerId} className="glass-card transition-all border-white/5">
-                    <CardContent className="p-6 flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <span className="text-2xl font-black italic text-muted-foreground/30 w-8">{i + 1}</span>
-                            <Avatar className="h-12 w-12">
-                                <AvatarFallback className="bg-muted font-black">{getInitials(p.name)}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex flex-col">
-                                <span className="font-black text-lg">{p.name}</span>
-                                <div className="flex items-center gap-2">
-                                  <span className="text-[10px] font-bold uppercase text-muted-foreground">{p.totalGoals} Goles en {p.matchesPlayed} PJ</span>
-                                  <Badge variant="outline" className="text-[7px] h-3 uppercase border-white/10">{p.position}</Badge>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="text-right">
-                            <span className="text-3xl font-black italic text-blue-400">{p.goalsPerMatch}</span>
-                            <p className="text-[8px] uppercase font-black text-muted-foreground leading-none">Goles/PJ</p>
-                        </div>
-                    </CardContent>
-                </Card>
-            ))}
+            <div className="mx-auto w-20 h-20 bg-orange-500/10 rounded-full flex items-center justify-center">
+                <Flame className="h-10 w-10 text-orange-500 fill-orange-500" />
+            </div>
+            <h1 className="text-4xl font-black italic uppercase tracking-tighter">Partido más picante</h1>
+            <p className="text-muted-foreground italic">El encuentro con mayor producción ofensiva registrado en la historia.</p>
         </div>
+        {spiciest ? (
+            <Card className="glass-card border-orange-500/30 bg-gradient-to-br from-orange-500/10 to-transparent p-10">
+                <div className="flex flex-col items-center gap-6">
+                    <span className="text-8xl font-black italic text-white leading-none">{spiciest.teamAScore + spiciest.teamBScore}</span>
+                    <span className="text-sm font-black uppercase text-orange-500 tracking-widest">Goles Totales</span>
+                    <div className="flex items-center gap-16 pt-4 border-t border-white/10 w-full justify-center">
+                        <div className="flex flex-col items-center">
+                            <span className="text-xs font-black uppercase text-primary">Azul: {spiciest.teamAScore}</span>
+                        </div>
+                        <div className="text-2xl font-light text-muted-foreground/30 italic">VS</div>
+                        <div className="flex flex-col items-center">
+                            <span className="text-xs font-black uppercase text-accent">Rojo: {spiciest.teamBScore}</span>
+                        </div>
+                    </div>
+                    <Button asChild variant="outline" className="mt-4"><Link href={`/matches/${spiciest.id}`}>Ver Ficha Técnica</Link></Button>
+                </div>
+            </Card>
+        ) : <p className="italic opacity-30">Sin partidos registrados.</p>}
       </div>
     );
-  };
+  }
 
-  return (
-    <div className="max-w-4xl mx-auto pb-20">
-      <Button variant="ghost" onClick={() => router.back()} className="mb-8 hover:text-primary group">
-        <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" /> Volver al Dashboard
-      </Button>
-
-      {type === 'influencer' && renderInfluencer()}
-      {type === 'league' && renderSpiciestMatch()}
-      {type === 'partnership' && renderPartnership()}
-      {type === 'mvp' && renderMvpRanking()}
-      {type === 'attendance' && renderAttendance()}
-      {type === 'iman-derrotas' && renderImanDerrotas()}
-      {type === 'riesgo' && renderRiesgo()}
-      {type === 'polvora' && renderPolvora()}
-    </div>
-  );
+  return null;
 }

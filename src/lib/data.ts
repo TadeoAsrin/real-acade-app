@@ -49,15 +49,18 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
     };
   });
 
-  const sortedMatches = [...allMatches].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const playedMatches = allMatches.filter(m => m.teamAScore > 0 || m.teamBScore > 0);
+  const sortedMatches = [...playedMatches].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   
-  const globalMatchesDesc = [...allMatches].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  const last5Ids = globalMatchesDesc.slice(0, 5).map(m => m.id);
+  const last5Ids = [...playedMatches]
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 5)
+    .map(m => m.id);
 
   sortedMatches.forEach(match => {
     const teamAWon = match.teamAScore > match.teamBScore;
     const teamBWon = match.teamBScore > match.teamAScore;
-    const draw = match.teamAScore === match.teamBScore && (match.teamAScore > 0 || match.teamBScore > 0);
+    const draw = match.teamAScore === match.teamBScore;
 
     const processPlayer = (playerStat: PlayerStats, team: 'A' | 'B') => {
         const { playerId, goals, isCaptain, isMvp, hasBestGoal } = playerStat;
@@ -143,18 +146,16 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
   return Object.values(statsMap);
 };
 
-export const getChemistryRankings = (players: Player[], matches: Match[], minMatchesThreshold = 2): ChemistryPair[] => {
+export const getChemistryRankings = (players: Player[], matches: Match[], minMatchesThreshold = 1): ChemistryPair[] => {
   if (!players.length || !matches.length) return [];
 
   const chemistryMap: { [key: string]: { matches: number, wins: number } } = {};
   const playerStats = calculateAggregatedStats(players, matches);
   
-  matches.forEach(match => {
-    // Validar que el partido sea válido para química (jugado)
-    const hasScore = match.teamAScore > 0 || match.teamBScore > 0;
-    const isPast = new Date(match.date).getTime() < new Date().getTime();
-    if (!hasScore && !isPast) return;
+  // Solo procesar partidos ya jugados
+  const playedMatches = matches.filter(m => m.teamAScore > 0 || m.teamBScore > 0);
 
+  playedMatches.forEach(match => {
     const teamAWon = match.teamAScore > match.teamBScore;
     const teamBWon = match.teamBScore > match.teamAScore;
 
@@ -175,7 +176,7 @@ export const getChemistryRankings = (players: Player[], matches: Match[], minMat
     processTeam(match.teamBPlayers, teamBWon);
   });
 
-  const allPairs = Object.entries(chemistryMap)
+  return Object.entries(chemistryMap)
     .map(([key, stats]) => {
       const [id1, id2] = key.split('_::_');
       const player1 = players.find(p => p.id === id1);
@@ -194,23 +195,18 @@ export const getChemistryRankings = (players: Player[], matches: Match[], minMat
         combinedPower: (s1?.powerPoints || 0) + (s2?.powerPoints || 0)
       };
     })
-    .filter((pair): pair is ChemistryPair => pair !== null);
-
-  let result = allPairs.filter(p => p.matches >= minMatchesThreshold);
-  if (result.length === 0 && minMatchesThreshold > 1) {
-    result = allPairs.filter(p => p.matches >= 1);
-  }
-
-  return result.sort((a, b) => 
-    b.winRate - a.winRate || 
-    b.matches - a.matches || 
-    b.combinedPower - a.combinedPower
-  );
+    .filter((pair): pair is ChemistryPair => pair !== null && pair.matches >= minMatchesThreshold)
+    .sort((a, b) => 
+      b.winRate - a.winRate || 
+      b.matches - a.matches || 
+      b.combinedPower - a.combinedPower
+    );
 };
 
 export const getSpiciestMatch = (matches: Match[]) => {
-  if (matches.length === 0) return null;
-  return [...matches].sort((a, b) => (b.teamAScore + b.teamBScore) - (a.teamAScore + a.teamBScore))[0];
+  const playedMatches = matches.filter(m => m.teamAScore > 0 || m.teamBScore > 0);
+  if (playedMatches.length === 0) return null;
+  return [...playedMatches].sort((a, b) => (b.teamAScore + b.teamBScore) - (a.teamAScore + a.teamBScore))[0];
 };
 
 export const balanceTeams = (selectedPlayers: AggregatedPlayerStats[]) => {
