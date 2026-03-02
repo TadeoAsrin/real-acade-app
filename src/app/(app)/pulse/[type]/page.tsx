@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -21,7 +22,7 @@ export default function PulseDetailPage() {
 
   const playersQuery = useMemoFirebase(() => {
     if (!firestore) return null;
-    return collection(firestore, 'players');
+    return query(collection(firestore, 'players'), orderBy('name', 'asc'));
   }, [firestore]);
 
   const matchesQuery = useMemoFirebase(() => {
@@ -32,11 +33,12 @@ export default function PulseDetailPage() {
   const { data: playersData, isLoading: playersLoading } = useCollection<Player>(playersQuery);
   const { data: matchesData, isLoading: matchesLoading } = useCollection<Match>(matchesQuery);
 
-  const allPlayers = playersData || [];
-  const allMatches = matchesData || [];
-  const playerStats = calculateAggregatedStats(allPlayers, allMatches);
-  const chemistryRankings = getChemistryRankings(allPlayers, allMatches, 2);
-  const spiciestMatch = getSpiciestMatch(allMatches);
+  const allPlayers = React.useMemo(() => playersData || [], [playersData]);
+  const allMatches = React.useMemo(() => matchesData || [], [matchesData]);
+
+  const playerStats = React.useMemo(() => calculateAggregatedStats(allPlayers, allMatches), [allPlayers, allMatches]);
+  const chemistryRankings = React.useMemo(() => getChemistryRankings(allPlayers, allMatches, 2), [allPlayers, allMatches]);
+  const spiciestMatch = React.useMemo(() => getSpiciestMatch(allMatches), [allMatches]);
 
   if (playersLoading || matchesLoading) return <div className="flex h-screen items-center justify-center"><Zap className="animate-pulse text-primary h-12 w-12" /></div>;
 
@@ -51,7 +53,7 @@ export default function PulseDetailPage() {
       })
       .slice(0, 10);
 
-    const maxWin = Math.max(...sorted.map(p => p.winPercentage));
+    const maxWin = Math.max(...sorted.map(p => p.winPercentage), 0);
 
     return (
       <div className="space-y-8 max-w-2xl mx-auto">
@@ -68,7 +70,7 @@ export default function PulseDetailPage() {
 
         <div className="space-y-4">
             {sorted.map((p, i) => {
-                const isLeader = p.winPercentage === maxWin;
+                const isLeader = p.winPercentage === maxWin && maxWin > 0;
                 return (
                     <Card key={p.playerId} className={cn("glass-card transition-all", isLeader ? "border-primary/50 bg-primary/5 scale-105" : "border-white/5")}>
                         <CardContent className="p-6 flex items-center justify-between">
@@ -119,7 +121,7 @@ export default function PulseDetailPage() {
 
         <div className="space-y-4">
             {sorted.map((p, i) => {
-                const isLeader = p.totalMvp === maxMvps;
+                const isLeader = p.totalMvp === maxMvps && maxMvps > 0;
                 return (
                     <Card key={p.playerId} className={cn("glass-card transition-all", isLeader ? "border-yellow-500/50 bg-yellow-500/5 scale-105" : "border-white/5")}>
                         <CardContent className="p-6 flex items-center justify-between">
@@ -169,7 +171,7 @@ export default function PulseDetailPage() {
         <div className="space-y-4">
             {sorted.map((p, i) => {
                 const percentage = totalMatches > 0 ? Math.round((p.matchesPlayed / totalMatches) * 100) : 0;
-                const isLeader = p.matchesPlayed === maxAttendance;
+                const isLeader = p.matchesPlayed === maxAttendance && maxAttendance > 0;
                 return (
                     <Card key={p.playerId} className={cn("glass-card transition-all border-white/5", isLeader && "border-emerald-500/30 bg-emerald-500/5 scale-105")}>
                         <CardContent className="p-6 flex items-center justify-between">
@@ -215,7 +217,7 @@ export default function PulseDetailPage() {
 
         <div className="space-y-4">
             {sorted.map((p, i) => {
-                const isLeader = p.losses === maxLosses;
+                const isLeader = p.losses === maxLosses && maxLosses > 0;
                 return (
                     <Card key={p.playerId} className={cn("glass-card transition-all border-white/5", isLeader && "border-red-500/30 bg-red-500/5 scale-105")}>
                         <CardContent className="p-6 flex items-center justify-between">
@@ -250,7 +252,7 @@ export default function PulseDetailPage() {
       .sort((a, b) => a.winPercentage - b.winPercentage || a.matchesPlayed - b.matchesPlayed)
       .slice(0, 10);
 
-    const minWinRate = Math.min(...sorted.map(p => p.winPercentage));
+    const minWinRate = Math.min(...sorted.map(p => p.winPercentage), 100);
 
     return (
       <div className="space-y-8 max-w-2xl mx-auto">
@@ -297,13 +299,12 @@ export default function PulseDetailPage() {
   };
 
   const renderPolvora = () => {
-    // Pólvora Mojada: Solo Mediocampistas y Delanteros
     const sorted = [...playerStats]
       .filter(p => p.matchesPlayed >= 3 && (p.position === 'Mediocampista' || p.position === 'Delantero'))
       .sort((a, b) => a.goalsPerMatch - b.goalsPerMatch || a.totalGoals - b.totalGoals)
       .slice(0, 10);
 
-    const minGoals = Math.min(...sorted.map(p => p.goalsPerMatch));
+    const minGoals = Math.min(...sorted.map(p => p.goalsPerMatch), 10);
 
     return (
       <div className="space-y-8 max-w-2xl mx-auto">
@@ -431,7 +432,7 @@ export default function PulseDetailPage() {
         {chemistryRankings.length > 0 ? (
             <div className="space-y-4">
                 {chemistryRankings.map((pair, i) => {
-                    const isLeader = pair.winRate === maxWinRate;
+                    const isLeader = pair.winRate === maxWinRate && maxWinRate > 0;
                     const isNew = pair.matches === 1;
                     return (
                         <Card key={i} className={cn("glass-card transition-all", isLeader ? "border-primary/50 bg-primary/5 scale-105" : "border-white/5")}>
