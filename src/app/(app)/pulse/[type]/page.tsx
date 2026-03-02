@@ -5,10 +5,10 @@ import { useParams, useRouter } from "next/navigation";
 import { calculateAggregatedStats, getChemistryRankings, getSpiciestMatch } from "@/lib/data";
 import { useCollection, useMemoFirebase, useFirestore } from "@/firebase";
 import { collection, query, orderBy } from "firebase/firestore";
-import type { Match, Player, AggregatedPlayerStats } from "@/lib/definitions";
+import type { Match, Player, AggregatedPlayerStats, ChemistryPair } from "@/lib/definitions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Brain, Link as LinkIcon, Zap, Crown, Flame, Calendar, Star, Users, Target, Skull, Ghost, Droplets, Loader2, Trophy, ChevronLeft } from "lucide-react";
+import { Brain, Link as LinkIcon, Star, Users, Flame, Skull, Ghost, Droplets, Loader2, ChevronLeft, Zap, TrendingUp } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials, cn } from "@/lib/utils";
 import Link from "next/link";
@@ -72,7 +72,7 @@ export default function PulseDetailPage() {
 
       <div className="space-y-4">
           {sortedData.length > 0 ? sortedData.map((p, i) => (
-              <Card key={p.playerId} className={cn("competition-card border-l-4 transition-all hover-lift", i === 0 ? "border-l-yellow-500 bg-yellow-500/5" : "border-l-primary/20")}>
+              <Card key={p.playerId} className={cn("competition-card border-l-4 transition-all hover-lift", i === 0 ? "border-l-yellow-500 bg-yellow-500/5 shadow-[0_0_30px_rgba(234,179,8,0.1)]" : "border-l-primary/20")}>
                   <CardContent className="p-6 flex items-center justify-between">
                       <div className="flex items-center gap-4">
                           <span className="text-2xl font-black italic text-muted-foreground/30 w-8">#{i + 1}</span>
@@ -81,7 +81,10 @@ export default function PulseDetailPage() {
                           </Avatar>
                           <div className="flex flex-col">
                               <Link href={`/players/${p.playerId}`} className="font-black text-xl hover:underline italic uppercase tracking-tighter">{p.name}</Link>
-                              <span className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">{p.matchesPlayed} Partidos Jugados</span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">{p.matchesPlayed} PJ</span>
+                                {p.isActive && <Badge variant="outline" className="h-3 text-[6px] border-emerald-500/30 text-emerald-500 uppercase">Activo</Badge>}
+                              </div>
                           </div>
                       </div>
                       <div className="text-right">
@@ -92,7 +95,7 @@ export default function PulseDetailPage() {
               </Card>
           )) : (
             <div className="h-40 flex flex-col items-center justify-center border-2 border-dashed rounded-3xl opacity-30 italic">
-              Sin datos registrados en esta categoría.
+              Aún no hay suficientes batallas para generar este ranking.
             </div>
           )}
       </div>
@@ -101,54 +104,60 @@ export default function PulseDetailPage() {
 
   if (type === 'influencer') {
     const sorted = [...playerStats].sort((a, b) => b.winPercentage - a.winPercentage || b.matchesPlayed - a.matchesPlayed);
-    return renderRankingList("Cerebros del Campo", "Ranking de efectividad pura. Los jugadores con mayor porcentaje de victoria cuando están en cancha.", Brain, sorted, (p) => `${p.winPercentage}%`, "Victorias", "text-primary");
+    return renderRankingList("Cerebros del Campo", "Efectividad pura. Jugadores con mayor % de victoria histórico en la academia.", Brain, sorted, (p) => `${p.winPercentage}%`, "Victorias", "text-primary");
   }
 
   if (type === 'mvp') {
     const sorted = [...playerStats].sort((a, b) => b.totalMvp - a.totalMvp || b.powerPoints - a.powerPoints);
-    return renderRankingList("Reyes del MVP", "El trono de los mejores del partido. Ranking acumulado de premios oficiales de la jornada.", Star, sorted, (p) => p.totalMvp, "Premios", "text-yellow-500");
+    return renderRankingList("Reyes del MVP", "El trono de los mejores del partido. Ranking acumulado de premios oficiales.", Star, sorted, (p) => p.totalMvp, "Premios", "text-yellow-500");
   }
 
   if (type === 'attendance') {
     const total = allMatches.filter(m => m.teamAScore > 0 || m.teamBScore > 0).length;
     const sorted = [...playerStats].sort((a, b) => b.matchesPlayed - a.matchesPlayed || a.name.localeCompare(b.name));
-    return renderRankingList("Los Infaltables", "El compromiso no se negocia. Ranking de asistencia histórica a la academia.", Users, sorted, (p) => `${total > 0 ? Math.round((p.matchesPlayed / total) * 100) : 0}%`, "Asistencia", "text-emerald-500");
+    return renderRankingList("Los Infaltables", "El compromiso no se negocia. Ranking de asistencia histórica al club.", Users, sorted, (p) => `${total > 0 ? Math.round((p.matchesPlayed / total) * 100) : 0}%`, "Asistencia", "text-emerald-500");
   }
 
   if (type === 'iman-derrotas') {
     const sorted = [...playerStats].sort((a, b) => b.losses - a.losses || b.matchesPlayed - a.matchesPlayed);
-    return renderRankingList("Imán de Derrotas", "La mala racha no perdona. Jugadores con más caídas registradas en el historial.", Skull, sorted, (p) => p.losses, "Derrotas", "text-red-500");
+    return renderRankingList("Imán de Derrotas", "La mala racha no perdona. Jugadores con más caídas en el historial.", Skull, sorted, (p) => p.losses, "Derrotas", "text-red-500");
   }
 
   if (type === 'riesgo') {
-    const sorted = [...playerStats].sort((a, b) => a.winPercentage - b.winPercentage || a.matchesPlayed - b.matchesPlayed);
-    return renderRankingList("Factor de Riesgo", "Menor porcentaje de victorias. Los que más sufren para sumar de a tres puntos.", Ghost, sorted, (p) => `${p.winPercentage}%`, "Efectividad", "text-zinc-400");
+    const sorted = [...playerStats].filter(p => p.matchesPlayed >= 1).sort((a, b) => a.winPercentage - b.winPercentage || b.matchesPlayed - a.matchesPlayed);
+    return renderRankingList("Factor de Riesgo", "Menor porcentaje de victorias. Los que más sufren para sumar de a tres.", Ghost, sorted, (p) => `${p.winPercentage}%`, "Efectividad", "text-zinc-400");
   }
 
   if (type === 'polvora') {
     const sorted = [...playerStats]
-      .filter(p => p.position === 'Mediocampista' || p.position === 'Delantero')
+      .filter(p => (p.position === 'Mediocampista' || p.position === 'Delantero') && p.matchesPlayed >= 1)
       .sort((a, b) => a.goalsPerMatch - b.goalsPerMatch || a.totalGoals - b.totalGoals);
-    return renderRankingList("Pólvora Mojada", "Baja producción ofensiva en roles de ataque (Medios y Delanteros). Ranking de Goles por Partido.", Droplets, sorted, (p) => p.goalsPerMatch, "Goles/PJ", "text-blue-400");
+    return renderRankingList("Pólvora Mojada", "Baja producción ofensiva en roles de ataque. Ranking de Goles por Partido.", Droplets, sorted, (p) => p.goalsPerMatch, "Goles/PJ", "text-blue-400");
   }
 
   if (type === 'partnership') {
-    const pairs = getChemistryRankings(allPlayers, allMatches, 1);
+    // Calculamos el ranking de química con un fallback a 1 partido si es necesario
+    let pairs = getChemistryRankings(allPlayers, allMatches, 2);
+    if (pairs.length === 0) pairs = getChemistryRankings(allPlayers, allMatches, 1);
+    
+    // Limitamos a los mejores 15 para mantener la exclusividad
+    const topPairs = pairs.slice(0, 15);
+
     return (
       <div className="space-y-8 max-w-2xl mx-auto pb-20">
         <Link href="/dashboard" className="flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground hover:text-primary transition-colors mb-4 font-oswald tracking-widest">
           <ChevronLeft className="h-3 w-3" /> VOLVER AL PANEL
         </Link>
         <div className="text-center space-y-4">
-            <div className="mx-auto w-20 h-20 bg-white/10 rounded-full flex items-center justify-center border border-white/10">
-                <LinkIcon className="h-10 w-10 text-white" />
+            <div className="mx-auto w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center border border-primary/20">
+                <LinkIcon className="h-10 w-10 text-primary" />
             </div>
             <h1 className="text-4xl font-black italic uppercase tracking-tighter">Sociedades de Élite</h1>
-            <p className="text-muted-foreground italic text-sm">La química perfecta. Duplas de jugadores que dominan el campo cuando comparten equipo.</p>
+            <p className="text-muted-foreground italic text-sm">El Top 15 de química pura. Duplas activas con Win Rate superior al 50%.</p>
         </div>
         <div className="space-y-4">
-            {pairs.length > 0 ? pairs.map((pair, i) => (
-                <Card key={i} className={cn("competition-card transition-all hover-lift", i === 0 ? "border-l-4 border-l-primary bg-primary/5" : "border-l-4 border-l-transparent")}>
+            {topPairs.length > 0 ? topPairs.map((pair, i) => (
+                <Card key={i} className={cn("competition-card transition-all hover-lift", i === 0 ? "border-l-4 border-l-primary bg-primary/5 shadow-[0_0_30px_rgba(37,99,235,0.1)]" : "border-l-4 border-l-transparent")}>
                     <CardContent className="p-6 flex items-center justify-between">
                         <div className="flex items-center gap-4">
                             <span className="text-2xl font-black italic text-muted-foreground/30 w-8">#{i + 1}</span>
@@ -166,7 +175,7 @@ export default function PulseDetailPage() {
                                 </span>
                                 <div className="flex items-center gap-2">
                                   <span className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">{pair.wins}V en {pair.matches} PJ</span>
-                                  {pair.matches === 1 && <Badge className="h-3 text-[6px] bg-primary/20 text-primary border-none">NUEVA DUPLA</Badge>}
+                                  {pair.matches === 1 && <Badge className="h-3 text-[6px] bg-primary/20 text-primary border-none uppercase font-black">Nueva Sociedad</Badge>}
                                 </div>
                             </div>
                         </div>
@@ -177,8 +186,9 @@ export default function PulseDetailPage() {
                     </CardContent>
                 </Card>
             )) : (
-              <div className="h-40 flex flex-col items-center justify-center border-2 border-dashed rounded-3xl opacity-30 italic">
-                Aún no hay suficientes batallas para detectar química.
+              <div className="h-40 flex flex-col items-center justify-center border-2 border-dashed rounded-3xl opacity-30 italic px-10 text-center">
+                <LinkIcon className="h-10 w-10 mb-2 opacity-50" />
+                <p>No se han detectado sociedades activas que superen el 50% de efectividad.</p>
               </div>
             )}
         </div>

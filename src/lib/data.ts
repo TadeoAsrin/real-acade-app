@@ -137,6 +137,7 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
           const pointsPossible = stats.matchesPlayed * 3;
           stats.efficiency = Math.round((pointsObtained / pointsPossible) * 100);
 
+          // Jugador activo si jugó al menos 1 de los últimos 5 partidos del club
           stats.isActive = stats.matchesInLast5 >= 1;
           stats.captaincyPriorityScore = (stats.matchesInLast5 * 3) + (stats.matchesPlayed * 1) - (stats.totalCaptaincies * 4);
       }
@@ -152,7 +153,6 @@ export const getChemistryRankings = (players: Player[], matches: Match[], minMat
   const chemistryMap: { [key: string]: { matches: number, wins: number } } = {};
   const playerStats = calculateAggregatedStats(players, matches);
   
-  // Solo procesar partidos ya jugados
   const playedMatches = matches.filter(m => m.teamAScore > 0 || m.teamBScore > 0);
 
   playedMatches.forEach(match => {
@@ -184,15 +184,23 @@ export const getChemistryRankings = (players: Player[], matches: Match[], minMat
       const s1 = playerStats.find(s => s.playerId === id1);
       const s2 = playerStats.find(s => s.playerId === id2);
       
-      if (!player1 || !player2) return null;
+      if (!player1 || !player2 || !s1 || !s2) return null;
+
+      // Filtro de actividad: Ambos jugadores deben estar activos
+      if (!s1.isActive || !s2.isActive) return null;
+
+      const winRate = Math.round((stats.wins / stats.matches) * 100);
+
+      // Filtro de rendimiento: Win Rate mínimo del 50%
+      if (winRate < 50) return null;
 
       return { 
         player1, 
         player2, 
         wins: stats.wins, 
         matches: stats.matches,
-        winRate: Math.round((stats.wins / stats.matches) * 100),
-        combinedPower: (s1?.powerPoints || 0) + (s2?.powerPoints || 0)
+        winRate,
+        combinedPower: s1.powerPoints + s2.powerPoints
       };
     })
     .filter((pair): pair is ChemistryPair => pair !== null && pair.matches >= minMatchesThreshold)
