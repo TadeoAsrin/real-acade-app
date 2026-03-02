@@ -43,8 +43,8 @@
     --warning: 38 95% 56%; /* #F9A825 */
 
     /* Gaceta (Modo Claro - Editorial) */
-    --paper: 0 0% 100%; /* #FFFFFF - Blanco puro para máximo contraste */
-    --editorial-text: 0 0% 0%; /* #000000 - Negro absoluto para legibilidad */
+    --paper: 0 0% 100%; /* #FFFFFF - Blanco puro */
+    --editorial-text: 0 0% 0%; /* #000000 - Negro absoluto */
     --editorial-muted: 0 0% 20%; /* #333333 */
 
     /* Sidebar */
@@ -91,9 +91,13 @@
     @apply bg-card text-card-foreground shadow-2xl border-none rounded-lg overflow-hidden transition-all duration-200;
   }
 
-  /* Estética Gaceta Editorial */
+  /* Estética Gaceta Editorial - FORZADA PARA CONTRASTE */
   .editorial-paper {
-    @apply bg-[hsl(var(--paper))] text-[hsl(var(--editorial-text))] font-lora relative overflow-hidden;
+    background-color: #FFFFFF !important;
+    color: #000000 !important;
+    font-family: var(--font-lora), serif;
+    position: relative;
+    overflow: hidden;
     background-image: url("https://www.transparenttextures.com/patterns/paper-fibers.png");
     background-blend-mode: multiply;
     background-size: 400px;
@@ -101,6 +105,7 @@
 
   .editorial-title {
     @apply font-playfair font-black text-black leading-tight;
+    color: #000000 !important;
   }
 
   .editorial-divider {

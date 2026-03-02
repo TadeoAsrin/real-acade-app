@@ -78,7 +78,11 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-w-4xl p-0 overflow-hidden border-none editorial-paper shadow-2xl flex flex-col h-[92vh] sm:h-auto sm:max-h-[85vh] sm:rounded-none bottom-0 sm:bottom-auto translate-y-0 sm:translate-y-[-50%] top-auto sm:top-[50%]">
+      {/* 
+        CRÍTICO: Añadimos bg-white y text-black para anular el modo oscuro del DialogContent 
+        y aplicamos !important mediante editorial-paper en el CSS global.
+      */}
+      <DialogContent className="max-w-4xl p-0 overflow-hidden border-none editorial-paper shadow-2xl flex flex-col h-[92vh] sm:h-auto sm:max-h-[85vh] sm:rounded-none bottom-0 sm:bottom-auto translate-y-0 sm:translate-y-[-50%] top-auto sm:top-[50%] bg-white text-black">
         <DialogHeader className="sr-only">
           <DialogTitle>La Gaceta de Real Acade</DialogTitle>
           <DialogDescription>Crónica oficial del encuentro</DialogDescription>
@@ -109,7 +113,7 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
         </div>
 
         {/* Content Area - Scrollable */}
-        <div className="flex-1 overflow-y-auto overscroll-contain">
+        <div className="flex-1 overflow-y-auto overscroll-contain bg-white">
           {/* Cover Photo */}
           {coverPhoto && (
             <div className="w-full aspect-video sm:aspect-[21/9] overflow-hidden border-b-4 border-black relative group">
@@ -127,7 +131,7 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
             </div>
           )}
 
-          <div className="p-6 sm:p-10 md:p-12">
+          <div className="p-6 sm:p-10 md:p-12 bg-white">
             <article className="space-y-10">
               <div className="space-y-6 text-center max-w-2xl mx-auto">
                 <h1 className="editorial-title text-4xl sm:text-6xl md:text-7xl font-black leading-[0.9] tracking-tighter uppercase italic text-black">
@@ -168,7 +172,7 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
                       </div>
                     </div>
 
-                    <div className="space-y-4 pt-4 border-t border-black/10 font-oswald">
+                    <div className="space-y-4 pt-4 border-t border-black/10 font-oswald text-black">
                       {match.teamAPlayers.find(p => p.isMvp) || match.teamBPlayers.find(p => p.isMvp) ? (
                         <div className="space-y-1">
                           <span className="text-[10px] uppercase font-black text-black/40 tracking-widest">MAN OF THE MATCH</span>
