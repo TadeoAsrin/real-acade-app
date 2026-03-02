@@ -16,7 +16,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc } from "@/firebase";
 import { collection, query, orderBy, doc } from "firebase/firestore";
 import type { Player, Match, AggregatedPlayerStats } from "@/lib/definitions";
-import { Loader2, TrendingUp, TrendingDown, Minus, ChevronRight, Users, Star, Info, Sparkles, Crown, Target, Zap, Calendar } from "lucide-react";
+import { Loader2, TrendingUp, TrendingDown, Minus, ChevronRight, Users, Star, Info, Sparkles, Crown, Target, Zap, Calendar, ShieldCheck } from "lucide-react";
 import Link from 'next/link';
 import { cn, getInitials } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -365,7 +365,7 @@ function StandingsContent() {
 
 export default function StandingsPage() {
   return (
-    <React.Suspense fallback={<div className="flex h-[50vh] items-center justify-center"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div>}>
+    <React.Suspense fallback={<div className="flex h-[50vh] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
       <StandingsContent />
     </React.Suspense>
   );

@@ -12,6 +12,7 @@ import { ArrowLeft, Brain, Link as LinkIcon, Zap, Crown, Flame, Trophy, Calendar
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials, cn } from "@/lib/utils";
 import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
 
 export default function PulseDetailPage() {
   const { type } = useParams();
@@ -431,6 +432,7 @@ export default function PulseDetailPage() {
             <div className="space-y-4">
                 {chemistryRankings.map((pair, i) => {
                     const isLeader = pair.winRate === maxWinRate;
+                    const isNew = pair.matches === 1;
                     return (
                         <Card key={i} className={cn("glass-card transition-all", isLeader ? "border-primary/50 bg-primary/5 scale-105" : "border-white/5")}>
                             <CardContent className="p-6 flex items-center justify-between">
@@ -447,9 +449,12 @@ export default function PulseDetailPage() {
                                         </Avatar>
                                     </div>
                                     <div className="flex flex-col min-w-0">
-                                        <span className="font-black text-lg truncate italic">
-                                            {pair.player1.name.split(' ')[0]} + {pair.player2.name.split(' ')[0]}
-                                        </span>
+                                        <div className="flex items-center gap-2">
+                                          <span className="font-black text-lg truncate italic">
+                                              {pair.player1.name.split(' ')[0]} + {pair.player2.name.split(' ')[0]}
+                                          </span>
+                                          {isNew && <Badge variant="outline" className="text-[7px] border-primary/20 text-primary uppercase">Nueva Sociedad</Badge>}
+                                        </div>
                                         <span className="text-[10px] font-bold uppercase text-muted-foreground">{pair.wins}V en {pair.matches} PJ</span>
                                     </div>
                                 </div>
@@ -463,7 +468,7 @@ export default function PulseDetailPage() {
                 })}
             </div>
         ) : (
-            <div className="h-64 border-2 border-dashed rounded-3xl flex items-center justify-center text-muted-foreground italic">No hay suficientes datos de parejas aún (mínimo 2 partidos juntos).</div>
+            <div className="h-64 border-2 border-dashed rounded-3xl flex items-center justify-center text-muted-foreground italic">No hay suficientes datos de parejas aún.</div>
         )}
       </div>
     );

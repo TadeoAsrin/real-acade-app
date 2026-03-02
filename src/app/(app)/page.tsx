@@ -4,6 +4,6 @@
  * La ruta raíz (/) se gestiona exclusivamente en src/app/page.tsx.
  */
 export const dynamic = 'force-static';
-export function AppGroupRoot() {
+export default function AppGroupRoot() {
   return null;
 }

@@ -57,7 +57,7 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-w-4xl p-0 overflow-hidden border-none shadow-2xl flex flex-col h-[92vh] sm:h-auto sm:max-h-[85vh] bottom-0 sm:bottom-auto translate-y-0 sm:translate-y-[-50%] top-auto sm:top-[50%] bg-white text-black editorial-paper">
+      <DialogContent className="max-w-4xl p-0 overflow-hidden border-none shadow-2xl flex flex-col h-[92vh] sm:h-auto sm:max-h-[85vh] bottom-0 sm:bottom-auto translate-y-0 sm:translate-y-[-50%] top-auto sm:top-[50%] bg-white !bg-white text-black editorial-paper">
         <DialogHeader className="sr-only">
           <DialogTitle>La Gaceta de Real Acade</DialogTitle>
           <DialogDescription>Crónica oficial del encuentro</DialogDescription>
@@ -79,7 +79,7 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto overscroll-contain bg-white">
+        <div className="flex-1 overflow-y-auto overscroll-contain bg-white !bg-white">
           {coverPhoto && (
             <div className="w-full aspect-video sm:aspect-[21/9] overflow-hidden border-b-4 border-black relative">
               <img src={coverPhoto} alt="Tapa" className="w-full h-full object-cover" />
@@ -87,10 +87,10 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
             </div>
           )}
 
-          <div className="p-6 sm:p-10 md:p-12 bg-white">
+          <div className="p-6 sm:p-10 md:p-12 bg-white !bg-white">
             <article className="space-y-10">
               <div className="space-y-6 text-center max-w-2xl mx-auto">
-                <h1 className="editorial-title text-4xl sm:text-6xl md:text-7xl font-black leading-[0.9] tracking-tighter uppercase italic text-black">
+                <h1 className="editorial-title text-4xl sm:text-6xl md:text-7xl font-black leading-[0.9] tracking-tighter uppercase italic text-black !text-black">
                   {aiSummary.title}
                 </h1>
                 <div className="editorial-divider" />
@@ -111,7 +111,7 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
 
                 <div className="lg:col-span-4 space-y-6">
                   <div className="bg-black/5 p-6 rounded-none border-t-4 border-black space-y-6">
-                    <h3 className="font-bebas text-sm font-black uppercase tracking-widest flex items-center justify-between border-b border-black/10 pb-3 text-black">
+                    <h3 className="font-bebas text-sm font-black uppercase tracking-widest flex items-center justify-between border-b border-black/10 pb-3 text-black !text-black">
                       OFFICIAL REPORT <Trophy className="h-4 w-4 text-accent" />
                     </h3>
                     <div className="flex items-center justify-between font-bebas italic">
@@ -132,7 +132,7 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
           </div>
         </div>
 
-        <div className="shrink-0 p-4 sm:p-6 bg-white border-t border-black/10 flex flex-col sm:flex-row gap-3 z-20">
+        <div className="shrink-0 p-4 sm:p-6 bg-white !bg-white border-t border-black/10 flex flex-col sm:flex-row gap-3 z-20">
           <button onClick={handleClose} className="bg-black text-white hover:bg-black/90 font-bebas font-black uppercase tracking-[0.2em] text-sm rounded-none h-14 w-full transition-colors">
             CLOSE GAZETTE
           </button>

@@ -148,6 +148,7 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
 
 export const getChemistryRankings = (players: Player[], matches: Match[], minMatches = 2): ChemistryPair[] => {
   const statsMap: { [key: string]: { matches: number, wins: number } } = {};
+  const playerStats = calculateAggregatedStats(players, matches);
   
   matches.forEach(match => {
     const processTeam = (playerStats: PlayerStats[], teamWon: boolean) => {
@@ -166,22 +167,33 @@ export const getChemistryRankings = (players: Player[], matches: Match[], minMat
     processTeam(match.teamBPlayers, match.teamBScore > match.teamAScore);
   });
 
-  return Object.entries(statsMap)
+  const rankings = Object.entries(statsMap)
     .filter(([_, stats]) => stats.matches >= minMatches)
     .map(([key, stats]) => {
       const [id1, id2] = key.split('_::_');
       const player1 = players.find(p => p.id === id1);
       const player2 = players.find(p => p.id === id2);
+      const s1 = playerStats.find(s => s.playerId === id1);
+      const s2 = playerStats.find(s => s.playerId === id2);
+      
       return { 
         player1: player1!, 
         player2: player2!, 
         wins: stats.wins, 
         matches: stats.matches,
-        winRate: Math.round((stats.wins / stats.matches) * 100)
+        winRate: Math.round((stats.wins / stats.matches) * 100),
+        combinedPower: (s1?.powerPoints || 0) + (s2?.powerPoints || 0)
       };
     })
     .filter(pair => pair.player1 && pair.player2)
-    .sort((a, b) => b.winRate - a.winRate || b.matches - a.matches);
+    .sort((a, b) => b.winRate - a.winRate || b.matches - a.matches || b.combinedPower - a.combinedPower);
+
+  // Lógica adaptativa: si no hay parejas con minMatches, bajamos el umbral
+  if (rankings.length === 0 && minMatches > 1) {
+    return getChemistryRankings(players, matches, 1);
+  }
+
+  return rankings;
 };
 
 export const getSpiciestMatch = (matches: Match[]) => {
