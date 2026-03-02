@@ -86,7 +86,7 @@ export default function DashboardPage() {
   const influencerRunnersUp = sortedByInfluence.slice(1, 3);
 
   const mvpLeaders = [...playerStats].sort((a, b) => b.totalMvp - a.totalMvp || b.powerPoints - a.powerPoints).slice(0, 3);
-  const totalMatches = allMatches.length;
+  const totalMatches = allMatches.filter(m => m.teamAScore > 0 || m.teamBScore > 0).length;
   const maxAttendanceRate = totalMatches > 0 ? Math.round((Math.max(...playerStats.map(p => p.matchesPlayed)) / totalMatches) * 100) : 0;
 
   // Sala de Humildad
@@ -185,9 +185,24 @@ export default function DashboardPage() {
                     <p className="text-[10px] font-black text-yellow-500/60 uppercase tracking-widest mt-1 font-oswald">LÍDER ACTUAL</p>
                   </div>
                 </div>
-                <div className="mt-6 flex items-baseline gap-3">
-                  <span className="text-6xl font-bebas text-yellow-500 leading-none">{topScorer?.totalGoals || 0}</span>
-                  <span className="text-sm font-black text-muted-foreground uppercase tracking-widest font-oswald">GOLES TOTALES</span>
+                <div className="mt-6 flex flex-col gap-1">
+                  <div className="flex items-baseline gap-3">
+                    <span className="text-6xl font-bebas text-yellow-500 leading-none">{topScorer?.totalGoals || 0}</span>
+                    <span className="text-sm font-black text-muted-foreground uppercase tracking-widest font-oswald">GOLES TOTALES</span>
+                  </div>
+                  {topScorer && (
+                    <div className="flex items-center gap-4 mt-2 py-2 px-3 bg-white/5 rounded-lg border border-white/5">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-black text-yellow-500 uppercase font-oswald">PROMEDIO</span>
+                        <span className="text-xl font-bebas text-white leading-none">{topScorer.goalsPerMatch} G/PJ</span>
+                      </div>
+                      <div className="h-6 w-[1px] bg-white/10" />
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-black text-muted-foreground uppercase font-oswald">PARTIDOS</span>
+                        <span className="text-xl font-bebas text-white leading-none">{topScorer.matchesPlayed} PJ</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </Link>
               <div className="pt-6 border-t border-white/5 space-y-3">
@@ -197,7 +212,10 @@ export default function DashboardPage() {
                       <span className="text-yellow-500/40 font-bebas">#{idx + 2}</span>
                       <span className="font-bold text-muted-foreground">{runner.name}</span>
                     </div>
-                    <span className="font-bebas text-xl text-white/80">{runner.totalGoals}</span>
+                    <div className="flex items-center gap-3">
+                      <span className="text-[10px] font-bold text-muted-foreground/40 font-oswald uppercase">{runner.goalsPerMatch} G/PJ</span>
+                      <span className="font-bebas text-xl text-white/80">{runner.totalGoals}</span>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -225,12 +243,20 @@ export default function DashboardPage() {
                     <p className="text-[10px] font-black text-primary/60 uppercase tracking-widest mt-1 font-oswald">FACTOR DE VICTORIA</p>
                   </div>
                 </div>
-                <div className="mt-6 space-y-3">
+                <div className="mt-6 space-y-4">
                   <div className="flex items-baseline justify-between">
                     <span className="text-6xl font-bebas text-primary leading-none">{influencer?.winPercentage || 0}%</span>
-                    <span className="text-[10px] font-black text-muted-foreground uppercase font-oswald">{influencer?.wins} VICTORIAS</span>
+                    <div className="text-right">
+                      <span className="text-[10px] font-black text-muted-foreground uppercase block font-oswald">RÉCORD V-E-D</span>
+                      <span className="text-xl font-bebas text-white">{influencer?.wins}V - {influencer?.draws}E - {influencer?.losses}D</span>
+                    </div>
                   </div>
                   <Progress value={influencer?.winPercentage || 0} className="h-2 bg-white/5" />
+                  {influencer && (
+                    <div className="flex items-center gap-2 text-[10px] font-black uppercase text-primary/60 font-oswald tracking-widest">
+                      <TrendingUp className="h-3 w-3" /> CONSISTENCIA EN {influencer.matchesPlayed} PARTIDOS
+                    </div>
+                  )}
                 </div>
               </Link>
               <div className="pt-6 border-t border-white/5 space-y-3">
