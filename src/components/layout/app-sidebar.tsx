@@ -1,3 +1,4 @@
+
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
@@ -99,9 +100,7 @@ export function AppSidebar() {
     <Sidebar className="border-r border-border bg-background">
       <SidebarHeader className="p-6">
         <div className="flex items-center gap-4">
-          <div className="shrink-0">
-            <Fut7StatsLogo className="h-12 w-12 text-primary drop-shadow-[0_0_15px_rgba(59,130,246,0.2)]" />
-          </div>
+          <Fut7StatsLogo width={48} height={48} className="shrink-0 drop-shadow-xl" />
           <div className="flex flex-col">
             <h2 className="text-2xl font-bebas tracking-wider text-white leading-none">REAL ACADE</h2>
             <p className="text-[10px] uppercase tracking-[0.3em] text-primary font-black mt-1 font-oswald">CLUB DE ÉLITE</p>

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
@@ -73,7 +74,7 @@ export function Header() {
       <div className="flex items-center gap-4">
         <SidebarTrigger className="h-9 w-9 text-primary hover:bg-white/5" />
         <div className="md:hidden">
-          <Fut7StatsLogo className="h-8 w-8 text-primary" />
+          <Fut7StatsLogo width={32} height={32} className="drop-shadow-lg" />
         </div>
         <h1 className="text-xl md:text-3xl font-bebas uppercase tracking-wider text-white">
           {getPageTitle(pathname)}

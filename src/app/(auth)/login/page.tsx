@@ -1,3 +1,4 @@
+
 import { UserAuthForm } from "@/components/auth/user-auth-form";
 import { Fut7StatsLogo } from "@/components/icons";
 import {
@@ -18,8 +19,8 @@ export default function LoginPage() {
         <div className="h-2 bg-primary w-full" />
         <CardHeader className="text-center pt-10">
           <div className="mb-6 flex justify-center">
-            <Link href="/dashboard" className="transition-transform hover:scale-105 active:scale-95 p-4">
-              <Fut7StatsLogo className="h-24 w-24 text-primary drop-shadow-[0_0_20px_rgba(59,130,246,0.3)]" />
+            <Link href="/dashboard" className="transition-transform hover:scale-105 active:scale-95">
+              <Fut7StatsLogo width={120} height={120} className="drop-shadow-[0_0_30px_rgba(59,130,246,0.4)]" />
             </Link>
           </div>
           <CardTitle className="text-4xl font-bebas tracking-widest text-white">ACCESO MIEMBROS</CardTitle>
