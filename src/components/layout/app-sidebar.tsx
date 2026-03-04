@@ -99,8 +99,8 @@ export function AppSidebar() {
     <Sidebar className="border-r border-border bg-background">
       <SidebarHeader className="p-6">
         <div className="flex items-center gap-4">
-          <div className="bg-primary p-2.5 rounded-none shadow-lg shadow-primary/20">
-            <Fut7StatsLogo className="h-8 w-8 text-primary-foreground" />
+          <div className="shrink-0">
+            <Fut7StatsLogo className="h-12 w-12 text-primary drop-shadow-[0_0_15px_rgba(59,130,246,0.2)]" />
           </div>
           <div className="flex flex-col">
             <h2 className="text-2xl font-bebas tracking-wider text-white leading-none">REAL ACADE</h2>

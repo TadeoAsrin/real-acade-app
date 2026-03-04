@@ -18,8 +18,8 @@ export default function LoginPage() {
         <div className="h-2 bg-primary w-full" />
         <CardHeader className="text-center pt-10">
           <div className="mb-6 flex justify-center">
-            <Link href="/dashboard" className="transition-transform hover:scale-105 active:scale-95 bg-primary p-4 rounded-none shadow-xl shadow-primary/20">
-              <Fut7StatsLogo className="h-16 w-16 text-primary-foreground" />
+            <Link href="/dashboard" className="transition-transform hover:scale-105 active:scale-95 p-4">
+              <Fut7StatsLogo className="h-24 w-24 text-primary drop-shadow-[0_0_20px_rgba(59,130,246,0.3)]" />
             </Link>
           </div>
           <CardTitle className="text-4xl font-bebas tracking-widest text-white">ACCESO MIEMBROS</CardTitle>

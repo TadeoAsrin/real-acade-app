@@ -10,51 +10,47 @@ export function Fut7StatsLogo(props: SVGProps<SVGSVGElement>) {
     >
       <title>Escudo Oficial Real Acade</title>
       
-      {/* Círculo Exterior (Borde de Balón/Prestigio) */}
-      <circle cx="50" cy="50" r="48" stroke="currentColor" strokeWidth="1.5" strokeDasharray="4 2" opacity="0.3" />
-      <circle cx="50" cy="50" r="45" stroke="currentColor" strokeWidth="2" />
-      
-      {/* Fondo del Escudo */}
+      {/* Contorno del Escudo - Más grueso para legibilidad */}
       <path 
-        d="M50 8L20 22V48C20 68 33 85 50 92C67 85 80 68 80 48V22L50 8Z" 
+        d="M50 5L15 20V48C15 72 35 88 50 95C65 88 85 72 85 48V20L50 5Z" 
         fill="currentColor" 
       />
 
-      {/* El Roble de la Academia (Símbolo Central) */}
-      <g transform="translate(35, 25) scale(0.75)" fill="var(--primary-foreground)">
-        <path d="M20 5C12 5 5 11 5 19C5 25 9 30 15 32V45H25V32C31 30 35 25 35 19C35 11 28 5 20 5Z" />
-        <path d="M20 0C30 0 40 8 40 20C40 28 34 35 28 38V50H12V38C6 35 0 28 0 20C0 8 10 0 20 0Z" opacity="0.4" />
-      </g>
+      {/* Símbolo del Roble - Silueta sólida y simplificada */}
+      <path 
+        d="M50 22C42 22 35 28 35 38C35 45 40 52 46 54V68H54V54C60 52 65 45 65 38C65 28 58 22 50 22Z" 
+        fill="var(--primary-foreground)" 
+      />
+      <path 
+        d="M50 18C60 18 70 26 70 38C70 46 65 53 58 56V72H42V56C35 53 30 46 30 38C30 26 40 18 50 18Z" 
+        fill="var(--primary-foreground)" 
+        fillOpacity="0.3"
+      />
 
-      {/* Texto Circular Superior: REAL ACADE */}
-      <defs>
-        <path id="textPathTop" d="M 20,50 A 30,30 0 1,1 80,50" />
-      </defs>
-      
-      {/* Iniciales RA en el centro del roble */}
+      {/* Siglas RA - Tipografía Bold de alto impacto */}
       <text 
         x="50" 
-        y="58" 
+        y="62" 
         fill="var(--primary-foreground)" 
-        fontSize="14" 
+        fontSize="18" 
         fontWeight="900" 
         textAnchor="middle" 
         fontFamily="var(--font-bebas)"
-        letterSpacing="1"
+        letterSpacing="0.5"
       >
         RA
       </text>
 
-      {/* Año de Fundación en la base */}
+      {/* Año de Fundación - Simplificado */}
       <text 
         x="50" 
-        y="82" 
+        y="85" 
         fill="var(--primary-foreground)" 
-        fontSize="5" 
-        fontWeight="bold" 
+        fontSize="6" 
+        fontWeight="900" 
         textAnchor="middle" 
         fontFamily="var(--font-oswald)"
-        letterSpacing="2"
+        letterSpacing="1.5"
       >
         EST. 2010
       </text>

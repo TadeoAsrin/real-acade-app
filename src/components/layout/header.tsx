@@ -21,6 +21,7 @@ import { useToast } from "@/hooks/use-toast";
 import { getInitials } from "@/lib/utils";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { Fut7StatsLogo } from "@/components/icons";
 
 const getPageTitle = (pathname: string) => {
   if (pathname.includes("/dashboard")) return "PANEL DE CONTROL";
@@ -71,6 +72,9 @@ export function Header() {
     <header className="sticky top-0 z-20 flex h-14 items-center gap-4 border-b border-border bg-background px-4 md:h-16 md:px-6 shadow-xl">
       <div className="flex items-center gap-4">
         <SidebarTrigger className="h-9 w-9 text-primary hover:bg-white/5" />
+        <div className="md:hidden">
+          <Fut7StatsLogo className="h-8 w-8 text-primary" />
+        </div>
         <h1 className="text-xl md:text-3xl font-bebas uppercase tracking-wider text-white">
           {getPageTitle(pathname)}
         </h1>
