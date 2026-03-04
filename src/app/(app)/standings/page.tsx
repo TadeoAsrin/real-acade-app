@@ -137,7 +137,7 @@ function StandingsContent() {
                     <TableHead className="font-bebas text-sm">JUGADOR</TableHead>
                     <TableHead className="text-center font-bebas text-sm">PJ</TableHead>
                     <TableHead className="text-center font-bebas text-sm">V-E-D</TableHead>
-                    <TableHead className="text-center font-bebas text-sm text-accent">GOLES</TableHead>
+                    <TableHead className="text-center font-bebas text-sm text-yellow-500">GOLES</TableHead>
                     <TableHead className="text-center font-bebas text-sm">%</TableHead>
                     <TableHead className="text-center font-bebas text-sm bg-primary/10 text-primary">PTS</TableHead>
                     <TableHead className="text-center font-bebas text-sm">TREND</TableHead>
@@ -157,7 +157,7 @@ function StandingsContent() {
                       <TableCell className="text-center font-oswald text-[10px] tracking-widest font-bold">
                         <span className="text-emerald-500">{player.wins}</span>-<span className="text-orange-400">{player.draws}</span>-<span className="text-red-500">{player.losses}</span>
                       </TableCell>
-                      <TableCell className="text-center font-bebas text-xl text-accent/80">{player.totalGoals}</TableCell>
+                      <TableCell className="text-center font-bebas text-xl text-yellow-500/80">{player.totalGoals}</TableCell>
                       <TableCell className="text-center font-bebas text-xl text-muted-foreground/60">{player.efficiency}%</TableCell>
                       <TableCell className="text-center font-bebas text-3xl italic bg-primary/5">{player.wins * 3 + player.draws}</TableCell>
                       <TableCell className="text-center"><TrendIcon form={player.form} /></TableCell>
@@ -181,7 +181,7 @@ function StandingsContent() {
                     <TableHead className="w-16 text-center font-bebas text-sm">POS</TableHead>
                     <TableHead className="font-bebas text-sm">ARTILLERO</TableHead>
                     <TableHead className="text-center font-bebas text-sm">PJ</TableHead>
-                    <TableHead className="text-center font-bebas text-sm bg-accent/10 text-accent">GOLES</TableHead>
+                    <TableHead className="text-center font-bebas text-sm bg-yellow-500/10 text-yellow-500">GOLES</TableHead>
                     <TableHead className="text-center font-bebas text-sm">G/PJ</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -195,7 +195,7 @@ function StandingsContent() {
                           <div className="flex items-center gap-4">
                             <Avatar className="h-10 w-10 border border-white/10"><AvatarFallback className="bg-muted text-xs">{getInitials(player.name)}</AvatarFallback></Avatar>
                             <div className="flex flex-col">
-                              <Link href={`/players/${player.playerId}`} className="font-bold uppercase tracking-tight hover:text-accent flex items-center gap-2">
+                              <Link href={`/players/${player.playerId}`} className="font-bold uppercase tracking-tight hover:text-yellow-500 flex items-center gap-2">
                                 {player.name}
                                 {isSniper && <Target className="h-3 w-3 text-yellow-500" />}
                               </Link>
@@ -204,7 +204,7 @@ function StandingsContent() {
                           </div>
                         </TableCell>
                         <TableCell className="text-center font-bebas text-xl text-muted-foreground">{player.matchesPlayed}</TableCell>
-                        <TableCell className="text-center font-bebas text-4xl italic bg-accent/5 text-accent">{player.totalGoals}</TableCell>
+                        <TableCell className="text-center font-bebas text-4xl italic bg-yellow-500/5 text-yellow-500">{player.totalGoals}</TableCell>
                         <TableCell className="text-center font-bebas text-2xl italic text-white/60">{player.goalsPerMatch}</TableCell>
                       </TableRow>
                     );
@@ -247,7 +247,7 @@ function StandingsContent() {
                     <TableRow className="bg-black/20 border-white/5 h-12">
                       <TableHead className="pl-8 font-bebas text-xs uppercase">Jugador</TableHead>
                       <TableHead className="text-center font-bebas text-xs uppercase">Equipo</TableHead>
-                      <TableHead className="text-right pr-8 font-bebas text-xs uppercase">Goles en Fecha</TableHead>
+                      <TableHead className="text-right pr-8 font-bebas text-xs uppercase text-yellow-500">Goles en Fecha</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -267,7 +267,7 @@ function StandingsContent() {
                               {isBlue ? "AZUL" : "ROJO"}
                             </Badge>
                           </TableCell>
-                          <TableCell className="text-right pr-8 font-bebas text-3xl italic text-white">
+                          <TableCell className="text-right pr-8 font-bebas text-3xl italic text-yellow-500">
                             {stat.goals}
                           </TableCell>
                         </TableRow>

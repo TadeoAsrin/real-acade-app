@@ -88,13 +88,13 @@ export default function PlayerProfilePage() {
   const StatBox = ({ label, value, icon: Icon, color = "primary", sub }: { label: string, value: string | number, icon: any, color?: string, sub?: string }) => (
     <Card className="competition-card group hover-lift">
       <CardContent className="p-6 relative">
-        <div className={cn("absolute -right-4 -bottom-4 opacity-5 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12", `text-${color}`)}>
+        <div className={cn("absolute -right-4 -bottom-4 opacity-5 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12", color.startsWith('text-') ? color : `text-${color}`)}>
           <Icon className="h-24 w-24" />
         </div>
         <div className="space-y-1 relative z-10">
           <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">{label}</p>
           <div className="flex items-baseline gap-2">
-            <span className={cn("text-4xl font-black italic tracking-tighter", `text-${color}`)}>{value}</span>
+            <span className={cn("text-4xl font-black italic tracking-tighter", color.startsWith('text-') ? color : `text-${color}`)}>{value}</span>
             {sub && <span className="text-[10px] font-bold text-muted-foreground/40 uppercase">{sub}</span>}
           </div>
         </div>
@@ -155,7 +155,7 @@ export default function PlayerProfilePage() {
 
       <div className="grid gap-6 grid-cols-2 lg:grid-cols-4">
         <StatBox label="Partidos" value={playerStats.matchesPlayed} icon={History} color="primary" sub="PJ" />
-        <StatBox label="Goles" value={playerStats.totalGoals} icon={Target} color="accent" sub="GF" />
+        <StatBox label="Goles" value={playerStats.totalGoals} icon={Target} color="yellow-500" sub="GF" />
         <StatBox label="Premios MVP" value={playerStats.totalMvp} icon={Star} color="yellow-500" sub="MVP" />
         <StatBox label="Capitanías" value={playerStats.totalCaptaincies} icon={ShieldCheck} color="emerald-500" sub="CAP" />
       </div>
@@ -177,7 +177,7 @@ export default function PlayerProfilePage() {
                       <TableHead className="pl-6 text-[10px] font-black uppercase">Fecha</TableHead>
                       <TableHead className="text-center text-[10px] font-black uppercase">Equipo</TableHead>
                       <TableHead className="text-center text-[10px] font-black uppercase">Resultado</TableHead>
-                      <TableHead className="text-center text-[10px] font-black uppercase">Goles</TableHead>
+                      <TableHead className="text-center text-[10px] font-black uppercase text-yellow-500">Goles</TableHead>
                       <TableHead></TableHead>
                     </TableRow>
                   </TableHeader>
@@ -210,7 +210,7 @@ export default function PlayerProfilePage() {
                             {match.result}
                           </div>
                         </TableCell>
-                        <TableCell className="text-center font-black italic text-lg">{match.goals}</TableCell>
+                        <TableCell className="text-center font-black italic text-lg text-yellow-500">{match.goals}</TableCell>
                         <TableCell className="text-right pr-6">
                           <Button variant="ghost" size="sm" asChild className="h-8 w-8 p-0 group-hover:text-primary transition-colors">
                             <Link href={`/matches/${match.matchId}`}><ChevronRight className="h-4 w-4" /></Link>
@@ -281,7 +281,7 @@ export default function PlayerProfilePage() {
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground font-bold uppercase tracking-tighter">Por Goles</span>
-                <span className="font-black text-accent">+{playerStats.totalGoals * 2}</span>
+                <span className="font-black text-yellow-500">+{playerStats.totalGoals * 2}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground font-bold uppercase tracking-tighter">Por MVP / Goles VIP</span>
