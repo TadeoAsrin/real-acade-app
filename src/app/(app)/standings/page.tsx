@@ -16,7 +16,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc } from "@/firebase";
 import { collection, query, orderBy, doc } from "firebase/firestore";
 import type { Player, Match, AggregatedPlayerStats } from "@/lib/definitions";
-import { Loader2, TrendingUp, TrendingDown, Minus, ChevronRight, Users, Star, Info, Sparkles, Crown, Target, Zap, Calendar, ShieldCheck } from "lucide-react";
+import { Loader2, TrendingUp, TrendingDown, Minus, ChevronRight, Users, Star, Info, Sparkles, Crown, Target, Zap, Calendar, ShieldCheck, AlertCircle } from "lucide-react";
 import Link from 'next/link';
 import { cn, getInitials } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -79,7 +79,11 @@ function StandingsContent() {
 
   const sortedGeneral = [...stats].sort((a, b) => (b.wins * 3 + b.draws) - (a.wins * 3 + a.draws) || b.goalDifference - a.goalDifference);
   const sortedScorers = [...stats].filter(p => p.totalGoals > 0).sort((a, b) => b.totalGoals - a.totalGoals || b.goalsPerMatch - a.goalsPerMatch);
-  const sortedEfficiency = [...stats].filter(p => p.matchesPlayed >= 1).sort((a, b) => b.efficiency - a.efficiency);
+  
+  // Requisito de mínimo 2 partidos jugados para entrar en el ranking de efectividad
+  const sortedEfficiency = [...stats]
+    .filter(p => p.matchesPlayed >= 2)
+    .sort((a, b) => b.efficiency - a.efficiency || b.matchesPlayed - a.matchesPlayed);
 
   const leadershipRanking = [...stats]
     .sort((a, b) => {
@@ -256,7 +260,12 @@ function StandingsContent() {
             )}
           </TabsContent>
 
-          <TabsContent value="efectividad" className="animate-in fade-in slide-in-from-bottom-2">
+          <TabsContent value="efectividad" className="animate-in fade-in slide-in-from-bottom-2 space-y-6">
+            <div className="flex items-center justify-center gap-3 p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-lg">
+              <AlertCircle className="h-4 w-4 text-emerald-500" />
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500">REQUISITO: MÍNIMO 2 PARTIDOS JUGADOS</p>
+            </div>
+            
             <Card className="competition-card">
               <Table>
                 <TableHeader>
@@ -287,6 +296,11 @@ function StandingsContent() {
                       </TableCell>
                     </TableRow>
                   ))}
+                  {sortedEfficiency.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-20 opacity-20 italic">No hay suficientes datos (Mín. 2 PJ).</TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
             </Card>
