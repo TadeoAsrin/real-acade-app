@@ -78,9 +78,16 @@ function StandingsContent() {
   if (playersLoading || matchesLoading) return <div className="flex h-[50vh] items-center justify-center"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div>;
 
   const sortedGeneral = [...stats].sort((a, b) => (b.wins * 3 + b.draws) - (a.wins * 3 + a.draws) || b.goalDifference - a.goalDifference);
-  const sortedScorers = [...stats].filter(p => p.totalGoals > 0).sort((a, b) => b.totalGoals - a.totalGoals || b.goalsPerMatch - a.goalsPerMatch);
   
-  // Requisito de mínimo 2 partidos jugados para entrar en el ranking de efectividad
+  // Goleadores: Ordenados por Índice de Letalidad
+  const sortedScorers = [...stats]
+    .filter(p => p.totalGoals > 0)
+    .sort((a, b) => b.lethalityIndex - a.lethalityIndex || b.totalGoals - a.totalGoals);
+
+  const sniper = [...stats]
+    .filter(p => p.matchesPlayed >= 3)
+    .sort((a, b) => b.goalsPerMatch - a.goalsPerMatch || b.totalGoals - a.totalGoals)[0];
+  
   const sortedEfficiency = [...stats]
     .filter(p => p.matchesPlayed >= 2)
     .sort((a, b) => b.efficiency - a.efficiency || b.matchesPlayed - a.matchesPlayed);
@@ -154,7 +161,12 @@ function StandingsContent() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="goleadores" className="animate-in fade-in slide-in-from-bottom-2">
+          <TabsContent value="goleadores" className="animate-in fade-in slide-in-from-bottom-2 space-y-6">
+            <div className="flex items-center justify-center gap-3 p-4 bg-yellow-500/5 border border-yellow-500/10 rounded-lg">
+              <Info className="h-4 w-4 text-yellow-500" />
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-yellow-500">ORDEN: ÍNDICE DE LETALIDAD (GOLES + G/PJ*2). MÍN. 3 PJ PARA PONDERAR.</p>
+            </div>
+
             <Card className="competition-card">
               <Table>
                 <TableHeader>
@@ -164,23 +176,34 @@ function StandingsContent() {
                     <TableHead className="text-center font-bebas text-sm">PJ</TableHead>
                     <TableHead className="text-center font-bebas text-sm">G/PJ</TableHead>
                     <TableHead className="text-center font-bebas text-sm bg-accent/10 text-accent">GOLES</TableHead>
+                    <TableHead className="text-center font-bebas text-sm">ÍNDICE</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {sortedScorers.map((player, index) => (
-                    <TableRow key={player.playerId} className={cn("official-table-row h-16", index === 0 ? "podium-1" : index === 1 ? "podium-2" : index === 2 ? "podium-3" : "")}>
-                      <TableCell className="text-center font-bebas text-2xl italic">{index + 1}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-4">
-                          <Avatar className="h-10 w-10 border border-white/10"><AvatarFallback className="bg-muted text-xs">{getInitials(player.name)}</AvatarFallback></Avatar>
-                          <Link href={`/players/${player.playerId}`} className="font-bold uppercase tracking-tight hover:text-accent">{player.name}</Link>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-center font-bebas text-xl text-muted-foreground">{player.matchesPlayed}</TableCell>
-                      <TableCell className="text-center font-bebas text-xl text-muted-foreground">{player.goalsPerMatch}</TableCell>
-                      <TableCell className="text-center font-bebas text-4xl italic bg-accent/5 text-accent">{player.totalGoals}</TableCell>
-                    </TableRow>
-                  ))}
+                  {sortedScorers.map((player, index) => {
+                    const isSniper = player.playerId === sniper?.playerId;
+                    return (
+                      <TableRow key={player.playerId} className={cn("official-table-row h-16", index === 0 ? "podium-1" : index === 1 ? "podium-2" : index === 2 ? "podium-3" : "")}>
+                        <TableCell className="text-center font-bebas text-2xl italic">{index + 1}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-4">
+                            <Avatar className="h-10 w-10 border border-white/10"><AvatarFallback className="bg-muted text-xs">{getInitials(player.name)}</AvatarFallback></Avatar>
+                            <div className="flex flex-col">
+                              <Link href={`/players/${player.playerId}`} className="font-bold uppercase tracking-tight hover:text-accent flex items-center gap-2">
+                                {player.name}
+                                {isSniper && <Target className="h-3 w-3 text-yellow-500" />}
+                              </Link>
+                              {isSniper && <span className="text-[7px] font-black text-yellow-500 uppercase tracking-widest">FRANCOTIRADOR</span>}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-center font-bebas text-xl text-muted-foreground">{player.matchesPlayed}</TableCell>
+                        <TableCell className="text-center font-bebas text-xl text-muted-foreground">{player.goalsPerMatch}</TableCell>
+                        <TableCell className="text-center font-bebas text-4xl italic bg-accent/5 text-accent">{player.totalGoals}</TableCell>
+                        <TableCell className="text-center font-bebas text-2xl italic text-white/60">{player.lethalityIndex.toFixed(1)}</TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </Card>

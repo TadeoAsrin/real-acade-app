@@ -46,6 +46,7 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
       lossesAsCaptain: 0,
       drawsAsCaptain: 0,
       matchesSinceLastCaptain: 0,
+      lethalityIndex: 0,
     };
   });
 
@@ -140,6 +141,11 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
           // Jugador activo si jugó al menos 1 de los últimos 5 partidos del club
           stats.isActive = stats.matchesInLast5 >= 1;
           stats.captaincyPriorityScore = (stats.matchesInLast5 * 3) + (stats.matchesPlayed * 1) - (stats.totalCaptaincies * 4);
+
+          // Índice de Letalidad: Goles + (G/PJ * 2). Requiere min 3 PJ para ponderar el promedio.
+          stats.lethalityIndex = stats.matchesPlayed >= 3 
+            ? stats.totalGoals + (stats.goalsPerMatch * 2) 
+            : stats.totalGoals;
       }
       stats.form = [...stats.form].reverse();
   }

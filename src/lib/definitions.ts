@@ -71,6 +71,8 @@ export type AggregatedPlayerStats = {
   lossesAsCaptain: number;
   drawsAsCaptain: number;
   matchesSinceLastCaptain: number;
+  // Índice de Letalidad
+  lethalityIndex: number;
 };
 
 export type ChemistryPair = {

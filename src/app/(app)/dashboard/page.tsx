@@ -76,9 +76,15 @@ export default function DashboardPage() {
   const chemistryRankings = getChemistryRankings(allPlayers, allMatches, 1);
   const topChemistry = chemistryRankings[0];
 
-  const sortedByGoals = [...playerStats].sort((a, b) => b.totalGoals - a.totalGoals || b.goalsPerMatch - a.goalsPerMatch);
-  const topScorer = sortedByGoals[0];
-  const runnersUp = sortedByGoals.slice(1, 5); 
+  // Carrera por el Pichichi: Índice de Letalidad
+  const sortedByLethality = [...playerStats].sort((a, b) => b.lethalityIndex - a.lethalityIndex || b.totalGoals - a.totalGoals);
+  const topScorer = sortedByLethality[0];
+  const runnersUp = sortedByLethality.slice(1, 5); 
+
+  // Identificar al "Francotirador" (Mejor promedio con min 3 PJ)
+  const sniper = [...playerStats]
+    .filter(p => p.matchesPlayed >= 3)
+    .sort((a, b) => b.goalsPerMatch - a.goalsPerMatch || b.totalGoals - a.totalGoals)[0];
 
   const sortedByInfluence = [...playerStats]
     .filter(p => p.matchesPlayed > 0)
@@ -134,9 +140,12 @@ export default function DashboardPage() {
                 </p>
               </div>
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
-                <Button size="lg" onClick={() => setShowGacetaManually(true)} className="font-bebas text-xl tracking-widest h-14 px-8">
-                  <Newspaper className="h-5 w-5 mr-2" /> LEER GACETA
-                </Button>
+                <button 
+                  onClick={() => setShowGacetaManually(true)} 
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 font-bebas text-xl tracking-widest h-14 px-8 flex items-center gap-2 transition-all active:scale-95 shadow-lg shadow-primary/20 rounded-md"
+                >
+                  <Newspaper className="h-5 w-5" /> LEER GACETA
+                </button>
                 <Button asChild variant="secondary" size="lg" className="h-14 px-8 font-bebas text-xl tracking-widest">
                   <Link href={`/matches/${lastMatch.id}`}>FICHA TÉCNICA</Link>
                 </Button>
@@ -166,11 +175,12 @@ export default function DashboardPage() {
         <h2 className="text-xs font-black uppercase tracking-[0.4em] text-muted-foreground/50 px-1 font-oswald">ESTRELLAS DE LA ACADEMIA</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           
-          {/* PICHICHI */}
+          {/* PICHICHI / ÍNDICE DE LETALIDAD */}
           <Card className="competition-card border-t-4 border-t-yellow-500 bg-gradient-to-b from-yellow-500/5 to-card hover-lift">
             <CardHeader className="pb-2">
-              <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-yellow-500 flex items-center gap-2 font-oswald">
-                <Trophy className="h-4 w-4" /> CARRERA POR EL PICHICHI
+              <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-yellow-500 flex items-center justify-between font-oswald">
+                <div className="flex items-center gap-2"><Trophy className="h-4 w-4" /> CARRERA PICHICHI</div>
+                <Badge variant="outline" className="text-[8px] font-black border-yellow-500/30 text-yellow-500">ÍNDICE LETALIDAD</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -182,20 +192,33 @@ export default function DashboardPage() {
                     </Avatar>
                     <div className="absolute -top-2 -right-2 bg-yellow-500 text-yellow-foreground p-1 rounded-full"><Crown className="h-4 w-4" /></div>
                   </div>
-                  <div>
-                    <h3 className="text-4xl font-bebas text-white group-hover:text-yellow-500 transition-colors uppercase leading-none">{topScorer?.name || '-'}</h3>
-                    <p className="text-[10px] font-black text-yellow-500/60 uppercase tracking-widest mt-1 font-oswald">LÍDER ACTUAL</p>
+                  <div className="min-w-0">
+                    <h3 className="text-4xl font-bebas text-white group-hover:text-yellow-500 transition-colors uppercase leading-none truncate">{topScorer?.name || '-'}</h3>
+                    <div className="flex items-center gap-2 mt-1">
+                      {topScorer?.playerId === sniper?.playerId && (
+                        <Badge className="bg-yellow-500 text-black text-[7px] font-black uppercase p-1 h-4 flex items-center gap-1">
+                          <Target className="h-2.5 w-2.5" /> FRANCOTIRADOR
+                        </Badge>
+                      )}
+                      <p className="text-[10px] font-black text-yellow-500/60 uppercase tracking-widest font-oswald">LÍDER ACTUAL</p>
+                    </div>
                   </div>
                 </div>
                 <div className="mt-6 flex flex-col gap-1">
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-6xl font-bebas text-yellow-500 leading-none">{topScorer?.totalGoals || 0}</span>
-                    <span className="text-sm font-black text-muted-foreground uppercase tracking-widest font-oswald">GOLES TOTALES</span>
+                  <div className="flex items-baseline justify-between">
+                    <div className="flex items-baseline gap-3">
+                      <span className="text-6xl font-bebas text-yellow-500 leading-none">{topScorer?.totalGoals || 0}</span>
+                      <span className="text-sm font-black text-muted-foreground uppercase tracking-widest font-oswald">GOLES</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-3xl font-bebas text-white leading-none">{topScorer?.lethalityIndex.toFixed(1)}</span>
+                      <p className="text-[8px] font-black text-muted-foreground/40 uppercase font-oswald">POWER INDEX</p>
+                    </div>
                   </div>
                   {topScorer && (
                     <div className="flex items-center gap-4 mt-2 py-2 px-3 bg-white/5 rounded-lg border border-white/5">
                       <div className="flex flex-col">
-                        <span className="text-[10px] font-black text-yellow-500 uppercase font-oswald">PROMEDIO</span>
+                        <span className="text-[10px] font-black text-yellow-500 uppercase font-oswald">EFICIENCIA</span>
                         <span className="text-xl font-bebas text-white leading-none">{topScorer.goalsPerMatch} G/PJ</span>
                       </div>
                       <div className="h-6 w-[1px] bg-white/10" />
@@ -212,11 +235,21 @@ export default function DashboardPage() {
                   <div key={runner.playerId} className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-3">
                       <span className="text-yellow-500/40 font-bebas">#{idx + 2}</span>
-                      <span className="font-bold text-muted-foreground">{runner.name}</span>
+                      <div className="flex flex-col">
+                        <span className="font-bold text-muted-foreground flex items-center gap-1.5">
+                          {runner.name}
+                          {runner.playerId === sniper?.playerId && <Target className="h-3 w-3 text-yellow-500" />}
+                        </span>
+                        <span className="text-[8px] font-black text-muted-foreground/30 uppercase tracking-widest font-oswald">
+                          {runner.goalsPerMatch} G/PJ • {runner.matchesPlayed} PJ
+                        </span>
+                      </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="text-[10px] font-bold text-muted-foreground/40 font-oswald uppercase">{runner.goalsPerMatch} G/PJ</span>
-                      <span className="font-bebas text-xl text-white/80">{runner.totalGoals}</span>
+                      <div className="text-right">
+                        <span className="font-bebas text-xl text-white/80">{runner.totalGoals}</span>
+                        <p className="text-[7px] font-black text-muted-foreground/20 uppercase font-oswald leading-none">GOLES</p>
+                      </div>
                     </div>
                   </div>
                 ))}
