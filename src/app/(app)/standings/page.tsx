@@ -79,10 +79,10 @@ function StandingsContent() {
 
   const sortedGeneral = [...stats].sort((a, b) => (b.wins * 3 + b.draws) - (a.wins * 3 + a.draws) || b.goalDifference - a.goalDifference);
   
-  // Goleadores: Ordenados por Índice de Letalidad
+  // Goleadores: Ordenados por Goles Totales y desempate por Promedio
   const sortedScorers = [...stats]
     .filter(p => p.totalGoals > 0)
-    .sort((a, b) => b.lethalityIndex - a.lethalityIndex || b.totalGoals - a.totalGoals);
+    .sort((a, b) => b.totalGoals - a.totalGoals || b.goalsPerMatch - a.goalsPerMatch);
 
   const sniper = [...stats]
     .filter(p => p.matchesPlayed >= 3)
@@ -164,7 +164,7 @@ function StandingsContent() {
           <TabsContent value="goleadores" className="animate-in fade-in slide-in-from-bottom-2 space-y-6">
             <div className="flex items-center justify-center gap-3 p-4 bg-yellow-500/5 border border-yellow-500/10 rounded-lg">
               <Info className="h-4 w-4 text-yellow-500" />
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-yellow-500">ORDEN: ÍNDICE DE LETALIDAD (GOLES + G/PJ*2). MÍN. 3 PJ PARA PONDERAR.</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-yellow-500">PICHICHI OFICIAL: ORDENADO POR GOLES. DESEMPATE POR PROMEDIO G/PJ.</p>
             </div>
 
             <Card className="competition-card">
@@ -174,9 +174,8 @@ function StandingsContent() {
                     <TableHead className="w-16 text-center font-bebas text-sm">POS</TableHead>
                     <TableHead className="font-bebas text-sm">ARTILLERO</TableHead>
                     <TableHead className="text-center font-bebas text-sm">PJ</TableHead>
-                    <TableHead className="text-center font-bebas text-sm">G/PJ</TableHead>
                     <TableHead className="text-center font-bebas text-sm bg-accent/10 text-accent">GOLES</TableHead>
-                    <TableHead className="text-center font-bebas text-sm">ÍNDICE</TableHead>
+                    <TableHead className="text-center font-bebas text-sm">G/PJ</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -198,9 +197,8 @@ function StandingsContent() {
                           </div>
                         </TableCell>
                         <TableCell className="text-center font-bebas text-xl text-muted-foreground">{player.matchesPlayed}</TableCell>
-                        <TableCell className="text-center font-bebas text-xl text-muted-foreground">{player.goalsPerMatch}</TableCell>
                         <TableCell className="text-center font-bebas text-4xl italic bg-accent/5 text-accent">{player.totalGoals}</TableCell>
-                        <TableCell className="text-center font-bebas text-2xl italic text-white/60">{player.lethalityIndex.toFixed(1)}</TableCell>
+                        <TableCell className="text-center font-bebas text-2xl italic text-white/60">{player.goalsPerMatch}</TableCell>
                       </TableRow>
                     );
                   })}

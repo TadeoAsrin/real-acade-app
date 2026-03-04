@@ -76,10 +76,13 @@ export default function DashboardPage() {
   const chemistryRankings = getChemistryRankings(allPlayers, allMatches, 1);
   const topChemistry = chemistryRankings[0];
 
-  // Carrera por el Pichichi: Índice de Letalidad
-  const sortedByLethality = [...playerStats].sort((a, b) => b.lethalityIndex - a.lethalityIndex || b.totalGoals - a.totalGoals);
-  const topScorer = sortedByLethality[0];
-  const runnersUp = sortedByLethality.slice(1, 5); 
+  // Carrera por el Pichichi: Goles totales y desempate por promedio
+  const sortedScorers = [...playerStats]
+    .filter(p => p.totalGoals > 0)
+    .sort((a, b) => b.totalGoals - a.totalGoals || b.goalsPerMatch - a.goalsPerMatch);
+  
+  const topScorer = sortedScorers[0];
+  const runnersUp = sortedScorers.slice(1, 5); 
 
   // Identificar al "Francotirador" (Mejor promedio con min 3 PJ)
   const sniper = [...playerStats]
@@ -180,7 +183,7 @@ export default function DashboardPage() {
             <CardHeader className="pb-2">
               <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-yellow-500 flex items-center justify-between font-oswald">
                 <div className="flex items-center gap-2"><Trophy className="h-4 w-4" /> CARRERA PICHICHI</div>
-                <Badge variant="outline" className="text-[8px] font-black border-yellow-500/30 text-yellow-500">ÍNDICE LETALIDAD</Badge>
+                <Badge variant="outline" className="text-[8px] font-black border-yellow-500/30 text-yellow-500">TABLA OFICIAL</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -211,20 +214,20 @@ export default function DashboardPage() {
                       <span className="text-sm font-black text-muted-foreground uppercase tracking-widest font-oswald">GOLES</span>
                     </div>
                     <div className="text-right">
-                      <span className="text-3xl font-bebas text-white leading-none">{topScorer?.lethalityIndex.toFixed(1)}</span>
-                      <p className="text-[8px] font-black text-muted-foreground/40 uppercase font-oswald">POWER INDEX</p>
+                      <span className="text-3xl font-bebas text-white leading-none">{topScorer?.goalsPerMatch || 0}</span>
+                      <p className="text-[8px] font-black text-muted-foreground/40 uppercase font-oswald">PROMEDIO G/PJ</p>
                     </div>
                   </div>
                   {topScorer && (
                     <div className="flex items-center gap-4 mt-2 py-2 px-3 bg-white/5 rounded-lg border border-white/5">
                       <div className="flex flex-col">
-                        <span className="text-[10px] font-black text-yellow-500 uppercase font-oswald">EFICIENCIA</span>
-                        <span className="text-xl font-bebas text-white leading-none">{topScorer.goalsPerMatch} G/PJ</span>
+                        <span className="text-[10px] font-black text-yellow-500 uppercase font-oswald">PARTIDOS</span>
+                        <span className="text-xl font-bebas text-white leading-none">{topScorer.matchesPlayed} PJ</span>
                       </div>
                       <div className="h-6 w-[1px] bg-white/10" />
                       <div className="flex flex-col">
-                        <span className="text-[10px] font-black text-muted-foreground uppercase font-oswald">PARTIDOS</span>
-                        <span className="text-xl font-bebas text-white leading-none">{topScorer.matchesPlayed} PJ</span>
+                        <span className="text-[10px] font-black text-muted-foreground uppercase font-oswald">PUNTOS PODER</span>
+                        <span className="text-xl font-bebas text-white leading-none">{topScorer.powerPoints} PTS</span>
                       </div>
                     </div>
                   )}
@@ -241,14 +244,18 @@ export default function DashboardPage() {
                           {runner.playerId === sniper?.playerId && <Target className="h-3 w-3 text-yellow-500" />}
                         </span>
                         <span className="text-[8px] font-black text-muted-foreground/30 uppercase tracking-widest font-oswald">
-                          {runner.goalsPerMatch} G/PJ • {runner.matchesPlayed} PJ
+                          {runner.matchesPlayed} PJ • {runner.powerPoints} PTS
                         </span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-4">
                       <div className="text-right">
                         <span className="font-bebas text-xl text-white/80">{runner.totalGoals}</span>
                         <p className="text-[7px] font-black text-muted-foreground/20 uppercase font-oswald leading-none">GOLES</p>
+                      </div>
+                      <div className="text-right min-w-[40px]">
+                        <span className="font-bebas text-lg text-yellow-500/60">{runner.goalsPerMatch}</span>
+                        <p className="text-[7px] font-black text-muted-foreground/20 uppercase font-oswald leading-none">PROM</p>
                       </div>
                     </div>
                   </div>
