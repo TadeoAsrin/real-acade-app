@@ -77,7 +77,12 @@ function StandingsContent() {
 
   if (playersLoading || matchesLoading) return <div className="flex h-[50vh] items-center justify-center"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div>;
 
-  const sortedGeneral = [...stats].sort((a, b) => (b.wins * 3 + b.draws) - (a.wins * 3 + a.draws) || b.goalDifference - a.goalDifference);
+  // Clasificación General: Puntos -> Efectividad -> Goles Totales
+  const sortedGeneral = [...stats].sort((a, b) => 
+    (b.wins * 3 + b.draws) - (a.wins * 3 + a.draws) || 
+    b.efficiency - a.efficiency || 
+    b.totalGoals - a.totalGoals
+  );
   
   // Goleadores: Ordenados por Goles Totales y desempate por Promedio
   const sortedScorers = [...stats]
@@ -131,9 +136,9 @@ function StandingsContent() {
                     <TableHead className="w-16 text-center font-bebas text-sm">POS</TableHead>
                     <TableHead className="font-bebas text-sm">JUGADOR</TableHead>
                     <TableHead className="text-center font-bebas text-sm">PJ</TableHead>
-                    <TableHead className="text-center font-bebas text-sm text-emerald-500">GF</TableHead>
-                    <TableHead className="text-center font-bebas text-sm text-red-500">GC</TableHead>
-                    <TableHead className="text-center font-bebas text-sm">DIF</TableHead>
+                    <TableHead className="text-center font-bebas text-sm">V-E-D</TableHead>
+                    <TableHead className="text-center font-bebas text-sm text-accent">GOLES</TableHead>
+                    <TableHead className="text-center font-bebas text-sm">%</TableHead>
                     <TableHead className="text-center font-bebas text-sm bg-primary/10 text-primary">PTS</TableHead>
                     <TableHead className="text-center font-bebas text-sm">TREND</TableHead>
                   </TableRow>
@@ -149,9 +154,11 @@ function StandingsContent() {
                         </div>
                       </TableCell>
                       <TableCell className="text-center font-bebas text-xl">{player.matchesPlayed}</TableCell>
-                      <TableCell className="text-center font-bebas text-xl text-emerald-500/60">{player.goalsFor}</TableCell>
-                      <TableCell className="text-center font-bebas text-xl text-red-500/60">{player.goalsAgainst}</TableCell>
-                      <TableCell className="text-center font-bebas text-xl">{player.goalDifference > 0 ? `+${player.goalDifference}` : player.goalDifference}</TableCell>
+                      <TableCell className="text-center font-oswald text-[10px] tracking-widest font-bold">
+                        <span className="text-emerald-500">{player.wins}</span>-<span className="text-orange-400">{player.draws}</span>-<span className="text-red-500">{player.losses}</span>
+                      </TableCell>
+                      <TableCell className="text-center font-bebas text-xl text-accent/80">{player.totalGoals}</TableCell>
+                      <TableCell className="text-center font-bebas text-xl text-muted-foreground/60">{player.efficiency}%</TableCell>
                       <TableCell className="text-center font-bebas text-3xl italic bg-primary/5">{player.wins * 3 + player.draws}</TableCell>
                       <TableCell className="text-center"><TrendIcon form={player.form} /></TableCell>
                     </TableRow>
