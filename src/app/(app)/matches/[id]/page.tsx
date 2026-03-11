@@ -58,18 +58,18 @@ export default function MatchDetailPage() {
     return index !== -1 ? index + 1 : 0;
   }, [allMatches, id]);
 
-  // Lógica de premios manuales
+  // LÓGICA DE PREMIOS MEJORADA: Busca al jugador marcado como MVP o Gol de la Fecha
   const mvpPlayer = React.useMemo(() => {
     if (!match || !allPlayers.length) return null;
     const allStats = [...(match.teamAPlayers || []), ...(match.teamBPlayers || [])];
-    const stat = allStats.find(s => s.isMvp);
+    const stat = allStats.find(s => !!s.isMvp);
     return allPlayers.find(p => p.id === stat?.playerId);
   }, [match, allPlayers]);
 
   const bestGoalPlayer = React.useMemo(() => {
     if (!match || !allPlayers.length) return null;
     const allStats = [...(match.teamAPlayers || []), ...(match.teamBPlayers || [])];
-    const stat = allStats.find(s => s.hasBestGoal);
+    const stat = allStats.find(s => !!s.hasBestGoal);
     return allPlayers.find(p => p.id === stat?.playerId);
   }, [match, allPlayers]);
 
@@ -121,7 +121,7 @@ export default function MatchDetailPage() {
           </div>
           <div className="text-4xl md:text-6xl font-light text-muted-foreground/10 italic font-oswald">—</div>
           <div className="flex flex-col items-center">
-            <span className="text-7xl md:text-9xl font-bebas text-white leading-none drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+            <span className="text-7xl md:text-9xl font-bebas text-accent leading-none drop-shadow-[0_0_20px_rgba(244,63,94,0.4)]">
               {match.teamBScore}
             </span>
             <span className="text-xs font-black uppercase tracking-[0.4em] text-accent font-oswald mt-2">ROJO</span>

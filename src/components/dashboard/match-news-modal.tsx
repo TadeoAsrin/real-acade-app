@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Newspaper, X, ChevronRight, Trophy, Star, Sparkles } from 'lucide-react';
+import { Newspaper, X, ChevronRight, Trophy, Star, Sparkles, Crown } from 'lucide-react';
 import { es } from 'date-fns/locale';
 import { format, parseISO } from 'date-fns';
 import type { Match, Player } from '@/lib/definitions';
@@ -91,12 +91,12 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
           
           <div className="flex items-center justify-center gap-8 py-2 border-y border-black/5">
             <div className="flex flex-col items-center">
-              <span className="text-5xl font-bebas text-primary leading-none">{match.teamAScore}</span>
+              <span className="text-5xl font-bebas text-primary leading-none drop-shadow-[0_0_10px_rgba(59,130,246,0.3)]">{match.teamAScore}</span>
               <span className="text-[8px] font-black text-primary uppercase">AZUL</span>
             </div>
             <div className="text-xl font-light text-black/20 italic">—</div>
             <div className="flex flex-col items-center">
-              <span className="text-5xl font-bebas text-black leading-none">{match.teamBScore}</span>
+              <span className="text-5xl font-bebas text-accent leading-none drop-shadow-[0_0_10px_rgba(244,63,94,0.3)]">{match.teamBScore}</span>
               <span className="text-[8px] font-black text-accent uppercase">ROJO</span>
             </div>
           </div>
@@ -124,14 +124,14 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
             <div className="bg-white border border-black/10 p-4 grid grid-cols-1 sm:grid-cols-3 gap-4 divide-y sm:divide-y-0 sm:divide-x divide-black/5 text-center shadow-sm">
               <div className="flex flex-col gap-1 py-2 sm:py-0">
                 <div className="flex items-center justify-center gap-1.5 text-yellow-600">
-                  <CrownIcon className="h-3 w-3" />
+                  <Crown className="h-3 w-3" />
                   <span className="text-[8px] font-black uppercase">MVP</span>
                 </div>
                 <span className="text-sm font-bold truncate uppercase">{mvpPlayer?.name || "N/A"}</span>
               </div>
               <div className="flex flex-col gap-1 py-2 sm:py-0">
                 <div className="flex items-center justify-center gap-1.5 text-orange-600">
-                  <TargetIcon className="h-3 w-3" />
+                  <Sparkles className="h-3 w-3" />
                   <span className="text-[8px] font-black uppercase">GOL DE LA FECHA</span>
                 </div>
                 <span className="text-sm font-bold truncate uppercase">{bestGoalPlayer?.name || "N/A"}</span>
@@ -193,18 +193,6 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
     </Dialog>
   );
 }
-
-const CrownIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14" />
-  </svg>
-);
-
-const TargetIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" />
-  </svg>
-);
 
 const BallIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>

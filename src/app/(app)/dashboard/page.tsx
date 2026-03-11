@@ -173,7 +173,7 @@ export default function DashboardPage() {
             </div>
             
             <div className="flex flex-col items-center gap-4 min-w-[280px] bg-black/60 backdrop-blur-md p-8 rounded-2xl border border-white/10 shadow-2xl">
-              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40 font-oswald">BROADCAST SCORE</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40 font-oswald">RESULTADO</span>
               <div className="flex items-center gap-8">
                 <div className="flex flex-col items-center">
                   <span className="text-7xl font-bebas text-primary drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]">{lastMatch.teamAScore}</span>
@@ -181,7 +181,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="h-16 w-[2px] bg-white/10" />
                 <div className="flex flex-col items-center">
-                  <span className="text-7xl font-bebas text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">{lastMatch.teamBScore}</span>
+                  <span className="text-7xl font-bebas text-accent drop-shadow-[0_0_15px_rgba(244,63,94,0.5)]">{lastMatch.teamBScore}</span>
                   <span className="text-[10px] font-black uppercase text-accent font-oswald">ROJO</span>
                 </div>
               </div>
