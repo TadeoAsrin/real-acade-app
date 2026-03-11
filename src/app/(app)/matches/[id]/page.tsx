@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -7,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { Player, Match } from "@/lib/definitions";
-import { Star, Loader2, Share2, Pencil, Camera, ChevronLeft, Trophy, Calendar, Goal, X, Sparkles } from "lucide-react";
+import { Star, Loader2, Share2, Pencil, Camera, ChevronLeft, Trophy, Calendar, Goal, X, Sparkles, Crown } from "lucide-react";
 import { useDoc, useCollection, useMemoFirebase, useFirestore, useUser } from "@/firebase";
 import { doc, collection } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
@@ -47,18 +48,18 @@ export default function MatchDetailPage() {
 
   const allPlayers = players || [];
   
-  // LÓGICA DE PREMIOS ROBUSTA: Busca en ambos equipos al jugador marcado por el admin
+  // LÓGICA DE PREMIOS ROBUSTA: Busca al jugador marcado como MVP o Gol de la Fecha
   const mvpPlayer = React.useMemo(() => {
     if (!match || !allPlayers.length) return null;
     const allStats = [...(match.teamAPlayers || []), ...(match.teamBPlayers || [])];
-    const stat = allStats.find(s => s.isMvp === true);
+    const stat = allStats.find(s => !!s.isMvp);
     return allPlayers.find(p => p.id === stat?.playerId);
   }, [match, allPlayers]);
 
   const bestGoalPlayer = React.useMemo(() => {
     if (!match || !allPlayers.length) return null;
     const allStats = [...(match.teamAPlayers || []), ...(match.teamBPlayers || [])];
-    const stat = allStats.find(s => s.hasBestGoal === true);
+    const stat = allStats.find(s => !!s.hasBestGoal);
     return allPlayers.find(p => p.id === stat?.playerId);
   }, [match, allPlayers]);
 
@@ -97,21 +98,24 @@ export default function MatchDetailPage() {
           <Badge variant="outline" className="px-6 py-1 border-primary/30 text-primary font-bebas tracking-[0.4em] text-sm uppercase rounded-none">
             La Gaceta del Partido
           </Badge>
-          <p className="text-sm font-bold text-muted-foreground/60 uppercase tracking-[0.2em] font-oswald">
-            {format(date, "PPPP", { locale: es })}
-          </p>
+          <div className="flex flex-col items-center gap-2">
+            <Badge className="bg-primary/10 text-primary border-primary/20 rounded-none text-[10px] font-black tracking-widest uppercase">FECHA OFICIAL</Badge>
+            <p className="text-sm font-bold text-muted-foreground/60 uppercase tracking-[0.2em] font-oswald">
+              {format(date, "PPPP", { locale: es })}
+            </p>
+          </div>
         </div>
         
         <div className="flex items-center justify-center gap-12 md:gap-24">
           <div className="flex flex-col items-center">
-            <span className="text-8xl md:text-[10rem] font-bebas text-primary leading-none italic drop-shadow-2xl">
+            <span className="text-8xl md:text-[10rem] font-bebas text-primary leading-none italic drop-shadow-[0_0_30px_rgba(59,130,246,0.4)]">
               {match.teamAScore}
             </span>
             <span className="text-xs font-black uppercase tracking-[0.4em] text-primary font-oswald mt-2">AZUL</span>
           </div>
           <div className="text-4xl md:text-6xl font-light text-muted-foreground/10 italic font-oswald shrink-0 self-center">—</div>
           <div className="flex flex-col items-center">
-            <span className="text-8xl md:text-[10rem] font-bebas text-white leading-none italic drop-shadow-2xl">
+            <span className="text-8xl md:text-[10rem] font-bebas text-white leading-none italic drop-shadow-[0_0_30px_rgba(255,255,255,0.1)]">
               {match.teamBScore}
             </span>
             <span className="text-xs font-black uppercase tracking-[0.4em] text-accent font-oswald mt-2">ROJO</span>
@@ -164,19 +168,11 @@ export default function MatchDetailPage() {
       </div>
 
       {/* MATCH FACTS CARD (RESULTADO, MVP, GOL DE LA FECHA) */}
-      <Card className="competition-card border-none bg-white/5 backdrop-blur-md mx-4 sm:mx-0 overflow-hidden">
+      <Card className="competition-card border-none bg-white/5 backdrop-blur-md mx-4 sm:mx-0 overflow-hidden rounded-2xl">
         <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/5">
           <div className="p-8 flex flex-col items-center text-center gap-2">
-            <div className="flex items-center gap-2 text-primary/60">
-              <Trophy className="h-4 w-4" />
-              <span className="text-[9px] font-black uppercase tracking-[0.3em] font-oswald">RESULTADO</span>
-            </div>
-            <span className="text-4xl font-bebas text-white italic">{match.teamAScore}-{match.teamBScore}</span>
-          </div>
-          
-          <div className="p-8 flex flex-col items-center text-center gap-2">
             <div className="flex items-center gap-2 text-yellow-500/60">
-              <Star className="h-4 w-4 fill-current" />
+              <Crown className="h-4 w-4 fill-current" />
               <span className="text-[9px] font-black uppercase tracking-[0.3em] font-oswald">MVP</span>
             </div>
             <span className="text-xl font-bebas text-white uppercase truncate max-w-full">{mvpPlayer?.name || "N/A"}</span>
@@ -190,6 +186,14 @@ export default function MatchDetailPage() {
             <span className="text-xl font-bebas text-white uppercase truncate max-w-full">
               {bestGoalPlayer?.name || "N/A"}
             </span>
+          </div>
+
+          <div className="p-8 flex flex-col items-center text-center gap-2">
+            <div className="flex items-center gap-2 text-primary/60">
+              <Trophy className="h-4 w-4" />
+              <span className="text-[9px] font-black uppercase tracking-[0.3em] font-oswald">RESULTADO</span>
+            </div>
+            <span className="text-4xl font-bebas text-white italic">{match.teamAScore}-{match.teamBScore}</span>
           </div>
         </div>
       </Card>
@@ -210,7 +214,7 @@ export default function MatchDetailPage() {
 
       <section className="space-y-10 max-w-[750px] mx-auto pt-16 border-t border-white/5">
         <div className="flex flex-col items-center gap-2">
-          <h2 className="text-[10px] font-black uppercase tracking-[0.5em] text-muted-foreground/40 font-oswald">Goles del Partido</h2>
+          <h2 className="text-[10px] font-black uppercase tracking-[0.5em] text-muted-foreground/40 font-oswald">TABLA DE ARTILLEROS</h2>
           <div className="h-1 w-12 bg-primary/30" />
         </div>
         
@@ -265,7 +269,7 @@ export default function MatchDetailPage() {
         <section className="space-y-8 pt-10 border-t border-white/5">
           <div className="flex items-center gap-3 px-6 sm:px-0">
             <Camera className="h-5 w-5 text-primary/40" />
-            <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground font-oswald">Más Capturas del Combate</h2>
+            <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground font-oswald">Galería de Combate</h2>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-4 sm:px-0">
             {match.photos.slice(1).map((url, idx) => (

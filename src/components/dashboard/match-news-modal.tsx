@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -42,18 +43,18 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
     onClose?.();
   };
 
-  // LÓGICA DE PREMIOS ROBUSTA: Busca en ambos equipos al jugador marcado por el admin
+  // LÓGICA DE PREMIOS MEJORADA: Busca al jugador marcado como MVP o Gol de la Fecha
   const mvpPlayer = React.useMemo(() => {
     if (!match || !allPlayers.length) return null;
     const allStats = [...(match.teamAPlayers || []), ...(match.teamBPlayers || [])];
-    const stat = allStats.find(s => s.isMvp === true);
+    const stat = allStats.find(s => !!s.isMvp);
     return allPlayers.find(p => p.id === stat?.playerId);
   }, [match, allPlayers]);
 
   const bestGoalPlayer = React.useMemo(() => {
     if (!match || !allPlayers.length) return null;
     const allStats = [...(match.teamAPlayers || []), ...(match.teamBPlayers || [])];
-    const stat = allStats.find(s => s.hasBestGoal === true);
+    const stat = allStats.find(s => !!s.hasBestGoal);
     return allPlayers.find(p => p.id === stat?.playerId);
   }, [match, allPlayers]);
 
@@ -61,7 +62,7 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
 
   const { aiSummary } = match;
   const date = parseISO(match.date);
-  const coverPhoto = match.photos && match.photos.length > 0 ? match.photos[0] : "https://picsum.photos/seed/football/800/400";
+  const coverPhoto = match.photos && match.photos.length > 0 ? match.photos[0] : "https://picsum.photos/seed/football/1200/800";
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
@@ -120,24 +121,24 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
 
           {/* DATOS DE HONOR (MVP, GOL DE LA FECHA, RESULTADO) */}
           <div className="px-6 sm:px-10 mt-8">
-            <div className="bg-white border border-black/10 p-4 grid grid-cols-1 sm:grid-cols-3 gap-4 divide-y sm:divide-y-0 sm:divide-x divide-black/5 text-center">
+            <div className="bg-white border border-black/10 p-4 grid grid-cols-1 sm:grid-cols-3 gap-4 divide-y sm:divide-y-0 sm:divide-x divide-black/5 text-center shadow-sm">
               <div className="flex flex-col gap-1 py-2 sm:py-0">
                 <div className="flex items-center justify-center gap-1.5 text-yellow-600">
-                  <Star className="h-3 w-3 fill-current" />
+                  <CrownIcon className="h-3 w-3" />
                   <span className="text-[8px] font-black uppercase">MVP</span>
                 </div>
                 <span className="text-sm font-bold truncate uppercase">{mvpPlayer?.name || "N/A"}</span>
               </div>
               <div className="flex flex-col gap-1 py-2 sm:py-0">
                 <div className="flex items-center justify-center gap-1.5 text-orange-600">
-                  <Sparkles className="h-3 w-3 fill-current" />
+                  <TargetIcon className="h-3 w-3" />
                   <span className="text-[8px] font-black uppercase">GOL DE LA FECHA</span>
                 </div>
                 <span className="text-sm font-bold truncate uppercase">{bestGoalPlayer?.name || "N/A"}</span>
               </div>
               <div className="flex flex-col gap-1 py-2 sm:py-0">
                 <div className="flex items-center justify-center gap-1.5 text-black/40">
-                  <Trophy className="h-3 w-3" />
+                  <BallIcon className="h-3 w-3" />
                   <span className="text-[8px] font-black uppercase">RESULTADO</span>
                 </div>
                 <span className="text-sm font-bold uppercase">{match.teamAScore} - {match.teamBScore}</span>
@@ -179,6 +180,7 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
           </div>
         </div>
 
+        {/* Footer actions */}
         <div className="shrink-0 p-4 bg-white border-t border-black/10 flex flex-col sm:flex-row gap-3 z-20">
           <Button asChild className="bg-black text-white hover:bg-black/90 font-bebas font-black uppercase tracking-widest text-sm rounded-none h-14 w-full">
             <Link href={`/matches/${match.id}`}>VER FICHA COMPLETA <ChevronRight className="ml-2 h-4 w-4" /></Link>
@@ -191,3 +193,21 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
     </Dialog>
   );
 }
+
+const CrownIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14" />
+  </svg>
+);
+
+const TargetIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" />
+  </svg>
+);
+
+const BallIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <circle cx="12" cy="12" r="10" /><path d="m12 12-4-3 1-4h6l1 4Z" /><path d="m12 12 4 3-1 4h-6l-1-4Z" />
+  </svg>
+);

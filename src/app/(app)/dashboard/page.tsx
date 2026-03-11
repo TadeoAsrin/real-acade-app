@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -55,7 +56,7 @@ export default function DashboardPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] text-center p-6 gap-8">
         <div className="relative">
-          <Trophy className="h-32 w-32 text-primary relative z-10" />
+          <SoccerBallIcon className="h-32 w-32 text-primary relative z-10" />
         </div>
         <div className="space-y-4 max-w-xl">
           <h1 className="text-5xl font-bebas text-white">¡BIENVENIDO A LA ACADEMIA!</h1>
@@ -70,13 +71,12 @@ export default function DashboardPage() {
     );
   }
 
-  const playerStats = calculateAggregatedStats(allPlayers, allMatches);
   const lastMatch = allMatches[0];
+  const playerStats = calculateAggregatedStats(allPlayers, allMatches);
   const spiciestMatch = getSpiciestMatch(allMatches);
   const chemistryRankings = getChemistryRankings(allPlayers, allMatches, 1);
   const topChemistry = chemistryRankings[0];
 
-  // Carrera por el Pichichi: Goles totales y desempate por promedio
   const sortedScorers = [...playerStats]
     .filter(p => p.totalGoals > 0)
     .sort((a, b) => b.totalGoals - a.totalGoals || b.goalsPerMatch - a.goalsPerMatch);
@@ -84,7 +84,6 @@ export default function DashboardPage() {
   const topScorer = sortedScorers[0];
   const runnersUp = sortedScorers.slice(1, 5); 
 
-  // Identificar al "Francotirador" (Mejor promedio con min 3 PJ)
   const sniper = [...playerStats]
     .filter(p => p.matchesPlayed >= 3)
     .sort((a, b) => b.goalsPerMatch - a.goalsPerMatch || b.totalGoals - a.totalGoals)[0];
@@ -99,7 +98,6 @@ export default function DashboardPage() {
   const totalMatches = allMatches.filter(m => m.teamAScore > 0 || m.teamBScore > 0).length;
   const maxAttendanceRate = totalMatches > 0 ? Math.round((Math.max(...playerStats.map(p => p.matchesPlayed)) / totalMatches) * 100) : 0;
 
-  // Sala de Humildad (MÍNIMO 2 PJ)
   const humilityQualified = playerStats.filter(p => p.matchesPlayed >= 2);
   const imanLeaders = [...humilityQualified].sort((a, b) => b.losses - a.losses || b.matchesPlayed - a.matchesPlayed).slice(0, 3);
   const deudaMandoLeaders = [...humilityQualified].filter(p => p.totalCaptaincies === 0).sort((a, b) => b.matchesPlayed - a.matchesPlayed).slice(0, 3);
@@ -122,14 +120,14 @@ export default function DashboardPage() {
 
       {/* PORTADA DE LA GACETA */}
       {lastMatch && (
-        <Card className="competition-card border-l-8 border-l-primary relative group hover-lift overflow-hidden">
+        <Card className="competition-card border-l-8 border-l-primary relative group hover-lift overflow-hidden rounded-2xl">
           <div className="absolute top-0 right-0 p-8 opacity-5">
             <Newspaper className="h-40 w-40 text-white" />
           </div>
           <CardContent className="p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-10 relative z-10">
             <div className="flex-1 space-y-6 text-center md:text-left">
               <div className="flex items-center justify-center md:justify-start gap-3">
-                <Badge className="bg-primary text-primary-foreground font-bebas tracking-widest px-3 py-1 text-sm">NUEVA EDICIÓN</Badge>
+                <Badge className="bg-primary text-primary-foreground font-bebas tracking-widest px-3 py-1 text-sm rounded-none">ÚLTIMA EDICIÓN</Badge>
                 <span className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em] font-oswald">
                   {format(parseISO(lastMatch.date), "dd MMMM", { locale: es })}
                 </span>
@@ -147,7 +145,7 @@ export default function DashboardPage() {
                   onClick={() => setShowGacetaManually(true)} 
                   className="bg-primary text-primary-foreground hover:bg-primary/90 font-bebas text-xl tracking-widest h-14 px-8 flex items-center gap-2 transition-all active:scale-95 shadow-lg shadow-primary/20 rounded-md"
                 >
-                  <Newspaper className="h-5 w-5" /> LEER GACETA
+                  <Newspaper className="h-5 w-5" /> TAPA DEL DIARIO
                 </button>
                 <Button asChild variant="secondary" size="lg" className="h-14 px-8 font-bebas text-xl tracking-widest">
                   <Link href={`/matches/${lastMatch.id}`}>FICHA TÉCNICA</Link>
@@ -155,18 +153,21 @@ export default function DashboardPage() {
               </div>
             </div>
             
-            <div className="flex flex-col items-center gap-4 min-w-[260px] bg-black/40 p-8 rounded-lg border border-white/5 shadow-2xl">
-              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40 font-oswald">FINAL SCORE</span>
+            <div className="flex flex-col items-center gap-4 min-w-[280px] bg-black/60 backdrop-blur-md p-8 rounded-2xl border border-white/10 shadow-2xl">
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40 font-oswald">BROADCAST SCORE</span>
               <div className="flex items-center gap-8">
                 <div className="flex flex-col items-center">
-                  <span className="text-6xl font-bebas text-primary">{lastMatch.teamAScore}</span>
+                  <span className="text-7xl font-bebas text-primary drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]">{lastMatch.teamAScore}</span>
                   <span className="text-[10px] font-black uppercase text-primary font-oswald">AZUL</span>
                 </div>
-                <div className="h-12 w-[1px] bg-white/10" />
+                <div className="h-16 w-[2px] bg-white/10" />
                 <div className="flex flex-col items-center">
-                  <span className="text-6xl font-bebas text-accent">{lastMatch.teamBScore}</span>
+                  <span className="text-7xl font-bebas text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">{lastMatch.teamBScore}</span>
                   <span className="text-[10px] font-black uppercase text-accent font-oswald">ROJO</span>
                 </div>
+              </div>
+              <div className="mt-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                {format(parseISO(lastMatch.date), "eeee d MMMM", { locale: es })}
               </div>
             </div>
           </CardContent>
@@ -175,11 +176,11 @@ export default function DashboardPage() {
 
       {/* ESTRELLAS DE LA ACADEMIA */}
       <section className="space-y-6">
-        <h2 className="text-xs font-black uppercase tracking-[0.4em] text-muted-foreground/50 px-1 font-oswald">ESTRELLAS DE LA ACADEMIA</h2>
+        <h2 className="text-xs font-black uppercase tracking-[0.4em] text-muted-foreground/50 px-1 font-oswald">CUADRO DE HONOR</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           
           {/* PICHICHI / ÍNDICE DE LETALIDAD */}
-          <Card className="competition-card border-t-4 border-t-yellow-500 bg-gradient-to-b from-yellow-500/5 to-card hover-lift">
+          <Card className="competition-card border-t-4 border-t-yellow-500 bg-gradient-to-b from-yellow-500/5 to-card hover-lift rounded-2xl">
             <CardHeader className="pb-2">
               <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-yellow-500 flex items-center justify-between font-oswald">
                 <div className="flex items-center gap-2"><Trophy className="h-4 w-4" /> CARRERA PICHICHI</div>
@@ -190,7 +191,7 @@ export default function DashboardPage() {
               <Link href={topScorer ? `/players/${topScorer.playerId}` : "/players"} className="group block">
                 <div className="flex items-center gap-5">
                   <div className="relative">
-                    <Avatar className="h-20 w-20 border-4 border-yellow-500/20 group-hover:border-yellow-500 transition-all">
+                    <Avatar className="h-20 w-20 border-4 border-yellow-500/20 group-hover:border-yellow-500 transition-all rounded-none">
                       <AvatarFallback className="bg-yellow-500/10 text-yellow-500 text-3xl font-bebas">{getInitials(topScorer?.name || "?")}</AvatarFallback>
                     </Avatar>
                     <div className="absolute -top-2 -right-2 bg-yellow-500 text-yellow-foreground p-1 rounded-full"><Crown className="h-4 w-4" /></div>
@@ -199,7 +200,7 @@ export default function DashboardPage() {
                     <h3 className="text-4xl font-bebas text-white group-hover:text-yellow-500 transition-colors uppercase leading-none truncate">{topScorer?.name || '-'}</h3>
                     <div className="flex items-center gap-2 mt-1">
                       {topScorer?.playerId === sniper?.playerId && (
-                        <Badge className="bg-yellow-500 text-black text-[7px] font-black uppercase p-1 h-4 flex items-center gap-1">
+                        <Badge className="bg-yellow-500 text-black text-[7px] font-black uppercase p-1 h-4 flex items-center gap-1 rounded-none">
                           <Target className="h-2.5 w-2.5" /> FRANCOTIRADOR
                         </Badge>
                       )}
@@ -218,19 +219,6 @@ export default function DashboardPage() {
                       <p className="text-[8px] font-black text-muted-foreground/40 uppercase font-oswald">PROMEDIO G/PJ</p>
                     </div>
                   </div>
-                  {topScorer && (
-                    <div className="flex items-center gap-4 mt-2 py-2 px-3 bg-white/5 rounded-lg border border-white/5">
-                      <div className="flex flex-col">
-                        <span className="text-[10px] font-black text-yellow-500 uppercase font-oswald">PARTIDOS</span>
-                        <span className="text-xl font-bebas text-white leading-none">{topScorer.matchesPlayed} PJ</span>
-                      </div>
-                      <div className="h-6 w-[1px] bg-white/10" />
-                      <div className="flex flex-col">
-                        <span className="text-[10px] font-black text-muted-foreground uppercase font-oswald">PUNTOS PODER</span>
-                        <span className="text-xl font-bebas text-white leading-none">{topScorer.powerPoints} PTS</span>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </Link>
               <div className="pt-6 border-t border-white/5 space-y-3">
@@ -253,10 +241,6 @@ export default function DashboardPage() {
                         <span className="font-bebas text-xl text-white/80">{runner.totalGoals}</span>
                         <p className="text-[7px] font-black text-muted-foreground/20 uppercase font-oswald leading-none">GOLES</p>
                       </div>
-                      <div className="text-right min-w-[40px]">
-                        <span className="font-bebas text-lg text-yellow-500/60">{runner.goalsPerMatch}</span>
-                        <p className="text-[7px] font-black text-muted-foreground/20 uppercase font-oswald leading-none">PROM</p>
-                      </div>
                     </div>
                   </div>
                 ))}
@@ -268,7 +252,7 @@ export default function DashboardPage() {
           </Card>
 
           {/* INFLUYENTE */}
-          <Card className="competition-card border-t-4 border-t-primary bg-gradient-to-b from-primary/5 to-card hover-lift">
+          <Card className="competition-card border-t-4 border-t-primary bg-gradient-to-b from-primary/5 to-card hover-lift rounded-2xl">
             <CardHeader className="pb-2">
               <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2 font-oswald">
                 <Brain className="h-4 w-4" /> JUGADOR MÁS INFLUYENTE
@@ -277,7 +261,7 @@ export default function DashboardPage() {
             <CardContent className="space-y-6">
               <Link href="/pulse/influencer" className="block group">
                 <div className="flex items-center gap-5">
-                  <Avatar className="h-20 w-20 border-4 border-primary/20 group-hover:border-primary transition-all">
+                  <Avatar className="h-20 w-20 border-4 border-primary/20 group-hover:border-primary transition-all rounded-none">
                     <AvatarFallback className="bg-primary/10 text-primary text-3xl font-bebas">{getInitials(influencer?.name || "?")}</AvatarFallback>
                   </Avatar>
                   <div>
@@ -294,11 +278,6 @@ export default function DashboardPage() {
                     </div>
                   </div>
                   <Progress value={influencer?.winPercentage || 0} className="h-2 bg-white/5" />
-                  {influencer && (
-                    <div className="flex items-center gap-2 text-[10px] font-black uppercase text-primary/60 font-oswald tracking-widest">
-                      <TrendingUp className="h-3 w-3" /> CONSISTENCIA EN {influencer.matchesPlayed} PARTIDOS
-                    </div>
-                  )}
                 </div>
               </Link>
               <div className="pt-6 border-t border-white/5 space-y-3">
@@ -341,7 +320,7 @@ export default function DashboardPage() {
             { label: "INFALTABLES", value: `${maxAttendanceRate}%`, sub: "Asistencia", icon: Users, color: "text-emerald-500", href: "/pulse/attendance" }
           ].map((item, i) => (
             <Link key={i} href={item.href}>
-              <Card className="competition-card hover-lift h-full border-b-2 border-transparent hover:border-white/10">
+              <Card className="competition-card hover-lift h-full border-b-2 border-transparent hover:border-white/10 rounded-2xl">
                 <CardContent className="p-6 flex flex-col items-center text-center gap-4">
                   <item.icon className={cn("h-8 w-8", item.color)} />
                   <div className="space-y-1">
@@ -360,7 +339,7 @@ export default function DashboardPage() {
       <section className="space-y-6">
         <div className="flex items-center justify-between px-1">
           <h2 className="text-xs font-black uppercase tracking-[0.4em] text-muted-foreground/50 font-oswald">SALA DE HUMILDAD</h2>
-          <Badge variant="outline" className="text-[8px] font-black uppercase border-white/10 text-muted-foreground/40">FILTRO: MÍNIMO 2 PJ</Badge>
+          <Badge variant="outline" className="text-[8px] font-black uppercase border-white/10 text-muted-foreground/40 rounded-none">FILTRO: MÍNIMO 2 PJ</Badge>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
@@ -391,7 +370,7 @@ export default function DashboardPage() {
             }
           ].map((sec, i) => (
             <Link key={i} href={sec.href}>
-              <Card className="competition-card border-t border-white/5 bg-surface-900/50 hover-lift h-full">
+              <Card className="competition-card border-t border-white/5 bg-surface-900/50 hover-lift h-full rounded-2xl">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground flex items-center justify-between font-oswald">
                     <div className="flex items-center gap-2">
@@ -425,3 +404,27 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+const SoccerBallIcon = ({ className }: { className?: string }) => (
+  <svg 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    className={className}
+  >
+    <circle cx="12" cy="12" r="10" />
+    <path d="m12 12-4-3 1-4h6l1 4Z" />
+    <path d="m12 12 4 3-1 4h-6l-1-4Z" />
+    <path d="M12 2v2" />
+    <path d="M12 20v2" />
+    <path d="m4.93 4.93 1.41 1.41" />
+    <path d="m17.66 17.66 1.41 1.41" />
+    <path d="M2 12h2" />
+    <path d="M20 12h2" />
+    <path d="m19.07 4.93-1.41 1.41" />
+    <path d="m6.34 17.66-1.41 1.41" />
+  </svg>
+);
