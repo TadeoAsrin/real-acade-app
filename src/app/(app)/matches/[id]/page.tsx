@@ -4,11 +4,10 @@ import * as React from 'react';
 import { useParams } from "next/navigation";
 import {
   Card,
-  CardContent,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { Player, Match } from "@/lib/definitions";
-import { Award, Star, Loader2, Share2, Pencil, Camera, ChevronLeft, Trophy, Calendar, Goal, X, Sparkles } from "lucide-react";
+import { Star, Loader2, Share2, Pencil, Camera, ChevronLeft, Trophy, Calendar, Goal, X, Sparkles } from "lucide-react";
 import { useDoc, useCollection, useMemoFirebase, useFirestore, useUser } from "@/firebase";
 import { doc, collection } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
@@ -48,7 +47,7 @@ export default function MatchDetailPage() {
 
   const allPlayers = players || [];
   
-  // LÓGICA DE PREMIOS CARGADOS MANUALMENTE
+  // LÓGICA DE PREMIOS ROBUSTA: Busca en ambos equipos al jugador marcado por el admin
   const mvpPlayer = React.useMemo(() => {
     if (!match || !allPlayers.length) return null;
     const allStats = [...(match.teamAPlayers || []), ...(match.teamBPlayers || [])];
@@ -164,8 +163,8 @@ export default function MatchDetailPage() {
         </div>
       </div>
 
-      {/* MATCH FACTS CARD (MVP, GOL DE LA FECHA, RESULTADO) */}
-      <Card className="competition-card border-none bg-white/5 backdrop-blur-md mx-4 sm:mx-0">
+      {/* MATCH FACTS CARD (RESULTADO, MVP, GOL DE LA FECHA) */}
+      <Card className="competition-card border-none bg-white/5 backdrop-blur-md mx-4 sm:mx-0 overflow-hidden">
         <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/5">
           <div className="p-8 flex flex-col items-center text-center gap-2">
             <div className="flex items-center gap-2 text-primary/60">
@@ -177,7 +176,7 @@ export default function MatchDetailPage() {
           
           <div className="p-8 flex flex-col items-center text-center gap-2">
             <div className="flex items-center gap-2 text-yellow-500/60">
-              <Star className="h-4 w-4" />
+              <Star className="h-4 w-4 fill-current" />
               <span className="text-[9px] font-black uppercase tracking-[0.3em] font-oswald">MVP</span>
             </div>
             <span className="text-xl font-bebas text-white uppercase truncate max-w-full">{mvpPlayer?.name || "N/A"}</span>
@@ -185,7 +184,7 @@ export default function MatchDetailPage() {
 
           <div className="p-8 flex flex-col items-center text-center gap-2">
             <div className="flex items-center gap-2 text-orange-500/60">
-              <Sparkles className="h-4 w-4" />
+              <Sparkles className="h-4 w-4 fill-current" />
               <span className="text-[9px] font-black uppercase tracking-[0.3em] font-oswald">GOL DE LA FECHA</span>
             </div>
             <span className="text-xl font-bebas text-white uppercase truncate max-w-full">

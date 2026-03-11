@@ -8,11 +8,10 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Newspaper, X, ChevronRight } from 'lucide-react';
+import { Newspaper, X, ChevronRight, Trophy, Star, Sparkles } from 'lucide-react';
 import { es } from 'date-fns/locale';
 import { format, parseISO } from 'date-fns';
 import type { Match, Player } from '@/lib/definitions';
-import { useUser } from '@/firebase';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -26,7 +25,6 @@ interface MatchNewsModalProps {
 
 export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchNewsModalProps) {
   const [isOpen, setIsOpen] = React.useState(false);
-  const { user } = useUser();
 
   React.useEffect(() => {
     if (!match) return;
@@ -44,21 +42,20 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
     onClose?.();
   };
 
-  const allStats = React.useMemo(() => {
-    if (!match) return [];
-    return [...(match.teamAPlayers || []), ...(match.teamBPlayers || [])];
-  }, [match]);
-
-  // LÓGICA DE PREMIOS: Busca estrictamente lo que el administrador cargó manualmente
+  // LÓGICA DE PREMIOS ROBUSTA: Busca en ambos equipos al jugador marcado por el admin
   const mvpPlayer = React.useMemo(() => {
+    if (!match || !allPlayers.length) return null;
+    const allStats = [...(match.teamAPlayers || []), ...(match.teamBPlayers || [])];
     const stat = allStats.find(s => s.isMvp === true);
     return allPlayers.find(p => p.id === stat?.playerId);
-  }, [allStats, allPlayers]);
+  }, [match, allPlayers]);
 
   const bestGoalPlayer = React.useMemo(() => {
+    if (!match || !allPlayers.length) return null;
+    const allStats = [...(match.teamAPlayers || []), ...(match.teamBPlayers || [])];
     const stat = allStats.find(s => s.hasBestGoal === true);
     return allPlayers.find(p => p.id === stat?.playerId);
-  }, [allStats, allPlayers]);
+  }, [match, allPlayers]);
 
   if (!match || !match.aiSummary) return null;
 
@@ -121,19 +118,28 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
             </div>
           </div>
 
-          {/* BARRA DE DATOS OFICIAL (MVP, GOL DE LA FECHA, RESULTADO) */}
+          {/* DATOS DE HONOR (MVP, GOL DE LA FECHA, RESULTADO) */}
           <div className="px-6 sm:px-10 mt-8">
             <div className="bg-white border border-black/10 p-4 grid grid-cols-1 sm:grid-cols-3 gap-4 divide-y sm:divide-y-0 sm:divide-x divide-black/5 text-center">
               <div className="flex flex-col gap-1 py-2 sm:py-0">
-                <span className="text-[8px] font-black text-black/40 uppercase">MVP</span>
+                <div className="flex items-center justify-center gap-1.5 text-yellow-600">
+                  <Star className="h-3 w-3 fill-current" />
+                  <span className="text-[8px] font-black uppercase">MVP</span>
+                </div>
                 <span className="text-sm font-bold truncate uppercase">{mvpPlayer?.name || "N/A"}</span>
               </div>
               <div className="flex flex-col gap-1 py-2 sm:py-0">
-                <span className="text-[8px] font-black text-black/40 uppercase">GOL DE LA FECHA</span>
+                <div className="flex items-center justify-center gap-1.5 text-orange-600">
+                  <Sparkles className="h-3 w-3 fill-current" />
+                  <span className="text-[8px] font-black uppercase">GOL DE LA FECHA</span>
+                </div>
                 <span className="text-sm font-bold truncate uppercase">{bestGoalPlayer?.name || "N/A"}</span>
               </div>
               <div className="flex flex-col gap-1 py-2 sm:py-0">
-                <span className="text-[8px] font-black text-black/40 uppercase">RESULTADO</span>
+                <div className="flex items-center justify-center gap-1.5 text-black/40">
+                  <Trophy className="h-3 w-3" />
+                  <span className="text-[8px] font-black uppercase">RESULTADO</span>
+                </div>
                 <span className="text-sm font-bold uppercase">{match.teamAScore} - {match.teamBScore}</span>
               </div>
             </div>
