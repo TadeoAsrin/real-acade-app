@@ -58,18 +58,18 @@ export default function MatchDetailPage() {
     return index !== -1 ? index + 1 : 0;
   }, [allMatches, id]);
 
-  // LÓGICA DE PREMIOS MEJORADA: Busca al jugador marcado como MVP o Gol de la Fecha
+  // Lógica de premios manuales corregida
   const mvpPlayer = React.useMemo(() => {
     if (!match || !allPlayers.length) return null;
     const allStats = [...(match.teamAPlayers || []), ...(match.teamBPlayers || [])];
-    const stat = allStats.find(s => !!s.isMvp);
+    const stat = allStats.find(s => s.isMvp === true);
     return allPlayers.find(p => p.id === stat?.playerId);
   }, [match, allPlayers]);
 
   const bestGoalPlayer = React.useMemo(() => {
     if (!match || !allPlayers.length) return null;
     const allStats = [...(match.teamAPlayers || []), ...(match.teamBPlayers || [])];
-    const stat = allStats.find(s => !!s.hasBestGoal);
+    const stat = allStats.find(s => s.hasBestGoal === true);
     return allPlayers.find(p => p.id === stat?.playerId);
   }, [match, allPlayers]);
 
@@ -149,7 +149,7 @@ export default function MatchDetailPage() {
             </div>
             <div>
               <p className="text-[10px] font-black uppercase tracking-widest text-yellow-500/60 font-oswald">MVP DEL PARTIDO</p>
-              <p className="text-xl font-bebas text-white uppercase tracking-wider">{mvpPlayer?.name || "SIN ELEGIR"}</p>
+              <p className="text-xl font-bebas text-white uppercase tracking-wider">{mvpPlayer?.name || "N/A"}</p>
             </div>
           </CardContent>
         </Card>
@@ -161,7 +161,7 @@ export default function MatchDetailPage() {
             </div>
             <div>
               <p className="text-[10px] font-black uppercase tracking-widest text-orange-500/60 font-oswald">GOL DE LA FECHA</p>
-              <p className="text-xl font-bebas text-white uppercase tracking-wider">{bestGoalPlayer?.name || "SIN ELEGIR"}</p>
+              <p className="text-xl font-bebas text-white uppercase tracking-wider">{bestGoalPlayer?.name || "N/A"}</p>
             </div>
           </CardContent>
         </Card>
@@ -231,7 +231,7 @@ export default function MatchDetailPage() {
               <div className="relative z-10 space-y-4 text-center md:text-left flex-1">
                 <div className="flex items-center justify-center md:justify-start gap-3">
                   <Badge className="bg-primary text-primary-foreground font-bebas tracking-widest px-3 py-1 text-sm rounded-none">EDICIÓN ESPECIAL</Badge>
-                  <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] font-oswald">REAL ACADE GAZETTE</span>
+                  <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] font-oswald">LA VOZ DEL PUEBLO</span>
                 </div>
                 <h2 className="text-4xl md:text-6xl font-bebas text-white tracking-wider leading-[0.9]">
                   {match.aiSummary?.title || "CRÓNICA DE LA BATALLA"}

@@ -9,13 +9,14 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Newspaper, X, ChevronRight, Trophy, Star, Sparkles, Crown } from 'lucide-react';
+import { Newspaper, X, ChevronRight, Crown, Sparkles } from 'lucide-react';
 import { es } from 'date-fns/locale';
 import { format, parseISO } from 'date-fns';
 import type { Match, Player } from '@/lib/definitions';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface MatchNewsModalProps {
   match: Match;
@@ -62,7 +63,7 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
 
   const { aiSummary } = match;
   const date = parseISO(match.date);
-  const coverPhoto = match.photos && match.photos.length > 0 ? match.photos[0] : "https://picsum.photos/seed/football/1200/800";
+  const coverPhoto = match.photos && match.photos.length > 0 ? match.photos[0] : "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=1200&h=800";
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
@@ -127,14 +128,14 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
                   <Crown className="h-3 w-3" />
                   <span className="text-[8px] font-black uppercase">MVP</span>
                 </div>
-                <span className="text-sm font-bold truncate uppercase">{mvpPlayer?.name || "SIN ELEGIR"}</span>
+                <span className="text-sm font-bold truncate uppercase">{mvpPlayer?.name || "N/A"}</span>
               </div>
               <div className="flex flex-col gap-1 py-2 sm:py-0">
                 <div className="flex items-center justify-center gap-1.5 text-orange-600">
                   <Sparkles className="h-3 w-3" />
                   <span className="text-[8px] font-black uppercase">GOL DE LA FECHA</span>
                 </div>
-                <span className="text-sm font-bold truncate uppercase">{bestGoalPlayer?.name || "SIN ELEGIR"}</span>
+                <span className="text-sm font-bold truncate uppercase">{bestGoalPlayer?.name || "N/A"}</span>
               </div>
               <div className="flex flex-col gap-1 py-2 sm:py-0">
                 <div className="flex items-center justify-center gap-1.5 text-black/40">
