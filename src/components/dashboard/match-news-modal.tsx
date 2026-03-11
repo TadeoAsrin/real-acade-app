@@ -30,13 +30,6 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
   const { user } = useUser();
   const firestore = useFirestore();
 
-  const adminRoleRef = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
-    return doc(firestore, 'roles_admin', user.uid);
-  }, [firestore, user]);
-
-  const { data: adminRole } = useDoc<{isAdmin: boolean}>(adminRoleRef);
-
   React.useEffect(() => {
     if (!match) return;
     if (forceOpen) {
@@ -53,23 +46,35 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
     onClose?.();
   };
 
+  // LÓGICA DE PREMIOS BASADA EN CARGA MANUAL
+  const allStats = React.useMemo(() => {
+    if (!match) return [];
+    return [...match.teamAPlayers, ...match.teamBPlayers];
+  }, [match]);
+
+  const mvpPlayer = React.useMemo(() => {
+    const stat = allStats.find(s => s.isMvp === true);
+    return allPlayers.find(p => p.id === stat?.playerId);
+  }, [allStats, allPlayers]);
+
+  const bestGoalPlayer = React.useMemo(() => {
+    const stat = allStats.find(s => s.hasBestGoal === true);
+    return allPlayers.find(p => p.id === stat?.playerId);
+  }, [allStats, allPlayers]);
+
+  const matchTopScorer = React.useMemo(() => {
+    const sorted = [...allStats].filter(s => s.goals > 0).sort((a, b) => b.goals - a.goals);
+    if (sorted.length === 0) return null;
+    const topStat = sorted[0];
+    const player = allPlayers.find(p => p.id === topStat.playerId);
+    return player ? { name: player.name, goals: topStat.goals } : null;
+  }, [allStats, allPlayers]);
+
   if (!match || !match.aiSummary) return null;
 
   const { aiSummary } = match;
   const date = parseISO(match.date);
   const coverPhoto = match.photos && match.photos.length > 0 ? match.photos[0] : "https://picsum.photos/seed/match/800/400";
-  
-  const allStats = [...match.teamAPlayers, ...match.teamBPlayers];
-  
-  // Logic to find real rewards from admin selection
-  const mvpStat = allStats.find(s => s.isMvp === true);
-  const mvp = allPlayers.find(p => p.id === mvpStat?.playerId);
-
-  const bestGoalStat = allStats.find(s => s.hasBestGoal === true);
-  const bestGoal = allPlayers.find(p => p.id === bestGoalStat?.playerId);
-
-  const topScorerStat = [...allStats].sort((a, b) => b.goals - a.goals)[0];
-  const matchTopScorer = (topScorerStat && topScorerStat.goals > 0) ? allPlayers.find(p => p.id === topScorerStat.playerId) : null;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
@@ -135,16 +140,16 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
             <div className="bg-white border border-black/10 p-4 grid grid-cols-2 sm:grid-cols-4 gap-4 divide-x divide-black/5 text-center">
               <div className="flex flex-col gap-1">
                 <span className="text-[8px] font-black text-black/40 uppercase">MVP</span>
-                <span className="text-xs font-bold truncate uppercase">{mvp?.name || "N/A"}</span>
+                <span className="text-xs font-bold truncate uppercase">{mvpPlayer?.name || "N/A"}</span>
               </div>
               <div className="flex flex-col gap-1">
                 <span className="text-[8px] font-black text-black/40 uppercase">GOL DE LA FECHA</span>
-                <span className="text-xs font-bold truncate uppercase">{bestGoal?.name || "N/A"}</span>
+                <span className="text-xs font-bold truncate uppercase">{bestGoalPlayer?.name || "N/A"}</span>
               </div>
               <div className="flex flex-col gap-1">
                 <span className="text-[8px] font-black text-black/40 uppercase">PICHICHI FECHA</span>
                 <span className="text-xs font-bold uppercase truncate">
-                  {matchTopScorer ? `${matchTopScorer.name} (${topScorerStat.goals})` : "N/A"}
+                  {matchTopScorer ? `${matchTopScorer.name} (${matchTopScorer.goals})` : "N/A"}
                 </span>
               </div>
               <div className="flex flex-col gap-1">

@@ -48,6 +48,31 @@ export default function MatchDetailPage() {
   const { data: players, isLoading: playersLoading } = useCollection<Player>(playersRef);
   const { data: adminRole } = useDoc<{isAdmin: boolean}>(adminRoleRef);
 
+  // LÓGICA DE PREMIOS Y DATOS CLAVE
+  const allPlayers = players || [];
+  
+  const mvpPlayer = React.useMemo(() => {
+    if (!match || !allPlayers.length) return null;
+    const stat = [...match.teamAPlayers, ...match.teamBPlayers].find(s => s.isMvp === true);
+    return allPlayers.find(p => p.id === stat?.playerId);
+  }, [match, allPlayers]);
+
+  const bestGoalPlayer = React.useMemo(() => {
+    if (!match || !allPlayers.length) return null;
+    const stat = [...match.teamAPlayers, ...match.teamBPlayers].find(s => s.hasBestGoal === true);
+    return allPlayers.find(p => p.id === stat?.playerId);
+  }, [match, allPlayers]);
+
+  const matchTopScorer = React.useMemo(() => {
+    if (!match || !allPlayers.length) return null;
+    const allStats = [...match.teamAPlayers, ...match.teamBPlayers];
+    const sorted = allStats.filter(s => s.goals > 0).sort((a, b) => b.goals - a.goals);
+    if (sorted.length === 0) return null;
+    const topStat = sorted[0];
+    const player = allPlayers.find(p => p.id === topStat.playerId);
+    return player ? { name: player.name, goals: topStat.goals } : null;
+  }, [match, allPlayers]);
+
   if (matchLoading || playersLoading) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
@@ -59,19 +84,6 @@ export default function MatchDetailPage() {
   if (!match) return <div className="text-center py-12 font-bebas text-2xl uppercase opacity-20">Partido no encontrado.</div>;
 
   const date = parseISO(match.date);
-  const allPlayers = players || [];
-  const allPlayerStats = [...match.teamAPlayers, ...match.teamBPlayers];
-  
-  // Logic to find real rewards selected during match creation by admin
-  const mvpStat = allPlayerStats.find(s => s.isMvp === true);
-  const mvpPlayer = allPlayers.find(p => p.id === mvpStat?.playerId);
-
-  const bestGoalStat = allPlayerStats.find(s => s.hasBestGoal === true);
-  const bestGoalPlayer = allPlayers.find(p => p.id === bestGoalStat?.playerId);
-  
-  // Logic to find Top Scorer of the specific match
-  const topScorerStat = [...allPlayerStats].sort((a, b) => b.goals - a.goals)[0];
-  const topScorer = (topScorerStat && topScorerStat.goals > 0) ? allPlayers.find(p => p.id === topScorerStat.playerId) : null;
 
   const handleShare = () => {
     const text = `⚽ *REAL ACADE* ⚽\n\n` +
@@ -201,7 +213,7 @@ export default function MatchDetailPage() {
               <span className="text-[9px] font-black uppercase tracking-[0.3em] font-oswald">PICHICHI FECHA</span>
             </div>
             <span className="text-xl font-bebas text-white uppercase truncate max-w-full">
-              {topScorer ? `${topScorer.name} (${topScorerStat.goals})` : "N/A"}
+              {matchTopScorer ? `${matchTopScorer.name} (${matchTopScorer.goals})` : "N/A"}
             </span>
           </div>
         </div>
