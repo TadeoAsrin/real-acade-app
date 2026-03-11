@@ -23,10 +23,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
+import { useSearchParams } from 'next/navigation';
 
 export default function DashboardPage() {
   const firestore = useFirestore();
+  const searchParams = useSearchParams();
   const [showGacetaManually, setShowGacetaManually] = React.useState(false);
+  const [targetMatchId, setTargetMatchId] = React.useState<string | null>(null);
 
   const playersQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -40,6 +43,14 @@ export default function DashboardPage() {
 
   const { data: playersData, isLoading: playersLoading } = useCollection<Player>(playersQuery);
   const { data: matchesData, isLoading: matchesLoading } = useCollection<Match>(matchesQuery);
+
+  React.useEffect(() => {
+    const gacetaId = searchParams.get('gaceta');
+    if (gacetaId) {
+      setTargetMatchId(gacetaId);
+      setShowGacetaManually(true);
+    }
+  }, [searchParams]);
 
   if (playersLoading || matchesLoading) {
     return (
@@ -72,6 +83,8 @@ export default function DashboardPage() {
   }
 
   const lastMatch = allMatches[0];
+  const activeMatchForGaceta = targetMatchId ? allMatches.find(m => m.id === targetMatchId) || lastMatch : lastMatch;
+
   const playerStats = calculateAggregatedStats(allPlayers, allMatches);
   const spiciestMatch = getSpiciestMatch(allMatches);
   const chemistryRankings = getChemistryRankings(allPlayers, allMatches, 1);
@@ -109,12 +122,15 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-12 pb-20 max-w-7xl mx-auto">
       
-      {lastMatch && (
+      {activeMatchForGaceta && (
         <MatchNewsModal 
-          match={lastMatch} 
+          match={activeMatchForGaceta} 
           allPlayers={allPlayers} 
           forceOpen={showGacetaManually} 
-          onClose={() => setShowGacetaManually(false)}
+          onClose={() => {
+            setShowGacetaManually(false);
+            setTargetMatchId(null);
+          }}
         />
       )}
 
@@ -142,7 +158,10 @@ export default function DashboardPage() {
               </div>
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
                 <button 
-                  onClick={() => setShowGacetaManually(true)} 
+                  onClick={() => {
+                    setTargetMatchId(lastMatch.id);
+                    setShowGacetaManually(true);
+                  }} 
                   className="bg-primary text-primary-foreground hover:bg-primary/90 font-bebas text-xl tracking-widest h-14 px-8 flex items-center gap-2 transition-all active:scale-95 shadow-lg shadow-primary/20 rounded-md"
                 >
                   <Newspaper className="h-5 w-5" /> TAPA DEL DIARIO
