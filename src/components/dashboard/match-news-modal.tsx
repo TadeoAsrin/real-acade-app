@@ -43,18 +43,18 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
     onClose?.();
   };
 
-  // LÓGICA DE PREMIOS MEJORADA: Busca al jugador marcado como MVP o Gol de la Fecha
+  // Lógica para encontrar los premios manuales
   const mvpPlayer = React.useMemo(() => {
     if (!match || !allPlayers.length) return null;
     const allStats = [...(match.teamAPlayers || []), ...(match.teamBPlayers || [])];
-    const stat = allStats.find(s => !!s.isMvp);
+    const stat = allStats.find(s => s.isMvp === true);
     return allPlayers.find(p => p.id === stat?.playerId);
   }, [match, allPlayers]);
 
   const bestGoalPlayer = React.useMemo(() => {
     if (!match || !allPlayers.length) return null;
     const allStats = [...(match.teamAPlayers || []), ...(match.teamBPlayers || [])];
-    const stat = allStats.find(s => !!s.hasBestGoal);
+    const stat = allStats.find(s => s.hasBestGoal === true);
     return allPlayers.find(p => p.id === stat?.playerId);
   }, [match, allPlayers]);
 
@@ -68,7 +68,7 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="max-w-4xl p-0 overflow-hidden border-none shadow-2xl flex flex-col h-[92vh] sm:h-auto sm:max-h-[90vh] bottom-0 sm:bottom-auto translate-y-0 sm:translate-y-[-50%] top-auto sm:top-[50%] bg-[#f4f4f4] text-black">
         <DialogHeader className="sr-only">
-          <DialogTitle>La Gaceta de Real Acade</DialogTitle>
+          <DialogTitle>La Voz del Pueblo</DialogTitle>
           <DialogDescription>Crónica oficial del encuentro</DialogDescription>
         </DialogHeader>
         
@@ -79,7 +79,7 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
               <div className="bg-black text-white p-1.5">
                 <Newspaper className="h-5 w-5" />
               </div>
-              <span className="font-bebas font-black uppercase tracking-[0.3em] text-sm text-black">THE ACADEMY GAZETTE</span>
+              <span className="font-bebas font-black uppercase tracking-[0.3em] text-sm text-black">LA VOZ DEL PUEBLO</span>
             </div>
             <div className="flex items-center gap-4 text-[10px] font-black uppercase text-black/40 font-oswald">
               <span>EDICIÓN ESPECIAL</span>
@@ -119,7 +119,7 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
             </div>
           </div>
 
-          {/* DATOS DE HONOR (MVP, GOL DE LA FECHA, RESULTADO) */}
+          {/* CUADRO DE HONOR (MVP, GOL DE LA FECHA, RESULTADO) */}
           <div className="px-6 sm:px-10 mt-8">
             <div className="bg-white border border-black/10 p-4 grid grid-cols-1 sm:grid-cols-3 gap-4 divide-y sm:divide-y-0 sm:divide-x divide-black/5 text-center shadow-sm">
               <div className="flex flex-col gap-1 py-2 sm:py-0">
@@ -127,14 +127,14 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
                   <Crown className="h-3 w-3" />
                   <span className="text-[8px] font-black uppercase">MVP</span>
                 </div>
-                <span className="text-sm font-bold truncate uppercase">{mvpPlayer?.name || "N/A"}</span>
+                <span className="text-sm font-bold truncate uppercase">{mvpPlayer?.name || "SIN ELEGIR"}</span>
               </div>
               <div className="flex flex-col gap-1 py-2 sm:py-0">
                 <div className="flex items-center justify-center gap-1.5 text-orange-600">
                   <Sparkles className="h-3 w-3" />
                   <span className="text-[8px] font-black uppercase">GOL DE LA FECHA</span>
                 </div>
-                <span className="text-sm font-bold truncate uppercase">{bestGoalPlayer?.name || "N/A"}</span>
+                <span className="text-sm font-bold truncate uppercase">{bestGoalPlayer?.name || "SIN ELEGIR"}</span>
               </div>
               <div className="flex flex-col gap-1 py-2 sm:py-0">
                 <div className="flex items-center justify-center gap-1.5 text-black/40">

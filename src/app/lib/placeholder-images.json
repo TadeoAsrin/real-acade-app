@@ -1,10 +1,11 @@
+
 {
   "placeholderImages": [
     {
       "id": "club-logo",
-      "description": "Escudo Oficial Real Acade",
+      "description": "Escudo Oficial Real Acade (Roble, Est. 2010)",
       "imageUrl": "https://picsum.photos/seed/realacadecrest/400/400",
-      "imageHint": "soccer crest"
+      "imageHint": "sports crest logo"
     },
     {
       "id": "messi",
