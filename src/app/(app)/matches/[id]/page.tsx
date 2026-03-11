@@ -62,15 +62,14 @@ export default function MatchDetailPage() {
   const allPlayers = players || [];
   const allPlayerStats = [...match.teamAPlayers, ...match.teamBPlayers];
   
-  // Logic to find MVP
+  // Logic to find real rewards selected during match creation
   const mvpStat = allPlayerStats.find(s => s.isMvp === true);
   const mvpPlayer = allPlayers.find(p => p.id === mvpStat?.playerId);
 
-  // Logic to find Best Goal
   const bestGoalStat = allPlayerStats.find(s => s.hasBestGoal === true);
   const bestGoalPlayer = allPlayers.find(p => p.id === bestGoalStat?.playerId);
   
-  // Logic to find Top Scorer
+  // Logic to find Top Scorer of the specific match
   const topScorerStat = [...allPlayerStats].sort((a, b) => b.goals - a.goals)[0];
   const topScorer = allPlayers.find(p => p.id === topScorerStat?.playerId);
 
@@ -189,7 +188,7 @@ export default function MatchDetailPage() {
           <div className="p-8 flex flex-col items-center text-center gap-2">
             <div className="flex items-center gap-2 text-orange-500/60">
               <Sparkles className="h-4 w-4" />
-              <span className="text-[9px] font-black uppercase tracking-[0.3em] font-oswald">LA JOYITA</span>
+              <span className="text-[9px] font-black uppercase tracking-[0.3em] font-oswald">GOL DE LA FECHA</span>
             </div>
             <span className="text-xl font-bebas text-white uppercase truncate max-w-full">
               {bestGoalPlayer?.name || "SIN ELEGIR"}

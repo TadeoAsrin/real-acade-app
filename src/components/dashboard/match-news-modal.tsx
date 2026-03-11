@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Newspaper, Trophy, X, Quote, Calendar, Star, Goal, ChevronRight, Sparkles } from 'lucide-react';
+import { Newspaper, X, Star, Goal, ChevronRight, Sparkles, Trophy } from 'lucide-react';
 import { es } from 'date-fns/locale';
 import { format, parseISO } from 'date-fns';
 import type { Match, Player } from '@/lib/definitions';
@@ -60,8 +60,16 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
   const coverPhoto = match.photos && match.photos.length > 0 ? match.photos[0] : "https://picsum.photos/seed/match/800/400";
   
   const allStats = [...match.teamAPlayers, ...match.teamBPlayers];
-  const mvp = allPlayers.find(p => p.id === allStats.find(s => s.isMvp === true)?.playerId);
-  const bestGoal = allPlayers.find(p => p.id === allStats.find(s => s.hasBestGoal === true)?.playerId);
+  
+  // Logic to find real rewards
+  const mvpStat = allStats.find(s => s.isMvp === true);
+  const mvp = allPlayers.find(p => p.id === mvpStat?.playerId);
+
+  const bestGoalStat = allStats.find(s => s.hasBestGoal === true);
+  const bestGoal = allPlayers.find(p => p.id === bestGoalStat?.playerId);
+
+  const topScorerStat = [...allStats].sort((a, b) => b.goals - a.goals)[0];
+  const matchTopScorer = allPlayers.find(p => p.id === topScorerStat?.playerId);
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
@@ -122,24 +130,24 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
             </div>
           </div>
 
-          {/* Facts Bar */}
+          {/* Facts Bar (The Academy Gazette Awards) */}
           <div className="px-6 sm:px-10 mt-8">
             <div className="bg-white border border-black/10 p-4 grid grid-cols-2 sm:grid-cols-4 gap-4 divide-x divide-black/5 text-center">
               <div className="flex flex-col gap-1">
-                <span className="text-[8px] font-black text-black/40 uppercase">MVP</span>
+                <span className="text-[8px] font-black text-black/40 uppercase">KING OF THE MATCH</span>
                 <span className="text-xs font-bold truncate uppercase">{mvp?.name || "N/A"}</span>
               </div>
               <div className="flex flex-col gap-1">
-                <span className="text-[8px] font-black text-black/40 uppercase">LA JOYITA</span>
+                <span className="text-[8px] font-black text-black/40 uppercase">GOL DE LA FECHA</span>
                 <span className="text-xs font-bold truncate uppercase">{bestGoal?.name || "N/A"}</span>
               </div>
               <div className="flex flex-col gap-1">
-                <span className="text-[8px] font-black text-black/40 uppercase">GOLES</span>
-                <span className="text-xs font-bold uppercase">{match.teamAScore + match.teamBScore} TOTAL</span>
+                <span className="text-[8px] font-black text-black/40 uppercase">PICHICHI FECHA</span>
+                <span className="text-xs font-bold uppercase truncate">{matchTopScorer?.name || "N/A"} ({topScorerStat?.goals || 0})</span>
               </div>
               <div className="flex flex-col gap-1">
-                <span className="text-[8px] font-black text-black/40 uppercase">FECHA</span>
-                <span className="text-xs font-bold uppercase">{format(date, "dd/MM/yy")}</span>
+                <span className="text-[8px] font-black text-black/40 uppercase">RESULTADO</span>
+                <span className="text-xs font-bold uppercase">{match.teamAScore} - {match.teamBScore}</span>
               </div>
             </div>
           </div>
