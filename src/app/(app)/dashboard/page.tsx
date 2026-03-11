@@ -62,8 +62,8 @@ export default function DashboardPage() {
   // 3. On Fire (Power Ranking)
   const topPower = [...stats].sort((a, b) => b.powerPoints - a.powerPoints).slice(0, 5);
 
-  // 4. Pulso de la Competición (Lógica Real)
-  const totalMvpAwards = stats.reduce((acc, p) => acc + p.totalMvp, 0);
+  // 4. Pulso de la Competición (Lógica Corregida)
+  const maxMvpCount = Math.max(...stats.map(p => p.totalMvp), 0);
   const recordGoalsInMatch = Math.max(...allMatches.map(m => m.teamAScore + m.teamBScore), 0);
   
   const chemistry = getChemistryRankings(allPlayers, allMatches, 1);
@@ -323,10 +323,10 @@ export default function DashboardPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Link href="/pulse/mvp" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-yellow-500/20 transition-all hover-lift">
             <Star className="h-6 w-6 text-yellow-500" />
-            <span className="text-5xl font-black italic font-bebas leading-none">{totalMvpAwards}</span>
+            <span className="text-5xl font-black italic font-bebas leading-none">{maxMvpCount}</span>
             <div className="space-y-0.5">
               <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">REYES MVP</p>
-              <p className="text-[8px] font-bold text-muted-foreground/40 uppercase font-oswald">PREMIOS</p>
+              <p className="text-[8px] font-bold text-muted-foreground/40 uppercase font-oswald">RÉCORD PREMIOS</p>
             </div>
           </Link>
           <Link href="/pulse/league" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-orange-500/20 transition-all hover-lift">
