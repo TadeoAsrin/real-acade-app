@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -8,12 +9,14 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Newspaper, Trophy, X, Quote } from 'lucide-react';
+import { Newspaper, Trophy, X, Quote, Calendar, Star, Goal, ChevronRight } from 'lucide-react';
 import { es } from 'date-fns/locale';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import type { Match, Player } from '@/lib/definitions';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
+import Link from 'next/link';
+import { Badge } from '../ui/badge';
 
 interface MatchNewsModalProps {
   match: Match;
@@ -53,88 +56,140 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
   if (!match || !match.aiSummary) return null;
 
   const { aiSummary } = match;
-  const coverPhoto = match.photos && match.photos.length > 0 ? match.photos[0] : null;
+  const date = parseISO(match.date);
+  const coverPhoto = match.photos && match.photos.length > 0 ? match.photos[0] : "https://picsum.photos/seed/match/800/400";
+  
+  const allStats = [...match.teamAPlayers, ...match.teamBPlayers];
+  const mvp = allPlayers.find(p => p.id === allStats.find(s => s.isMvp)?.playerId);
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-w-4xl p-0 overflow-hidden border-none shadow-2xl flex flex-col h-[92vh] sm:h-auto sm:max-h-[85vh] bottom-0 sm:bottom-auto translate-y-0 sm:translate-y-[-50%] top-auto sm:top-[50%] bg-white !bg-white text-black editorial-paper">
+      <DialogContent className="max-w-4xl p-0 overflow-hidden border-none shadow-2xl flex flex-col h-[92vh] sm:h-auto sm:max-h-[90vh] bottom-0 sm:bottom-auto translate-y-0 sm:translate-y-[-50%] top-auto sm:top-[50%] bg-[#f4f4f4] text-black">
         <DialogHeader className="sr-only">
           <DialogTitle>La Gaceta de Real Acade</DialogTitle>
           <DialogDescription>Crónica oficial del encuentro</DialogDescription>
         </DialogHeader>
         
-        <div className="shrink-0 p-4 sm:p-6 bg-black z-20">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="bg-white text-black p-1.5 rounded-none">
-                <Newspaper className="h-4 w-4 sm:h-5 sm:w-5" />
+        {/* Newspaper Header */}
+        <div className="shrink-0 p-4 border-b-4 border-black bg-white z-20 flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="bg-black text-white p-1.5">
+                <Newspaper className="h-5 w-5" />
               </div>
-              <span className="font-bebas font-black uppercase tracking-[0.3em] text-[10px] sm:text-sm text-white">THE ACADEMY GAZETTE</span>
+              <span className="font-bebas font-black uppercase tracking-[0.3em] text-sm text-black">THE ACADEMY GAZETTE</span>
             </div>
-            <div className="flex items-center gap-2 sm:gap-4 font-oswald text-[8px] sm:text-[10px] font-bold uppercase text-white/60">
-              <span className="text-primary font-black">SPECIAL EDITION</span>
-              <span>{format(new Date(match.date), "eeee, dd MMMM yyyy", { locale: es })}</span>
-              <button onClick={handleClose} className="ml-2 p-2 hover:bg-white/10 rounded-full transition-colors text-white"><X className="h-5 w-5" /></button>
+            <div className="flex items-center gap-4 text-[10px] font-black uppercase text-black/40 font-oswald">
+              <span>EDICIÓN ESPECIAL</span>
+              <span className="hidden sm:inline">•</span>
+              <span>{format(date, "eeee, dd MMMM yyyy", { locale: es })}</span>
+              <button onClick={handleClose} className="p-1 hover:bg-black/5 rounded-full transition-colors"><X className="h-4 w-4" /></button>
+            </div>
+          </div>
+          
+          <div className="flex items-center justify-center gap-8 py-2 border-y border-black/5">
+            <div className="flex flex-col items-center">
+              <span className="text-5xl font-bebas text-primary leading-none">{match.teamAScore}</span>
+              <span className="text-[8px] font-black text-primary uppercase">AZUL</span>
+            </div>
+            <div className="text-xl font-light text-black/20 italic">—</div>
+            <div className="flex flex-col items-center">
+              <span className="text-5xl font-bebas text-black leading-none">{match.teamBScore}</span>
+              <span className="text-[8px] font-black text-accent uppercase">ROJO</span>
             </div>
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto overscroll-contain bg-white !bg-white">
-          {coverPhoto && (
-            <div className="w-full aspect-video sm:aspect-[21/9] overflow-hidden border-b-4 border-black relative">
-              <img src={coverPhoto} alt="Tapa" className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+        <div className="flex-1 overflow-y-auto overscroll-contain bg-[#fdfdfd]">
+          {/* Headline Section */}
+          <div className="p-6 sm:p-10 space-y-8 max-w-2xl mx-auto text-center">
+            <h1 className="text-4xl sm:text-6xl font-black font-playfair leading-[0.95] tracking-tight uppercase italic text-black">
+              {aiSummary.title}
+            </h1>
+            <p className="font-lora text-xl text-black/70 italic border-y border-black/10 py-4">
+              {aiSummary.subtitle}
+            </p>
+          </div>
+
+          {/* Hero Image with Overlay */}
+          <div className="px-6 sm:px-10">
+            <div className="relative aspect-video rounded-xl overflow-hidden border border-black/10">
+              <img src={coverPhoto} alt="Cover" className="w-full h-full object-cover" />
+              <div className="absolute top-4 left-4 bg-black text-white px-3 py-1 text-[10px] font-black uppercase tracking-widest font-oswald">
+                FINAL: {match.teamAScore} - {match.teamBScore}
+              </div>
             </div>
-          )}
+          </div>
 
-          <div className="p-6 sm:p-10 md:p-12 bg-white !bg-white">
-            <article className="space-y-10">
-              <div className="space-y-6 text-center max-w-2xl mx-auto">
-                <h1 className="editorial-title text-4xl sm:text-6xl md:text-7xl font-black leading-[0.9] tracking-tighter uppercase italic text-black !text-black">
-                  {aiSummary.title}
-                </h1>
-                <div className="editorial-divider" />
-                <p className="font-lora text-xl sm:text-2xl font-bold text-black italic leading-tight">
-                  {aiSummary.subtitle}
-                </p>
+          {/* Facts Bar */}
+          <div className="px-6 sm:px-10 mt-8">
+            <div className="bg-white border border-black/10 p-4 grid grid-cols-2 sm:grid-cols-4 gap-4 divide-x divide-black/5 text-center">
+              <div className="flex flex-col gap-1">
+                <span className="text-[8px] font-black text-black/40 uppercase">MVP</span>
+                <span className="text-xs font-bold truncate uppercase">{mvp?.name || "N/A"}</span>
               </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-                <div className="lg:col-span-8 space-y-6 lg:border-r lg:border-black/10 lg:pr-10">
-                  <div className="relative">
-                    <Quote className="absolute -left-8 -top-6 h-16 w-16 text-black/[0.05] pointer-events-none" />
-                    <p className="text-xl sm:text-2xl leading-relaxed text-justify text-black font-lora first-letter:text-8xl first-letter:font-black first-letter:float-left first-letter:mr-4 first-letter:mt-3 first-letter:text-black">
-                      {aiSummary.summary}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="lg:col-span-4 space-y-6">
-                  <div className="bg-black/5 p-6 rounded-none border-t-4 border-black space-y-6">
-                    <h3 className="font-bebas text-sm font-black uppercase tracking-widest flex items-center justify-between border-b border-black/10 pb-3 text-black !text-black">
-                      OFFICIAL REPORT <Trophy className="h-4 w-4 text-accent" />
-                    </h3>
-                    <div className="flex items-center justify-between font-bebas italic">
-                      <div className="text-center">
-                        <p className="text-[10px] font-black text-primary uppercase mb-1 tracking-widest">AZUL</p>
-                        <p className="text-5xl font-black text-black">{match.teamAScore}</p>
-                      </div>
-                      <div className="text-black/20 text-3xl font-light">vs</div>
-                      <div className="text-center">
-                        <p className="text-[10px] font-black text-accent uppercase mb-1 tracking-widest">ROJO</p>
-                        <p className="text-5xl font-black text-black">{match.teamBScore}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+              <div className="flex flex-col gap-1">
+                <span className="text-[8px] font-black text-black/40 uppercase">FECHA</span>
+                <span className="text-xs font-bold uppercase">{format(date, "dd/MM/yy")}</span>
               </div>
+              <div className="flex flex-col gap-1">
+                <span className="text-[8px] font-black text-black/40 uppercase">GOLES</span>
+                <span className="text-xs font-bold uppercase">{match.teamAScore + match.teamBScore} TOTAL</span>
+              </div>
+              <div className="flex flex-col gap-1">
+                <span className="text-[8px] font-black text-black/40 uppercase">ESTADO</span>
+                <span className="text-xs font-bold text-emerald-600 uppercase">FINALIZADO</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Body Text */}
+          <div className="p-6 sm:p-10 max-w-2xl mx-auto">
+            <article className="prose prose-sm prose-neutral">
+              <p className="text-lg leading-relaxed text-justify text-black/80 font-lora first-letter:text-7xl first-letter:font-black first-letter:float-left first-letter:mr-3 first-letter:mt-2 first-letter:text-black">
+                {aiSummary.summary}
+              </p>
             </article>
+            
+            <blockquote className="mt-10 border-l-4 border-black pl-6 italic text-xl text-black font-lora">
+              "{aiSummary.subtitle}"
+            </blockquote>
+          </div>
+
+          {/* Goals Summary */}
+          <div className="px-6 sm:px-10 pb-10 max-w-2xl mx-auto space-y-6">
+            <div className="h-[1px] bg-black/10 w-full" />
+            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-center text-black/40">MARCADORES DE ÉLITE</h3>
+            <div className="grid grid-cols-2 gap-10">
+              <div className="space-y-2">
+                <Badge className="bg-primary text-[8px] rounded-none">AZUL</Badge>
+                {match.teamAPlayers.filter(p => p.goals > 0).map(p => (
+                  <div key={p.playerId} className="flex items-center justify-between text-[10px] font-bold">
+                    <span className="uppercase">{allPlayers.find(pl => pl.id === p.playerId)?.name}</span>
+                    <span className="font-bebas text-sm">x{p.goals}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="space-y-2">
+                <Badge className="bg-accent text-[8px] rounded-none">ROJO</Badge>
+                {match.teamBPlayers.filter(p => p.goals > 0).map(p => (
+                  <div key={p.playerId} className="flex items-center justify-between text-[10px] font-bold">
+                    <span className="uppercase">{allPlayers.find(pl => pl.id === p.playerId)?.name}</span>
+                    <span className="font-bebas text-sm">x{p.goals}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="shrink-0 p-4 sm:p-6 bg-white !bg-white border-t border-black/10 flex flex-col sm:flex-row gap-3 z-20">
-          <button onClick={handleClose} className="bg-black text-white hover:bg-black/90 font-bebas font-black uppercase tracking-[0.2em] text-sm rounded-none h-14 w-full transition-colors">
-            CLOSE GAZETTE
+        {/* Footer actions */}
+        <div className="shrink-0 p-4 bg-white border-t border-black/10 flex flex-col sm:flex-row gap-3 z-20">
+          <Button asChild className="bg-black text-white hover:bg-black/90 font-bebas font-black uppercase tracking-widest text-sm rounded-none h-14 w-full">
+            <Link href={`/matches/${match.id}`}>VER FICHA COMPLETA <ChevronRight className="ml-2 h-4 w-4" /></Link>
+          </Button>
+          <button onClick={handleClose} className="border border-black/10 text-black/40 hover:bg-black/5 font-bebas font-black uppercase tracking-widest text-sm rounded-none h-14 w-full sm:w-1/3 transition-colors">
+            CERRAR
           </button>
         </div>
       </DialogContent>

@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -20,7 +21,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import type { Player, PlayerStats, Match } from "@/lib/definitions";
 import { cn, getInitials } from "@/lib/utils";
-import { Award, Star, Loader2, Share2, Pencil, Quote, Camera, ChevronLeft, Newspaper, Trophy, Sparkles, X } from "lucide-react";
+import { Award, Star, Loader2, Share2, Pencil, Quote, Camera, ChevronLeft, Newspaper, Trophy, Sparkles, X, Calendar, Goal, User } from "lucide-react";
 import { useDoc, useCollection, useMemoFirebase, useFirestore, useUser } from "@/firebase";
 import { doc, collection } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
@@ -30,8 +31,6 @@ import { es } from "date-fns/locale";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
 } from "@/components/ui/dialog";
 
 const PlayerStatsTable = ({
@@ -112,23 +111,20 @@ export function MatchGallery({ photos }: { photos: string[] }) {
         <h2 className="text-xs font-bebas tracking-[0.3em] uppercase text-muted-foreground">GALERÍA DE COMBATE</h2>
       </div>
       <div className="flex gap-4 overflow-x-auto pb-4 snap-x no-scrollbar">
-        {photos.map((url, idx) => {
-          if (!url) return null;
-          return (
-            <div 
-              key={idx} 
-              className="relative flex-none w-64 aspect-[4/3] rounded-lg overflow-hidden cursor-zoom-in snap-center border border-white/10 group hover-lift"
-              onClick={() => setSelectedPhoto(url)}
-            >
-              <img 
-                src={url} 
-                alt={`Foto ${idx + 1}`} 
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            </div>
-          );
-        })}
+        {photos.map((url, idx) => (
+          <div 
+            key={idx} 
+            className="relative flex-none w-64 aspect-[4/3] rounded-lg overflow-hidden cursor-zoom-in snap-center border border-white/10 group hover-lift"
+            onClick={() => setSelectedPhoto(url)}
+          >
+            <img 
+              src={url} 
+              alt={`Foto ${idx + 1}`} 
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          </div>
+        ))}
       </div>
 
       <Dialog open={!!selectedPhoto} onOpenChange={(open) => !open && setSelectedPhoto(null)}>
@@ -177,17 +173,6 @@ export default function MatchDetailPage() {
 
   const isAdmin = adminRole?.isAdmin;
 
-  const handleShare = () => {
-    const text = `⚽ *REAL ACADE* ⚽\n\n` +
-      `🔥 *AZUL ${match?.teamAScore} - ${match?.teamBScore} ROJO*\n` +
-      `📅 ${format(parseISO(match?.date || ""), "PPP", { locale: es })}\n\n` +
-      `Mirá la crónica completa y las fotos acá:\n` +
-      `${window.location.href}`;
-    
-    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
-    window.open(url, '_blank');
-  };
-
   if (matchLoading || playersLoading) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
@@ -200,186 +185,221 @@ export default function MatchDetailPage() {
 
   const date = parseISO(match.date);
   const isPlayed = match.teamAScore > 0 || match.teamBScore > 0 || differenceInHours(new Date(), date) > 2;
-  const hoursUntilMatch = differenceInHours(date, new Date());
-  const showLineups = isPlayed || hoursUntilMatch <= 24;
-
   const allPlayers = players || [];
   const allPlayerStats = [...match.teamAPlayers, ...match.teamBPlayers];
   
-  const mvpStat = allPlayerStats.find(s => s.isMvp);
-  const bestGoalStat = allPlayerStats.find(s => s.hasBestGoal);
+  const mvpPlayer = allPlayers.find(p => p.id === allPlayerStats.find(s => s.isMvp)?.playerId);
+  const topScorerStat = [...allPlayerStats].sort((a, b) => b.goals - a.goals)[0];
+  const topScorer = allPlayers.find(p => p.id === topScorerStat?.playerId);
+
+  const teamAGoalEvents = match.teamAPlayers.filter(p => p.goals > 0);
+  const teamBGoalEvents = match.teamBPlayers.filter(p => p.goals > 0);
+
+  const handleShare = () => {
+    const text = `⚽ *REAL ACADE* ⚽\n\n` +
+      `🔥 *AZUL ${match.teamAScore} - ${match.teamBScore} ROJO*\n` +
+      `📅 ${format(date, "PPP", { locale: es })}\n\n` +
+      `Mirá la crónica completa y las fotos acá:\n` +
+      `${window.location.href}`;
+    
+    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
+  };
 
   return (
-    <div className="space-y-10 max-w-5xl mx-auto pb-20">
+    <div className="space-y-12 max-w-4xl mx-auto pb-20">
       
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+      {/* 1. ARTICLE HEADER */}
+      <div className="flex flex-col items-center text-center gap-6">
+        <Link href="/matches" className="flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground hover:text-primary transition-colors font-oswald tracking-widest">
+          <ChevronLeft className="h-3 w-3" /> VOLVER AL HISTORIAL
+        </Link>
         <div className="space-y-2">
-            <Link href="/matches" className="flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground hover:text-primary transition-colors mb-4 font-oswald tracking-widest">
-              <ChevronLeft className="h-3 w-3" /> VOLVER AL HISTORIAL
-            </Link>
-            <h1 className="text-6xl font-bebas tracking-widest text-white">FICHA TÉCNICA</h1>
-            <div className="flex items-center gap-3">
-                <Badge variant="outline" className="bg-white/5 border-white/10 uppercase font-oswald tracking-widest text-[10px] rounded-none">
-                  {format(date, "PPPP", { locale: es })}
-                </Badge>
-                {isPlayed ? (
-                  <Badge className="bg-muted text-muted-foreground uppercase font-oswald tracking-widest text-[10px] rounded-none">FINALIZADO</Badge>
-                ) : (
-                  <Badge className="bg-primary text-primary-foreground animate-pulse uppercase font-oswald tracking-widest text-[10px] rounded-none">PRÓXIMO</Badge>
-                )}
-                <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-primary/10 hover:text-primary text-muted-foreground" onClick={handleShare}>
-                        <Share2 className="h-4 w-4" />
-                    </Button>
-                    {isAdmin && (
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" asChild>
-                            <Link href={`/matches/${id}/edit`}><Pencil className="h-4 w-4" /></Link>
-                        </Button>
-                    )}
-                </div>
-            </div>
+          <span className="text-xs font-black uppercase tracking-[0.4em] text-primary font-oswald">LA GACETA DEL PARTIDO</span>
+          <p className="text-sm font-bold text-muted-foreground/60 uppercase tracking-widest">{format(date, "PPPP", { locale: es })}</p>
+        </div>
+        
+        <div className="flex items-center justify-center gap-10 md:gap-20">
+          <div className="flex flex-col items-center">
+            <span className="text-7xl md:text-9xl font-bebas text-primary italic leading-none">{match.teamAScore}</span>
+            <span className="text-xs font-black uppercase tracking-widest text-primary font-oswald">AZUL</span>
+          </div>
+          <div className="text-2xl md:text-4xl font-light text-muted-foreground/20 italic font-oswald shrink-0">—</div>
+          <div className="flex flex-col items-center">
+            <span className="text-7xl md:text-9xl font-bebas text-white italic leading-none">{match.teamBScore}</span>
+            <span className="text-xs font-black uppercase tracking-widest text-accent font-oswald">ROJO</span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="h-8 border-white/10 rounded-full font-oswald text-[10px] tracking-widest uppercase" onClick={handleShare}>
+            <Share2 className="h-3 w-3 mr-2" /> Compartir
+          </Button>
+          {isAdmin && (
+            <Button variant="outline" size="sm" className="h-8 border-white/10 rounded-full font-oswald text-[10px] tracking-widest uppercase" asChild>
+              <Link href={`/matches/${id}/edit`}><Pencil className="h-3 w-3 mr-2" /> Editar</Link>
+            </Button>
+          )}
         </div>
       </div>
 
-      {/* Scoreboard Hero */}
-      <Card className="competition-card border-none overflow-hidden relative">
-          <CardContent className="p-10 md:p-16 relative z-10 bg-gradient-to-b from-black/20 to-transparent">
-              <div className="flex items-center justify-around gap-4">
-                  <div className="flex flex-col items-center gap-4">
-                      <span className="text-xl font-bebas text-primary tracking-[0.4em] uppercase italic">Azul</span>
-                      <span className="text-[8rem] md:text-[10rem] font-bebas text-white leading-none italic drop-shadow-2xl">
-                          {isPlayed ? match.teamAScore : "-"}
-                      </span>
-                  </div>
-                  <div className="flex flex-col items-center">
-                      <div className="h-20 w-[1px] bg-white/10 mb-4" />
-                      <span className="text-2xl font-oswald text-muted-foreground/40 italic tracking-widest">VS</span>
-                      <div className="h-20 w-[1px] bg-white/10 mt-4" />
-                  </div>
-                  <div className="flex flex-col items-center gap-4">
-                      <span className="text-xl font-bebas text-accent tracking-[0.4em] uppercase italic">Rojo</span>
-                      <span className="text-[8rem] md:text-[10rem] font-bebas text-white leading-none italic drop-shadow-2xl">
-                          {isPlayed ? match.teamBScore : "-"}
-                      </span>
-                  </div>
-              </div>
-          </CardContent>
+      {/* 2 & 3. HEADLINE & SUBTITLE */}
+      {match.aiSummary && (
+        <div className="text-center space-y-6 max-w-3xl mx-auto border-y border-white/5 py-10">
+          <h1 className="text-4xl md:text-7xl font-bebas leading-[0.9] tracking-tight uppercase italic text-white drop-shadow-2xl">
+            {match.aiSummary.title}
+          </h1>
+          <p className="text-lg md:text-xl text-muted-foreground font-lora italic leading-relaxed px-4">
+            {match.aiSummary.subtitle}
+          </p>
+        </div>
+      )}
+
+      {/* 4. HERO IMAGE */}
+      <div className="relative group">
+        <div className="aspect-video w-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
+          <img 
+            src={match.photos?.[0] || "https://picsum.photos/seed/football/1200/800"} 
+            alt="Hero Match" 
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+        </div>
+        
+        {/* Overlay */}
+        <div className="absolute bottom-6 left-6 flex items-end gap-4 pointer-events-none">
+          <div className="bg-primary px-4 py-2 rounded-lg shadow-xl">
+            <span className="font-bebas text-2xl text-white italic tracking-widest">{match.teamAScore} - {match.teamBScore}</span>
+          </div>
+          <div className="bg-black/60 backdrop-blur-md px-4 py-2 rounded-lg border border-white/10">
+            <span className="text-[10px] font-black text-white uppercase tracking-widest font-oswald">{format(date, "dd MMM", { locale: es })}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 5. MATCH FACTS CARD */}
+      <Card className="competition-card border-none bg-white/5 backdrop-blur-sm">
+        <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-white/5">
+          <div className="p-6 flex flex-col items-center gap-1">
+            <div className="flex items-center gap-2 text-primary">
+              <Trophy className="h-4 w-4" />
+              <span className="text-[10px] font-black uppercase tracking-widest font-oswald">RESULTADO</span>
+            </div>
+            <span className="text-3xl font-bebas text-white italic">{match.teamAScore} - {match.teamBScore}</span>
+          </div>
+          <div className="p-6 flex flex-col items-center gap-1">
+            <div className="flex items-center gap-2 text-yellow-500">
+              <Star className="h-4 w-4" />
+              <span className="text-[10px] font-black uppercase tracking-widest font-oswald">MVP</span>
+            </div>
+            <span className="text-xl font-bebas text-white uppercase truncate max-w-full">{mvpPlayer?.name || "Sin elegir"}</span>
+          </div>
+          <div className="p-6 flex flex-col items-center gap-1">
+            <div className="flex items-center gap-2 text-accent">
+              <Goal className="h-4 w-4" />
+              <span className="text-[10px] font-black uppercase tracking-widest font-oswald">PICHICHI FECHA</span>
+            </div>
+            <span className="text-xl font-bebas text-white uppercase truncate max-w-full">{topScorer?.name || "N/A"} ({topScorerStat?.goals || 0})</span>
+          </div>
+          <div className="p-6 flex flex-col items-center gap-1">
+            <div className="flex items-center gap-2 text-muted-foreground/60">
+              <Calendar className="h-4 w-4" />
+              <span className="text-[10px] font-black uppercase tracking-widest font-oswald">FECHA</span>
+            </div>
+            <span className="text-xl font-bebas text-white">{format(date, "dd/MM/yyyy")}</span>
+          </div>
+        </div>
       </Card>
 
-      {/* La Gaceta (Integrated Editorial) */}
+      {/* 6 & 7. ARTICLE BODY & HIGHLIGHT QUOTE */}
       {match.aiSummary && (
-        <section className="editorial-paper rounded-none shadow-2xl border-t-4 border-black">
-          <div className="p-4 sm:p-6 border-b border-black/5 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="bg-black text-white p-1 rounded-none">
-                <Newspaper className="h-4 w-4" />
-              </div>
-              <span className="text-[10px] font-bebas tracking-[0.3em] uppercase text-black">THE ACADEMY GAZETTE EDITORIAL</span>
-            </div>
-            <span className="text-[8px] font-bold uppercase text-black/40 font-oswald">ESPECIAL JORNADA • {format(date, "dd/MM/yy")}</span>
-          </div>
-          <div className="p-8 sm:p-16 space-y-8">
-            <div className="text-center space-y-4">
-                <h2 className="editorial-title text-4xl sm:text-6xl uppercase italic text-black">
-                {match.aiSummary.title}
-                </h2>
-                <div className="editorial-divider max-w-xs mx-auto" />
-            </div>
-            <p className="text-xl sm:text-2xl leading-relaxed text-justify text-[#111111] font-lora first-letter:text-7xl first-letter:font-black first-letter:float-left first-letter:mr-3 first-letter:mt-2 first-letter:text-black first-letter:font-playfair">
+        <div className="max-w-[700px] mx-auto space-y-10 py-10">
+          <div className="prose prose-invert prose-lg">
+            <p className="text-xl leading-relaxed text-muted-foreground font-lora first-letter:text-7xl first-letter:font-black first-letter:float-left first-letter:mr-3 first-letter:mt-2 first-letter:text-primary">
               {match.aiSummary.summary}
             </p>
           </div>
-        </section>
+
+          <blockquote className="border-l-4 border-primary pl-8 py-4 italic text-2xl text-white/90 font-lora bg-primary/5 rounded-r-lg">
+            "{match.aiSummary.subtitle}"
+          </blockquote>
+        </div>
       )}
 
-      {/* Photo Gallery */}
-      <MatchGallery photos={match.photos || []} />
+      {/* 8. GOALS SECTION */}
+      <section className="space-y-8 max-w-[700px] mx-auto pt-10 border-t border-white/5">
+        <h2 className="text-center text-xs font-black uppercase tracking-[0.4em] text-muted-foreground font-oswald">GOLES DEL PARTIDO</h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 border-b border-primary/20 pb-2">
+              <Badge className="bg-primary text-[10px] font-black tracking-widest rounded-none">EQUIPO AZUL</Badge>
+            </div>
+            <div className="space-y-3">
+              {teamAGoalEvents.length > 0 ? teamAGoalEvents.map(p => (
+                <div key={p.playerId} className="flex items-center justify-between group">
+                  <div className="flex items-center gap-3">
+                    <Goal className="h-4 w-4 text-primary opacity-40 group-hover:opacity-100 transition-opacity" />
+                    <span className="text-sm font-bold text-white/80 uppercase tracking-tighter">{allPlayers.find(pl => pl.id === p.playerId)?.name}</span>
+                  </div>
+                  <span className="font-bebas text-xl text-primary italic">x{p.goals}</span>
+                </div>
+              )) : <p className="text-xs italic text-muted-foreground/40">Sin goles marcados</p>}
+            </div>
+          </div>
 
-      {/* Lineups and Stats */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        <div className="lg:col-span-8 space-y-8">
-            {showLineups ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <PlayerStatsTable
-                  title="Batallón Azul"
-                  stats={match.teamAPlayers}
-                  teamColor="primary"
-                  allPlayers={allPlayers}
-                  />
-                  <PlayerStatsTable
-                  title="Escuadrón Rojo"
-                  stats={match.teamBPlayers}
-                  teamColor="accent"
-                  allPlayers={allPlayers}
-                  />
-              </div>
-            ) : (
-              <Card className="competition-card p-12 text-center border-dashed border-white/10 bg-transparent">
-                <Sparkles className="h-12 w-12 text-primary/30 mx-auto mb-4" />
-                <h3 className="text-xl font-bebas tracking-widest uppercase italic text-white">Equipos en Preparación</h3>
-                <p className="text-muted-foreground text-xs font-oswald tracking-widest uppercase mt-2">
-                  La alineación oficial se revelará 24 horas antes del pitazo inicial.
-                </p>
-              </Card>
-            )}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 border-b border-accent/20 pb-2">
+              <Badge className="bg-accent text-[10px] font-black tracking-widest rounded-none">EQUIPO ROJO</Badge>
+            </div>
+            <div className="space-y-3">
+              {teamBGoalEvents.length > 0 ? teamBGoalEvents.map(p => (
+                <div key={p.playerId} className="flex items-center justify-between group">
+                  <div className="flex items-center gap-3">
+                    <Goal className="h-4 w-4 text-accent opacity-40 group-hover:opacity-100 transition-opacity" />
+                    <span className="text-sm font-bold text-white/80 uppercase tracking-tighter">{allPlayers.find(pl => pl.id === p.playerId)?.name}</span>
+                  </div>
+                  <span className="font-bebas text-xl text-accent italic">x{p.goals}</span>
+                </div>
+              )) : <p className="text-xs italic text-muted-foreground/40">Sin goles marcados</p>}
+            </div>
+          </div>
         </div>
+      </section>
 
-        <div className="lg:col-span-4 space-y-8">
-            {isPlayed && (
-              <>
-                <Card className="competition-card border-t-4 border-t-primary">
-                  <CardHeader className="bg-white/5 pb-4 border-b border-white/5">
-                    <CardTitle className="text-xs font-bebas tracking-widest uppercase text-primary flex items-center gap-2">
-                      <Award className="h-3 w-3" /> HONORES DE LA JORNADA
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-6 space-y-6">
-                    {mvpStat && (
-                      <div className="flex items-center gap-4 group">
-                        <div className="relative">
-                          <Avatar className="h-14 w-14 border-2 border-primary shadow-xl shadow-primary/20">
-                            <AvatarImage src={allPlayers.find(p => p.id === mvpStat.playerId)?.avatar || undefined} alt="MVP" />
-                            <AvatarFallback className="bg-primary text-primary-foreground font-bebas text-lg">{getInitials(allPlayers.find(p => p.id === mvpStat.playerId)?.name || "?")}</AvatarFallback>
-                          </Avatar>
-                          <Star className="absolute -top-2 -right-2 h-5 w-5 text-primary fill-primary animate-pulse" />
-                        </div>
-                        <div>
-                          <p className="text-[8px] font-black uppercase text-primary/60 tracking-widest mb-1 font-oswald">M.V.P. OFICIAL</p>
-                          <p className="text-xl font-bebas tracking-wide text-white uppercase italic leading-none">{allPlayers.find(p => p.id === mvpStat.playerId)?.name}</p>
-                        </div>
-                      </div>
-                    )}
-                    {bestGoalStat && (
-                      <div className="flex items-center gap-4">
-                        <Avatar className="h-14 w-14 border-2 border-accent shadow-xl shadow-accent/20">
-                          <AvatarImage src={allPlayers.find(p => p.id === bestGoalStat.playerId)?.avatar || undefined} alt="Mejor Gol" />
-                          <AvatarFallback className="bg-accent text-accent-foreground font-bebas text-lg">{getInitials(allPlayers.find(p => p.id === bestGoalStat.playerId)?.name || "?")}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="text-[8px] font-black uppercase text-accent/60 tracking-widest mb-1 font-oswald">MEJOR GOL</p>
-                          <p className="text-xl font-bebas tracking-wide text-white uppercase italic leading-none">{allPlayers.find(p => p.id === bestGoalStat.playerId)?.name}</p>
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </>
-            )}
-            
-            {match.comment && (
-              <Card className="competition-card border-l-4 border-l-success">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-[10px] font-black uppercase tracking-widest text-success flex items-center gap-2 font-oswald">
-                    <Quote className="h-3 w-3" /> LA VOZ DEL ADMIN
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm font-medium italic text-muted-foreground leading-relaxed font-inter">
+      {/* Extra: Match Context & Gallery */}
+      <div className="pt-20 space-y-12">
+        <MatchGallery photos={match.photos || []} />
+        
+        {match.comment && (
+          <Card className="competition-card border-l-4 border-l-primary bg-primary/5">
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-4">
+                <Quote className="h-8 w-8 text-primary/20 shrink-0" />
+                <div className="space-y-2">
+                  <p className="text-xs font-black uppercase tracking-widest text-primary font-oswald">LA VOZ DEL ADMIN</p>
+                  <p className="text-lg font-medium italic text-white/80 leading-relaxed">
                     "{match.comment}"
                   </p>
-                </CardContent>
-              </Card>
-            )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <PlayerStatsTable
+            title="Batallón Azul"
+            stats={match.teamAPlayers}
+            teamColor="primary"
+            allPlayers={allPlayers}
+          />
+          <PlayerStatsTable
+            title="Escuadrón Rojo"
+            stats={match.teamBPlayers}
+            teamColor="accent"
+            allPlayers={allPlayers}
+          />
         </div>
       </div>
     </div>
