@@ -8,12 +8,11 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Newspaper, X, Star, Goal, ChevronRight, Sparkles, Trophy } from 'lucide-react';
+import { Newspaper, X, ChevronRight } from 'lucide-react';
 import { es } from 'date-fns/locale';
 import { format, parseISO } from 'date-fns';
 import type { Match, Player } from '@/lib/definitions';
-import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { useUser, useFirestore } from '@/firebase';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -28,7 +27,6 @@ interface MatchNewsModalProps {
 export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchNewsModalProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const { user } = useUser();
-  const firestore = useFirestore();
 
   React.useEffect(() => {
     if (!match) return;
@@ -46,12 +44,12 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
     onClose?.();
   };
 
-  // LÓGICA DE PREMIOS BASADA EN CARGA MANUAL
   const allStats = React.useMemo(() => {
     if (!match) return [];
-    return [...match.teamAPlayers, ...match.teamBPlayers];
+    return [...(match.teamAPlayers || []), ...(match.teamBPlayers || [])];
   }, [match]);
 
+  // LÓGICA DE PREMIOS: Busca estrictamente lo que el administrador cargó
   const mvpPlayer = React.useMemo(() => {
     const stat = allStats.find(s => s.isMvp === true);
     return allPlayers.find(p => p.id === stat?.playerId);
@@ -74,7 +72,7 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
 
   const { aiSummary } = match;
   const date = parseISO(match.date);
-  const coverPhoto = match.photos && match.photos.length > 0 ? match.photos[0] : "https://picsum.photos/seed/match/800/400";
+  const coverPhoto = match.photos && match.photos.length > 0 ? match.photos[0] : "https://picsum.photos/seed/football/800/400";
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
@@ -125,17 +123,13 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
             </p>
           </div>
 
-          {/* Hero Image with Overlay */}
           <div className="px-6 sm:px-10">
             <div className="relative aspect-video rounded-xl overflow-hidden border border-black/10">
               <img src={coverPhoto} alt="Cover" className="w-full h-full object-cover" />
-              <div className="absolute top-4 left-4 bg-black text-white px-3 py-1 text-[10px] font-black uppercase tracking-widest font-oswald">
-                FINAL: {match.teamAScore} - {match.teamBScore}
-              </div>
             </div>
           </div>
 
-          {/* Facts Bar (The Academy Gazette Awards) */}
+          {/* BARRA DE DATOS OFICIAL (Corrected) */}
           <div className="px-6 sm:px-10 mt-8">
             <div className="bg-white border border-black/10 p-4 grid grid-cols-2 sm:grid-cols-4 gap-4 divide-x divide-black/5 text-center">
               <div className="flex flex-col gap-1">
@@ -159,20 +153,14 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
             </div>
           </div>
 
-          {/* Body Text */}
           <div className="p-6 sm:p-10 max-w-2xl mx-auto">
             <article className="prose prose-sm prose-neutral">
               <p className="text-lg leading-relaxed text-justify text-black/80 font-lora first-letter:text-7xl first-letter:font-black first-letter:float-left first-letter:mr-3 first-letter:mt-2 first-letter:text-black">
                 {aiSummary.summary}
               </p>
             </article>
-            
-            <blockquote className="mt-10 border-l-4 border-black pl-6 italic text-xl text-black font-lora">
-              "{aiSummary.subtitle}"
-            </blockquote>
           </div>
 
-          {/* Goals Summary */}
           <div className="px-6 sm:px-10 pb-10 max-w-2xl mx-auto space-y-6">
             <div className="h-[1px] bg-black/10 w-full" />
             <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-center text-black/40">MARCADORES DE ÉLITE</h3>
@@ -199,7 +187,6 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
           </div>
         </div>
 
-        {/* Footer actions */}
         <div className="shrink-0 p-4 bg-white border-t border-black/10 flex flex-col sm:flex-row gap-3 z-20">
           <Button asChild className="bg-black text-white hover:bg-black/90 font-bebas font-black uppercase tracking-widest text-sm rounded-none h-14 w-full">
             <Link href={`/matches/${match.id}`}>VER FICHA COMPLETA <ChevronRight className="ml-2 h-4 w-4" /></Link>

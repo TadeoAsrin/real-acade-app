@@ -6,11 +6,9 @@ import {
   Card,
   CardContent,
 } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import type { Player, Match } from "@/lib/definitions";
-import { getInitials } from "@/lib/utils";
-import { Award, Star, Loader2, Share2, Pencil, Camera, ChevronLeft, Trophy, Calendar, Goal, X, User, Sparkles } from "lucide-react";
+import { Award, Star, Loader2, Share2, Pencil, Camera, ChevronLeft, Trophy, Calendar, Goal, X, Sparkles } from "lucide-react";
 import { useDoc, useCollection, useMemoFirebase, useFirestore, useUser } from "@/firebase";
 import { doc, collection } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
@@ -48,24 +46,26 @@ export default function MatchDetailPage() {
   const { data: players, isLoading: playersLoading } = useCollection<Player>(playersRef);
   const { data: adminRole } = useDoc<{isAdmin: boolean}>(adminRoleRef);
 
-  // LÓGICA DE PREMIOS Y DATOS CLAVE
   const allPlayers = players || [];
   
+  // LÓGICA DE PREMIOS CARGADOS MANUALMENTE
   const mvpPlayer = React.useMemo(() => {
     if (!match || !allPlayers.length) return null;
-    const stat = [...match.teamAPlayers, ...match.teamBPlayers].find(s => s.isMvp === true);
+    const allStats = [...(match.teamAPlayers || []), ...(match.teamBPlayers || [])];
+    const stat = allStats.find(s => s.isMvp === true);
     return allPlayers.find(p => p.id === stat?.playerId);
   }, [match, allPlayers]);
 
   const bestGoalPlayer = React.useMemo(() => {
     if (!match || !allPlayers.length) return null;
-    const stat = [...match.teamAPlayers, ...match.teamBPlayers].find(s => s.hasBestGoal === true);
+    const allStats = [...(match.teamAPlayers || []), ...(match.teamBPlayers || [])];
+    const stat = allStats.find(s => s.hasBestGoal === true);
     return allPlayers.find(p => p.id === stat?.playerId);
   }, [match, allPlayers]);
 
   const matchTopScorer = React.useMemo(() => {
     if (!match || !allPlayers.length) return null;
-    const allStats = [...match.teamAPlayers, ...match.teamBPlayers];
+    const allStats = [...(match.teamAPlayers || []), ...(match.teamBPlayers || [])];
     const sorted = allStats.filter(s => s.goals > 0).sort((a, b) => b.goals - a.goals);
     if (sorted.length === 0) return null;
     const topStat = sorted[0];
@@ -99,7 +99,6 @@ export default function MatchDetailPage() {
   return (
     <div className="max-w-4xl mx-auto pb-20 space-y-16">
       
-      {/* 1. ARTICLE HEADER */}
       <div className="flex flex-col items-center text-center gap-8">
         <Link href="/matches" className="flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground hover:text-primary transition-colors font-oswald tracking-[0.3em]">
           <ChevronLeft className="h-3 w-3" /> VOLVER AL HISTORIAL
@@ -142,7 +141,6 @@ export default function MatchDetailPage() {
         </div>
       </div>
 
-      {/* 2 & 3. ARTICLE HEADLINE & SUBTITLE */}
       {match.aiSummary && (
         <div className="text-center space-y-6 max-w-3xl mx-auto border-y border-white/5 py-12">
           <h1 className="text-5xl md:text-8xl font-black font-playfair leading-[0.9] tracking-tight uppercase italic text-white">
@@ -154,7 +152,6 @@ export default function MatchDetailPage() {
         </div>
       )}
 
-      {/* 4. HERO IMAGE WITH OVERLAY */}
       <div className="relative group px-4 sm:px-0">
         <div className="aspect-video w-full rounded-2xl overflow-hidden border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
           <img 
@@ -165,7 +162,6 @@ export default function MatchDetailPage() {
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
         </div>
         
-        {/* Overlay Label */}
         <div className="absolute bottom-8 left-8 md:left-12 flex flex-col items-start gap-2 pointer-events-none">
           <div className="bg-primary/90 backdrop-blur-md px-6 py-2 rounded-sm shadow-2xl">
             <span className="font-bebas text-3xl text-white italic tracking-widest">AZUL {match.teamAScore} — {match.teamBScore} ROJO</span>
@@ -178,7 +174,7 @@ export default function MatchDetailPage() {
         </div>
       </div>
 
-      {/* 5. MATCH FACTS CARD */}
+      {/* MATCH FACTS CARD (Unificada con la Academy Gazette) */}
       <Card className="competition-card border-none bg-white/5 backdrop-blur-md mx-4 sm:mx-0">
         <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-white/5">
           <div className="p-8 flex flex-col items-center text-center gap-2">
@@ -219,7 +215,6 @@ export default function MatchDetailPage() {
         </div>
       </Card>
 
-      {/* 6 & 7. ARTICLE BODY & HIGHLIGHT QUOTE */}
       {match.aiSummary && (
         <div className="max-w-[700px] mx-auto space-y-12 px-6 sm:px-0">
           <div className="prose prose-invert prose-lg">
@@ -234,7 +229,6 @@ export default function MatchDetailPage() {
         </div>
       )}
 
-      {/* 8. GOALS SECTION */}
       <section className="space-y-10 max-w-[750px] mx-auto pt-16 border-t border-white/5">
         <div className="flex flex-col items-center gap-2">
           <h2 className="text-[10px] font-black uppercase tracking-[0.5em] text-muted-foreground/40 font-oswald">Goles del Partido</h2>
@@ -288,7 +282,6 @@ export default function MatchDetailPage() {
         </div>
       </section>
 
-      {/* GALERÍA DE FOTOS ADICIONAL */}
       {match.photos && match.photos.length > 1 && (
         <section className="space-y-8 pt-10 border-t border-white/5">
           <div className="flex items-center gap-3 px-6 sm:px-0">
@@ -314,7 +307,6 @@ export default function MatchDetailPage() {
         </section>
       )}
 
-      {/* ZOOM DIALOG */}
       <Dialog open={!!selectedPhoto} onOpenChange={(open) => !open && setSelectedPhoto(null)}>
         <DialogContent className="max-w-screen-lg p-0 bg-transparent border-none shadow-none">
           <div className="relative w-full h-full flex items-center justify-center">
