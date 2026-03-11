@@ -18,6 +18,7 @@ import { signOut } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 import { doc, collection, query, orderBy } from "firebase/firestore";
 import { Avatar, AvatarFallback } from "../ui/avatar";
+import { Button } from "../ui/button";
 import { getInitials, cn } from "@/lib/utils";
 import { Fut7StatsLogo } from "@/components/icons";
 
