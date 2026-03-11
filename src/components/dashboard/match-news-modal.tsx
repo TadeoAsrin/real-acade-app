@@ -43,7 +43,6 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
     onClose?.();
   };
 
-  // Improved Logic for Honors: Direct lookup from manual admin flags
   const mvpPlayer = React.useMemo(() => {
     if (!match || !allPlayers.length) return null;
     const allStats = [...(match.teamAPlayers || []), ...(match.teamBPlayers || [])];
@@ -103,7 +102,6 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
         </div>
 
         <div className="flex-1 overflow-y-auto overscroll-contain bg-[#fdfdfd]">
-          {/* Headline Section */}
           <div className="p-6 sm:p-10 space-y-8 max-w-2xl mx-auto text-center">
             <h1 className="text-4xl sm:text-6xl font-black font-playfair leading-[0.95] tracking-tight uppercase italic text-black">
               {aiSummary.title}
@@ -119,7 +117,6 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
             </div>
           </div>
 
-          {/* CUADRO DE HONOR (MVP, GOL DE LA FECHA, RESULTADO) */}
           <div className="px-6 sm:px-10 mt-8">
             <div className="bg-white border border-black/10 p-4 grid grid-cols-1 sm:grid-cols-3 gap-4 divide-y sm:divide-y-0 sm:divide-x divide-black/5 text-center shadow-sm">
               <div className="flex flex-col gap-1 py-2 sm:py-0">
@@ -180,7 +177,6 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
           </div>
         </div>
 
-        {/* Footer actions */}
         <div className="shrink-0 p-4 bg-white border-t border-black/10 flex flex-col sm:flex-row gap-3 z-20">
           <Button asChild className="bg-black text-white hover:bg-black/90 font-bebas font-black uppercase tracking-widest text-sm rounded-none h-14 w-full">
             <Link href={`/matches/${match.id}`}>VER FICHA COMPLETA <ChevronRight className="ml-2 h-4 w-4" /></Link>

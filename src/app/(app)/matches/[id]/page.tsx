@@ -126,7 +126,7 @@ export default function MatchDetailPage() {
         </div>
       </section>
 
-      {/* 2. MATCH STATS - Corrected labels and icons */}
+      {/* 2. MATCH STATS */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card className="competition-card border-none bg-gradient-to-br from-yellow-500/10 to-transparent">
           <CardContent className="p-6 flex items-center gap-4">
