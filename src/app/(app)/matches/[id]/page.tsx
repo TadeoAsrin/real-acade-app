@@ -62,7 +62,7 @@ export default function MatchDetailPage() {
   const allPlayers = players || [];
   const allPlayerStats = [...match.teamAPlayers, ...match.teamBPlayers];
   
-  // Logic to find real rewards selected during match creation
+  // Logic to find real rewards selected during match creation by admin
   const mvpStat = allPlayerStats.find(s => s.isMvp === true);
   const mvpPlayer = allPlayers.find(p => p.id === mvpStat?.playerId);
 
@@ -71,7 +71,7 @@ export default function MatchDetailPage() {
   
   // Logic to find Top Scorer of the specific match
   const topScorerStat = [...allPlayerStats].sort((a, b) => b.goals - a.goals)[0];
-  const topScorer = allPlayers.find(p => p.id === topScorerStat?.playerId);
+  const topScorer = (topScorerStat && topScorerStat.goals > 0) ? allPlayers.find(p => p.id === topScorerStat.playerId) : null;
 
   const handleShare = () => {
     const text = `⚽ *REAL ACADE* ⚽\n\n` +
@@ -180,9 +180,9 @@ export default function MatchDetailPage() {
           <div className="p-8 flex flex-col items-center text-center gap-2">
             <div className="flex items-center gap-2 text-yellow-500/60">
               <Star className="h-4 w-4" />
-              <span className="text-[9px] font-black uppercase tracking-[0.3em] font-oswald">KING OF THE MATCH</span>
+              <span className="text-[9px] font-black uppercase tracking-[0.3em] font-oswald">MVP</span>
             </div>
-            <span className="text-xl font-bebas text-white uppercase truncate max-w-full">{mvpPlayer?.name || "SIN ELEGIR"}</span>
+            <span className="text-xl font-bebas text-white uppercase truncate max-w-full">{mvpPlayer?.name || "N/A"}</span>
           </div>
 
           <div className="p-8 flex flex-col items-center text-center gap-2">
@@ -191,7 +191,7 @@ export default function MatchDetailPage() {
               <span className="text-[9px] font-black uppercase tracking-[0.3em] font-oswald">GOL DE LA FECHA</span>
             </div>
             <span className="text-xl font-bebas text-white uppercase truncate max-w-full">
-              {bestGoalPlayer?.name || "SIN ELEGIR"}
+              {bestGoalPlayer?.name || "N/A"}
             </span>
           </div>
 
@@ -201,7 +201,7 @@ export default function MatchDetailPage() {
               <span className="text-[9px] font-black uppercase tracking-[0.3em] font-oswald">PICHICHI FECHA</span>
             </div>
             <span className="text-xl font-bebas text-white uppercase truncate max-w-full">
-              {topScorer?.name || "N/A"} ({topScorerStat?.goals || 0})
+              {topScorer ? `${topScorer.name} (${topScorerStat.goals})` : "N/A"}
             </span>
           </div>
         </div>

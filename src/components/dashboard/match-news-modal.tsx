@@ -61,7 +61,7 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
   
   const allStats = [...match.teamAPlayers, ...match.teamBPlayers];
   
-  // Logic to find real rewards
+  // Logic to find real rewards from admin selection
   const mvpStat = allStats.find(s => s.isMvp === true);
   const mvp = allPlayers.find(p => p.id === mvpStat?.playerId);
 
@@ -69,7 +69,7 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
   const bestGoal = allPlayers.find(p => p.id === bestGoalStat?.playerId);
 
   const topScorerStat = [...allStats].sort((a, b) => b.goals - a.goals)[0];
-  const matchTopScorer = allPlayers.find(p => p.id === topScorerStat?.playerId);
+  const matchTopScorer = (topScorerStat && topScorerStat.goals > 0) ? allPlayers.find(p => p.id === topScorerStat.playerId) : null;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
@@ -134,7 +134,7 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
           <div className="px-6 sm:px-10 mt-8">
             <div className="bg-white border border-black/10 p-4 grid grid-cols-2 sm:grid-cols-4 gap-4 divide-x divide-black/5 text-center">
               <div className="flex flex-col gap-1">
-                <span className="text-[8px] font-black text-black/40 uppercase">KING OF THE MATCH</span>
+                <span className="text-[8px] font-black text-black/40 uppercase">MVP</span>
                 <span className="text-xs font-bold truncate uppercase">{mvp?.name || "N/A"}</span>
               </div>
               <div className="flex flex-col gap-1">
@@ -143,7 +143,9 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
               </div>
               <div className="flex flex-col gap-1">
                 <span className="text-[8px] font-black text-black/40 uppercase">PICHICHI FECHA</span>
-                <span className="text-xs font-bold uppercase truncate">{matchTopScorer?.name || "N/A"} ({topScorerStat?.goals || 0})</span>
+                <span className="text-xs font-bold uppercase truncate">
+                  {matchTopScorer ? `${matchTopScorer.name} (${topScorerStat.goals})` : "N/A"}
+                </span>
               </div>
               <div className="flex flex-col gap-1">
                 <span className="text-[8px] font-black text-black/40 uppercase">RESULTADO</span>
