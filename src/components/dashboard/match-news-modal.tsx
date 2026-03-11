@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -44,7 +43,7 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
     onClose?.();
   };
 
-  // Lógica para encontrar los premios manuales
+  // Improved Logic for Honors
   const mvpPlayer = React.useMemo(() => {
     if (!match || !allPlayers.length) return null;
     const allStats = [...(match.teamAPlayers || []), ...(match.teamBPlayers || [])];

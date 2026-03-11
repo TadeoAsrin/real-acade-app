@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -9,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { Player, Match } from "@/lib/definitions";
-import { Star, Loader2, Share2, Pencil, ChevronLeft, Trophy, Calendar, Goal, Sparkles, Crown, Newspaper, ArrowRight } from "lucide-react";
+import { Star, Loader2, Share2, Pencil, ChevronLeft, Trophy, Goal, Sparkles, Crown, Newspaper, ArrowRight } from "lucide-react";
 import { useDoc, useCollection, useMemoFirebase, useFirestore, useUser } from "@/firebase";
 import { doc, collection, query, orderBy } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
@@ -51,14 +50,12 @@ export default function MatchDetailPage() {
 
   const allPlayers = players || [];
   
-  // Calcular número de jornada
   const matchNumber = React.useMemo(() => {
     if (!allMatches || !id) return 0;
     const index = allMatches.findIndex(m => m.id === id);
     return index !== -1 ? index + 1 : 0;
   }, [allMatches, id]);
 
-  // Lógica de premios manuales corregida
   const mvpPlayer = React.useMemo(() => {
     if (!match || !allPlayers.length) return null;
     const allStats = [...(match.teamAPlayers || []), ...(match.teamBPlayers || [])];
@@ -85,17 +82,6 @@ export default function MatchDetailPage() {
 
   const date = parseISO(match.date);
 
-  const handleShare = () => {
-    const text = `⚽ *REAL ACADE* ⚽\n\n` +
-      `🔥 *AZUL ${match.teamAScore} - ${match.teamBScore} ROJO*\n` +
-      `📅 ${format(date, "PPP", { locale: es })}\n\n` +
-      `Mirá la ficha completa acá:\n` +
-      `${window.location.href}`;
-    
-    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
-    window.open(url, '_blank');
-  };
-
   return (
     <div className="max-w-4xl mx-auto pb-20 space-y-10 px-4 md:px-0">
       
@@ -117,19 +103,19 @@ export default function MatchDetailPage() {
             <span className="text-7xl md:text-9xl font-bebas text-primary leading-none drop-shadow-[0_0_20px_rgba(59,130,246,0.4)]">
               {match.teamAScore}
             </span>
-            <span className="text-xs font-black uppercase tracking-[0.4em] text-primary font-oswald mt-2">AZUL</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-primary font-oswald mt-2">AZUL</span>
           </div>
           <div className="text-4xl md:text-6xl font-light text-muted-foreground/10 italic font-oswald">—</div>
           <div className="flex flex-col items-center">
             <span className="text-7xl md:text-9xl font-bebas text-accent leading-none drop-shadow-[0_0_20px_rgba(244,63,94,0.4)]">
               {match.teamBScore}
             </span>
-            <span className="text-xs font-black uppercase tracking-[0.4em] text-accent font-oswald mt-2">ROJO</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-accent font-oswald mt-2">ROJO</span>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          <Button variant="outline" size="sm" className="h-9 border-white/10 rounded-full font-oswald text-[10px] tracking-widest uppercase hover:bg-primary/10 hover:text-primary transition-all" onClick={handleShare}>
+          <Button variant="outline" size="sm" className="h-9 border-white/10 rounded-full font-oswald text-[10px] tracking-widest uppercase hover:bg-primary/10 hover:text-primary transition-all">
             <Share2 className="h-3 w-3 mr-2" /> Compartir
           </Button>
           {adminRole?.isAdmin && (
@@ -140,7 +126,7 @@ export default function MatchDetailPage() {
         </div>
       </section>
 
-      {/* 2. MATCH STATS (MVP & GOL DE LA FECHA) */}
+      {/* 2. MATCH STATS */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card className="competition-card border-none bg-gradient-to-br from-yellow-500/10 to-transparent">
           <CardContent className="p-6 flex items-center gap-4">
