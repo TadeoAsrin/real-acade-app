@@ -43,7 +43,7 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
     onClose?.();
   };
 
-  // Improved Logic for Honors
+  // Improved Logic for Honors: Direct lookup from manual admin flags
   const mvpPlayer = React.useMemo(() => {
     if (!match || !allPlayers.length) return null;
     const allStats = [...(match.teamAPlayers || []), ...(match.teamBPlayers || [])];
@@ -125,21 +125,21 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
               <div className="flex flex-col gap-1 py-2 sm:py-0">
                 <div className="flex items-center justify-center gap-1.5 text-yellow-600">
                   <Crown className="h-3 w-3" />
-                  <span className="text-[8px] font-black uppercase">MVP</span>
+                  <span className="text-[8px] font-black uppercase">👑 MVP</span>
                 </div>
                 <span className="text-sm font-bold truncate uppercase">{mvpPlayer?.name || "N/A"}</span>
               </div>
               <div className="flex flex-col gap-1 py-2 sm:py-0">
                 <div className="flex items-center justify-center gap-1.5 text-orange-600">
                   <Sparkles className="h-3 w-3" />
-                  <span className="text-[8px] font-black uppercase">GOL DE LA FECHA</span>
+                  <span className="text-[8px] font-black uppercase">🎯 GOL DE LA FECHA</span>
                 </div>
                 <span className="text-sm font-bold truncate uppercase">{bestGoalPlayer?.name || "N/A"}</span>
               </div>
               <div className="flex flex-col gap-1 py-2 sm:py-0">
                 <div className="flex items-center justify-center gap-1.5 text-black/40">
                   <BallIcon className="h-3 w-3" />
-                  <span className="text-[8px] font-black uppercase">RESULTADO</span>
+                  <span className="text-[8px] font-black uppercase">⚽ RESULTADO</span>
                 </div>
                 <span className="text-sm font-bold uppercase">{match.teamAScore} - {match.teamBScore}</span>
               </div>

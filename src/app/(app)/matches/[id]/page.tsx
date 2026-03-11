@@ -126,7 +126,7 @@ export default function MatchDetailPage() {
         </div>
       </section>
 
-      {/* 2. MATCH STATS */}
+      {/* 2. MATCH STATS - Corrected labels and icons */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card className="competition-card border-none bg-gradient-to-br from-yellow-500/10 to-transparent">
           <CardContent className="p-6 flex items-center gap-4">
@@ -134,7 +134,7 @@ export default function MatchDetailPage() {
               <Crown className="h-6 w-6 text-yellow-500" />
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-yellow-500/60 font-oswald">MVP DEL PARTIDO</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-yellow-500/60 font-oswald">👑 MVP</p>
               <p className="text-xl font-bebas text-white uppercase tracking-wider">{mvpPlayer?.name || "N/A"}</p>
             </div>
           </CardContent>
@@ -146,7 +146,7 @@ export default function MatchDetailPage() {
               <Sparkles className="h-6 w-6 text-orange-500" />
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-orange-500/60 font-oswald">GOL DE LA FECHA</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-orange-500/60 font-oswald">🎯 GOL DE LA FECHA</p>
               <p className="text-xl font-bebas text-white uppercase tracking-wider">{bestGoalPlayer?.name || "N/A"}</p>
             </div>
           </CardContent>
