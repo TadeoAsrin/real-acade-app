@@ -1,3 +1,4 @@
+
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
@@ -167,7 +168,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-6 border-t border-white/5 bg-black/20">
-         {!isUserLoading && user ? (
+         {user && (
            <div className="flex flex-col gap-4">
               <div className="flex items-center gap-3">
                 <Avatar className="h-10 w-10 border-2 border-primary/20">
@@ -194,7 +195,7 @@ export function AppSidebar() {
                 SALIR
               </Button>
            </div>
-         ) : null}
+         )}
       </SidebarFooter>
     </Sidebar>
   );
