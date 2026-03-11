@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import type { Player, Match } from "@/lib/definitions";
 import { getInitials } from "@/lib/utils";
-import { Award, Star, Loader2, Share2, Pencil, Camera, ChevronLeft, Trophy, Calendar, Goal, X, User } from "lucide-react";
+import { Award, Star, Loader2, Share2, Pencil, Camera, ChevronLeft, Trophy, Calendar, Goal, X, User, Sparkles } from "lucide-react";
 import { useDoc, useCollection, useMemoFirebase, useFirestore, useUser } from "@/firebase";
 import { doc, collection } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
@@ -62,7 +62,15 @@ export default function MatchDetailPage() {
   const allPlayers = players || [];
   const allPlayerStats = [...match.teamAPlayers, ...match.teamBPlayers];
   
-  const mvpPlayer = allPlayers.find(p => p.id === allPlayerStats.find(s => s.isMvp)?.playerId);
+  // Logic to find MVP
+  const mvpStat = allPlayerStats.find(s => s.isMvp === true);
+  const mvpPlayer = allPlayers.find(p => p.id === mvpStat?.playerId);
+
+  // Logic to find Best Goal
+  const bestGoalStat = allPlayerStats.find(s => s.hasBestGoal === true);
+  const bestGoalPlayer = allPlayers.find(p => p.id === bestGoalStat?.playerId);
+  
+  // Logic to find Top Scorer
   const topScorerStat = [...allPlayerStats].sort((a, b) => b.goals - a.goals)[0];
   const topScorer = allPlayers.find(p => p.id === topScorerStat?.playerId);
 
@@ -179,6 +187,16 @@ export default function MatchDetailPage() {
           </div>
 
           <div className="p-8 flex flex-col items-center text-center gap-2">
+            <div className="flex items-center gap-2 text-orange-500/60">
+              <Sparkles className="h-4 w-4" />
+              <span className="text-[9px] font-black uppercase tracking-[0.3em] font-oswald">LA JOYITA</span>
+            </div>
+            <span className="text-xl font-bebas text-white uppercase truncate max-w-full">
+              {bestGoalPlayer?.name || "SIN ELEGIR"}
+            </span>
+          </div>
+
+          <div className="p-8 flex flex-col items-center text-center gap-2">
             <div className="flex items-center gap-2 text-accent/60">
               <Goal className="h-4 w-4" />
               <span className="text-[9px] font-black uppercase tracking-[0.3em] font-oswald">PICHICHI FECHA</span>
@@ -186,14 +204,6 @@ export default function MatchDetailPage() {
             <span className="text-xl font-bebas text-white uppercase truncate max-w-full">
               {topScorer?.name || "N/A"} ({topScorerStat?.goals || 0})
             </span>
-          </div>
-
-          <div className="p-8 flex flex-col items-center text-center gap-2">
-            <div className="flex items-center gap-2 text-muted-foreground/40">
-              <Calendar className="h-4 w-4" />
-              <span className="text-[9px] font-black uppercase tracking-[0.3em] font-oswald">JORNADA</span>
-            </div>
-            <span className="text-xl font-bebas text-white">{format(date, "dd/MM/yy")}</span>
           </div>
         </div>
       </Card>

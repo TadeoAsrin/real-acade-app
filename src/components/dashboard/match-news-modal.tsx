@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Newspaper, Trophy, X, Quote, Calendar, Star, Goal, ChevronRight } from 'lucide-react';
+import { Newspaper, Trophy, X, Quote, Calendar, Star, Goal, ChevronRight, Sparkles } from 'lucide-react';
 import { es } from 'date-fns/locale';
 import { format, parseISO } from 'date-fns';
 import type { Match, Player } from '@/lib/definitions';
@@ -60,7 +60,8 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
   const coverPhoto = match.photos && match.photos.length > 0 ? match.photos[0] : "https://picsum.photos/seed/match/800/400";
   
   const allStats = [...match.teamAPlayers, ...match.teamBPlayers];
-  const mvp = allPlayers.find(p => p.id === allStats.find(s => s.isMvp)?.playerId);
+  const mvp = allPlayers.find(p => p.id === allStats.find(s => s.isMvp === true)?.playerId);
+  const bestGoal = allPlayers.find(p => p.id === allStats.find(s => s.hasBestGoal === true)?.playerId);
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
@@ -129,16 +130,16 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
                 <span className="text-xs font-bold truncate uppercase">{mvp?.name || "N/A"}</span>
               </div>
               <div className="flex flex-col gap-1">
-                <span className="text-[8px] font-black text-black/40 uppercase">FECHA</span>
-                <span className="text-xs font-bold uppercase">{format(date, "dd/MM/yy")}</span>
+                <span className="text-[8px] font-black text-black/40 uppercase">LA JOYITA</span>
+                <span className="text-xs font-bold truncate uppercase">{bestGoal?.name || "N/A"}</span>
               </div>
               <div className="flex flex-col gap-1">
                 <span className="text-[8px] font-black text-black/40 uppercase">GOLES</span>
                 <span className="text-xs font-bold uppercase">{match.teamAScore + match.teamBScore} TOTAL</span>
               </div>
               <div className="flex flex-col gap-1">
-                <span className="text-[8px] font-black text-black/40 uppercase">ESTADO</span>
-                <span className="text-xs font-bold text-emerald-600 uppercase">FINALIZADO</span>
+                <span className="text-[8px] font-black text-black/40 uppercase">FECHA</span>
+                <span className="text-xs font-bold uppercase">{format(date, "dd/MM/yy")}</span>
               </div>
             </div>
           </div>
