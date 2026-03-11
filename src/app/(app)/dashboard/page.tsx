@@ -9,7 +9,7 @@ import type { Match, Player } from "@/lib/definitions";
 import { Loader2, Newspaper, ArrowRight, Trophy, Zap, Flame, Target, Users, Link as LinkIcon, Crown, Star, Skull, ShieldAlert, Droplets, Info, Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { calculateAggregatedStats } from "@/lib/data";
+import { calculateAggregatedStats, getChemistryRankings } from "@/lib/data";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials, cn } from "@/lib/utils";
@@ -43,25 +43,41 @@ export default function DashboardPage() {
 
   const allPlayers = playersData || [];
   const allMatches = matchesData || [];
-  const lastMatch = allMatches[0];
+  const playedMatches = allMatches.filter(m => m.teamAScore > 0 || m.teamBScore > 0);
+  const lastMatch = playedMatches[0];
   const stats = calculateAggregatedStats(allPlayers, allMatches);
 
-  // Stats for Pichichi Card (Top 5)
+  // 1. Pichichi Stats
   const pichichiRanking = [...stats].sort((a, b) => b.totalGoals - a.totalGoals || b.goalsPerMatch - a.goalsPerMatch);
   const topScorer = pichichiRanking[0];
   const otherScorers = pichichiRanking.slice(1, 5);
 
-  // Stats for Influence Card (Top 3)
+  // 2. Influence Stats
   const influenceRanking = [...stats]
     .filter(p => p.matchesPlayed >= 2)
     .sort((a, b) => b.winPercentage - a.winPercentage || b.matchesPlayed - a.matchesPlayed);
   const mostInfluential = influenceRanking[0];
   const otherInfluential = influenceRanking.slice(1, 3);
 
-  // Stats for On Fire Card (Top 5)
+  // 3. On Fire (Power Ranking)
   const topPower = [...stats].sort((a, b) => b.powerPoints - a.powerPoints).slice(0, 5);
 
-  // Sala de Humildad logic
+  // 4. Pulso de la Competición (Lógica Real)
+  const totalMvpAwards = stats.reduce((acc, p) => acc + p.totalMvp, 0);
+  const recordGoalsInMatch = Math.max(...allMatches.map(m => m.teamAScore + m.teamBScore), 0);
+  
+  const chemistry = getChemistryRankings(allPlayers, allMatches, 1);
+  const topPair = chemistry[0];
+  const societyText = topPair 
+    ? `${topPair.player1.name.split(' ')[0]} + ${topPair.player2.name.split(' ')[0]}` 
+    : "SIN DUPLAS";
+  const societyValue = topPair ? `${topPair.winRate}%` : "0%";
+
+  const totalPossibleMatches = playedMatches.length;
+  const topAttendance = Math.max(...stats.map(p => p.matchesPlayed), 0);
+  const attendanceValue = totalPossibleMatches > 0 ? `${Math.round((topAttendance / totalPossibleMatches) * 100)}%` : "0%";
+
+  // 5. Sala de Humildad
   const filteredForHumility = stats.filter(p => p.matchesPlayed >= 2);
   const imanDerrotas = [...filteredForHumility].sort((a, b) => b.losses - a.losses || b.matchesPlayed - a.matchesPlayed).slice(0, 3);
   const deudaMando = [...filteredForHumility].filter(p => p.totalCaptaincies === 0).sort((a, b) => b.matchesPlayed - a.matchesPlayed).slice(0, 3);
@@ -305,38 +321,38 @@ export default function DashboardPage() {
       <section className="space-y-6">
         <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 px-1 font-oswald">PULSO DE LA COMPETICIÓN</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3">
+          <Link href="/pulse/mvp" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-yellow-500/20 transition-all hover-lift">
             <Star className="h-6 w-6 text-yellow-500" />
-            <span className="text-5xl font-black italic font-bebas leading-none">{stats.reduce((acc, p) => acc + p.totalMvp, 0)}</span>
+            <span className="text-5xl font-black italic font-bebas leading-none">{totalMvpAwards}</span>
             <div className="space-y-0.5">
               <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">REYES MVP</p>
               <p className="text-[8px] font-bold text-muted-foreground/40 uppercase font-oswald">PREMIOS</p>
             </div>
-          </div>
-          <div className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3">
+          </Link>
+          <Link href="/pulse/league" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-orange-500/20 transition-all hover-lift">
             <Flame className="h-6 w-6 text-orange-500" />
-            <span className="text-5xl font-black italic font-bebas leading-none">{Math.max(...allMatches.map(m => m.teamAScore + m.teamBScore), 0)}</span>
+            <span className="text-5xl font-black italic font-bebas leading-none">{recordGoalsInMatch}</span>
             <div className="space-y-0.5">
               <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">RÉCORD GOLES</p>
               <p className="text-[8px] font-bold text-muted-foreground/40 uppercase font-oswald">EN UN PARTIDO</p>
             </div>
-          </div>
-          <div className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3">
+          </Link>
+          <Link href="/pulse/partnership" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-primary/20 transition-all hover-lift">
             <LinkIcon className="h-6 w-6 text-primary" />
-            <span className="text-5xl font-black italic font-bebas leading-none">100%</span>
+            <span className="text-5xl font-black italic font-bebas leading-none">{societyValue}</span>
             <div className="space-y-0.5">
               <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">SOCIEDAD IDEAL</p>
-              <p className="text-[8px] font-bold text-muted-foreground/40 uppercase font-oswald">MONO + MENCHO</p>
+              <p className="text-[8px] font-bold text-muted-foreground/40 uppercase font-oswald truncate max-w-[120px]">{societyText}</p>
             </div>
-          </div>
-          <div className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3">
+          </Link>
+          <Link href="/pulse/attendance" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-emerald-500/20 transition-all hover-lift">
             <Users className="h-6 w-6 text-emerald-500" />
-            <span className="text-5xl font-black italic font-bebas leading-none">100%</span>
+            <span className="text-5xl font-black italic font-bebas leading-none">{attendanceValue}</span>
             <div className="space-y-0.5">
               <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">INFALTABLES</p>
               <p className="text-[8px] font-bold text-muted-foreground/40 uppercase font-oswald">ASISTENCIA</p>
             </div>
-          </div>
+          </Link>
         </div>
       </section>
 
@@ -348,7 +364,7 @@ export default function DashboardPage() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Imán de Derrotas */}
-          <div className="bg-[#111827]/40 rounded-2xl p-6 border border-white/5 space-y-6">
+          <Link href="/pulse/iman-derrotas" className="bg-[#111827]/40 rounded-2xl p-6 border border-white/5 space-y-6 hover:border-red-500/20 transition-all hover-lift">
             <div className="flex items-center gap-2 text-red-500/60">
               <Skull className="h-4 w-4" />
               <span className="text-[10px] font-black uppercase tracking-widest font-oswald">IMÁN DE DERROTAS</span>
@@ -357,17 +373,17 @@ export default function DashboardPage() {
               {imanDerrotas.map(p => (
                 <div key={p.playerId} className="flex items-center justify-between">
                   <div className="flex flex-col">
-                    <Link href={`/players/${p.playerId}`} className="text-xs font-bold uppercase hover:text-red-500 transition-colors">{p.name}</Link>
+                    <span className="text-xs font-bold uppercase hover:text-red-500 transition-colors">{p.name}</span>
                     <span className="text-[7px] font-bold text-muted-foreground/40 uppercase tracking-widest font-oswald">{p.wins}V - {p.draws}E - {p.losses}D ({p.matchesPlayed} PJ)</span>
                   </div>
                   <span className="text-xl font-black italic text-red-500/80 font-bebas">{p.losses}</span>
                 </div>
               ))}
             </div>
-          </div>
+          </Link>
 
           {/* Deuda de Mando */}
-          <div className="bg-[#111827]/40 rounded-2xl p-6 border border-white/5 space-y-6">
+          <Link href="/pulse/deuda-mando" className="bg-[#111827]/40 rounded-2xl p-6 border border-white/5 space-y-6 hover:border-orange-500/20 transition-all hover-lift">
             <div className="flex items-center gap-2 text-orange-500/60">
               <ShieldAlert className="h-4 w-4" />
               <span className="text-[10px] font-black uppercase tracking-widest font-oswald">DEUDA DE MANDO</span>
@@ -376,17 +392,17 @@ export default function DashboardPage() {
               {deudaMando.map(p => (
                 <div key={p.playerId} className="flex items-center justify-between">
                   <div className="flex flex-col">
-                    <Link href={`/players/${p.playerId}`} className="text-xs font-bold uppercase hover:text-orange-500 transition-colors">{p.name}</Link>
+                    <span className="text-xs font-bold uppercase hover:text-orange-500 transition-colors">{p.name}</span>
                     <span className="text-[7px] font-bold text-muted-foreground/40 uppercase tracking-widest font-oswald">PJ SIN BRAZALETE</span>
                   </div>
                   <span className="text-xl font-black italic text-orange-500/80 font-bebas">{p.matchesPlayed}</span>
                 </div>
               ))}
             </div>
-          </div>
+          </Link>
 
           {/* Pólvora Mojada */}
-          <div className="bg-[#111827]/40 rounded-2xl p-6 border border-white/5 space-y-6">
+          <Link href="/pulse/polvora" className="bg-[#111827]/40 rounded-2xl p-6 border border-white/5 space-y-6 hover:border-blue-400/20 transition-all hover-lift">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-blue-400/60">
                 <Droplets className="h-4 w-4" />
@@ -398,14 +414,14 @@ export default function DashboardPage() {
               {polvoraMojada.map(p => (
                 <div key={p.playerId} className="flex items-center justify-between">
                   <div className="flex flex-col">
-                    <Link href={`/players/${p.playerId}`} className="text-xs font-bold uppercase hover:text-blue-400 transition-colors">{p.name}</Link>
+                    <span className="text-xs font-bold uppercase hover:text-blue-400 transition-colors">{p.name}</span>
                     <span className="text-[7px] font-bold text-muted-foreground/40 uppercase tracking-widest font-oswald">{p.totalGoals} GOLES EN {p.matchesPlayed} PJ</span>
                   </div>
                   <span className="text-xl font-black italic text-blue-400/80 font-bebas">{p.goalsPerMatch}</span>
                 </div>
               ))}
             </div>
-          </div>
+          </Link>
         </div>
       </section>
     </div>
