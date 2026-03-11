@@ -12,7 +12,7 @@ import { Newspaper, X, ChevronRight } from 'lucide-react';
 import { es } from 'date-fns/locale';
 import { format, parseISO } from 'date-fns';
 import type { Match, Player } from '@/lib/definitions';
-import { useUser, useFirestore } from '@/firebase';
+import { useUser } from '@/firebase';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -49,7 +49,7 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
     return [...(match.teamAPlayers || []), ...(match.teamBPlayers || [])];
   }, [match]);
 
-  // LÓGICA DE PREMIOS: Busca estrictamente lo que el administrador cargó
+  // LÓGICA DE PREMIOS: Busca estrictamente lo que el administrador cargó manualmente
   const mvpPlayer = React.useMemo(() => {
     const stat = allStats.find(s => s.isMvp === true);
     return allPlayers.find(p => p.id === stat?.playerId);
@@ -58,14 +58,6 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
   const bestGoalPlayer = React.useMemo(() => {
     const stat = allStats.find(s => s.hasBestGoal === true);
     return allPlayers.find(p => p.id === stat?.playerId);
-  }, [allStats, allPlayers]);
-
-  const matchTopScorer = React.useMemo(() => {
-    const sorted = [...allStats].filter(s => s.goals > 0).sort((a, b) => b.goals - a.goals);
-    if (sorted.length === 0) return null;
-    const topStat = sorted[0];
-    const player = allPlayers.find(p => p.id === topStat.playerId);
-    return player ? { name: player.name, goals: topStat.goals } : null;
   }, [allStats, allPlayers]);
 
   if (!match || !match.aiSummary) return null;
@@ -129,26 +121,20 @@ export function MatchNewsModal({ match, allPlayers, forceOpen, onClose }: MatchN
             </div>
           </div>
 
-          {/* BARRA DE DATOS OFICIAL (Corrected) */}
+          {/* BARRA DE DATOS OFICIAL (MVP, GOL DE LA FECHA, RESULTADO) */}
           <div className="px-6 sm:px-10 mt-8">
-            <div className="bg-white border border-black/10 p-4 grid grid-cols-2 sm:grid-cols-4 gap-4 divide-x divide-black/5 text-center">
-              <div className="flex flex-col gap-1">
+            <div className="bg-white border border-black/10 p-4 grid grid-cols-1 sm:grid-cols-3 gap-4 divide-y sm:divide-y-0 sm:divide-x divide-black/5 text-center">
+              <div className="flex flex-col gap-1 py-2 sm:py-0">
                 <span className="text-[8px] font-black text-black/40 uppercase">MVP</span>
-                <span className="text-xs font-bold truncate uppercase">{mvpPlayer?.name || "N/A"}</span>
+                <span className="text-sm font-bold truncate uppercase">{mvpPlayer?.name || "N/A"}</span>
               </div>
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1 py-2 sm:py-0">
                 <span className="text-[8px] font-black text-black/40 uppercase">GOL DE LA FECHA</span>
-                <span className="text-xs font-bold truncate uppercase">{bestGoalPlayer?.name || "N/A"}</span>
+                <span className="text-sm font-bold truncate uppercase">{bestGoalPlayer?.name || "N/A"}</span>
               </div>
-              <div className="flex flex-col gap-1">
-                <span className="text-[8px] font-black text-black/40 uppercase">PICHICHI FECHA</span>
-                <span className="text-xs font-bold uppercase truncate">
-                  {matchTopScorer ? `${matchTopScorer.name} (${matchTopScorer.goals})` : "N/A"}
-                </span>
-              </div>
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1 py-2 sm:py-0">
                 <span className="text-[8px] font-black text-black/40 uppercase">RESULTADO</span>
-                <span className="text-xs font-bold uppercase">{match.teamAScore} - {match.teamBScore}</span>
+                <span className="text-sm font-bold uppercase">{match.teamAScore} - {match.teamBScore}</span>
               </div>
             </div>
           </div>

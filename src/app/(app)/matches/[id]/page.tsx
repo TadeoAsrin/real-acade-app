@@ -63,16 +63,6 @@ export default function MatchDetailPage() {
     return allPlayers.find(p => p.id === stat?.playerId);
   }, [match, allPlayers]);
 
-  const matchTopScorer = React.useMemo(() => {
-    if (!match || !allPlayers.length) return null;
-    const allStats = [...(match.teamAPlayers || []), ...(match.teamBPlayers || [])];
-    const sorted = allStats.filter(s => s.goals > 0).sort((a, b) => b.goals - a.goals);
-    if (sorted.length === 0) return null;
-    const topStat = sorted[0];
-    const player = allPlayers.find(p => p.id === topStat.playerId);
-    return player ? { name: player.name, goals: topStat.goals } : null;
-  }, [match, allPlayers]);
-
   if (matchLoading || playersLoading) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
@@ -174,9 +164,9 @@ export default function MatchDetailPage() {
         </div>
       </div>
 
-      {/* MATCH FACTS CARD (Unificada con la Academy Gazette) */}
+      {/* MATCH FACTS CARD (MVP, GOL DE LA FECHA, RESULTADO) */}
       <Card className="competition-card border-none bg-white/5 backdrop-blur-md mx-4 sm:mx-0">
-        <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-white/5">
+        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/5">
           <div className="p-8 flex flex-col items-center text-center gap-2">
             <div className="flex items-center gap-2 text-primary/60">
               <Trophy className="h-4 w-4" />
@@ -200,16 +190,6 @@ export default function MatchDetailPage() {
             </div>
             <span className="text-xl font-bebas text-white uppercase truncate max-w-full">
               {bestGoalPlayer?.name || "N/A"}
-            </span>
-          </div>
-
-          <div className="p-8 flex flex-col items-center text-center gap-2">
-            <div className="flex items-center gap-2 text-accent/60">
-              <Goal className="h-4 w-4" />
-              <span className="text-[9px] font-black uppercase tracking-[0.3em] font-oswald">PICHICHI FECHA</span>
-            </div>
-            <span className="text-xl font-bebas text-white uppercase truncate max-w-full">
-              {matchTopScorer ? `${matchTopScorer.name} (${matchTopScorer.goals})` : "N/A"}
             </span>
           </div>
         </div>
