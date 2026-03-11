@@ -53,7 +53,7 @@ const menuItems = [
 export function AppSidebar() {
   const pathname = usePathname();
   const auth = useAuth();
-  const { user, isUserLoading } = useUser();
+  const { user } = useUser();
   const firestore = useFirestore();
   const router = useRouter();
   const { toast } = useToast();
@@ -99,12 +99,12 @@ export function AppSidebar() {
     <Sidebar className="border-r border-white/5 bg-[#0b1220]">
       <SidebarHeader className="p-6">
         <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 shadow-[0_0_20px_rgba(37,99,235,0.2)]">
-            <Fut7StatsLogo width={32} height={32} className="shrink-0" />
+          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
+            <Fut7StatsLogo width={28} height={28} className="shrink-0" />
           </div>
           <div className="flex flex-col">
-            <h2 className="text-xl font-bold tracking-tight text-white leading-none">REAL ACADE</h2>
-            <p className="text-[9px] uppercase tracking-[0.3em] text-primary font-black mt-1">CLUB DE FULBO</p>
+            <h2 className="text-lg font-bold tracking-tight text-white leading-none">REAL ACADE</h2>
+            <p className="text-[8px] uppercase tracking-[0.2em] text-primary font-bold mt-1">CLUB DE ÉLITE</p>
           </div>
         </div>
       </SidebarHeader>
@@ -118,15 +118,15 @@ export function AppSidebar() {
                 isActive={pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))}
                 tooltip={item.label}
                 className={cn(
-                  "py-6 px-4 transition-all duration-200 rounded-lg",
+                  "py-5 px-4 transition-all duration-200 rounded-lg",
                   (pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))) 
                     ? "bg-primary/10 text-primary" 
                     : "text-muted-foreground hover:bg-white/5"
                 )}
                 >
                 <Link href={item.href} onClick={handleNavClick}>
-                    <item.icon className="h-5 w-5" />
-                    <span className="font-bold text-xs tracking-widest uppercase">{item.label}</span>
+                    <item.icon className="h-4 w-4" />
+                    <span className="font-bold text-[10px] tracking-widest uppercase">{item.label}</span>
                 </Link>
                 </SidebarMenuButton>
             </SidebarMenuItem>
@@ -134,18 +134,18 @@ export function AppSidebar() {
             
             {isAdmin && (
               <>
-                <div className="px-4 py-4 mt-4 border-t border-white/5">
-                  <p className="text-[9px] font-black uppercase tracking-[0.4em] text-muted-foreground/40">ZONA TÁCTICA</p>
+                <div className="px-4 py-4 mt-4">
+                  <p className="text-[8px] font-black uppercase tracking-[0.3em] text-muted-foreground/30">ZONA TÁCTICA</p>
                 </div>
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     asChild
                     isActive={pathname.startsWith("/drafts/new")}
-                    className="py-6 px-4 text-emerald-500 hover:text-emerald-400 hover:bg-emerald-500/5 rounded-lg"
+                    className="py-5 px-4 text-emerald-500/70 hover:text-emerald-400 hover:bg-emerald-500/5 rounded-lg"
                   >
                     <Link href="/drafts/new" onClick={handleNavClick}>
-                        <Swords className="h-5 w-5" />
-                        <span className="font-bold text-xs tracking-widest uppercase">PAN Y QUESO</span>
+                        <Swords className="h-4 w-4" />
+                        <span className="font-bold text-[10px] tracking-widest uppercase">PAN Y QUESO</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -153,11 +153,11 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     asChild
                     isActive={pathname.startsWith("/generator")}
-                    className="py-6 px-4 text-orange-500 hover:text-orange-400 hover:bg-orange-500/5 rounded-lg"
+                    className="py-5 px-4 text-orange-500/70 hover:text-orange-400 hover:bg-orange-500/5 rounded-lg"
                   >
                     <Link href="/generator" onClick={handleNavClick}>
-                        <Dices className="h-5 w-5" />
-                        <span className="font-bold text-xs tracking-widest uppercase">EQUILIBRADOR PRO</span>
+                        <Dices className="h-4 w-4" />
+                        <span className="font-bold text-[10px] tracking-widest uppercase">EQUILIBRADOR PRO</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -166,21 +166,21 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarContent>
 
-      <SidebarFooter className="p-6 border-t border-white/5 bg-black/20">
+      <SidebarFooter className="p-6 border-t border-white/5">
          {user && (
            <div className="flex flex-col gap-4">
               <div className="flex items-center gap-3">
-                <Avatar className="h-10 w-10 border-2 border-primary/20">
-                  <AvatarFallback className="bg-surface-900 text-xs font-bold text-primary">
+                <Avatar className="h-9 w-9 border border-white/10">
+                  <AvatarFallback className="bg-surface-900 text-[10px] font-bold text-primary">
                     {getInitials(currentUserData?.name || user.email || "U")}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col min-w-0">
-                  <span className="text-sm font-bold text-white truncate">
+                  <span className="text-xs font-bold text-white truncate">
                     {currentUserData?.name || user.email?.split('@')[0]}
                   </span>
                   {isAdmin && (
-                    <span className="text-[8px] font-black uppercase text-primary">ADMINISTRADOR</span>
+                    <span className="text-[7px] font-bold text-primary uppercase">ADMINISTRADOR</span>
                   )}
                 </div>
               </div>
@@ -188,10 +188,10 @@ export function AppSidebar() {
                 variant="ghost" 
                 size="sm"
                 onClick={handleLogout}
-                className="w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10 text-[10px] font-bold"
+                className="w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10 text-[9px] font-bold h-8"
               >
                 <LogOut className="h-3 w-3 mr-2" />
-                SALIR
+                CERRAR SESIÓN
               </Button>
            </div>
          )}
