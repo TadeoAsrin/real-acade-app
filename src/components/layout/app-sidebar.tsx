@@ -1,4 +1,3 @@
-
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
@@ -96,19 +95,21 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className="border-r border-border bg-background">
+    <Sidebar className="border-r border-white/5 bg-[#0b1220]">
       <SidebarHeader className="p-6">
         <div className="flex items-center gap-4">
-          <Fut7StatsLogo width={48} height={48} className="shrink-0 drop-shadow-[0_0_15px_rgba(59,130,246,0.3)]" />
+          <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 shadow-[0_0_20px_rgba(37,99,235,0.2)]">
+            <Fut7StatsLogo width={32} height={32} className="shrink-0" />
+          </div>
           <div className="flex flex-col">
-            <h2 className="text-2xl font-bebas tracking-wider text-white leading-none">REAL ACADE</h2>
-            <p className="text-[10px] uppercase tracking-[0.3em] text-primary font-black mt-1 font-oswald">CLUB DE FULBO</p>
+            <h2 className="text-xl font-bold tracking-tight text-white leading-none">REAL ACADE</h2>
+            <p className="text-[9px] uppercase tracking-[0.3em] text-primary font-black mt-1">CLUB DE FULBO</p>
           </div>
         </div>
       </SidebarHeader>
       
       <SidebarContent>
-        <SidebarMenu className="px-3 pt-6 gap-2">
+        <SidebarMenu className="px-3 pt-6 gap-1">
             {menuItems.map((item) => (
             <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton
@@ -116,13 +117,15 @@ export function AppSidebar() {
                 isActive={pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))}
                 tooltip={item.label}
                 className={cn(
-                  "py-7 px-4 transition-all duration-200 rounded-none border-l-4 border-transparent hover:bg-white/5",
-                  (pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))) && "border-l-primary bg-primary/5 text-primary"
+                  "py-6 px-4 transition-all duration-200 rounded-lg",
+                  (pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))) 
+                    ? "bg-primary/10 text-primary" 
+                    : "text-muted-foreground hover:bg-white/5"
                 )}
                 >
                 <Link href={item.href} onClick={handleNavClick}>
-                    <item.icon className={cn("h-5 w-5", (pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))) ? "text-primary" : "text-muted-foreground")} />
-                    <span className="font-bebas text-lg tracking-widest">{item.label}</span>
+                    <item.icon className="h-5 w-5" />
+                    <span className="font-bold text-xs tracking-widest uppercase">{item.label}</span>
                 </Link>
                 </SidebarMenuButton>
             </SidebarMenuItem>
@@ -130,19 +133,18 @@ export function AppSidebar() {
             
             {isAdmin && (
               <>
-                <div className="px-4 py-4 mt-4">
-                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 font-oswald">ZONA TÁCTICA</p>
+                <div className="px-4 py-4 mt-4 border-t border-white/5">
+                  <p className="text-[9px] font-black uppercase tracking-[0.4em] text-muted-foreground/40">ZONA TÁCTICA</p>
                 </div>
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     asChild
                     isActive={pathname.startsWith("/drafts/new")}
-                    tooltip="Nuevo Pan y Queso"
-                    className="py-7 px-4 text-emerald-500 hover:text-emerald-400 hover:bg-emerald-500/5 rounded-none"
+                    className="py-6 px-4 text-emerald-500 hover:text-emerald-400 hover:bg-emerald-500/5 rounded-lg"
                   >
                     <Link href="/drafts/new" onClick={handleNavClick}>
                         <Swords className="h-5 w-5" />
-                        <span className="font-bebas text-lg tracking-widest uppercase">PAN Y QUESO</span>
+                        <span className="font-bold text-xs tracking-widest uppercase">PAN Y QUESO</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -150,12 +152,11 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     asChild
                     isActive={pathname.startsWith("/generator")}
-                    tooltip="Equilibrador Pro"
-                    className="py-7 px-4 text-orange-500 hover:text-orange-400 hover:bg-orange-500/5 rounded-none"
+                    className="py-6 px-4 text-orange-500 hover:text-orange-400 hover:bg-orange-500/5 rounded-lg"
                   >
                     <Link href="/generator" onClick={handleNavClick}>
                         <Dices className="h-5 w-5" />
-                        <span className="font-bebas text-lg tracking-widest uppercase">EQUILIBRADOR PRO</span>
+                        <span className="font-bold text-xs tracking-widest uppercase">EQUILIBRADOR PRO</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -164,43 +165,33 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarContent>
 
-      <SidebarFooter className="p-6 border-t border-white/5 bg-surface-900/50">
+      <SidebarFooter className="p-6 border-t border-white/5 bg-black/20">
          {!isUserLoading && user ? (
-           <div className="flex flex-col gap-6">
-              <div className="flex items-center gap-4 px-1 py-1">
-                <Avatar className={cn("h-12 w-12 rounded-none border-2 transition-all", isAdmin ? "border-primary shadow-lg shadow-primary/20" : "border-white/10")}>
-                  <AvatarFallback className="bg-surface-800 text-sm font-bebas text-primary">
+           <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-10 w-10 border-2 border-primary/20">
+                  <AvatarFallback className="bg-surface-900 text-xs font-bold text-primary">
                     {getInitials(currentUserData?.name || user.email || "U")}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col min-w-0">
-                  <span className="text-base font-bebas tracking-wide text-white truncate">
+                  <span className="text-sm font-bold text-white truncate">
                     {currentUserData?.name || user.email?.split('@')[0]}
                   </span>
-                  <div className="flex items-center gap-1">
-                    {isAdmin ? (
-                      <span className="flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-primary font-oswald">
-                        <ShieldCheck className="h-3 w-3" /> ADMINISTRADOR
-                      </span>
-                    ) : (
-                      <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground font-oswald">
-                        JUGADOR OFICIAL
-                      </span>
-                    )}
-                  </div>
+                  {isAdmin && (
+                    <span className="text-[8px] font-black uppercase text-primary">ADMINISTRADOR</span>
+                  )}
                 </div>
               </div>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton 
-                    onClick={handleLogout}
-                    className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors font-oswald uppercase text-xs tracking-widest py-6"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    <span>CERRAR SESIÓN</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={handleLogout}
+                className="w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10 text-[10px] font-bold"
+              >
+                <LogOut className="h-3 w-3 mr-2" />
+                SALIR
+              </Button>
            </div>
          ) : null}
       </SidebarFooter>
