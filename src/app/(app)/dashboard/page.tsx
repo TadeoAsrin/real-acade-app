@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from 'react';
@@ -103,34 +104,32 @@ function DashboardContent() {
         />
       )}
 
-      {/* 1. HERO SECTION */}
+      {/* 1. HERO SECTION - ESTILO CINEMATOGRÁFICO */}
       {lastMatch && (
         <section>
-          <div className="relative overflow-hidden rounded-[2rem] bg-[#111827] border border-white/5 shadow-2xl p-8 md:p-12">
-            <div className="absolute top-0 right-0 p-8 opacity-5">
-              <Newspaper className="h-40 w-40" />
-            </div>
-            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-              <div className="lg:col-span-8 space-y-6">
+          <div className="relative group overflow-hidden rounded-[2.5rem] border-none bg-gradient-to-r from-primary/20 via-background to-accent/20 shadow-2xl transition-all duration-500 hover:scale-[1.005]">
+            <div className="absolute inset-0 bg-black/40 pointer-events-none" />
+            <div className="relative z-10 p-8 md:p-16 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+              <div className="lg:col-span-8 space-y-8">
                 <div className="flex items-center gap-3">
-                  <Badge className="bg-primary text-white font-bold text-[10px] tracking-widest px-3 py-1 uppercase rounded-full">NUEVA EDICIÓN</Badge>
-                  <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
-                    {new Date(lastMatch.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}
+                  <Badge className="bg-primary text-primary-foreground font-bebas tracking-widest px-4 py-1.5 text-sm rounded-none shadow-lg shadow-primary/20">EDICIÓN ESPECIAL</Badge>
+                  <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] font-oswald">
+                    {new Date(lastMatch.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}
                   </span>
                 </div>
-                <h1 className="text-4xl md:text-6xl font-black italic uppercase leading-[0.9] tracking-tighter">
+                <h1 className="text-5xl md:text-[5.5rem] font-bebas text-white tracking-wider leading-[0.85] uppercase">
                   {lastMatch.aiSummary?.title || "CRÓNICA DE LA JORNADA"}
                 </h1>
-                <p className="text-lg text-muted-foreground font-medium italic max-w-2xl">
+                <p className="text-xl md:text-2xl text-muted-foreground font-lora italic max-w-2xl leading-relaxed">
                   {lastMatch.aiSummary?.subtitle || "Exhibición de fútbol y mística en el último encuentro del club."}
                 </p>
-                <div className="flex flex-wrap gap-4 pt-4">
-                  <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-white font-black uppercase italic px-10 h-14 text-sm rounded-xl">
-                    <Link href={`/dashboard?gaceta=${lastMatch.id}`} className="flex items-center gap-2">
-                      <Newspaper className="h-5 w-5" /> LEER EL DIARIO
+                <div className="flex flex-wrap gap-4 pt-6">
+                  <Button asChild size="lg" className="h-16 px-10 font-bebas text-2xl tracking-[0.2em] bg-white text-black hover:bg-white/90 shadow-[0_0_40px_rgba(255,255,255,0.25)] rounded-none transition-all group-hover:px-12">
+                    <Link href={`/dashboard?gaceta=${lastMatch.id}`} className="flex items-center gap-3">
+                      <Newspaper className="h-6 w-6" /> LEER EL DIARIO
                     </Link>
                   </Button>
-                  <Button asChild variant="outline" size="lg" className="border-white/10 hover:bg-white/5 font-black uppercase italic px-10 h-14 text-sm rounded-xl">
+                  <Button asChild variant="outline" size="lg" className="border-white/10 hover:bg-white/5 font-black uppercase italic px-10 h-16 text-sm rounded-none">
                     <Link href={`/matches/${lastMatch.id}`} className="flex items-center gap-2">
                       <FileText className="h-5 w-5" /> FICHA TÉCNICA
                     </Link>
@@ -139,17 +138,17 @@ function DashboardContent() {
               </div>
               
               <div className="lg:col-span-4 flex justify-center lg:justify-end">
-                <div className="bg-[#0b1220] p-8 rounded-3xl border border-white/10 shadow-inner text-center space-y-4 min-w-[240px]">
-                  <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest font-oswald">RESULTADO</p>
-                  <div className="flex items-center justify-center gap-6">
+                <div className="bg-black/60 backdrop-blur-xl p-10 rounded-none border border-white/10 shadow-[0_30px_60px_rgba(0,0,0,0.5)] text-center space-y-6 min-w-[280px] transform lg:rotate-3 group-hover:rotate-0 transition-transform duration-700">
+                  <p className="text-[10px] font-black uppercase text-white/40 tracking-[0.4em] font-oswald">RESULTADO FINAL</p>
+                  <div className="flex items-center justify-center gap-8">
                     <div className="flex flex-col items-center">
-                      <span className="text-6xl font-black italic text-primary leading-none drop-shadow-[0_0_15px_rgba(59,130,246,0.3)] font-bebas">{lastMatch.teamAScore}</span>
-                      <span className="text-[8px] font-bold text-primary/60 uppercase mt-2">AZUL</span>
+                      <span className="text-8xl font-bebas text-primary leading-none drop-shadow-[0_0_20px_rgba(59,130,246,0.6)]">{lastMatch.teamAScore}</span>
+                      <span className="text-[10px] font-black text-primary uppercase mt-3 tracking-widest font-oswald">AZUL</span>
                     </div>
-                    <div className="h-10 w-[1px] bg-white/10" />
+                    <div className="h-16 w-[1px] bg-white/10" />
                     <div className="flex flex-col items-center">
-                      <span className="text-6xl font-black italic text-accent leading-none drop-shadow-[0_0_15px_rgba(244,63,94,0.3)] font-bebas">{lastMatch.teamBScore}</span>
-                      <span className="text-[8px] font-bold text-accent/60 uppercase mt-2">ROJO</span>
+                      <span className="text-8xl font-bebas text-accent leading-none drop-shadow-[0_0_20px_rgba(244,63,94,0.6)]">{lastMatch.teamBScore}</span>
+                      <span className="text-[10px] font-black text-accent uppercase mt-3 tracking-widest font-oswald">ROJO</span>
                     </div>
                   </div>
                 </div>
