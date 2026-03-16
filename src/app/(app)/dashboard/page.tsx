@@ -62,9 +62,9 @@ export default function DashboardPage() {
   // 3. On Fire (Power Ranking)
   const topPower = [...stats].sort((a, b) => b.powerPoints - a.powerPoints).slice(0, 5);
 
-  // 4. Pulso de la Competición (Lógica Corregida)
-  const maxMvpCount = Math.max(...stats.map(p => p.totalMvp), 0);
-  const recordGoalsInMatch = Math.max(...allMatches.map(m => m.teamAScore + m.teamBScore), 0);
+  // 4. Pulso de la Competición (Lógica Corregida para Reyes MVP)
+  const maxMvpCount = stats.length > 0 ? Math.max(...stats.map(p => p.totalMvp), 0) : 0;
+  const recordGoalsInMatch = allMatches.length > 0 ? Math.max(...allMatches.map(m => m.teamAScore + m.teamBScore), 0) : 0;
   
   const chemistry = getChemistryRankings(allPlayers, allMatches, 1);
   const topPair = chemistry[0];
@@ -74,7 +74,7 @@ export default function DashboardPage() {
   const societyValue = topPair ? `${topPair.winRate}%` : "0%";
 
   const totalPossibleMatches = playedMatches.length;
-  const topAttendance = Math.max(...stats.map(p => p.matchesPlayed), 0);
+  const topAttendance = stats.length > 0 ? Math.max(...stats.map(p => p.matchesPlayed), 0) : 0;
   const attendanceValue = totalPossibleMatches > 0 ? `${Math.round((topAttendance / totalPossibleMatches) * 100)}%` : "0%";
 
   // 5. Sala de Humildad
