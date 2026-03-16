@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -13,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 
-export default function DraftDetailPage() {
+function DraftDetailContent() {
   const { id } = useParams();
   const searchParams = useSearchParams();
   const capType = searchParams.get('cap') as 'A' | 'B' | null;
@@ -289,5 +290,13 @@ export default function DraftDetailPage() {
 
       </div>
     </div>
+  );
+}
+
+export default function DraftDetailPage() {
+  return (
+    <React.Suspense fallback={<div className="flex h-screen items-center justify-center"><Loader2 className="animate-spin h-10 w-10 text-primary" /></div>}>
+      <DraftDetailContent />
+    </React.Suspense>
   );
 }
