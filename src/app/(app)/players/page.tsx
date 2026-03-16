@@ -17,7 +17,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc, setDocumentNonBlocking, updateDocumentNonBlocking, deleteDocumentNonBlocking } from "@/firebase";
 import { collection, doc, query, orderBy } from "firebase/firestore";
 import type { Player, Match, AggregatedPlayerStats, PlayerPosition } from "@/lib/definitions";
-import { Loader2, UserPlus, Trash2, Pencil, ArrowUpDown, ChevronUp, ChevronDown, ShieldCheck } from "lucide-react";
+import { Loader2, UserPlus, Trash2, Pencil, ArrowUpDown, ChevronUp, ChevronDown, ShieldCheck, Users, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -80,7 +80,7 @@ function PlayersList() {
     if (sortParam === 'totalGoals') {
       setSortConfig({ key: 'totalGoals', direction: 'desc' });
     }
-  }, [searchParams]);
+  }, [sortParams]);
 
   const playersQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -164,17 +164,15 @@ function PlayersList() {
   if (playersLoading || matchesLoading) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
       </div>
     );
   }
 
   const allPlayers = playersData || [];
   const allMatches = matchesData || [];
-  
   const rawStats = calculateAggregatedStats(allPlayers, allMatches);
   
-  // Jerarquía de capitanes sugeridos (top 2)
   const suggestedLeaderIds = rawStats
     .filter(p => p.isActive)
     .sort((a, b) => {
@@ -189,135 +187,132 @@ function PlayersList() {
   const playerStats = rawStats.sort((a, b) => {
     const aValue = a[sortConfig.key];
     const bValue = b[sortConfig.key];
-
-    if (typeof aValue === 'string' && typeof bValue === 'string') {
-      return sortConfig.direction === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
-    }
-
-    if (typeof aValue === 'number' && typeof bValue === 'number') {
-      return sortConfig.direction === 'asc' ? aValue - bValue : bValue - aValue;
-    }
-
+    if (typeof aValue === 'string' && typeof bValue === 'string') return sortConfig.direction === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+    if (typeof aValue === 'number' && typeof bValue === 'number') return sortConfig.direction === 'asc' ? aValue - bValue : bValue - aValue;
     return 0;
   });
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Jugadores</h1>
-          <p className="text-muted-foreground">Estadísticas y roles tácticos de todos los miembros.</p>
+    <div className="flex flex-col gap-10 max-w-7xl mx-auto pb-20">
+      {/* 1. CINEMATIC HEADER */}
+      <section className="cinematic-banner p-8 md:p-12 flex flex-col md:flex-row justify-between items-center gap-8">
+        <div className="absolute inset-0 bg-black/40 pointer-events-none" />
+        <div className="relative z-10 space-y-4 text-center md:text-left">
+          <div className="flex items-center justify-center md:justify-start gap-3">
+            <Badge className="bg-primary text-primary-foreground font-bebas tracking-widest px-3 py-1 text-sm rounded-none">EDICIÓN ESPECIAL</Badge>
+            <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] font-oswald">MERCADO DE PASES</span>
+          </div>
+          <h1 className="text-5xl md:text-7xl font-bebas text-white tracking-wider leading-none uppercase">PLANTILLA ÉLITE</h1>
+          <p className="text-lg md:text-xl text-muted-foreground font-lora italic max-w-2xl">Perfiles tácticos y estadísticas oficiales de todos los cracks del club.</p>
         </div>
-        {isAdmin && (
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button><UserPlus className="mr-2 h-4 w-4" /> Nuevo Jugador</Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Añadir Nuevo Jugador</DialogTitle>
-                <DialogDescription>Ingresa los datos para darlo de alta en el club.</DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="name">Nombre Completo</Label>
-                  <Input
-                    id="name"
-                    value={newPlayerName}
-                    onChange={(e) => setNewPlayerName(e.target.value)}
-                    placeholder="Ej. Juan Pérez"
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="position">Posición</Label>
-                  <Select onValueChange={(val) => setNewPlayerPosition(val as PlayerPosition)} value={newPlayerPosition}>
-                    <SelectTrigger>
-                        <SelectValue placeholder="Selecciona una posición" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {POSITIONS.map(pos => (
-                            <SelectItem key={pos} value={pos}>{pos}</SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button onClick={handleAddPlayer} disabled={isUpdatingPlayer || !newPlayerName}>
-                  {isUpdatingPlayer && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Guardar Jugador
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        )}
-      </div>
 
-      <Card className="competition-card">
+        {isAdmin && (
+          <div className="relative z-10">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button size="lg" className="h-16 px-10 font-bebas text-2xl tracking-[0.2em] bg-white text-black hover:bg-white/90 shadow-[0_0_40px_rgba(255,255,255,0.25)] rounded-none transition-all group hover:px-12">
+                  <UserPlus className="mr-3 h-6 w-6" /> NUEVO CRACK
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-surface-900 border-white/10 text-white">
+                <DialogHeader>
+                  <DialogTitle className="font-bebas text-3xl tracking-widest text-primary italic">AÑADIR NUEVO JUGADOR</DialogTitle>
+                  <DialogDescription className="font-oswald uppercase text-[10px] tracking-widest text-muted-foreground/60">Ingresa los datos para darlo de alta en el club.</DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-6 py-6">
+                  <div className="grid gap-2">
+                    <Label htmlFor="name" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Nombre Completo</Label>
+                    <Input id="name" value={newPlayerName} onChange={(e) => setNewPlayerName(e.target.value)} placeholder="Ej. Juan Pérez" className="bg-black/40 border-white/10 h-12 font-bold uppercase italic" />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="position" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Posición Táctica</Label>
+                    <Select onValueChange={(val) => setNewPlayerPosition(val as PlayerPosition)} value={newPlayerPosition}>
+                      <SelectTrigger className="bg-black/40 border-white/10 h-12 font-bold uppercase italic">
+                          <SelectValue placeholder="Seleccionar rol" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-surface-900 border-white/10">
+                          {POSITIONS.map(pos => (
+                              <SelectItem key={pos} value={pos} className="font-bold uppercase italic">{pos}</SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button onClick={handleAddPlayer} disabled={isUpdatingPlayer || !newPlayerName} className="w-full h-14 font-bebas text-xl tracking-widest bg-primary text-white">
+                    {isUpdatingPlayer && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+                    GUARDAR EN PLANTILLA
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+        )}
+      </section>
+
+      <Card className="competition-card border-none bg-black/20 backdrop-blur-md">
           <CardContent className="p-0">
               <Table>
                   <TableHeader>
-                      <TableRow className="bg-muted/30">
-                      <TableHead 
-                        className="pl-6 cursor-pointer hover:text-primary transition-colors"
-                        onClick={() => handleSort('name')}
-                      >
-                        <div className="flex items-center">Jugador {getSortIcon('name')}</div>
+                      <TableRow className="bg-black/40 border-white/5 h-14">
+                      <TableHead className="pl-8 cursor-pointer hover:text-primary transition-colors font-bebas text-sm" onClick={() => handleSort('name')}>
+                        <div className="flex items-center">JUGADOR {getSortIcon('name')}</div>
                       </TableHead>
-                      <TableHead className="text-center">Posición</TableHead>
-                      <TableHead className="text-center cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('matchesPlayed')}>
-                        <div className="flex items-center justify-center">Partidos {getSortIcon('matchesPlayed')}</div>
+                      <TableHead className="text-center font-bebas text-sm">POSICIÓN</TableHead>
+                      <TableHead className="text-center cursor-pointer hover:text-primary transition-colors font-bebas text-sm" onClick={() => handleSort('matchesPlayed')}>
+                        <div className="flex items-center justify-center">PJ {getSortIcon('matchesPlayed')}</div>
                       </TableHead>
-                      <TableHead className="text-center cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('totalGoals')}>
-                        <div className="flex items-center justify-center">Goles {getSortIcon('totalGoals')}</div>
+                      <TableHead className="text-center cursor-pointer hover:text-primary transition-colors font-bebas text-sm" onClick={() => handleSort('totalGoals')}>
+                        <div className="flex items-center justify-center">GF {getSortIcon('totalGoals')}</div>
                       </TableHead>
-                      <TableHead className="text-center cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('totalCaptaincies')}>
-                        <div className="flex items-center justify-center">Mando {getSortIcon('totalCaptaincies')}</div>
+                      <TableHead className="text-center cursor-pointer hover:text-primary transition-colors font-bebas text-sm" onClick={() => handleSort('totalCaptaincies')}>
+                        <div className="flex items-center justify-center">MANDO {getSortIcon('totalCaptaincies')}</div>
                       </TableHead>
-                      {isAdmin && <TableHead className="text-right pr-6">Acciones</TableHead>}
+                      {isAdmin && <TableHead className="text-right pr-8 font-bebas text-sm">ACCIONES</TableHead>}
                       </TableRow>
                   </TableHeader>
                   <TableBody>
                       {playerStats.map((player) => {
                         const isSuggested = suggestedLeaderIds.includes(player.playerId);
                         return (
-                          <TableRow key={player.playerId} className="official-table-row">
-                              <TableCell className="pl-6">
-                              <div className="flex items-center gap-3">
-                                  <Avatar className="h-9 w-9">
-                                    <AvatarFallback className="bg-primary/20 text-primary font-black">{getInitials(player.name)}</AvatarFallback>
+                          <TableRow key={player.playerId} className="official-table-row h-20">
+                              <TableCell className="pl-8">
+                              <div className="flex items-center gap-4">
+                                  <Avatar className="h-12 w-12 border-2 border-white/10 shadow-xl">
+                                    <AvatarFallback className="bg-primary/20 text-primary font-black text-lg">{getInitials(player.name)}</AvatarFallback>
                                   </Avatar>
                                   <div className="flex flex-col">
-                                    <Link href={`/players/${player.playerId}`} className="font-medium hover:underline flex items-center gap-2">
+                                    <Link href={`/players/${player.playerId}`} className="font-black uppercase tracking-tight hover:text-primary transition-colors text-lg italic">
                                       {player.name}
-                                      {isSuggested && (
-                                        <Badge variant="outline" className="h-4 border-emerald-500/50 text-emerald-500 bg-emerald-500/5 text-[7px] font-black uppercase px-1.5 py-0 rounded-none">
-                                          LÍDER SUGERIDO
-                                        </Badge>
-                                      )}
                                     </Link>
+                                    {isSuggested && (
+                                      <div className="flex items-center gap-1 mt-0.5">
+                                        <Sparkles className="h-2.5 w-2.5 text-emerald-500" />
+                                        <span className="text-[7px] font-black text-emerald-500 uppercase tracking-widest font-oswald">LÍDER SUGERIDO</span>
+                                      </div>
+                                    )}
                                   </div>
                               </div>
                               </TableCell>
                               <TableCell className="text-center">
                                 {player.position ? (
-                                    <Badge variant="outline" className="font-medium text-[10px] uppercase tracking-wider">
+                                    <Badge variant="outline" className="font-black text-[9px] uppercase tracking-[0.2em] italic border-white/10 px-3 py-1 bg-white/5">
                                         {player.position}
                                     </Badge>
                                 ) : (
-                                    <span className="text-muted-foreground text-xs italic">Sin asignar</span>
+                                    <span className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest opacity-20 italic">Sin rol</span>
                                 )}
                               </TableCell>
-                              <TableCell className="text-center font-mono font-bold">{player.matchesPlayed}</TableCell>
-                              <TableCell className="text-center font-mono font-bold">{player.totalGoals}</TableCell>
+                              <TableCell className="text-center font-bebas text-2xl text-white/80">{player.matchesPlayed}</TableCell>
+                              <TableCell className="text-center font-bebas text-2xl text-yellow-500/80">{player.totalGoals}</TableCell>
                               <TableCell className="text-center">
-                                <div className="flex items-center justify-center gap-1.5">
-                                  <span className="font-mono font-bold">{player.totalCaptaincies}</span>
-                                  {player.totalCaptaincies > 0 && <ShieldCheck className="h-3 w-3 text-emerald-500" />}
+                                <div className="flex items-center justify-center gap-2">
+                                  <span className="font-bebas text-2xl text-emerald-500/80">{player.totalCaptaincies}</span>
+                                  {player.totalCaptaincies > 0 && <ShieldCheck className="h-4 w-4 text-emerald-500" />}
                                 </div>
                               </TableCell>
                               {isAdmin && (
-                                <TableCell className="text-right pr-6">
+                                <TableCell className="text-right pr-8">
                                   <div className="flex justify-end gap-2">
                                     <Dialog open={editingPlayerId === player.playerId} onOpenChange={(open) => {
                                       if (open) {
@@ -329,38 +324,38 @@ function PlayersList() {
                                       }
                                     }}>
                                       <DialogTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
+                                        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary transition-colors">
                                           <Pencil className="h-4 w-4" />
                                         </Button>
                                       </DialogTrigger>
-                                      <DialogContent>
+                                      <DialogContent className="bg-surface-900 border-white/10 text-white">
                                         <DialogHeader>
-                                          <DialogTitle>Editar Jugador</DialogTitle>
-                                          <DialogDescription>Modifica los datos de {player.name}.</DialogDescription>
+                                          <DialogTitle className="font-bebas text-3xl tracking-widest text-primary italic">EDITAR JUGADOR</DialogTitle>
+                                          <DialogDescription className="font-oswald uppercase text-[10px] tracking-widest text-muted-foreground/60">Modifica los datos oficiales de {player.name}.</DialogDescription>
                                         </DialogHeader>
-                                        <div className="grid gap-4 py-4">
+                                        <div className="grid gap-6 py-6">
                                           <div className="grid gap-2">
-                                            <Label htmlFor="edit-name">Nombre Completo</Label>
-                                            <Input id="edit-name" value={editPlayerName} onChange={(e) => setEditPlayerName(e.target.value)} />
+                                            <Label htmlFor="edit-name" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Nombre Completo</Label>
+                                            <Input id="edit-name" value={editPlayerName} onChange={(e) => setEditPlayerName(e.target.value)} className="bg-black/40 border-white/10 h-12 font-bold uppercase italic" />
                                           </div>
                                           <div className="grid gap-2">
-                                            <Label htmlFor="edit-position">Posición</Label>
+                                            <Label htmlFor="edit-position" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Posición Táctica</Label>
                                             <Select onValueChange={(val) => setEditPlayerPosition(val as PlayerPosition)} value={editPlayerPosition}>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Selecciona una posición" />
+                                                <SelectTrigger className="bg-black/40 border-white/10 h-12 font-bold uppercase italic">
+                                                    <SelectValue placeholder="Seleccionar rol" />
                                                 </SelectTrigger>
-                                                <SelectContent>
+                                                <SelectContent className="bg-surface-900 border-white/10">
                                                     {POSITIONS.map(pos => (
-                                                        <SelectItem key={pos} value={pos}>{pos}</SelectItem>
+                                                        <SelectItem key={pos} value={pos} className="font-bold uppercase italic">{pos}</SelectItem>
                                                     ))}
                                                 </SelectContent>
                                             </Select>
                                           </div>
                                         </div>
                                         <DialogFooter>
-                                          <Button onClick={handleUpdatePlayer} disabled={isUpdatingPlayer || !editPlayerName}>
-                                            {isUpdatingPlayer && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                            Guardar Cambios
+                                          <Button onClick={handleUpdatePlayer} disabled={isUpdatingPlayer || !editPlayerName} className="w-full h-14 font-bebas text-xl tracking-widest bg-primary text-white">
+                                            {isUpdatingPlayer && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+                                            GUARDAR CAMBIOS
                                           </Button>
                                         </DialogFooter>
                                       </DialogContent>
@@ -368,20 +363,18 @@ function PlayersList() {
 
                                     <AlertDialog>
                                       <AlertDialogTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
+                                        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive transition-colors">
                                           <Trash2 className="h-4 w-4" />
                                         </Button>
                                       </AlertDialogTrigger>
-                                      <AlertDialogContent>
+                                      <AlertDialogContent className="bg-surface-900 border-white/10 text-white">
                                         <AlertDialogHeader>
-                                          <AlertDialogTitle>¿Eliminar a {player.name}?</AlertDialogTitle>
-                                          <AlertDialogDescription>Atención: Si eliminas al jugador, sus datos se perderán en los partidos pasados.</AlertDialogDescription>
+                                          <AlertDialogTitle className="font-bebas text-3xl tracking-widest text-destructive italic">¿BAJA DEFINITIVA?</AlertDialogTitle>
+                                          <AlertDialogDescription className="font-oswald uppercase text-[10px] tracking-widest text-muted-foreground/60">Atención: Al eliminar a {player.name}, sus datos desaparecerán del historial del club.</AlertDialogDescription>
                                         </AlertDialogHeader>
                                         <AlertDialogFooter>
-                                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                          <AlertDialogAction onClick={() => handleDeletePlayer(player.playerId)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                                            Eliminar permanentemente
-                                          </AlertDialogAction>
+                                          <AlertDialogCancel className="bg-white/5 border-white/10 text-white font-bebas tracking-widest rounded-none h-12">CANCELAR</AlertDialogCancel>
+                                          <AlertDialogAction onClick={() => handleDeletePlayer(player.playerId)} className="bg-destructive text-white font-bebas tracking-widest rounded-none h-12 px-8">ELIMINAR PERMANENTEMENTE</AlertDialogAction>
                                         </AlertDialogFooter>
                                       </AlertDialogContent>
                                     </AlertDialog>

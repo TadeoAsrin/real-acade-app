@@ -50,17 +50,22 @@
     @apply bg-card text-card-foreground shadow-lg border border-white/5 rounded-[var(--radius)] overflow-hidden transition-all duration-200;
   }
 
-  .sports-gradient {
-    background: linear-gradient(135deg, #1d4ed8, #7c3aed);
+  .bg-dot-pattern {
+    background-image: radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size: 24px 24px;
   }
 
-  .goal-gradient {
-    background: linear-gradient(135deg, #f97316, #ef4444);
+  .cinematic-banner {
+    @apply relative overflow-hidden rounded-[2rem] bg-gradient-to-r from-primary/20 via-background to-accent/20 border border-white/5 shadow-2xl transition-all duration-500 hover:scale-[1.005];
   }
 
-  .sports-separator {
-    @apply flex items-center justify-center gap-4 text-muted-foreground/30 my-8 text-xs font-black uppercase tracking-[0.3em];
+  .official-table-row {
+    @apply transition-colors hover:bg-white/5 border-white/5;
   }
+
+  .podium-1 { @apply bg-gradient-to-r from-yellow-500/10 via-yellow-500/5 to-transparent border-l-4 border-l-yellow-500; }
+  .podium-2 { @apply bg-gradient-to-r from-slate-400/10 via-slate-400/5 to-transparent border-l-4 border-l-slate-400; }
+  .podium-3 { @apply bg-gradient-to-r from-orange-700/10 via-orange-700/5 to-transparent border-l-4 border-l-orange-700; }
 }
 
 .score-display {
