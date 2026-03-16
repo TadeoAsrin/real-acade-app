@@ -6,7 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { useCollection, useMemoFirebase, useFirestore } from "@/firebase";
 import { collection, query, orderBy } from "firebase/firestore";
 import type { Match, Player } from "@/lib/definitions";
-import { Loader2, Newspaper, ArrowRight, Trophy, Zap, Flame, Target, Users, Link as LinkIcon, Crown, Star, Skull, ShieldAlert, Droplets, Info, Brain } from "lucide-react";
+import { Loader2, Newspaper, ArrowRight, Trophy, Zap, Flame, Target, Users, Link as LinkIcon, Crown, Star, Skull, ShieldAlert, Droplets, Info, Brain, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { calculateAggregatedStats, getChemistryRankings } from "@/lib/data";
@@ -47,22 +47,28 @@ function DashboardContent() {
   const lastMatch = playedMatches[0];
   const stats = calculateAggregatedStats(allPlayers, allMatches);
 
-  // 1. Pichichi Stats
+  // 1. ORDEN DE MANDO (Justicia de Liderazgo)
+  const ordenDeMando = [...stats]
+    .filter(p => p.totalCaptaincies === 0 && p.isActive)
+    .sort((a, b) => b.matchesPlayed - a.matchesPlayed)
+    .slice(0, 2);
+
+  // 2. Pichichi Stats
   const pichichiRanking = [...stats].sort((a, b) => b.totalGoals - a.totalGoals || b.goalsPerMatch - a.goalsPerMatch);
   const topScorer = pichichiRanking[0];
   const otherScorers = pichichiRanking.slice(1, 5);
 
-  // 2. Influence Stats
+  // 3. Influence Stats
   const influenceRanking = [...stats]
     .filter(p => p.matchesPlayed >= 2)
     .sort((a, b) => b.winPercentage - a.winPercentage || b.matchesPlayed - a.matchesPlayed);
   const mostInfluential = influenceRanking[0];
   const otherInfluential = influenceRanking.slice(1, 3);
 
-  // 3. On Fire (Power Ranking)
+  // 4. On Fire (Power Ranking)
   const topPower = [...stats].sort((a, b) => b.powerPoints - a.powerPoints).slice(0, 5);
 
-  // 4. Pulso de la Competición
+  // 5. Pulso de la Competición
   const maxMvpCount = stats.length > 0 ? Math.max(...stats.map(p => p.totalMvp), 0) : 0;
   const recordGoalsInMatch = allMatches.length > 0 ? Math.max(...allMatches.map(m => m.teamAScore + m.teamBScore), 0) : 0;
   
@@ -77,10 +83,9 @@ function DashboardContent() {
   const topAttendance = stats.length > 0 ? Math.max(...stats.map(p => p.matchesPlayed), 0) : 0;
   const attendanceValue = totalPossibleMatches > 0 ? `${Math.round((topAttendance / totalPossibleMatches) * 100)}%` : "0%";
 
-  // 5. Sala de Humildad
+  // 6. Sala de Humildad
   const filteredForHumility = stats.filter(p => p.matchesPlayed >= 2);
   const imanDerrotas = [...filteredForHumility].sort((a, b) => b.losses - a.losses || b.matchesPlayed - a.matchesPlayed).slice(0, 3);
-  const deudaMando = [...filteredForHumility].filter(p => p.totalCaptaincies === 0).sort((a, b) => b.matchesPlayed - a.matchesPlayed).slice(0, 3);
   const polvoraMojada = [...filteredForHumility]
     .filter(p => p.position === 'Mediocampista' || p.position === 'Delantero')
     .sort((a, b) => a.goalsPerMatch - b.goalsPerMatch || a.totalGoals - b.totalGoals)
@@ -151,7 +156,46 @@ function DashboardContent() {
         </section>
       )}
 
-      {/* 2. ESTRELLAS DE LA ACADEMIA */}
+      {/* 2. ORDEN DE MANDO (Justicia Táctica) */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-3 px-1">
+          <ShieldCheck className="h-4 w-4 text-emerald-500" />
+          <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-500 font-oswald">ORDEN DE MANDO</h2>
+          <div className="h-px flex-1 bg-emerald-500/10" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {ordenDeMando.length > 0 ? ordenDeMando.map((p, idx) => (
+            <Link key={p.playerId} href="/pulse/deuda-mando" className="group">
+              <div className="bg-[#111827] border border-emerald-500/20 rounded-2xl p-5 flex items-center justify-between transition-all hover:bg-emerald-500/5 hover:border-emerald-500/40">
+                <div className="flex items-center gap-4">
+                  <div className="relative">
+                    <Avatar className="h-12 w-12 border-2 border-emerald-500/20">
+                      <AvatarFallback className="bg-emerald-500/10 text-emerald-500 font-black">{getInitials(p.name)}</AvatarFallback>
+                    </Avatar>
+                    <div className="absolute -bottom-1 -right-1 bg-emerald-500 rounded-full p-1 shadow-lg ring-2 ring-[#111827]">
+                      <Crown className="h-2.5 w-2.5 text-black" />
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-[8px] font-black text-emerald-500/60 uppercase tracking-widest font-oswald mb-0.5">CANDIDATO #{idx + 1}</p>
+                    <h3 className="text-xl font-black italic uppercase text-white group-hover:text-emerald-500 transition-colors leading-none">{p.name}</h3>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="text-3xl font-black italic font-bebas text-white leading-none">{p.matchesPlayed}</span>
+                  <p className="text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest font-oswald">PJ SIN BRAZALETE</p>
+                </div>
+              </div>
+            </Link>
+          )) : (
+            <div className="col-span-2 bg-[#111827] border border-dashed border-white/5 rounded-2xl p-6 text-center">
+              <p className="text-[10px] font-black uppercase text-muted-foreground/40 tracking-widest italic">Todos los jugadores activos han portado el mando</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* 3. ESTRELLAS DE LA ACADEMIA */}
       <section className="space-y-6">
         <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 px-1 font-oswald">ESTRELLAS DE LA ACADEMIA</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -317,7 +361,7 @@ function DashboardContent() {
         </div>
       </section>
 
-      {/* 3. PULSO DE LA COMPETICIÓN */}
+      {/* 4. PULSO DE LA COMPETICIÓN */}
       <section className="space-y-6">
         <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 px-1 font-oswald">PULSO DE LA COMPETICIÓN</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -356,13 +400,13 @@ function DashboardContent() {
         </div>
       </section>
 
-      {/* 4. SALA DE HUMILDAD */}
+      {/* 5. SALA DE HUMILDAD */}
       <section className="space-y-6">
         <div className="flex items-center justify-between px-1">
           <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 font-oswald">SALA DE HUMILDAD</h2>
           <Badge variant="outline" className="text-[7px] font-black uppercase tracking-widest border-white/5 text-muted-foreground/40 font-oswald">FILTRO: MÍNIMO 2 PJ</Badge>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Imán de Derrotas */}
           <Link href="/pulse/iman-derrotas" className="bg-[#111827]/40 rounded-2xl p-6 border border-white/5 space-y-6 hover:border-red-500/20 transition-all hover-lift">
             <div className="flex items-center gap-2 text-red-500/60">
@@ -377,25 +421,6 @@ function DashboardContent() {
                     <span className="text-[7px] font-bold text-muted-foreground/40 uppercase tracking-widest font-oswald">{p.wins}V - {p.draws}E - {p.losses}D ({p.matchesPlayed} PJ)</span>
                   </div>
                   <span className="text-xl font-black italic text-red-500/80 font-bebas">{p.losses}</span>
-                </div>
-              ))}
-            </div>
-          </Link>
-
-          {/* Deuda de Mando */}
-          <Link href="/pulse/deuda-mando" className="bg-[#111827]/40 rounded-2xl p-6 border border-white/5 space-y-6 hover:border-orange-500/20 transition-all hover-lift">
-            <div className="flex items-center gap-2 text-orange-500/60">
-              <ShieldAlert className="h-4 w-4" />
-              <span className="text-[10px] font-black uppercase tracking-widest font-oswald">DEUDA DE MANDO</span>
-            </div>
-            <div className="space-y-4">
-              {deudaMando.map(p => (
-                <div key={p.playerId} className="flex items-center justify-between">
-                  <div className="flex flex-col">
-                    <span className="text-xs font-bold uppercase hover:text-orange-500 transition-colors">{p.name}</span>
-                    <span className="text-[7px] font-bold text-muted-foreground/40 uppercase tracking-widest font-oswald">PJ SIN BRAZALETE</span>
-                  </div>
-                  <span className="text-xl font-black italic text-orange-500/80 font-bebas">{p.matchesPlayed}</span>
                 </div>
               ))}
             </div>
