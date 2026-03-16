@@ -1,4 +1,3 @@
-
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
@@ -105,7 +104,7 @@ export function AppSidebar() {
           </div>
           <div className="flex flex-col">
             <h2 className="text-lg font-bold tracking-tight text-white leading-none">REAL ACADE</h2>
-            <p className="text-[8px] uppercase tracking-[0.2em] text-primary font-bold mt-1">CLUB DE ÉLITE</p>
+            <p className="text-[8px] uppercase tracking-[0.2em] text-primary font-bold mt-1">CLUB DE FULBO</p>
           </div>
         </div>
       </SidebarHeader>

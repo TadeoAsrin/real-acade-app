@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from 'react';
@@ -6,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { useCollection, useMemoFirebase, useFirestore } from "@/firebase";
 import { collection, query, orderBy } from "firebase/firestore";
 import type { Match, Player } from "@/lib/definitions";
-import { Loader2, Newspaper, ArrowRight, Trophy, Zap, Flame, Target, Users, Link as LinkIcon, Crown, Star, Skull, ShieldAlert, Droplets, Info, Brain, ShieldCheck } from "lucide-react";
+import { Loader2, Newspaper, ArrowRight, Trophy, Zap, Flame, Target, Users, Link as LinkIcon, Crown, Star, Skull, ShieldAlert, Droplets, Info, Brain, ShieldCheck, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { calculateAggregatedStats, getChemistryRankings } from "@/lib/data";
@@ -127,10 +126,14 @@ function DashboardContent() {
                 </p>
                 <div className="flex flex-wrap gap-4 pt-4">
                   <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-white font-black uppercase italic px-10 h-14 text-sm rounded-xl">
-                    <Link href={`/dashboard?gaceta=${lastMatch.id}`}>LEER GACETA</Link>
+                    <Link href={`/dashboard?gaceta=${lastMatch.id}`} className="flex items-center gap-2">
+                      <Newspaper className="h-5 w-5" /> LEER EL DIARIO
+                    </Link>
                   </Button>
                   <Button asChild variant="outline" size="lg" className="border-white/10 hover:bg-white/5 font-black uppercase italic px-10 h-14 text-sm rounded-xl">
-                    <Link href={`/matches/${lastMatch.id}`}>FICHA TÉCNICA</Link>
+                    <Link href={`/matches/${lastMatch.id}`} className="flex items-center gap-2">
+                      <FileText className="h-5 w-5" /> FICHA TÉCNICA
+                    </Link>
                   </Button>
                 </div>
               </div>
