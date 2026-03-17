@@ -1,4 +1,3 @@
-
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
@@ -99,13 +98,13 @@ export function AppSidebar() {
   return (
     <Sidebar className="border-r border-white/5 bg-[#0b1220]">
       <SidebarHeader className="p-6">
-        <div className="flex items-center gap-4">
-          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20 overflow-hidden">
-            <Fut7StatsLogo width={28} height={28} className="shrink-0" />
+        <div className="flex items-center gap-4 group">
+          <div className="h-12 w-12 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 overflow-hidden shadow-2xl transition-transform group-hover:scale-105">
+            <Fut7StatsLogo width={48} height={48} className="shrink-0" />
           </div>
           <div className="flex flex-col">
-            <h2 className="text-lg font-bold tracking-tight text-white leading-none">REAL ACADE</h2>
-            <p className="text-[8px] uppercase tracking-[0.2em] text-primary font-bold mt-1">CLUB DE FULBO</p>
+            <h2 className="text-xl font-black tracking-tighter text-white leading-none">REAL ACADE</h2>
+            <p className="text-[8px] uppercase tracking-[0.3em] text-primary font-black mt-1">CLUB DE FULBO</p>
           </div>
         </div>
       </SidebarHeader>
