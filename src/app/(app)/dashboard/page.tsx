@@ -68,7 +68,7 @@ function DashboardContent() {
   // 4. On Fire (Power Ranking)
   const topPower = [...stats].sort((a, b) => b.powerPoints - a.powerPoints).slice(0, 5);
 
-  // 5. Pulso de la Competición
+  // 5. Pulso de la Competición - RÉCORD INDIVIDUAL DE MVP
   const maxMvpCount = stats.length > 0 ? Math.max(...stats.map(p => p.totalMvp), 0) : 0;
   const recordGoalsInMatch = allMatches.length > 0 ? Math.max(...allMatches.map(m => m.teamAScore + m.teamBScore), 0) : 0;
   

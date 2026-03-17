@@ -1,10 +1,11 @@
+
 {
   "placeholderImages": [
     {
       "id": "club-logo",
       "description": "Escudo Oficial Real Acade (Roble, Est. 2010)",
-      "imageUrl": "https://images.unsplash.com/photo-1614632537423-1e6c2e7e0aab?auto=format&fit=crop&q=80&w=400&h=400",
-      "imageHint": "football crest"
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/firebasestudio.appspot.com/o/real-acade-logo.png?alt=media&token=logo-official",
+      "imageHint": "oak tree crest"
     },
     {
       "id": "messi",

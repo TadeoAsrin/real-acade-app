@@ -1,3 +1,4 @@
+
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
@@ -99,7 +100,7 @@ export function AppSidebar() {
     <Sidebar className="border-r border-white/5 bg-[#0b1220]">
       <SidebarHeader className="p-6">
         <div className="flex items-center gap-4">
-          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
+          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20 overflow-hidden">
             <Fut7StatsLogo width={28} height={28} className="shrink-0" />
           </div>
           <div className="flex flex-col">
