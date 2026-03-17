@@ -4,7 +4,7 @@
     {
       "id": "club-logo",
       "description": "Escudo Oficial Real Acade",
-      "imageUrl": "https://images.unsplash.com/photo-1614632537197-38a17461c2ba?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/firebasestudio.appspot.com/o/real-acade-logo.png?alt=media&token=logo-official",
       "imageHint": "football crest shield"
     },
     {
@@ -12,42 +12,6 @@
       "description": "Lionel Messi",
       "imageUrl": "https://images.unsplash.com/photo-1552318975-2758c95c11bc?auto=format&fit=crop&q=80&w=400&h=400",
       "imageHint": "football portrait messi"
-    },
-    {
-      "id": "cr7",
-      "description": "Cristiano Ronaldo",
-      "imageUrl": "https://images.unsplash.com/photo-1518604666860-9ed391f76460?auto=format&fit=crop&q=80&w=400&h=400",
-      "imageHint": "football portrait ronaldo"
-    },
-    {
-      "id": "pele",
-      "description": "Pelé",
-      "imageUrl": "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=400&h=400",
-      "imageHint": "football legend portrait"
-    },
-    {
-      "id": "maradona",
-      "description": "Diego Maradona",
-      "imageUrl": "https://images.unsplash.com/photo-1529900948632-58674ba19306?auto=format&fit=crop&q=80&w=400&h=400",
-      "imageHint": "soccer portrait legend"
-    },
-    {
-      "id": "zidane",
-      "description": "Zinedine Zidane",
-      "imageUrl": "https://images.unsplash.com/photo-1606925797300-0b35e9d1741e?auto=format&fit=crop&q=80&w=400&h=400",
-      "imageHint": "footballer portrait"
-    },
-    {
-      "id": "ronaldinho",
-      "description": "Ronaldinho",
-      "imageUrl": "https://images.unsplash.com/photo-1551958219-acbc608c6377?auto=format&fit=crop&q=80&w=400&h=400",
-      "imageHint": "smiling footballer portrait"
-    },
-    {
-      "id": "r9",
-      "description": "Ronaldo Nazário",
-      "imageUrl": "https://images.unsplash.com/photo-1628891435222-065925dcb365?auto=format&fit=crop&q=80&w=400&h=400",
-      "imageHint": "striker portrait"
     }
   ]
 }

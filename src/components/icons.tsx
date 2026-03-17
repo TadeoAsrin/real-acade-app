@@ -10,7 +10,7 @@ export function Fut7StatsLogo({ className, width = 100, height = 100 }: { classN
   const logo = placeholderData.placeholderImages.find(img => img.id === 'club-logo');
   const [hasError, setHasError] = React.useState(false);
   
-  // Renderiza un logo vectorial elegante basado en tipografía si falla la imagen o la URL es restringida
+  // Renderiza un logo vectorial elegante basado en tipografía si falla la imagen
   const renderFallback = () => (
     <div 
       className={cn(
@@ -27,8 +27,9 @@ export function Fut7StatsLogo({ className, width = 100, height = 100 }: { classN
     </div>
   );
 
-  // Forzamos el fallback si la imagen actual es la de Firebase que da 403
-  if (hasError || !logo?.imageUrl || logo.imageUrl.includes('firebasestorage')) {
+  // Intentamos cargar la imagen oficial. 
+  // Usamos 'unoptimized' para que el navegador la pida directamente y evite el error 403 de Next.js
+  if (hasError || !logo?.imageUrl) {
     return renderFallback();
   }
 
@@ -41,6 +42,7 @@ export function Fut7StatsLogo({ className, width = 100, height = 100 }: { classN
         className="object-cover"
         onError={() => setHasError(true)}
         priority
+        unoptimized
         sizes="(max-width: 768px) 100px, 200px"
       />
     </div>
