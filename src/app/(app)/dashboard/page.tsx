@@ -68,7 +68,7 @@ function DashboardContent() {
   // 4. On Fire (Power Ranking)
   const topPower = [...stats].sort((a, b) => b.powerPoints - a.powerPoints).slice(0, 5);
 
-  // 5. Pulso de la Competición - RÉCORD INDIVIDUAL DE MVP
+  // 5. Pulso de la Competición
   const maxMvpCount = stats.length > 0 ? Math.max(...stats.map(p => p.totalMvp), 0) : 0;
   const recordGoalsInMatch = allMatches.length > 0 ? Math.max(...allMatches.map(m => m.teamAScore + m.teamBScore), 0) : 0;
   
@@ -96,6 +96,9 @@ function DashboardContent() {
 
   return (
     <div className="flex flex-col gap-10 max-w-7xl mx-auto pb-20">
+      {/* Texture Layer */}
+      <div className="fixed inset-0 bg-dot-pattern pointer-events-none opacity-20 z-0" />
+
       {matchForModal && (
         <MatchNewsModal 
           match={matchForModal} 
@@ -104,52 +107,50 @@ function DashboardContent() {
         />
       )}
 
-      {/* 1. HERO SECTION - ESTILO CINEMATOGRÁFICO */}
+      {/* 1. HERO SECTION - ESTILO CINEMATOGRÁFICO "EDICIÓN ESPECIAL" */}
       {lastMatch && (
-        <section>
-          <div className="relative group overflow-hidden rounded-[2.5rem] border-none bg-gradient-to-r from-primary/20 via-background to-accent/20 shadow-2xl transition-all duration-500 hover:scale-[1.005]">
+        <section className="relative z-10">
+          <div className="cinematic-banner p-8 md:p-16 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             <div className="absolute inset-0 bg-black/40 pointer-events-none" />
-            <div className="relative z-10 p-8 md:p-16 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-              <div className="lg:col-span-8 space-y-8">
-                <div className="flex items-center gap-3">
-                  <Badge className="bg-primary text-primary-foreground font-bebas tracking-widest px-4 py-1.5 text-sm rounded-none shadow-lg shadow-primary/20">EDICIÓN ESPECIAL</Badge>
-                  <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] font-oswald">
-                    {new Date(lastMatch.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}
-                  </span>
-                </div>
-                <h1 className="text-5xl md:text-[5.5rem] font-bebas text-white tracking-wider leading-[0.85] uppercase">
-                  {lastMatch.aiSummary?.title || "CRÓNICA DE LA JORNADA"}
-                </h1>
-                <p className="text-xl md:text-2xl text-muted-foreground font-lora italic max-w-2xl leading-relaxed">
-                  {lastMatch.aiSummary?.subtitle || "Exhibición de fútbol y mística en el último encuentro del club."}
-                </p>
-                <div className="flex flex-wrap gap-4 pt-6">
-                  <Button asChild size="lg" className="h-16 px-10 font-bebas text-2xl tracking-[0.2em] bg-white text-black hover:bg-white/90 shadow-[0_0_40px_rgba(255,255,255,0.25)] rounded-none transition-all group-hover:px-12">
-                    <Link href={`/dashboard?gaceta=${lastMatch.id}`} className="flex items-center gap-3">
-                      <Newspaper className="h-6 w-6" /> LEER EL DIARIO
-                    </Link>
-                  </Button>
-                  <Button asChild variant="outline" size="lg" className="border-white/10 hover:bg-white/5 font-black uppercase italic px-10 h-16 text-sm rounded-none">
-                    <Link href={`/matches/${lastMatch.id}`} className="flex items-center gap-2">
-                      <FileText className="h-5 w-5" /> FICHA TÉCNICA
-                    </Link>
-                  </Button>
-                </div>
+            <div className="lg:col-span-8 space-y-8 relative z-10">
+              <div className="flex items-center gap-3">
+                <Badge className="bg-primary text-primary-foreground font-bebas tracking-widest px-4 py-1.5 text-sm rounded-none shadow-lg shadow-primary/20">EDICIÓN ESPECIAL</Badge>
+                <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] font-oswald">
+                  {new Date(lastMatch.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}
+                </span>
               </div>
-              
-              <div className="lg:col-span-4 flex justify-center lg:justify-end">
-                <div className="bg-black/60 backdrop-blur-xl p-10 rounded-none border border-white/10 shadow-[0_30px_60px_rgba(0,0,0,0.5)] text-center space-y-6 min-w-[280px] transform lg:rotate-3 group-hover:rotate-0 transition-transform duration-700">
-                  <p className="text-[10px] font-black uppercase text-white/40 tracking-[0.4em] font-oswald">RESULTADO FINAL</p>
-                  <div className="flex items-center justify-center gap-8">
-                    <div className="flex flex-col items-center">
-                      <span className="text-8xl font-bebas text-primary leading-none drop-shadow-[0_0_20px_rgba(59,130,246,0.6)]">{lastMatch.teamAScore}</span>
-                      <span className="text-[10px] font-black text-primary uppercase mt-3 tracking-widest font-oswald">AZUL</span>
-                    </div>
-                    <div className="h-16 w-[1px] bg-white/10" />
-                    <div className="flex flex-col items-center">
-                      <span className="text-8xl font-bebas text-accent leading-none drop-shadow-[0_0_20px_rgba(244,63,94,0.6)]">{lastMatch.teamBScore}</span>
-                      <span className="text-[10px] font-black text-accent uppercase mt-3 tracking-widest font-oswald">ROJO</span>
-                    </div>
+              <h1 className="text-5xl md:text-[5.5rem] font-bebas text-white tracking-wider leading-[0.85] uppercase">
+                {lastMatch.aiSummary?.title || "CRÓNICA DE LA JORNADA"}
+              </h1>
+              <p className="text-xl md:text-2xl text-muted-foreground font-lora italic max-w-2xl leading-relaxed">
+                {lastMatch.aiSummary?.subtitle || "Exhibición de fútbol y mística en el último encuentro del club."}
+              </p>
+              <div className="flex flex-wrap gap-4 pt-6">
+                <Button asChild size="lg" className="h-16 px-10 font-bebas text-2xl tracking-[0.2em] bg-white text-black hover:bg-white/90 shadow-[0_0_40px_rgba(255,255,255,0.25)] rounded-none transition-all group-hover:px-12">
+                  <Link href={`/dashboard?gaceta=${lastMatch.id}`} className="flex items-center gap-3">
+                    <Newspaper className="h-6 w-6" /> LEER EL DIARIO
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" size="lg" className="border-white/10 hover:bg-white/5 font-black uppercase italic px-10 h-16 text-sm rounded-none text-white">
+                  <Link href={`/matches/${lastMatch.id}`} className="flex items-center gap-2">
+                    <FileText className="h-5 w-5" /> FICHA TÉCNICA
+                  </Link>
+                </Button>
+              </div>
+            </div>
+            
+            <div className="lg:col-span-4 flex justify-center lg:justify-end relative z-10">
+              <div className="bg-black/60 backdrop-blur-xl p-10 rounded-none border border-white/10 shadow-[0_30px_60px_rgba(0,0,0,0.5)] text-center space-y-6 min-w-[280px] transform lg:rotate-3 hover:rotate-0 transition-transform duration-700">
+                <p className="text-[10px] font-black uppercase text-white/40 tracking-[0.4em] font-oswald">RESULTADO FINAL</p>
+                <div className="flex items-center justify-center gap-8">
+                  <div className="flex flex-col items-center">
+                    <span className="text-8xl font-bebas text-primary leading-none drop-shadow-[0_0_20px_rgba(59,130,246,0.6)]">{lastMatch.teamAScore}</span>
+                    <span className="text-[10px] font-black text-primary uppercase mt-3 tracking-widest font-oswald">AZUL</span>
+                  </div>
+                  <div className="h-16 w-[1px] bg-white/10" />
+                  <div className="flex flex-col items-center">
+                    <span className="text-8xl font-bebas text-accent leading-none drop-shadow-[0_0_20px_rgba(244,63,94,0.6)]">{lastMatch.teamBScore}</span>
+                    <span className="text-[10px] font-black text-accent uppercase mt-3 tracking-widest font-oswald">ROJO</span>
                   </div>
                 </div>
               </div>
@@ -159,7 +160,7 @@ function DashboardContent() {
       )}
 
       {/* 2. ORDEN DE MANDO (Justicia Táctica) */}
-      <section className="space-y-4">
+      <section className="space-y-4 relative z-10">
         <div className="flex items-center gap-3 px-1">
           <ShieldCheck className="h-4 w-4 text-emerald-500" />
           <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-500 font-oswald">ORDEN DE MANDO</h2>
@@ -198,7 +199,7 @@ function DashboardContent() {
       </section>
 
       {/* 3. ESTRELLAS DE LA ACADEMIA */}
-      <section className="space-y-6">
+      <section className="space-y-6 relative z-10">
         <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 px-1 font-oswald">ESTRELLAS DE LA ACADEMIA</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           
@@ -364,7 +365,7 @@ function DashboardContent() {
       </section>
 
       {/* 4. PULSO DE LA COMPETICIÓN */}
-      <section className="space-y-6">
+      <section className="space-y-6 relative z-10">
         <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 px-1 font-oswald">PULSO DE LA COMPETICIÓN</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Link href="/pulse/mvp" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-yellow-500/20 transition-all hover-lift">
@@ -403,7 +404,7 @@ function DashboardContent() {
       </section>
 
       {/* 5. SALA DE HUMILDAD */}
-      <section className="space-y-6">
+      <section className="space-y-6 relative z-10">
         <div className="flex items-center justify-between px-1">
           <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 font-oswald">SALA DE HUMILDAD</h2>
           <Badge variant="outline" className="text-[7px] font-black uppercase tracking-widest border-white/5 text-muted-foreground/40 font-oswald">FILTRO: MÍNIMO 2 PJ</Badge>

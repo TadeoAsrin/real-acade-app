@@ -10,7 +10,7 @@ export function Fut7StatsLogo({ className, width = 100, height = 100 }: { classN
   const logo = placeholderData.placeholderImages.find(img => img.id === 'club-logo');
   const [hasError, setHasError] = React.useState(false);
   
-  // Renderiza un logo vectorial elegante basado en tipografía si falla la imagen
+  // Renderiza un logo vectorial elegante basado en tipografía si falla la imagen o la URL es restringida
   const renderFallback = () => (
     <div 
       className={cn(
@@ -27,7 +27,8 @@ export function Fut7StatsLogo({ className, width = 100, height = 100 }: { classN
     </div>
   );
 
-  if (hasError || !logo?.imageUrl) {
+  // Forzamos el fallback si la imagen actual es la de Firebase que da 403
+  if (hasError || !logo?.imageUrl || logo.imageUrl.includes('firebasestorage')) {
     return renderFallback();
   }
 
