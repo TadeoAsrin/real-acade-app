@@ -39,20 +39,20 @@ const MatchCard = ({ match, isAdmin, onDelete }: MatchCardProps) => {
   const hasScore = match.teamAScore > 0 || match.teamBScore > 0;
   const isMatchToday = isToday(date);
   const isUpcoming = !hasScore && (isFuture(date) || isMatchToday);
-  const isCompleted = hasScore || (!isFuture(date) && !isMatchToday);
+  const isCompleted = hasScore || (!isFuture(date) && !isToday(date));
   const teamAWon = match.teamAScore > match.teamBScore;
   const teamBWon = match.teamBScore > match.teamAScore;
   const draw = match.teamAScore === match.teamBScore && isCompleted && hasScore;
 
   return (
-    <Card className="competition-card border-l-4 border-l-primary/30 hover:border-l-primary transition-all group relative bg-black/20 hover-lift backdrop-blur-sm">
+    <Card className="competition-card border-l-4 border-l-primary/30 hover:border-l-primary transition-all group relative bg-black/20 hover-lift backdrop-blur-sm shadow-2xl">
       <CardContent className="p-0">
         <div className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <Link href={`/matches/${match.id}`} className="flex-1">
             <div className="flex flex-col md:flex-row md:items-center gap-6">
               <div className="flex items-center gap-4 min-w-[180px]">
                   <div className={cn(
-                    "p-3 rounded-xl shrink-0",
+                    "p-3 rounded-xl shrink-0 shadow-lg",
                     isMatchToday ? "bg-orange-500 text-white animate-pulse" : "bg-white/5 text-muted-foreground"
                   )}>
                       {isMatchToday ? <Flame className="h-5 w-5" /> : <CalendarIcon className="h-5 w-5" />}
@@ -65,7 +65,7 @@ const MatchCard = ({ match, isAdmin, onDelete }: MatchCardProps) => {
                         <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-black font-oswald">
                             {format(date, "MMMM yyyy", { locale: es })}
                         </span>
-                        {isMatchToday && <Badge className="h-3 text-[7px] bg-orange-500 uppercase p-1 rounded-none font-black italic">¡Hoy!</Badge>}
+                        {isMatchToday && <Badge className="h-3 text-[7px] bg-orange-500 uppercase p-1 rounded-none font-black italic shadow-lg">¡Hoy!</Badge>}
                       </div>
                   </div>
               </div>
@@ -105,12 +105,12 @@ const MatchCard = ({ match, isAdmin, onDelete }: MatchCardProps) => {
 
               <div className="flex items-center gap-3 md:ml-auto">
                 {match.photos && match.photos.length > 0 && (
-                  <Badge variant="outline" className="h-8 w-8 rounded-full p-0 flex items-center justify-center bg-primary/5 border-primary/20 text-primary">
+                  <Badge variant="outline" className="h-8 w-8 rounded-full p-0 flex items-center justify-center bg-primary/5 border-primary/20 text-primary shadow-sm">
                     <Camera className="h-4 w-4" />
                   </Badge>
                 )}
                 {match.aiSummary && (
-                  <Badge variant="outline" className="h-8 w-8 rounded-full p-0 flex items-center justify-center bg-emerald-500/5 border-emerald-500/20 text-emerald-500">
+                  <Badge variant="outline" className="h-8 w-8 rounded-full p-0 flex items-center justify-center bg-emerald-500/5 border-emerald-500/20 text-emerald-500 shadow-sm">
                     <MessageSquare className="h-4 w-4" />
                   </Badge>
                 )}
@@ -137,13 +137,13 @@ const MatchCard = ({ match, isAdmin, onDelete }: MatchCardProps) => {
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel className="bg-white/5 border-white/10 text-white font-bebas tracking-widest rounded-none h-12">CANCELAR</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => onDelete(match.id)} className="bg-destructive text-white font-bebas tracking-widest rounded-none h-12 px-8">BORRAR HISTORIAL</AlertDialogAction>
+                        <AlertDialogAction onClick={() => onDelete(match.id)} className="bg-destructive text-white font-bebas tracking-widest rounded-none h-12 px-8 shadow-lg shadow-destructive/20">BORRAR HISTORIAL</AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
                 </>
               )}
-              <Button asChild className="h-12 px-6 font-bebas text-xl tracking-widest bg-white text-black hover:bg-white/90 rounded-none transition-all group hover:px-8 shadow-lg">
+              <Button asChild className="h-12 px-6 font-bebas text-xl tracking-widest bg-white text-black hover:bg-white/90 rounded-none transition-all group hover:px-8 shadow-xl">
                 <Link href={`/matches/${match.id}`} className="flex items-center gap-3">
                   {isUpcoming ? "VER INFO" : "VER CRÓNICA"} <ArrowRight className="h-5 w-5" />
                 </Link>
@@ -204,7 +204,7 @@ export default function MatchesPage() {
         <div className="absolute inset-0 bg-black/40 pointer-events-none" />
         <div className="relative z-10 space-y-4 text-center md:text-left">
           <div className="flex items-center justify-center md:justify-start gap-3">
-            <Badge className="bg-primary text-primary-foreground font-bebas tracking-widest px-3 py-1 text-sm rounded-none">EDICIÓN ESPECIAL</Badge>
+            <Badge className="bg-primary text-primary-foreground font-bebas tracking-widest px-3 py-1 text-sm rounded-none shadow-lg shadow-primary/20">EDICIÓN ESPECIAL</Badge>
             <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] font-oswald">REGISTRO HISTÓRICO</span>
           </div>
           <h1 className="text-5xl md:text-7xl font-bebas text-white tracking-wider leading-none uppercase">HISTORIAL DE BATALLAS</h1>

@@ -80,7 +80,7 @@ function PlayersList() {
     if (sortParam === 'totalGoals') {
       setSortConfig({ key: 'totalGoals', direction: 'desc' });
     }
-  }, [sortParams]);
+  }, [searchParams]); // CORREGIDO: Usando searchParams en lugar de sortParams inexistente
 
   const playersQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -199,7 +199,7 @@ function PlayersList() {
         <div className="absolute inset-0 bg-black/40 pointer-events-none" />
         <div className="relative z-10 space-y-4 text-center md:text-left">
           <div className="flex items-center justify-center md:justify-start gap-3">
-            <Badge className="bg-primary text-primary-foreground font-bebas tracking-widest px-3 py-1 text-sm rounded-none">EDICIÓN ESPECIAL</Badge>
+            <Badge className="bg-primary text-primary-foreground font-bebas tracking-widest px-3 py-1 text-sm rounded-none shadow-lg shadow-primary/20">EDICIÓN ESPECIAL</Badge>
             <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] font-oswald">MERCADO DE PASES</span>
           </div>
           <h1 className="text-5xl md:text-7xl font-bebas text-white tracking-wider leading-none uppercase">PLANTILLA ÉLITE</h1>

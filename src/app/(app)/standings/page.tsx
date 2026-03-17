@@ -116,7 +116,7 @@ function StandingsContent() {
         <div className="absolute inset-0 bg-black/40 pointer-events-none" />
         <div className="relative z-10 space-y-4">
           <div className="flex items-center gap-3">
-            <Badge className="bg-primary text-primary-foreground font-bebas tracking-widest px-3 py-1 text-sm rounded-none">EDICIÓN ESPECIAL</Badge>
+            <Badge className="bg-primary text-primary-foreground font-bebas tracking-widest px-3 py-1 text-sm rounded-none shadow-lg shadow-primary/20">EDICIÓN ESPECIAL</Badge>
             <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] font-oswald">COMPETICIÓN OFICIAL</span>
           </div>
           <h1 className="text-5xl md:text-7xl font-bebas text-white tracking-wider leading-none uppercase">TABLA DE POSICIONES</h1>
@@ -125,7 +125,7 @@ function StandingsContent() {
       </section>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="bg-black/40 border border-white/5 p-1 h-14 rounded-lg w-full flex overflow-x-auto no-scrollbar backdrop-blur-md">
+        <TabsList className="bg-black/40 border border-white/5 p-1 h-14 rounded-lg w-full flex overflow-x-auto no-scrollbar backdrop-blur-md shadow-2xl">
           {["General", "Goleadores", "Goles Fecha", "Efectividad", "Capitanes"].map((tab) => (
             <TabsTrigger key={tab.toLowerCase().replace(" ", "-")} value={tab.toLowerCase().replace(" ", "-")} className="flex-1 min-w-[120px] font-bebas tracking-widest text-lg data-[state=active]:bg-white data-[state=active]:text-black rounded-md transition-all">
               {tab}
@@ -151,9 +151,9 @@ function StandingsContent() {
                 </TableHeader>
                 <TableBody>
                   {sortedGeneral.map((player, index) => (
-                    <TableRow key={player.playerId} className={cn("official-table-row h-20", index === 0 ? "podium-1" : index === 1 ? "podium-2" : index === 2 ? "podium-3" : "")}>
+                    <TableRow key={player.playerId} className={cn("official-table-row h-20 transition-all", index === 0 ? "podium-1" : index === 1 ? "podium-2" : index === 2 ? "podium-3" : "")}>
                       <TableCell className="text-center font-bebas text-3xl italic">
-                        {index === 0 ? <Crown className="h-6 w-6 mx-auto text-yellow-500" /> : index + 1}
+                        {index === 0 ? <Crown className="h-6 w-6 mx-auto text-yellow-500 animate-pulse" /> : index + 1}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-4">
@@ -224,15 +224,14 @@ function StandingsContent() {
             </Card>
           </TabsContent>
 
-          {/* Resto de contenidos simplificados para brevedad, manteniendo la estructura */}
           <TabsContent value="goles-fecha" className="animate-in fade-in slide-in-from-bottom-2 space-y-8">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-black/40 p-6 rounded-2xl border border-white/5 backdrop-blur-md">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-black/40 p-6 rounded-2xl border border-white/5 backdrop-blur-md shadow-2xl">
               <div className="flex items-center gap-3">
                 <Calendar className="h-6 w-6 text-primary" />
                 <span className="font-bebas text-2xl tracking-widest uppercase text-white">Seleccionar Jornada</span>
               </div>
               <Select value={selectedMatchId} onValueChange={setSelectedMatchId}>
-                <SelectTrigger className="w-full md:w-[300px] font-black h-12 bg-black/60 border-white/10 italic uppercase">
+                <SelectTrigger className="w-full md:w-[300px] font-black h-12 bg-black/60 border-white/10 italic uppercase rounded-none">
                   <SelectValue placeholder="Elegir partido" />
                 </SelectTrigger>
                 <SelectContent className="bg-surface-900 border-white/10">
@@ -246,10 +245,10 @@ function StandingsContent() {
             </div>
 
             {selectedMatch ? (
-              <Card className="competition-card border-t-4 border-t-primary overflow-hidden">
+              <Card className="competition-card border-t-4 border-t-primary overflow-hidden shadow-2xl">
                 <div className="bg-black/40 p-4 border-b border-white/5 flex items-center justify-between">
                   <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">REPORTE DE ARTILLERÍA</span>
-                  <Badge variant="outline" className="font-bebas tracking-widest text-primary border-primary/20 text-lg px-4">
+                  <Badge variant="outline" className="font-bebas tracking-widest text-primary border-primary/20 text-lg px-4 rounded-none">
                     {format(parseISO(selectedMatch.date), "PPPP", { locale: es })}
                   </Badge>
                 </div>
@@ -274,7 +273,7 @@ function StandingsContent() {
                             </div>
                           </TableCell>
                           <TableCell className="text-center">
-                            <Badge className={cn("uppercase font-black text-[10px] italic rounded-none px-3", isBlue ? "bg-primary" : "bg-accent")}>
+                            <Badge className={cn("uppercase font-black text-[10px] italic rounded-none px-3 shadow-lg", isBlue ? "bg-primary" : "bg-accent")}>
                               {isBlue ? "AZUL" : "ROJO"}
                             </Badge>
                           </TableCell>
@@ -339,14 +338,14 @@ function StandingsContent() {
             {suggestedCandidates.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {suggestedCandidates.map((cap, idx) => (
-                  <Card key={cap.playerId} className="competition-card border-t-4 border-t-emerald-500 bg-surface-900 relative group hover-lift overflow-hidden">
+                  <Card key={cap.playerId} className="competition-card border-t-4 border-t-emerald-500 bg-surface-900 relative group hover-lift overflow-hidden shadow-2xl">
                     <div className="absolute top-0 right-0 p-4 opacity-5"><Crown className="h-24 w-24 text-emerald-500" /></div>
                     <CardContent className="p-10 flex items-center gap-8">
                       <div className="relative">
                         <Avatar className="h-24 w-24 border-4 border-emerald-500/20 shadow-2xl shadow-emerald-500/20">
                           <AvatarFallback className="text-4xl font-bebas bg-emerald-500/10 text-emerald-500">{getInitials(cap.name)}</AvatarFallback>
                         </Avatar>
-                        <Badge className="absolute -bottom-2 -right-2 bg-emerald-500 text-black font-bebas px-3 py-1 rounded-none text-lg">CANDIDATO</Badge>
+                        <Badge className="absolute -bottom-2 -right-2 bg-emerald-500 text-black font-bebas px-3 py-1 rounded-none text-lg shadow-lg">CANDIDATO</Badge>
                       </div>
                       <div>
                         <p className="text-[10px] font-black uppercase text-emerald-500 tracking-[0.3em] font-oswald mb-1">MANDO SUGERIDO #{idx + 1}</p>
@@ -359,7 +358,7 @@ function StandingsContent() {
               </div>
             )}
 
-            <Card className="competition-card border-none bg-black/20">
+            <Card className="competition-card border-none bg-black/20 shadow-2xl">
               <Table>
                 <TableHeader>
                   <TableRow className="bg-black/40 border-white/5 h-14">
