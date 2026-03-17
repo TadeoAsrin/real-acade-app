@@ -30,7 +30,6 @@ export function Fut7StatsLogo({ className, width = 100, height = 100 }: { classN
     </div>
   );
 
-  // Si no hay logo o hay error de carga, mostramos el fallback elegante
   if (hasError || !logo?.imageUrl) {
     return renderFallback();
   }
