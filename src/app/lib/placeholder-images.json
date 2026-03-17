@@ -1,9 +1,8 @@
-
 {
   "placeholderImages": [
     {
       "id": "club-logo",
-      "description": "Escudo Oficial Real Acade (Roble, Est. 2010)",
+      "description": "Escudo Oficial Real Acade",
       "imageUrl": "https://firebasestorage.googleapis.com/v0/b/firebasestudio.appspot.com/o/real-acade-logo.png?alt=media&token=logo-official",
       "imageHint": "oak tree crest"
     },
