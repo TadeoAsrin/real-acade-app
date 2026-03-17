@@ -10,7 +10,7 @@ export function Fut7StatsLogo({ className, width = 100, height = 100 }: { classN
   const [hasError, setHasError] = React.useState(false);
   
   // Usamos una etiqueta <img> estándar para evitar el procesamiento de Next.js
-  // que suele causar bloqueos 403 con servidores externos.
+  // que suele causar bloqueos 403 con servidores externos como Imgur o Firebase.
   
   const renderFallback = () => (
     <div 
@@ -43,7 +43,7 @@ export function Fut7StatsLogo({ className, width = 100, height = 100 }: { classN
       <img 
         src={logo.imageUrl}
         alt="Escudo Oficial Real Acade"
-        className="object-contain p-1 w-full h-full drop-shadow-2xl"
+        className="object-contain p-1 w-full h-full drop-shadow-2xl transition-transform hover:scale-110 duration-500"
         onError={() => setHasError(true)}
       />
     </div>
