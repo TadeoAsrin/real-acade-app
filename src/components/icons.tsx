@@ -2,7 +2,6 @@
 'use client';
 
 import * as React from 'react';
-import Image from "next/image";
 import placeholderData from "@/app/lib/placeholder-images.json";
 import { cn } from '@/lib/utils';
 
@@ -10,7 +9,9 @@ export function Fut7StatsLogo({ className, width = 100, height = 100 }: { classN
   const logo = placeholderData.placeholderImages.find(img => img.id === 'club-logo');
   const [hasError, setHasError] = React.useState(false);
   
-  // Renderiza un emblema institucional de lujo si la imagen falla
+  // Usamos una etiqueta <img> estándar para evitar el proxy de Next.js que causa el error 403
+  // con URLs de Firebase Storage restrictivas.
+  
   const renderFallback = () => (
     <div 
       className={cn(
@@ -24,7 +25,6 @@ export function Fut7StatsLogo({ className, width = 100, height = 100 }: { classN
         <span className="font-bebas text-white leading-none tracking-tighter select-none" style={{ fontSize: width * 0.45 }}>RA</span>
         <div className="h-[2px] w-1/3 bg-yellow-500 mt-1 shadow-[0_0_8px_rgba(234,179,8,0.8)]" />
       </div>
-      {/* Detalle decorativo de escudo */}
       <div className="absolute -bottom-1 -right-1 opacity-20">
         <svg width={width * 0.4} height={width * 0.4} viewBox="0 0 24 24" fill="white">
           <path d="M12 2L4 5V11C4 16.07 7.41 20.83 12 22C16.59 20.83 20 16.07 20 11V5L12 2Z" />
@@ -39,14 +39,12 @@ export function Fut7StatsLogo({ className, width = 100, height = 100 }: { classN
 
   return (
     <div className={cn("relative overflow-hidden flex items-center justify-center rounded-2xl border-2 border-white/5 bg-black/40", className)} style={{ width, height }}>
-      <Image 
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img 
         src={logo.imageUrl}
         alt="Escudo Oficial Real Acade"
-        fill
-        className="object-contain p-1"
+        className="object-contain p-1 w-full h-full"
         onError={() => setHasError(true)}
-        priority
-        unoptimized
       />
     </div>
   );
