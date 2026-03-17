@@ -25,12 +25,12 @@ export function Fut7StatsLogo({ className, width = 100, height = 100 }: { classN
   }
 
   return (
-    <div className={cn("relative overflow-hidden", className)} style={{ width, height }}>
+    <div className={cn("relative overflow-hidden flex items-center justify-center", className)} style={{ width, height }}>
       <Image 
         src={logo.imageUrl}
         alt="Escudo Oficial Real Acade"
         fill
-        className="object-cover"
+        className="object-contain"
         onError={() => setError(true)}
         priority
         sizes="(max-width: 768px) 100px, 200px"
