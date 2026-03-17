@@ -9,8 +9,8 @@ export function Fut7StatsLogo({ className, width = 100, height = 100 }: { classN
   const logo = placeholderData.placeholderImages.find(img => img.id === 'club-logo');
   const [hasError, setHasError] = React.useState(false);
   
-  // Usamos una etiqueta <img> estándar para evitar el proxy de Next.js que causa el error 403
-  // con URLs de Firebase Storage restrictivas.
+  // Usamos una etiqueta <img> estándar para evitar el procesamiento de Next.js
+  // que suele causar bloqueos 403 con servidores externos.
   
   const renderFallback = () => (
     <div 
@@ -38,12 +38,12 @@ export function Fut7StatsLogo({ className, width = 100, height = 100 }: { classN
   }
 
   return (
-    <div className={cn("relative overflow-hidden flex items-center justify-center rounded-2xl border-2 border-white/5 bg-black/40", className)} style={{ width, height }}>
+    <div className={cn("relative overflow-hidden flex items-center justify-center rounded-2xl border-2 border-white/5 bg-black/40 shadow-inner", className)} style={{ width, height }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img 
         src={logo.imageUrl}
         alt="Escudo Oficial Real Acade"
-        className="object-contain p-1 w-full h-full"
+        className="object-contain p-1 w-full h-full drop-shadow-2xl"
         onError={() => setHasError(true)}
       />
     </div>
