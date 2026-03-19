@@ -214,7 +214,9 @@ export default function MatchesPage() {
         {isAdmin && (
           <div className="relative z-10">
             <Button asChild size="lg" className="h-16 px-10 font-bebas text-2xl tracking-[0.2em] bg-white text-black hover:bg-white/90 shadow-[0_0_40px_rgba(255,255,255,0.25)] rounded-none transition-all group hover:px-12">
-              <Plus className="mr-3 h-6 w-6" /> NUEVO PARTIDO
+              <Link href="/matches/new" className="flex items-center">
+                <Plus className="mr-3 h-6 w-6" /> NUEVO PARTIDO
+              </Link>
             </Button>
           </div>
         )}
