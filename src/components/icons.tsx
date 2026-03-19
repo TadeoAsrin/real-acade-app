@@ -39,7 +39,7 @@ export function Fut7StatsLogo({ className, width = 100, height = 100 }: { classN
       <img 
         src={logo.imageUrl}
         alt="Escudo Oficial Real Acade"
-        className="object-cover p-0 w-full h-full transition-transform hover:scale-110 duration-500"
+        className="object-contain p-1 w-full h-full transition-transform hover:scale-110 duration-500"
         onError={() => setHasError(true)}
       />
     </div>
