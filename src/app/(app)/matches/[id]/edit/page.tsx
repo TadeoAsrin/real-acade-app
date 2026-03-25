@@ -139,8 +139,9 @@ export default function EditMatchPage() {
       });
 
       const allStats = [...match.teamAPlayers, ...match.teamBPlayers];
-      const currentMvp = allStats.find(s => s.isMvp === true || s.isMvp === "true" || (s as any).isMvp === 1);
-      const currentBestGoal = allStats.find(s => s.hasBestGoal === true || s.hasBestGoal === "true" || (s as any).hasBestGoal === 1);
+      // Sync awards from stats
+      const currentMvp = allStats.find(s => s.isMvp === true || String(s.isMvp) === "true" || (s as any).isMvp === 1);
+      const currentBestGoal = allStats.find(s => s.hasBestGoal === true || String(s.hasBestGoal) === "true" || (s as any).hasBestGoal === 1);
 
       form.reset({
         date: parseISO(match.date),
