@@ -204,6 +204,11 @@ export default function GalleryPage() {
       {/* 3. LIGHTBOX DIALOG */}
       <Dialog open={!!selectedItem} onOpenChange={(open) => !open && setSelectedItem(null)}>
         <DialogContent className="max-w-[95vw] max-h-[90vh] p-0 overflow-hidden bg-black/95 border-none shadow-2xl flex flex-col items-center justify-center">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Visualizador de Galería</DialogTitle>
+            <DialogDescription>Vista ampliada del momento seleccionado del club.</DialogDescription>
+          </DialogHeader>
+          
           {selectedItem && (
             <div className="relative w-full h-full flex flex-col items-center justify-center">
               <button 
