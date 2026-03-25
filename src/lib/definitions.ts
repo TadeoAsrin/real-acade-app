@@ -70,6 +70,9 @@ export type AggregatedPlayerStats = {
   drawsAsCaptain: number;
   matchesSinceLastCaptain: number;
   lethalityIndex: number;
+  masteryIndex: number;
+  cleanSheets: number;
+  defenseResilienceMatches: number; // Matches with exactly 1 goal conceded
 };
 
 export type ChemistryPair = {
@@ -99,5 +102,5 @@ export type GalleryItem = {
   description?: string;
   date: string;
   category?: string;
-  matchId?: string; // Optional reference if it comes from a match
+  matchId?: string;
 };

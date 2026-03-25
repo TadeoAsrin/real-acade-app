@@ -1,10 +1,11 @@
+
 'use client';
 
 import * as React from 'react';
 import { useParams } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Trophy, History, TrendingUp, Loader2, MapPin, Target, Star, ChevronLeft, Calendar, ChevronRight, Zap, ShieldCheck, Crown } from "lucide-react";
+import { Trophy, History, TrendingUp, Loader2, MapPin, Target, Star, ChevronLeft, Calendar, ChevronRight, Zap, ShieldCheck, Crown, Medal } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -116,9 +117,14 @@ export default function PlayerProfilePage() {
                 {getInitials(player.name)}
               </AvatarFallback>
             </Avatar>
-            <Badge className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-4 py-1 font-black uppercase italic tracking-tighter bg-primary shadow-lg ring-4 ring-background">
-              {playerStats.powerPoints} PTS
-            </Badge>
+            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex gap-2">
+              <Badge className="px-4 py-1 font-black uppercase italic tracking-tighter bg-primary shadow-lg ring-4 ring-background">
+                {playerStats.powerPoints} PTS
+              </Badge>
+              <Badge className="px-4 py-1 font-black uppercase italic tracking-tighter bg-emerald-500 shadow-lg ring-4 ring-background">
+                {playerStats.masteryIndex} IM
+              </Badge>
+            </div>
           </div>
           <div className="text-center md:text-left space-y-4">
             <div className="space-y-1">
@@ -154,7 +160,7 @@ export default function PlayerProfilePage() {
       </div>
 
       <div className="grid gap-6 grid-cols-2 lg:grid-cols-4">
-        <StatBox label="Partidos" value={playerStats.matchesPlayed} icon={History} color="primary" sub="PJ" />
+        <StatBox label="Jerarquía" value={playerStats.masteryIndex} icon={Medal} color="text-emerald-500" sub="IM" />
         <StatBox label="Goles" value={playerStats.totalGoals} icon={Target} color="yellow-500" sub="GF" />
         <StatBox label="Premios MVP" value={playerStats.totalMvp} icon={Star} color="yellow-500" sub="MVP" />
         <StatBox label="Capitanías" value={playerStats.totalCaptaincies} icon={ShieldCheck} color="emerald-500" sub="CAP" />
@@ -229,36 +235,27 @@ export default function PlayerProfilePage() {
           <Card className="competition-card border-t-4 border-t-emerald-500 bg-emerald-500/5">
             <CardHeader className="bg-emerald-500/10 pb-4">
               <CardTitle className="text-xs font-black uppercase tracking-widest text-emerald-500 flex items-center gap-2">
-                <Crown className="h-3 w-3" /> Récord de Mando
+                <Medal className="h-3 w-3" /> Reporte de Jerarquía
               </CardTitle>
             </CardHeader>
-            <CardContent className="pt-6 space-y-6">
-              <div className="grid grid-cols-3 gap-2 text-center">
-                <div className="bg-emerald-500/10 p-2 rounded-lg">
-                  <p className="text-[8px] font-black uppercase text-emerald-500/60 mb-1">V</p>
-                  <p className="text-xl font-bebas text-emerald-500">{playerStats.winsAsCaptain}</p>
-                </div>
-                <div className="bg-orange-500/10 p-2 rounded-lg">
-                  <p className="text-[8px] font-black uppercase text-orange-500/60 mb-1">E</p>
-                  <p className="text-xl font-bebas text-orange-500">{playerStats.drawsAsCaptain}</p>
-                </div>
-                <div className="bg-red-500/10 p-2 rounded-lg">
-                  <p className="text-[8px] font-black uppercase text-red-500/60 mb-1">D</p>
-                  <p className="text-xl font-bebas text-red-500">{playerStats.lossesAsCaptain}</p>
-                </div>
+            <CardContent className="pt-6 space-y-4">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground font-bold uppercase tracking-tighter">Vallas Invictas (Muralla)</span>
+                <span className="font-black text-emerald-500">x{playerStats.cleanSheets}</span>
               </div>
-              <div className="pt-4 border-t border-white/5 space-y-2">
-                <div className="flex items-center justify-between text-[10px] font-bold uppercase text-muted-foreground/60">
-                  <span>Estado de Turno:</span>
-                  {playerStats.totalCaptaincies === 0 ? (
-                    <span className="text-emerald-500">Debut Pendiente</span>
-                  ) : (
-                    <span>Último mando: {format(parseISO(playerStats.lastCaptainDate!), "dd/MM", { locale: es })}</span>
-                  )}
-                </div>
-                <div className="flex items-center justify-between text-[10px] font-black uppercase text-white">
-                  <span>Partidos en deuda:</span>
-                  <span className="text-lg font-bebas italic text-emerald-500">{playerStats.matchesSinceLastCaptain}</span>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground font-bold uppercase tracking-tighter">Resistencia Defensiva</span>
+                <span className="font-black text-emerald-500">x{playerStats.defenseResilienceMatches}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground font-bold uppercase tracking-tighter">Victorias como Capitán</span>
+                <span className="font-black text-emerald-500">x{playerStats.winsAsCaptain}</span>
+              </div>
+              <div className="pt-4 border-t border-white/10 flex items-center justify-between">
+                <span className="font-black uppercase tracking-widest text-white">Índice Final</span>
+                <div className="flex items-center gap-2">
+                  <Medal className="h-4 w-4 text-emerald-500" />
+                  <span className="text-3xl font-black italic text-emerald-500">{playerStats.masteryIndex}</span>
                 </div>
               </div>
             </CardContent>

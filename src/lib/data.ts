@@ -1,3 +1,4 @@
+
 import type { Player, Match, AggregatedPlayerStats, PlayerStats, ChemistryPair } from "./definitions";
 
 const POINTS = {
@@ -6,6 +7,19 @@ const POINTS = {
   GOAL: 2,
   MVP: 15,
   BEST_GOAL: 5,
+};
+
+// Mastery Index Weights (Bonus per match context)
+const MASTERY_WEIGHTS = {
+  WIN_AS_CAPTAIN: 0.40,
+  CLEAN_SHEET: 0.50,
+  ONE_GOAL_CONCEDED: 0.25,
+  MVP: 0.75,
+  BEST_GOAL: 0.25,
+};
+
+const IS_DEFENSIVE_POSITION = (pos?: string) => {
+  return pos === 'Arquero' || pos === 'Lateral Derecho' || pos === 'Defensor Central' || pos === 'Lateral Izquierdo';
 };
 
 export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match[]): AggregatedPlayerStats[] => {
@@ -47,6 +61,9 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
       drawsAsCaptain: 0,
       matchesSinceLastCaptain: 0,
       lethalityIndex: 0,
+      masteryIndex: 0,
+      cleanSheets: 0,
+      defenseResilienceMatches: 0,
     };
   });
 
@@ -88,6 +105,12 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
                 result = 'W';
             } else {
                 stats.losses++;
+            }
+
+            // Clean Sheet & Defense Resilience (GK/DEF Only)
+            if (IS_DEFENSIVE_POSITION(stats.position)) {
+              if (otherTeamScore === 0) stats.cleanSheets++;
+              if (otherTeamScore === 1) stats.defenseResilienceMatches++;
             }
 
             if (isCaptain) {
@@ -138,11 +161,20 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
           const pointsPossible = stats.matchesPlayed * 3;
           stats.efficiency = Math.round((pointsObtained / pointsPossible) * 100);
 
-          // Jugador activo si jugó al menos 1 de los últimos 5 partidos del club
+          // Mastery Index Calculation
+          const totalBasePoints = stats.wins * 3 + stats.draws * 1;
+          const captainBonus = stats.winsAsCaptain * MASTERY_WEIGHTS.WIN_AS_CAPTAIN;
+          const cleanSheetBonus = stats.cleanSheets * MASTERY_WEIGHTS.CLEAN_SHEET;
+          const resilienceBonus = stats.defenseResilienceMatches * MASTERY_WEIGHTS.ONE_GOAL_CONCEDED;
+          const mvpBonus = stats.totalMvp * MASTERY_WEIGHTS.MVP;
+          const bestGoalBonus = stats.totalBestGoals * MASTERY_WEIGHTS.BEST_GOAL;
+
+          const totalMasteryPoints = totalBasePoints + captainBonus + cleanSheetBonus + resilienceBonus + mvpBonus + bestGoalBonus;
+          stats.masteryIndex = Number((totalMasteryPoints / stats.matchesPlayed).toFixed(2));
+
           stats.isActive = stats.matchesInLast5 >= 1;
           stats.captaincyPriorityScore = (stats.matchesInLast5 * 3) + (stats.matchesPlayed * 1) - (stats.totalCaptaincies * 4);
 
-          // Índice de Letalidad: Goles + (G/PJ * 2). Requiere min 3 PJ para ponderar el promedio.
           stats.lethalityIndex = stats.matchesPlayed >= 3 
             ? stats.totalGoals + (stats.goalsPerMatch * 2) 
             : stats.totalGoals;
@@ -192,12 +224,10 @@ export const getChemistryRankings = (players: Player[], matches: Match[], minMat
       
       if (!player1 || !player2 || !s1 || !s2) return null;
 
-      // Filtro de actividad: Ambos jugadores deben estar activos
       if (!s1.isActive || !s2.isActive) return null;
 
       const winRate = Math.round((stats.wins / stats.matches) * 100);
 
-      // Filtro de rendimiento: Win Rate mínimo del 50%
       if (winRate < 50) return null;
 
       return { 
