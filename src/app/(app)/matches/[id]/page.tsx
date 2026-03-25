@@ -61,16 +61,24 @@ export default function MatchDetailPage() {
   const mvpPlayer = React.useMemo(() => {
     if (!match || !allPlayers.length) return null;
     const allStats = [...(match.teamAPlayers || []), ...(match.teamBPlayers || [])];
-    // Robust detection for MVP (truthy values)
-    const stat = allStats.find(s => s.isMvp === true || String(s.isMvp) === "true" || (s as any).isMvp === 1);
+    // Detección robusta: acepta booleanos puros, strings "true" o números truthy
+    const stat = allStats.find(s => 
+      s.isMvp === true || 
+      String(s.isMvp) === "true" || 
+      (s as any).isMvp === 1
+    );
     return allPlayers.find(p => p.id === stat?.playerId);
   }, [match, allPlayers]);
 
   const bestGoalPlayer = React.useMemo(() => {
     if (!match || !allPlayers.length) return null;
     const allStats = [...(match.teamAPlayers || []), ...(match.teamBPlayers || [])];
-    // Robust detection for Best Goal (truthy values)
-    const stat = allStats.find(s => s.hasBestGoal === true || String(s.hasBestGoal) === "true" || (s as any).hasBestGoal === 1);
+    // Detección robusta: acepta booleanos puros, strings "true" o números truthy
+    const stat = allStats.find(s => 
+      s.hasBestGoal === true || 
+      String(s.hasBestGoal) === "true" || 
+      (s as any).hasBestGoal === 1
+    );
     return allPlayers.find(p => p.id === stat?.playerId);
   }, [match, allPlayers]);
 
