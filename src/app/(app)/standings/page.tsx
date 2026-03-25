@@ -17,21 +17,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc } from "@/firebase";
 import { collection, query, orderBy, doc } from "firebase/firestore";
 import type { Player, Match, AggregatedPlayerStats } from "@/lib/definitions";
-import { Loader2, TrendingUp, TrendingDown, Minus, Trophy, Target, Zap, Crown, ShieldCheck, Calendar, Info, AlertCircle, Sparkles, Medal, Shield } from "lucide-react";
+import { Loader2, TrendingUp, TrendingDown, Minus, Trophy, Target, Zap, Crown, ShieldCheck, Calendar, Info, AlertCircle } from "lucide-react";
 import Link from 'next/link';
 import { cn, getInitials } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 const TrendIcon = ({ form }: { form: ('W' | 'D' | 'L')[] }) => {
   const last3 = form.slice(0, 3);
@@ -91,10 +84,6 @@ function StandingsContent() {
     b.totalGoals - a.totalGoals
   );
 
-  const sortedMastery = [...stats]
-    .filter(p => p.matchesPlayed >= 2)
-    .sort((a, b) => b.masteryIndex - a.masteryIndex || b.matchesPlayed - a.matchesPlayed);
-  
   const sortedScorers = [...stats]
     .filter(p => p.totalGoals > 0)
     .sort((a, b) => b.totalGoals - a.totalGoals || b.goalsPerMatch - a.goalsPerMatch);
@@ -137,7 +126,7 @@ function StandingsContent() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="bg-black/40 border border-white/5 p-1 h-14 rounded-lg w-full flex overflow-x-auto no-scrollbar backdrop-blur-md shadow-2xl">
-          {["General", "Jerarquía", "Goleadores", "Goles Fecha", "Efectividad", "Capitanes"].map((tab) => (
+          {["General", "Goleadores", "Goles Fecha", "Efectividad", "Capitanes"].map((tab) => (
             <TabsTrigger key={tab.toLowerCase().replace(" ", "-")} value={tab.toLowerCase().replace(" ", "-")} className="flex-1 min-w-[120px] font-bebas tracking-widest text-lg data-[state=active]:bg-white data-[state=active]:text-black rounded-md transition-all">
               {tab}
             </TabsTrigger>
@@ -182,98 +171,6 @@ function StandingsContent() {
                       <TableCell className="text-center font-bebas text-2xl text-muted-foreground/60">{player.efficiency}%</TableCell>
                       <TableCell className="text-center font-bebas text-4xl italic bg-primary/5 text-primary">{player.wins * 3 + player.draws}</TableCell>
                       <TableCell className="text-center"><TrendIcon form={player.form} /></TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="jerarquía" className="animate-in fade-in slide-in-from-bottom-2 space-y-6">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-6 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl">
-              <div className="flex items-center gap-4">
-                <div className="bg-emerald-500/20 p-3 rounded-full">
-                  <Medal className="h-6 w-6 text-emerald-500" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-black italic uppercase text-emerald-500">Índice de Maestría (IM)</h3>
-                  <p className="text-[10px] font-bold uppercase text-muted-foreground/60 tracking-widest">El ranking de equilibrio que premia la jerarquía táctica y defensiva.</p>
-                </div>
-              </div>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="outline" size="sm" className="border-emerald-500/20 text-emerald-500 hover:bg-emerald-500/10">
-                      <Info className="h-4 w-4 mr-2" /> REGLAS DEL ÍNDICE
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent className="bg-zinc-900 border-white/10 text-[10px] p-6 space-y-3 max-w-sm">
-                    <p className="font-black text-emerald-500 uppercase tracking-widest border-b border-white/10 pb-2">CRITERIOS DE JERARQUÍA</p>
-                    <div className="grid grid-cols-1 gap-2">
-                      <div className="flex justify-between"><span>Base Rendimiento (W=3, E=1)</span> <span className="text-emerald-500">PROM / PJ</span></div>
-                      <div className="flex justify-between"><span>Capitán de Victoria (Liderazgo)</span> <span className="text-emerald-500">+0.40 pts</span></div>
-                      <div className="flex justify-between"><span>Valla Invicta (Solo DEF/GK)</span> <span className="text-emerald-500">+0.50 pts</span></div>
-                      <div className="flex justify-between"><span>Resistencia (1 gol concedido - DEF/GK)</span> <span className="text-emerald-500">+0.25 pts</span></div>
-                      <div className="flex justify-between"><span>Premio MVP (Figura)</span> <span className="text-emerald-500">+0.75 pts</span></div>
-                      <div className="flex justify-between"><span>Mejor Gol (Joyita)</span> <span className="text-emerald-500">+0.25 pts</span></div>
-                    </div>
-                    <p className="text-[8px] italic text-muted-foreground pt-2 border-t border-white/5">Requiere mínimo 2 partidos jugados para ponderar.</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-
-            <Card className="competition-card border-none bg-black/20">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-black/40 border-white/5 h-14">
-                    <TableHead className="w-16 text-center font-bebas text-sm">POS</TableHead>
-                    <TableHead className="font-bebas text-sm">JUGADOR DE ÉLITE</TableHead>
-                    <TableHead className="text-center font-bebas text-sm">PJ</TableHead>
-                    <TableHead className="text-center font-bebas text-sm">DEFENSA</TableHead>
-                    <TableHead className="text-center font-bebas text-sm">MANDO</TableHead>
-                    <TableHead className="text-center font-bebas text-sm bg-emerald-500/10 text-emerald-500">ÍNDICE (IM)</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {sortedMastery.map((player, index) => (
-                    <TableRow key={player.playerId} className={cn("official-table-row h-20", index === 0 ? "bg-emerald-500/5" : "")}>
-                      <TableCell className="text-center font-bebas text-3xl italic">
-                        {index === 0 ? <Medal className="h-6 w-6 mx-auto text-emerald-500 animate-pulse" /> : index + 1}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-4">
-                          <Avatar className={cn("h-12 w-12 border-2", index === 0 ? "border-emerald-500 shadow-lg shadow-emerald-500/20" : "border-white/10")}>
-                            <AvatarFallback className="bg-muted text-xs font-black">{getInitials(player.name)}</AvatarFallback>
-                          </Avatar>
-                          <div className="flex flex-col">
-                            <Link href={`/players/${player.playerId}`} className="font-black uppercase tracking-tight hover:text-emerald-500 transition-colors text-lg italic">{player.name}</Link>
-                            <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">{player.position || 'COMODÍN'}</span>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-center font-bebas text-2xl text-muted-foreground">{player.matchesPlayed}</TableCell>
-                      <TableCell className="text-center">
-                        <div className="flex flex-col items-center">
-                          <div className="flex items-center gap-1">
-                            <Shield className="h-3 w-3 text-emerald-500/60" />
-                            <span className="font-bebas text-xl text-white/80">{player.cleanSheets}</span>
-                          </div>
-                          <span className="text-[7px] font-black text-muted-foreground/40 uppercase font-oswald">VALLAS INV.</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <div className="flex flex-col items-center">
-                          <div className="flex items-center gap-1">
-                            <Crown className="h-3 w-3 text-primary/60" />
-                            <span className="font-bebas text-xl text-white/80">{player.winsAsCaptain}</span>
-                          </div>
-                          <span className="text-[7px] font-black text-muted-foreground/40 uppercase font-oswald">VICT. CAP.</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-center font-bebas text-5xl italic text-emerald-500 bg-emerald-500/5">
-                        {player.masteryIndex}
-                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

@@ -121,9 +121,6 @@ export default function PlayerProfilePage() {
               <Badge className="px-4 py-1 font-black uppercase italic tracking-tighter bg-primary shadow-lg ring-4 ring-background">
                 {playerStats.powerPoints} PTS
               </Badge>
-              <Badge className="px-4 py-1 font-black uppercase italic tracking-tighter bg-emerald-500 shadow-lg ring-4 ring-background">
-                {playerStats.masteryIndex} IM
-              </Badge>
             </div>
           </div>
           <div className="text-center md:text-left space-y-4">
@@ -160,7 +157,7 @@ export default function PlayerProfilePage() {
       </div>
 
       <div className="grid gap-6 grid-cols-2 lg:grid-cols-4">
-        <StatBox label="Jerarquía" value={playerStats.masteryIndex} icon={Medal} color="text-emerald-500" sub="IM" />
+        <StatBox label="Efectividad" value={playerStats.efficiency} icon={TrendingUp} color="text-emerald-500" sub="%" />
         <StatBox label="Goles" value={playerStats.totalGoals} icon={Target} color="yellow-500" sub="GF" />
         <StatBox label="Premios MVP" value={playerStats.totalMvp} icon={Star} color="yellow-500" sub="MVP" />
         <StatBox label="Capitanías" value={playerStats.totalCaptaincies} icon={ShieldCheck} color="emerald-500" sub="CAP" />
@@ -232,35 +229,6 @@ export default function PlayerProfilePage() {
         </div>
 
         <div className="space-y-8">
-          <Card className="competition-card border-t-4 border-t-emerald-500 bg-emerald-500/5">
-            <CardHeader className="bg-emerald-500/10 pb-4">
-              <CardTitle className="text-xs font-black uppercase tracking-widest text-emerald-500 flex items-center gap-2">
-                <Medal className="h-3 w-3" /> Reporte de Jerarquía
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-6 space-y-4">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground font-bold uppercase tracking-tighter">Vallas Invictas (Muralla)</span>
-                <span className="font-black text-emerald-500">x{playerStats.cleanSheets}</span>
-              </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground font-bold uppercase tracking-tighter">Resistencia Defensiva</span>
-                <span className="font-black text-emerald-500">x{playerStats.defenseResilienceMatches}</span>
-              </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground font-bold uppercase tracking-tighter">Victorias como Capitán</span>
-                <span className="font-black text-emerald-500">x{playerStats.winsAsCaptain}</span>
-              </div>
-              <div className="pt-4 border-t border-white/10 flex items-center justify-between">
-                <span className="font-black uppercase tracking-widest text-white">Índice Final</span>
-                <div className="flex items-center gap-2">
-                  <Medal className="h-4 w-4 text-emerald-500" />
-                  <span className="text-3xl font-black italic text-emerald-500">{playerStats.masteryIndex}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
           <Card className="competition-card border-t-4 border-t-primary bg-primary/5">
             <CardHeader className="bg-primary/10 pb-4">
               <CardTitle className="text-xs font-black uppercase tracking-widest text-primary flex items-center gap-2">
