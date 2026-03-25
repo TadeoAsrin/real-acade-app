@@ -138,6 +138,10 @@ export default function EditMatchPage() {
         teamBStats[p.playerId] = { goals: p.goals };
       });
 
+      const allStats = [...match.teamAPlayers, ...match.teamBPlayers];
+      const currentMvp = allStats.find(s => s.isMvp === true || s.isMvp === "true" || (s as any).isMvp === 1);
+      const currentBestGoal = allStats.find(s => s.hasBestGoal === true || s.hasBestGoal === "true" || (s as any).hasBestGoal === 1);
+
       form.reset({
         date: parseISO(match.date),
         teamAPlayerIds: match.teamAPlayers.map(p => p.playerId),
@@ -146,8 +150,8 @@ export default function EditMatchPage() {
         teamBStats,
         teamACaptainId: match.teamAPlayers.find(p => p.isCaptain)?.playerId || "",
         teamBCaptainId: match.teamBPlayers.find(p => p.isCaptain)?.playerId || "",
-        mvpPlayerId: match.teamAPlayers.find(p => p.isMvp)?.playerId || match.teamBPlayers.find(p => p.isMvp)?.playerId || "",
-        bestGoalPlayerId: match.teamAPlayers.find(p => p.hasBestGoal)?.playerId || match.teamBPlayers.find(p => p.hasBestGoal)?.playerId || "",
+        mvpPlayerId: currentMvp?.playerId || "",
+        bestGoalPlayerId: currentBestGoal?.playerId || "",
         comment: match.comment || "",
         videoUrl: match.videoUrl || "",
         photos: match.photos || [],
@@ -340,7 +344,7 @@ export default function EditMatchPage() {
                   )}>
                     <Avatar className="h-6 w-6">
                       <AvatarImage src={player.avatar || undefined} alt={player.name} />
-                      <AvatarFallback className="text-[8px] font-black">{getInitials(player.name)}</AvatarFallback>
+                      <AvatarFallback className="text-[10px] font-black">{getInitials(player.name)}</AvatarFallback>
                     </Avatar>
                     <span className={cn("text-xs font-bold", isSelectedInOtherTeam && "text-muted-foreground line-through")}>
                       {player.name}

@@ -17,6 +17,7 @@ import Link from "next/link";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { MatchAiSummary } from '@/components/matches/match-ai-summary';
 
 export default function MatchDetailPage() {
   const params = useParams();
@@ -60,14 +61,14 @@ export default function MatchDetailPage() {
   const mvpPlayer = React.useMemo(() => {
     if (!match || !allPlayers.length) return null;
     const allStats = [...(match.teamAPlayers || []), ...(match.teamBPlayers || [])];
-    const stat = allStats.find(s => s.isMvp === true);
+    const stat = allStats.find(s => s.isMvp === true || s.isMvp === "true" || (s as any).isMvp === 1);
     return allPlayers.find(p => p.id === stat?.playerId);
   }, [match, allPlayers]);
 
   const bestGoalPlayer = React.useMemo(() => {
     if (!match || !allPlayers.length) return null;
     const allStats = [...(match.teamAPlayers || []), ...(match.teamBPlayers || [])];
-    const stat = allStats.find(s => s.hasBestGoal === true);
+    const stat = allStats.find(s => s.hasBestGoal === true || s.hasBestGoal === "true" || (s as any).hasBestGoal === 1);
     return allPlayers.find(p => p.id === stat?.playerId);
   }, [match, allPlayers]);
 
@@ -82,6 +83,16 @@ export default function MatchDetailPage() {
   if (!match) return <div className="text-center py-12 font-bebas text-2xl uppercase opacity-20">Partido no encontrado.</div>;
 
   const date = parseISO(match.date);
+
+  const aiInput = {
+    date: match.date,
+    teamAScore: match.teamAScore,
+    teamBScore: match.teamBScore,
+    teamAPlayers: match.teamAPlayers.map(s => ({ name: allPlayers.find(p => p.id === s.playerId)?.name || '?', goals: s.goals })),
+    teamBPlayers: match.teamBPlayers.map(s => ({ name: allPlayers.find(p => p.id === s.playerId)?.name || '?', goals: s.goals })),
+    mvpName: mvpPlayer?.name,
+    bestGoalName: bestGoalPlayer?.name,
+  };
 
   return (
     <div className="max-w-4xl mx-auto pb-20 space-y-10 px-4 md:px-0">
@@ -215,7 +226,12 @@ export default function MatchDetailPage() {
         </div>
       </section>
 
-      {/* 4. MATCH CONTENT / TAPA DEL DIARIO */}
+      {/* 4. AI CRÓNICA */}
+      <section className="pt-6">
+        <MatchAiSummary matchId={id} matchData={aiInput} />
+      </section>
+
+      {/* 5. MATCH CONTENT / TAPA DEL DIARIO */}
       <section className="pt-10">
         <Card className="competition-card group overflow-hidden border-none bg-gradient-to-r from-primary/20 via-background to-accent/20 hover:scale-[1.02] transition-transform duration-500 shadow-2xl">
           <CardContent className="p-0">
