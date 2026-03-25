@@ -47,12 +47,13 @@ export function PowerRanking({ players, matches }: PowerRankingProps) {
                 </button>
               </TooltipTrigger>
               <TooltipContent className="bg-zinc-900 border-white/10 text-[10px] p-4 space-y-2">
-                <p className="font-black text-orange-500 uppercase tracking-widest font-oswald">SISTEMA DE PUNTUACIÓN</p>
+                <p className="font-black text-orange-500 uppercase tracking-widest font-oswald border-b border-white/10 pb-1 mb-2">SISTEMA DE PUNTUACIÓN</p>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 font-bold">
                   <span>MVP:</span> <span className="text-orange-500">+15 PTS</span>
                   <span>VICTORIA:</span> <span className="text-orange-500">+10 PTS</span>
                   <span>EMPATE:</span> <span className="text-orange-500">+5 PTS</span>
-                  <span>GOL:</span> <span className="text-orange-500">+2 PTS</span>
+                  <span>MEJOR GOL:</span> <span className="text-orange-500">+5 PTS</span>
+                  <span>POR GOL:</span> <span className="text-orange-500">+2 PTS</span>
                 </div>
               </TooltipContent>
             </Tooltip>
