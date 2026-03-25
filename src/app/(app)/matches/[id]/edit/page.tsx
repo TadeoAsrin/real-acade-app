@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -31,7 +32,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn, getInitials } from "@/lib/utils";
-import { CalendarIcon, Loader2, Award, Star, ArrowLeft, Camera, Plus, Trash2, MessageSquare, Sparkles, Upload } from "lucide-react";
+import { CalendarIcon, Loader2, Award, Star, ArrowLeft, Camera, Plus, Trash2, MessageSquare, Sparkles, Upload, Video } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
@@ -74,6 +75,7 @@ const formSchema = z.object({
   mvpPlayerId: z.string().optional(),
   bestGoalPlayerId: z.string().optional(),
   comment: z.string().optional(),
+  videoUrl: z.string().url("Debe ser un link válido").or(z.literal("")).optional(),
   photos: z.array(z.string()).max(5),
   aiSummary: z.any().optional(),
 });
@@ -118,6 +120,7 @@ export default function EditMatchPage() {
       mvpPlayerId: "",
       bestGoalPlayerId: "",
       comment: "",
+      videoUrl: "",
       photos: [],
       aiSummary: null,
     },
@@ -146,6 +149,7 @@ export default function EditMatchPage() {
         mvpPlayerId: match.teamAPlayers.find(p => p.isMvp)?.playerId || match.teamBPlayers.find(p => p.isMvp)?.playerId || "",
         bestGoalPlayerId: match.teamAPlayers.find(p => p.hasBestGoal)?.playerId || match.teamBPlayers.find(p => p.hasBestGoal)?.playerId || "",
         comment: match.comment || "",
+        videoUrl: match.videoUrl || "",
         photos: match.photos || [],
         aiSummary: match.aiSummary || null,
       });
@@ -245,6 +249,7 @@ export default function EditMatchPage() {
         teamAPlayers,
         teamBPlayers,
         comment: data.comment,
+        videoUrl: data.videoUrl,
         photos: data.photos,
         aiSummary: data.aiSummary || null,
     });
@@ -563,21 +568,43 @@ export default function EditMatchPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-8">
-              <FormField
-                control={form.control}
-                name="comment"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs font-black uppercase tracking-widest text-muted-foreground">La Voz del Administrador</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Escribe el resumen del partido..." className="min-h-[120px] rounded-xl font-medium leading-relaxed" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="comment"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-black uppercase tracking-widest text-muted-foreground">La Voz del Administrador</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="Escribe el resumen del partido..." className="min-h-[120px] rounded-xl font-medium leading-relaxed" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="videoUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                        <Video className="h-3 w-3" /> Link de la Cámara (Video)
+                      </FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="https://repro.camara.com/..." 
+                          className="h-12 rounded-xl font-bold"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="space-y-4 pt-4 border-t border-white/5">
                 <FormLabel className="text-xs font-black uppercase tracking-widest text-muted-foreground">Galería de Fotos (Máx 5)</FormLabel>
                 
                 <div className="flex flex-col md:flex-row gap-3">

@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -31,7 +32,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn, getInitials } from "@/lib/utils";
-import { CalendarIcon, Loader2, Award, Star, Camera, MessageSquare, Plus, Trash2, Sparkles, Upload } from "lucide-react";
+import { CalendarIcon, Loader2, Award, Star, Camera, MessageSquare, Plus, Trash2, Sparkles, Upload, Video } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -74,6 +75,7 @@ const formSchema = z.object({
   mvpPlayerId: z.string().optional(),
   bestGoalPlayerId: z.string().optional(),
   comment: z.string().optional(),
+  videoUrl: z.string().url("Debe ser un link válido").or(z.literal("")).optional(),
   photos: z.array(z.string()).max(5, "Máximo 5 fotos"),
 });
 
@@ -109,6 +111,7 @@ export default function NewMatchPage() {
       mvpPlayerId: "",
       bestGoalPlayerId: "",
       comment: "",
+      videoUrl: "",
       photos: [],
     },
   });
@@ -183,6 +186,7 @@ export default function NewMatchPage() {
           teamAPlayers,
           teamBPlayers,
           comment: data.comment,
+          videoUrl: data.videoUrl,
           photos: data.photos,
           aiSummary: aiSummary || null,
           createdAt: serverTimestamp()
@@ -537,28 +541,51 @@ export default function NewMatchPage() {
                 <MessageSquare className="h-5 w-5 text-emerald-500" />
                 4. La Crónica Social
               </CardTitle>
-              <CardDescription>Añade contexto y fotos de la jornada. La primera foto será la tapa del diario.</CardDescription>
+              <CardDescription>Añade contexto, video y fotos de la jornada.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-8">
-              <FormField
-                control={form.control}
-                name="comment"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs font-black uppercase tracking-widest text-muted-foreground">Resumen del Administrador</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Ej: 'Partidazo 🔥 Mucha intensidad y un final picante...'" 
-                        className="min-h-[120px] rounded-xl font-medium leading-relaxed" 
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="comment"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-black uppercase tracking-widest text-muted-foreground">Resumen del Administrador</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Ej: 'Partidazo 🔥 Mucha intensidad...'" 
+                          className="min-h-[120px] rounded-xl font-medium leading-relaxed" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="videoUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                        <Video className="h-3 w-3" /> Link de la Cámara (Video)
+                      </FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="https://repro.camara.com/partido-xyz" 
+                          className="h-12 rounded-xl font-bold"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription className="text-[10px] uppercase">Pega aquí el link directo de la grabación.</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="space-y-4 pt-4 border-t border-white/5">
                 <FormLabel className="text-xs font-black uppercase tracking-widest text-muted-foreground">Galería de Fotos (Máx 5)</FormLabel>
                 
                 <div className="flex flex-col md:flex-row gap-3">

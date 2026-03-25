@@ -33,6 +33,10 @@
           "items": { "type": "string" },
           "description": "URLs of photos taken during the match."
         },
+        "videoUrl": {
+          "type": "string",
+          "description": "URL of the match video recording."
+        },
         "aiSummary": {
           "type": "object",
           "properties": {

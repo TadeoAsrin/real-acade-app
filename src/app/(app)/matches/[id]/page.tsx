@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -8,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { Player, Match } from "@/lib/definitions";
-import { Star, Loader2, Share2, Pencil, ChevronLeft, Trophy, Goal, Sparkles, Crown, Newspaper, ArrowRight } from "lucide-react";
+import { Star, Loader2, Share2, Pencil, ChevronLeft, Trophy, Goal, Sparkles, Crown, Newspaper, ArrowRight, PlayCircle } from "lucide-react";
 import { useDoc, useCollection, useMemoFirebase, useFirestore, useUser } from "@/firebase";
 import { doc, collection, query, orderBy } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
@@ -114,10 +115,17 @@ export default function MatchDetailPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center justify-center gap-3">
           <Button variant="outline" size="sm" className="h-9 border-white/10 rounded-full font-oswald text-[10px] tracking-widest uppercase hover:bg-primary/10 hover:text-primary transition-all">
             <Share2 className="h-3 w-3 mr-2" /> Compartir
           </Button>
+          {match.videoUrl && (
+            <Button asChild size="sm" className="h-9 rounded-full font-oswald text-[10px] tracking-widest uppercase bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-900/20">
+              <a href={match.videoUrl} target="_blank" rel="noopener noreferrer">
+                <PlayCircle className="h-3 w-3 mr-2" /> Ver Repetición
+              </a>
+            </Button>
+          )}
           {adminRole?.isAdmin && (
             <Button variant="outline" size="sm" className="h-9 border-white/10 rounded-full font-oswald text-[10px] tracking-widest uppercase hover:bg-yellow-500/10 hover:text-yellow-500 transition-all" asChild>
               <Link href={`/matches/${id}/edit`}><Pencil className="h-3 w-3 mr-2" /> Editar</Link>

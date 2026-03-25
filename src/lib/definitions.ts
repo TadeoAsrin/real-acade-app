@@ -32,6 +32,7 @@ export type Match = {
   teamBPlayers: PlayerStats[];
   comment?: string;
   photos?: string[];
+  videoUrl?: string;
   aiSummary?: MatchAiSummary;
 };
 
