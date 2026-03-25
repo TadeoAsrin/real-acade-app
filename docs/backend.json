@@ -98,6 +98,19 @@
         "picks": { "type": "array" }
       },
       "required": ["id", "date", "status", "captainA", "captainB", "availablePlayers", "teamAPlayers", "teamBPlayers", "picks"]
+    },
+    "GalleryItem": {
+      "title": "GalleryItem",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string", "enum": ["image", "video"] },
+        "url": { "type": "string" },
+        "description": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "category": { "type": "string" }
+      },
+      "required": ["id", "type", "url", "date"]
     }
   },
   "auth": {
@@ -146,6 +159,16 @@
             "$ref": "#/backend/entities/Draft"
           },
           "description": "Stores real-time draft data for pan y queso."
+        }
+      },
+      {
+        "path": "/gallery/{itemId}",
+        "definition": {
+          "entityName": "GalleryItem",
+          "schema": {
+            "$ref": "#/backend/entities/GalleryItem"
+          },
+          "description": "Stores exclusive photos and video links for the club gallery."
         }
       }
     ]

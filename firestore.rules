@@ -50,8 +50,12 @@ service cloud.firestore {
     match /drafts/{draftId} {
       allow get, list: if true;
       allow create: if isAdmin();
-      allow update: if true; // Permitiendo updates para que los capitanes puedan elegir sin login
-      allow delete: if isAdmin();
+      allow update: if true;
+    }
+
+    match /gallery/{itemId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
     }
   }
 }

@@ -12,7 +12,7 @@ import {
   SidebarContent,
   useSidebar,
 } from "../ui/sidebar";
-import { Goal, BarChart3, Users, LogOut, Trophy, Dices, ArrowLeftRight, Swords } from "lucide-react";
+import { Goal, BarChart3, Users, LogOut, Trophy, Dices, ArrowLeftRight, Swords, Image as ImageIcon } from "lucide-react";
 import Link from "next/link";
 import { useAuth, useUser, useFirestore, useMemoFirebase, useDoc, useCollection } from "@/firebase";
 import { signOut } from "firebase/auth";
@@ -43,6 +43,11 @@ const menuItems = [
     href: "/players",
     label: "JUGADORES",
     icon: Users,
+  },
+  {
+    href: "/gallery",
+    label: "GALERÍA",
+    icon: ImageIcon,
   },
   {
     href: "/compare",

@@ -1,3 +1,4 @@
+
 export type PlayerPosition = 'Arquero' | 'Lateral Derecho' | 'Defensor Central' | 'Lateral Izquierdo' | 'Mediocampista' | 'Delantero';
 
 export type Player = {
@@ -54,24 +55,20 @@ export type AggregatedPlayerStats = {
   matchesAsRed: number;
   powerPoints: number;
   form: ('W' | 'D' | 'L')[];
-  // Nuevos campos para estadísticas avanzadas
   goalsFor: number;
   goalsAgainst: number;
   goalDifference: number;
   efficiency: number;
   lastCaptainDate?: string | null;
   lastGoalDate?: string | null;
-  // Campos para lógica de capitanes
   isActive: boolean;
   matchesInLast3: number;
   matchesInLast5: number;
   captaincyPriorityScore: number;
-  // Estadísticas de liderazgo
   winsAsCaptain: number;
   lossesAsCaptain: number;
   drawsAsCaptain: number;
   matchesSinceLastCaptain: number;
-  // Índice de Letalidad
   lethalityIndex: number;
 };
 
@@ -93,4 +90,14 @@ export type Draft = {
   teamAPlayers: Player[];
   teamBPlayers: Player[];
   picks: { playerId: string; captain: 'A' | 'B' }[];
+};
+
+export type GalleryItem = {
+  id: string;
+  type: 'image' | 'video';
+  url: string;
+  description?: string;
+  date: string;
+  category?: string;
+  matchId?: string; // Optional reference if it comes from a match
 };
