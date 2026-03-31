@@ -82,9 +82,12 @@ function DashboardContent() {
   const topAttendance = stats.length > 0 ? Math.max(...stats.map(p => p.matchesPlayed), 0) : 0;
   const attendanceValue = totalPossibleMatches > 0 ? `${Math.round((topAttendance / totalPossibleMatches) * 100)}%` : "0%";
 
-  // 6. Sala de Humildad
+  // 6. Sala de Humildad (Ranking por porcentaje de derrota)
   const filteredForHumility = stats.filter(p => p.matchesPlayed >= 2);
-  const imanDerrotas = [...filteredForHumility].sort((a, b) => b.lossPercentage - a.lossPercentage || b.losses - a.losses).slice(0, 3);
+  const imanDerrotas = [...filteredForHumility]
+    .sort((a, b) => b.lossPercentage - a.lossPercentage || b.losses - a.losses)
+    .slice(0, 3);
+    
   const polvoraMojada = [...filteredForHumility]
     .filter(p => p.position === 'Mediocampista' || p.position === 'Delantero')
     .sort((a, b) => a.goalsPerMatch - b.goalsPerMatch || a.totalGoals - b.totalGoals)
@@ -409,7 +412,7 @@ function DashboardContent() {
           <Badge variant="outline" className="text-[7px] font-black uppercase tracking-widest border-white/5 text-muted-foreground/40 font-oswald">FILTRO: MÍNIMO 2 PJ</Badge>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Imán de Derrotas - Ratio de Vulnerabilidad */}
+          {/* Imán de Derrotas - Ratio de Vulnerabilidad (%) */}
           <Link href="/pulse/iman-derrotas" className="bg-[#111827]/40 rounded-2xl p-6 border border-white/5 space-y-6 hover:border-red-500/20 transition-all hover-lift">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-red-500/60">

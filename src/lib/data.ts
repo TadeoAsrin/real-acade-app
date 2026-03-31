@@ -104,11 +104,12 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
 
             if (goals > 0) stats.lastGoalDate = match.date;
 
-            if (isMvp) {
+            // Robust check for MVP and Best Goal
+            if (isMvp === true || String(isMvp) === "true" || (isMvp as any) === 1) {
               stats.totalMvp++;
               stats.powerPoints += POINTS.MVP;
             }
-            if (hasBestGoal) {
+            if (hasBestGoal === true || String(hasBestGoal) === "true" || (hasBestGoal as any) === 1) {
               stats.totalBestGoals++;
               stats.powerPoints += POINTS.BEST_GOAL;
             }

@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -236,7 +235,7 @@ export default function MatchDetailPage() {
         </div>
       </section>
 
-      {/* 4. AI CRÓNICA */}
+      {/* 4. AI CRÓNICA INTEGRADA */}
       <section className="pt-6">
         <MatchAiSummary matchId={id} matchData={aiInput} />
       </section>
