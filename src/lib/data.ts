@@ -1,4 +1,3 @@
-
 import type { Player, Match, AggregatedPlayerStats, PlayerStats, ChemistryPair } from "./definitions";
 
 const POINTS = {
@@ -27,6 +26,7 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
       losses: 0,
       draws: 0,
       winPercentage: 0,
+      lossPercentage: 0,
       goalsPerMatch: 0,
       mvpPerMatch: 0,
       matchesAsBlue: 0,
@@ -131,6 +131,7 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
       const stats = statsMap[playerId];
       if (stats.matchesPlayed > 0) {
           stats.winPercentage = Math.round((stats.wins / stats.matchesPlayed) * 100);
+          stats.lossPercentage = Math.round((stats.losses / stats.matchesPlayed) * 100);
           stats.goalsPerMatch = Number((stats.totalGoals / stats.matchesPlayed).toFixed(2));
           stats.mvpPerMatch = Number((stats.totalMvp / stats.matchesPlayed).toFixed(2));
           stats.goalDifference = stats.goalsFor - stats.goalsAgainst;

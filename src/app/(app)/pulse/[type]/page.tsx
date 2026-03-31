@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -125,8 +124,10 @@ export default function PulseDetailPage() {
   }
 
   if (type === 'iman-derrotas') {
-    const sorted = [...playerStats].filter(p => p.matchesPlayed >= 2).sort((a, b) => b.losses - a.losses || b.matchesPlayed - a.matchesPlayed);
-    return renderRankingList("Imán de Derrotas", "Récord adverso acumulado. Quienes más han sufrido el sabor de la caída.", Skull, sorted, (p) => p.losses, (p) => `${p.wins}V - ${p.draws}E - ${p.losses}D`, "text-red-500", "MÍNIMO 2 PARTIDOS JUGADOS");
+    const sorted = [...playerStats]
+      .filter(p => p.matchesPlayed >= 2)
+      .sort((a, b) => b.lossPercentage - a.lossPercentage || b.losses - a.losses);
+    return renderRankingList("Ratio de Vulnerabilidad", "Récord adverso ponderado. Ranking de porcentaje de derrota en el club.", Skull, sorted, (p) => `${p.lossPercentage}%`, (p) => `${p.losses} DERROTAS EN ${p.matchesPlayed} PJ`, "text-red-500", "MÍNIMO 2 PARTIDOS JUGADOS");
   }
 
   if (type === 'deuda-mando') {

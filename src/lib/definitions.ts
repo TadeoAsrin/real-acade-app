@@ -1,4 +1,3 @@
-
 export type PlayerPosition = 'Arquero' | 'Lateral Derecho' | 'Defensor Central' | 'Lateral Izquierdo' | 'Mediocampista' | 'Delantero';
 
 export type Player = {
@@ -50,6 +49,7 @@ export type AggregatedPlayerStats = {
   losses: number;
   draws: number;
   winPercentage: number;
+  lossPercentage: number;
   goalsPerMatch: number;
   mvpPerMatch: number;
   matchesAsBlue: number;

@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from 'react';
@@ -85,7 +84,7 @@ function DashboardContent() {
 
   // 6. Sala de Humildad
   const filteredForHumility = stats.filter(p => p.matchesPlayed >= 2);
-  const imanDerrotas = [...filteredForHumility].sort((a, b) => b.losses - a.losses || b.matchesPlayed - a.matchesPlayed).slice(0, 3);
+  const imanDerrotas = [...filteredForHumility].sort((a, b) => b.lossPercentage - a.lossPercentage || b.losses - a.losses).slice(0, 3);
   const polvoraMojada = [...filteredForHumility]
     .filter(p => p.position === 'Mediocampista' || p.position === 'Delantero')
     .sort((a, b) => a.goalsPerMatch - b.goalsPerMatch || a.totalGoals - b.totalGoals)
@@ -107,7 +106,7 @@ function DashboardContent() {
         />
       )}
 
-      {/* 1. HERO SECTION - ESTILO CINEMATOGRÁFICO "EDICIÓN ESPECIAL" */}
+      {/* 1. HERO SECTION */}
       {lastMatch && (
         <section className="relative z-10">
           <div className="cinematic-banner p-8 md:p-16 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
@@ -159,7 +158,7 @@ function DashboardContent() {
         </section>
       )}
 
-      {/* 2. ORDEN DE MANDO (Justicia Táctica) */}
+      {/* 2. ORDEN DE MANDO */}
       <section className="space-y-4 relative z-10">
         <div className="flex items-center gap-3 px-1">
           <ShieldCheck className="h-4 w-4 text-emerald-500" />
@@ -410,20 +409,34 @@ function DashboardContent() {
           <Badge variant="outline" className="text-[7px] font-black uppercase tracking-widest border-white/5 text-muted-foreground/40 font-oswald">FILTRO: MÍNIMO 2 PJ</Badge>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Imán de Derrotas */}
+          {/* Imán de Derrotas - Ratio de Vulnerabilidad */}
           <Link href="/pulse/iman-derrotas" className="bg-[#111827]/40 rounded-2xl p-6 border border-white/5 space-y-6 hover:border-red-500/20 transition-all hover-lift">
-            <div className="flex items-center gap-2 text-red-500/60">
-              <Skull className="h-4 w-4" />
-              <span className="text-[10px] font-black uppercase tracking-widest font-oswald">IMÁN DE DERROTAS</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-red-500/60">
+                <Skull className="h-4 w-4" />
+                <span className="text-[10px] font-black uppercase tracking-widest font-oswald">IMÁN DE DERROTAS</span>
+              </div>
+              <Badge variant="outline" className="text-[6px] font-black bg-red-500/5 text-red-500/40 border-none uppercase px-1.5 py-0 font-oswald">RATIO DE VULNERABILIDAD</Badge>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-5">
               {imanDerrotas.map(p => (
-                <div key={p.playerId} className="flex items-center justify-between">
-                  <div className="flex flex-col">
-                    <span className="text-xs font-bold uppercase hover:text-red-500 transition-colors">{p.name}</span>
-                    <span className="text-[7px] font-bold text-muted-foreground/40 uppercase tracking-widest font-oswald">{p.wins}V - {p.draws}E - {p.losses}D ({p.matchesPlayed} PJ)</span>
+                <div key={p.playerId} className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex flex-col">
+                      <span className="text-xs font-bold uppercase hover:text-red-500 transition-colors">{p.name}</span>
+                      <span className="text-[7px] font-bold text-muted-foreground/40 uppercase tracking-widest font-oswald">{p.wins}V - {p.draws}E - {p.losses}D ({p.matchesPlayed} PJ)</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-xl font-black italic text-red-500/80 font-bebas">{p.lossPercentage}%</span>
+                      <p className="text-[6px] font-black uppercase text-red-500/30 font-oswald tracking-widest">CAÍDA</p>
+                    </div>
                   </div>
-                  <span className="text-xl font-black italic text-red-500/80 font-bebas">{p.losses}</span>
+                  <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-red-900/40 transition-all duration-1000 ease-out" 
+                      style={{ width: `${p.lossPercentage}%` }} 
+                    />
+                  </div>
                 </div>
               ))}
             </div>
