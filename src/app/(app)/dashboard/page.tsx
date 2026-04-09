@@ -162,7 +162,7 @@ function DashboardContent() {
         </section>
       )}
 
-      {/* 2. PULSO DE LA COMPETICIÓN (Movido arriba) */}
+      {/* 2. PULSO DE LA COMPETICIÓN */}
       <section className="space-y-6 relative z-10">
         <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 px-1 font-oswald">PULSO DE LA COMPETICIÓN</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -368,7 +368,7 @@ function DashboardContent() {
       </section>
 
       {/* 4. FINAL ROW (GRID) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 relative z-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 relative z-10 items-start">
         {/* ORDEN DE MANDO */}
         <section className="space-y-4">
           <div className="flex items-center gap-3 px-1">
@@ -414,8 +414,9 @@ function DashboardContent() {
             <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 font-oswald">SALA DE HUMILDAD</h2>
             <Badge variant="outline" className="text-[7px] font-black uppercase tracking-widest border-white/5 text-muted-foreground/40 font-oswald">FILTRO: MÍNIMO 2 PJ</Badge>
           </div>
-          <div className="grid grid-cols-1 gap-6">
-            <Link href="/pulse/iman-derrotas" className="bg-[#111827]/40 rounded-2xl p-6 border border-white/5 space-y-6 hover:border-red-500/20 transition-all hover-lift">
+          
+          <div className="bg-[#111827]/40 rounded-2xl border border-white/5 p-6 space-y-4">
+            <Link href="/pulse/iman-derrotas" className="block space-y-6 hover:opacity-80 transition-all">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-red-500/60">
                   <Skull className="h-4 w-4" />
@@ -447,7 +448,9 @@ function DashboardContent() {
               </div>
             </Link>
 
-            <Link href="/pulse/polvora" className="bg-[#111827]/40 rounded-2xl p-6 border border-white/5 space-y-6 hover:border-blue-400/20 transition-all hover-lift">
+            <div className="h-px w-full bg-white/5 my-4" />
+
+            <Link href="/pulse/polvora" className="block space-y-6 hover:opacity-80 transition-all">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-blue-400/60">
                   <Droplets className="h-4 w-4" />
