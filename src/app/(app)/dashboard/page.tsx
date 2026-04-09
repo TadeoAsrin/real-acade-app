@@ -145,13 +145,29 @@ function DashboardContent() {
   // Pulso de la Competición
   const maxMvpCount = stats.length > 0 ? Math.max(...stats.map(p => p.totalMvp), 0) : 0;
   const recordGoalsInMatch = allMatches.length > 0 ? Math.max(...allMatches.map(m => m.teamAScore + m.teamBScore), 0) : 0;
+  
+  // Sociedad Ideal
   const chemistry = getChemistryRankings(allPlayers, allMatches, 1);
   const topPair = chemistry[0];
   const societyText = topPair ? `${topPair.player1.name.split(' ')[0]} + ${topPair.player2.name.split(' ')[0]}` : "SIN DUPLAS";
   const societyValue = topPair ? `${topPair.winRate}%` : "0%";
+  
+  // Infaltables (Asistencia)
   const totalPossibleMatches = playedMatches.length;
   const topAttendance = stats.length > 0 ? Math.max(...stats.map(p => p.matchesPlayed), 0) : 0;
   const attendanceValue = totalPossibleMatches > 0 ? `${Math.round((topAttendance / totalPossibleMatches) * 100)}%` : "0%";
+  
+  // Lógica de nombres para Infaltables
+  const topAttendancePlayers = stats.filter(p => p.matchesPlayed === topAttendance && p.matchesPlayed > 0);
+  const attendanceLeaderName = topAttendancePlayers.length > 0 
+    ? topAttendancePlayers[0].name.split(' ')[0].toUpperCase() 
+    : "";
+  const attendanceOthersCount = topAttendancePlayers.length - 1;
+  const attendanceText = topAttendancePlayers.length === 0 
+    ? "SIN REGISTROS" 
+    : attendanceOthersCount > 0 
+      ? `${attendanceLeaderName} +${attendanceOthersCount}` 
+      : `LÍDER: ${attendanceLeaderName}`;
 
   // Sala de Humildad
   const filteredForHumility = stats.filter(p => p.matchesPlayed >= 2);
@@ -296,7 +312,7 @@ function DashboardContent() {
             <span className="text-5xl font-black italic font-bebas leading-none text-white">{attendanceValue}</span>
             <div className="space-y-0.5">
               <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">INFALTABLES</p>
-              <p className="text-[8px] font-bold text-muted-foreground/40 uppercase font-oswald">ASISTENCIA</p>
+              <p className="text-[8px] font-bold text-muted-foreground/40 uppercase font-oswald truncate max-w-[120px]">{attendanceText}</p>
             </div>
           </Link>
         </div>
