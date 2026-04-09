@@ -7,7 +7,7 @@ import { useCollection, useMemoFirebase, useFirestore } from "@/firebase";
 import { collection, query, orderBy } from "firebase/firestore";
 import type { Match, Player, AggregatedPlayerStats, ChemistryPair } from "@/lib/definitions";
 import { Card, CardContent } from "@/components/ui/card";
-import { Brain, Link as LinkIcon, Star, Users, Flame, Skull, Ghost, Droplets, Loader2, ChevronLeft, Zap, TrendingUp, Info, ShieldAlert, Sparkles } from "lucide-react";
+import { Brain, Link as LinkIcon, Star, Users, Flame, Skull, Ghost, Droplets, Loader2, ChevronLeft, Zap, TrendingUp, Info, ShieldAlert, Sparkles, ShieldCheck } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials, cn } from "@/lib/utils";
 import Link from "next/link";
@@ -142,9 +142,9 @@ export default function PulseDetailPage() {
     return renderRankingList("Pólvora Mojada", "Sequía ofensiva en roles de ataque. Ranking de promedios de gol bajos.", Droplets, sorted, (p) => p.goalsPerMatch, (p) => `${p.totalGoals} GOLES EN ${p.matchesPlayed} PJ`, "text-blue-400", "MÍNIMO 2 PJ Y ROL OFENSIVO");
   }
 
-  if (type === 'clutch') {
-    const sorted = [...playerStats].filter(p => p.clutchWins > 0).sort((a, b) => b.clutchWins - a.clutchWins || b.winPercentage - a.winPercentage);
-    return renderRankingList("Especialistas Clutch", "Expertos en ganar bajo presión. Jugadores con más victorias por diferencia de 1 gol.", Zap, sorted, (p) => p.clutchWins, () => "WINS AJUSTADOS", "text-purple-500");
+  if (type === 'wall') {
+    const sorted = [...playerStats].filter(p => p.matchesPlayed >= 4).sort((a, b) => a.avgGoalsAgainst - b.avgGoalsAgainst);
+    return renderRankingList("El Muro", "Solidez defensiva absoluta. Jugadores que permiten menos goles por partido.", ShieldCheck, sorted, (p) => p.avgGoalsAgainst, () => "G/PJ RECIBIDOS", "text-emerald-500", "MÍNIMO 4 PARTIDOS JUGADOS");
   }
 
   if (type === 'partnership') {

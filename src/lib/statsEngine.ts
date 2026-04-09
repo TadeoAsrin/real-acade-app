@@ -2,7 +2,7 @@ import type { Match, Player, AggregatedPlayerStats, PlayerStats } from "./defini
 
 /**
  * Centralized Stats Engine for Real Acade
- * Handles complex metrics like Influence Score, Clutch Wins, and Streaks.
+ * Handles complex metrics like Influence Score, The Wall (Defense), and Streaks.
  */
 
 export function getPlayerStats(matches: Match[], playerId: string): Partial<AggregatedPlayerStats> {
@@ -13,7 +13,7 @@ export function getPlayerStats(matches: Match[], playerId: string): Partial<Aggr
 
   let wins = 0;
   let goals = 0;
-  let clutchWins = 0;
+  let goalsAgainst = 0;
   let currentStreak = 0;
   let maxStreak = 0;
 
@@ -26,6 +26,13 @@ export function getPlayerStats(matches: Match[], playerId: string): Partial<Aggr
     if (!pStat) return;
 
     goals += pStat.goals || 0;
+    
+    // Calculate goals against
+    if (isTeamA) {
+      goalsAgainst += match.teamBScore;
+    } else {
+      goalsAgainst += match.teamAScore;
+    }
 
     const teamAWon = match.teamAScore > match.teamBScore;
     const teamBWon = match.teamBScore > match.teamAScore;
@@ -35,13 +42,6 @@ export function getPlayerStats(matches: Match[], playerId: string): Partial<Aggr
       wins++;
       currentStreak++;
       maxStreak = Math.max(maxStreak, currentStreak);
-      
-      // Clutch Match: Goal difference <= 1
-      if (Math.abs(match.teamAScore - match.teamBScore) <= 1) {
-        clutchWins++;
-      }
-    } else if (match.teamAScore === match.teamBScore) {
-      currentStreak = 0; // Empate rompe racha de victorias
     } else {
       currentStreak = 0;
     }
@@ -52,14 +52,18 @@ export function getPlayerStats(matches: Match[], playerId: string): Partial<Aggr
   
   // FORMULA: influenceScore = (wins + 2) / (matchesPlayed + 4)
   const influenceScore = matchesPlayed > 0 ? (wins + 2) / (matchesPlayed + 4) : 0;
+  
+  // FORMULA: avgGoalsAgainst = totalGoalsAgainst / matchesPlayed
+  const avgGoalsAgainst = matchesPlayed > 0 ? Number((goalsAgainst / matchesPlayed).toFixed(2)) : 0;
 
   return {
     matchesPlayed,
     wins,
     totalGoals: goals,
+    goalsAgainst,
+    avgGoalsAgainst,
     winPercentage: winRate,
     influenceScore,
-    clutchWins,
     bestStreak: maxStreak
   };
 }

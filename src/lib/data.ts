@@ -35,6 +35,7 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
       form: [],
       goalsFor: 0,
       goalsAgainst: 0,
+      avgGoalsAgainst: 0,
       goalDifference: 0,
       efficiency: 0,
       lastCaptainDate: null,
@@ -140,6 +141,7 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
           stats.goalsPerMatch = Number((stats.totalGoals / stats.matchesPlayed).toFixed(2));
           stats.mvpPerMatch = Number((stats.totalMvp / stats.matchesPlayed).toFixed(2));
           stats.goalDifference = stats.goalsFor - stats.goalsAgainst;
+          stats.avgGoalsAgainst = Number((stats.goalsAgainst / stats.matchesPlayed).toFixed(2));
           
           const pointsObtained = stats.wins * 3 + stats.draws;
           const pointsPossible = stats.matchesPlayed * 3;
@@ -178,7 +180,6 @@ export const getChemistryRankings = (players: Player[], matches: Match[], minMat
     const processTeam = (teamPlayers: PlayerStats[], won: boolean) => {
       const ids = teamPlayers.map(p => p.playerId).filter(id => players.some(pl => pl.id === id));
       
-      // Triple bucle para encontrar tríos
       for (let i = 0; i < ids.length; i++) {
         for (let j = i + 1; j < ids.length; j++) {
           for (let k = j + 1; k < ids.length; k++) {
@@ -207,7 +208,6 @@ export const getChemistryRankings = (players: Player[], matches: Match[], minMat
       
       if (!p1 || !p2 || !p3 || !s1 || !s2 || !s3) return null;
 
-      // Solo tridentes activos
       if (!s1.isActive || !s2.isActive || !s3.isActive) return null;
 
       const winRate = Math.round((stats.wins / stats.matches) * 100);

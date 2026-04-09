@@ -21,9 +21,7 @@ import {
   ShieldCheck, 
   Zap, 
   Brain, 
-  ZapOff,
   TrendingUp,
-  Activity,
   ArrowRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -132,7 +130,7 @@ function DashboardContent() {
   const mostInfluential = [...leaderboard].sort((a, b) => b.influenceScore - a.influenceScore)[0];
   const topScorer = [...leaderboard].sort((a, b) => b.totalGoals - a.totalGoals)[0];
   const bestStreak = [...leaderboard].sort((a, b) => b.bestStreak - a.bestStreak)[0];
-  const clutchPlayer = [...leaderboard].sort((a, b) => b.clutchWins - a.clutchWins)[0];
+  const theWall = [...leaderboard].sort((a, b) => a.avgGoalsAgainst - b.avgGoalsAgainst)[0];
 
   const stats = calculateAggregatedStats(allPlayers, allMatches);
 
@@ -146,7 +144,7 @@ function DashboardContent() {
   const maxMvpCount = stats.length > 0 ? Math.max(...stats.map(p => p.totalMvp), 0) : 0;
   const recordGoalsInMatch = allMatches.length > 0 ? Math.max(...allMatches.map(m => m.teamAScore + m.teamBScore), 0) : 0;
   
-  // Tridente de Oro (antes Sociedad Ideal)
+  // Tridente de Oro
   const chemistry = getChemistryRankings(allPlayers, allMatches, 1);
   const topTrident = chemistry[0];
   const tridentText = topTrident 
@@ -154,12 +152,11 @@ function DashboardContent() {
     : "SIN TRIDENTES";
   const tridentValue = topTrident ? `${topTrident.winRate}%` : "0%";
   
-  // Infaltables (Asistencia)
+  // Infaltables
   const totalPossibleMatches = playedMatches.length;
   const topAttendance = stats.length > 0 ? Math.max(...stats.map(p => p.matchesPlayed), 0) : 0;
   const attendanceValue = totalPossibleMatches > 0 ? `${Math.round((topAttendance / totalPossibleMatches) * 100)}%` : "0%";
   
-  // Lógica de nombres para Infaltables
   const topAttendancePlayers = stats.filter(p => p.matchesPlayed === topAttendance && p.matchesPlayed > 0);
   const attendanceLeaderName = topAttendancePlayers.length > 0 
     ? topAttendancePlayers[0].name.split(' ')[0].toUpperCase() 
@@ -320,7 +317,7 @@ function DashboardContent() {
         </div>
       </section>
 
-      {/* 4. ESTRELLAS DE LA ACADEMIA (Highlights Premium) */}
+      {/* 4. ESTRELLAS DE LA ACADEMIA */}
       <section className="space-y-6 relative z-10">
         <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 px-1 font-oswald">ESTRELLAS DE LA ACADEMIA</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -364,15 +361,15 @@ function DashboardContent() {
             href="/standings?tab=general"
           />
 
-          {/* Clutch Player */}
+          {/* El Muro */}
           <HighlightCard 
-            title="CLUTCH PLAYER"
-            player={clutchPlayer}
-            icon={Zap}
-            statLabel="WINS LÍMITE"
-            statValue={clutchPlayer?.clutchWins || 0}
-            colorClass="text-purple-500"
-            href="/pulse/clutch"
+            title="EL MURO"
+            player={theWall}
+            icon={ShieldCheck}
+            statLabel="G/PJ RECIBIDOS"
+            statValue={theWall?.avgGoalsAgainst || 0}
+            colorClass="text-emerald-500"
+            href="/pulse/wall"
           />
 
         </div>

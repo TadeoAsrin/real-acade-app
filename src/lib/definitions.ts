@@ -58,6 +58,7 @@ export type AggregatedPlayerStats = {
   form: ('W' | 'D' | 'L')[];
   goalsFor: number;
   goalsAgainst: number;
+  avgGoalsAgainst: number;
   goalDifference: number;
   efficiency: number;
   lastCaptainDate?: string | null;
@@ -79,7 +80,7 @@ export type AggregatedPlayerStats = {
 export type ChemistryPair = {
   player1: Player;
   player2: Player;
-  player3: Player; // Añadido para el Tridente
+  player3: Player;
   wins: number;
   matches: number;
   winRate: number;
