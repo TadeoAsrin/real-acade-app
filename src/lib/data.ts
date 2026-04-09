@@ -48,6 +48,9 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
       drawsAsCaptain: 0,
       matchesSinceLastCaptain: 0,
       lethalityIndex: 0,
+      influenceScore: 0,
+      clutchWins: 0,
+      bestStreak: 0,
     };
   });
 
@@ -63,6 +66,7 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
     const teamAWon = match.teamAScore > match.teamBScore;
     const teamBWon = match.teamBScore > match.teamAScore;
     const draw = match.teamAScore === match.teamBScore;
+    const isClutch = Math.abs(match.teamAScore - match.teamBScore) <= 1;
 
     const processPlayer = (playerStat: PlayerStats, team: 'A' | 'B') => {
         const { playerId, goals, isCaptain, isMvp, hasBestGoal } = playerStat;
@@ -87,6 +91,7 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
                 stats.wins++;
                 stats.powerPoints += POINTS.WIN;
                 result = 'W';
+                if (isClutch) stats.clutchWins++;
             } else {
                 stats.losses++;
             }
@@ -104,7 +109,6 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
 
             if (goals > 0) stats.lastGoalDate = match.date;
 
-            // Robust check for MVP and Best Goal
             if (isMvp === true || String(isMvp) === "true" || (isMvp as any) === 1) {
               stats.totalMvp++;
               stats.powerPoints += POINTS.MVP;
@@ -147,6 +151,8 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
           stats.lethalityIndex = stats.matchesPlayed >= 3 
             ? stats.totalGoals + (stats.goalsPerMatch * 2) 
             : stats.totalGoals;
+
+          stats.influenceScore = (stats.wins + 2) / (stats.matchesPlayed + 4);
       }
       stats.form = [...stats.form].reverse();
   }

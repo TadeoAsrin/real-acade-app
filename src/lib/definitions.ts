@@ -11,7 +11,6 @@ export type Player = {
 export type PlayerStats = {
   playerId: string;
   goals: number;
-  assists?: number; // Añadido para el motor de estadísticas
   isCaptain?: boolean;
   isMvp?: boolean;
   hasBestGoal?: boolean;
@@ -43,7 +42,6 @@ export type AggregatedPlayerStats = {
   position?: PlayerPosition;
   matchesPlayed: number;
   totalGoals: number;
-  totalAssists: number;
   totalCaptaincies: number;
   totalMvp: number;
   totalBestGoals: number;

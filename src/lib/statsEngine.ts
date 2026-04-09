@@ -13,7 +13,6 @@ export function getPlayerStats(matches: Match[], playerId: string): Partial<Aggr
 
   let wins = 0;
   let goals = 0;
-  let assists = 0;
   let clutchWins = 0;
   let currentStreak = 0;
   let maxStreak = 0;
@@ -27,7 +26,6 @@ export function getPlayerStats(matches: Match[], playerId: string): Partial<Aggr
     if (!pStat) return;
 
     goals += pStat.goals || 0;
-    assists += pStat.assists || 0;
 
     const teamAWon = match.teamAScore > match.teamBScore;
     const teamBWon = match.teamBScore > match.teamAScore;
@@ -59,7 +57,6 @@ export function getPlayerStats(matches: Match[], playerId: string): Partial<Aggr
     matchesPlayed,
     wins,
     totalGoals: goals,
-    totalAssists: assists,
     winPercentage: winRate,
     influenceScore,
     clutchWins,
@@ -77,5 +74,5 @@ export function getLeaderboard(players: Player[], matches: Match[]): AggregatedP
       position: player.position,
       ...stats
     } as AggregatedPlayerStats;
-  }).filter(p => p.matchesPlayed >= 4); // Step 2: filter matchesPlayed >= 4
+  }).filter(p => p.matchesPlayed >= 4); 
 }

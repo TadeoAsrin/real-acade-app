@@ -23,7 +23,8 @@ import {
   Brain, 
   ZapOff,
   TrendingUp,
-  Activity
+  Activity,
+  ArrowRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -42,7 +43,8 @@ function HighlightCard({
   statLabel, 
   statValue, 
   colorClass,
-  extraInfo 
+  extraInfo,
+  href
 }: { 
   title: string, 
   player: AggregatedPlayerStats | undefined, 
@@ -50,40 +52,47 @@ function HighlightCard({
   statLabel: string, 
   statValue: string | number,
   colorClass: string,
-  extraInfo?: React.ReactNode
+  extraInfo?: React.ReactNode,
+  href: string
 }) {
   if (!player) return null;
 
   return (
-    <div className="bg-[#111827] rounded-2xl p-6 border border-white/5 flex flex-col h-full hover:border-white/10 transition-all group">
-      <div className={cn("flex items-center gap-2 mb-6", colorClass)}>
-        <Icon className="h-4 w-4" />
-        <span className="text-[10px] font-black uppercase tracking-[0.2em] font-oswald">{title}</span>
-      </div>
-      
-      <div className="flex items-center gap-4 mb-6">
-        <div className="relative">
-          <Avatar className="h-14 w-14 border-2 border-white/10">
-            <AvatarFallback className="bg-white/5 text-white font-black text-lg">{getInitials(player.name)}</AvatarFallback>
-          </Avatar>
-          <div className={cn("absolute -top-1 -right-1 rounded-full p-1 border-2 border-[#111827]", colorClass.replace('text-', 'bg-'))}>
-            <Star className="h-2 w-2 text-black" />
+    <Link href={href} className="group h-full block">
+      <div className="bg-[#111827] rounded-2xl p-6 border border-white/5 flex flex-col h-full hover:border-white/20 transition-all hover-lift relative overflow-hidden">
+        <div className={cn("flex items-center gap-2 mb-6", colorClass)}>
+          <Icon className="h-4 w-4" />
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] font-oswald">{title}</span>
+        </div>
+        
+        <div className="flex items-center gap-4 mb-6">
+          <div className="relative">
+            <Avatar className="h-14 w-14 border-2 border-white/10 group-hover:border-white/20 transition-colors">
+              <AvatarFallback className="bg-white/5 text-white font-black text-lg">{getInitials(player.name)}</AvatarFallback>
+            </Avatar>
+            <div className={cn("absolute -top-1 -right-1 rounded-full p-1 border-2 border-[#111827]", colorClass.replace('text-', 'bg-'))}>
+              <Star className="h-2 w-2 text-black" />
+            </div>
+          </div>
+          <div className="min-w-0">
+            <span className="text-xl font-black italic uppercase leading-none truncate block text-white">{player.name}</span>
+            <p className="text-[8px] font-bold text-muted-foreground uppercase mt-1 tracking-widest">{player.position || 'Comodín'}</p>
           </div>
         </div>
-        <div className="min-w-0">
-          <Link href={`/players/${player.playerId}`} className="text-xl font-black italic uppercase leading-none hover:opacity-80 transition-opacity truncate block">{player.name}</Link>
-          <p className="text-[8px] font-bold text-muted-foreground uppercase mt-1 tracking-widest">{player.position || 'Comodín'}</p>
-        </div>
-      </div>
 
-      <div className="mt-auto space-y-4">
-        <div className="flex items-baseline gap-2">
-          <span className="text-5xl font-black italic leading-none font-bebas">{statValue}</span>
-          <span className="text-[8px] font-black uppercase text-muted-foreground tracking-widest font-oswald">{statLabel}</span>
+        <div className="mt-auto space-y-4">
+          <div className="flex items-baseline gap-2">
+            <span className="text-5xl font-black italic leading-none font-bebas text-white">{statValue}</span>
+            <span className="text-[8px] font-black uppercase text-muted-foreground tracking-widest font-oswald">{statLabel}</span>
+          </div>
+          {extraInfo}
         </div>
-        {extraInfo}
+
+        <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-40 transition-opacity">
+          <ArrowRight className="h-4 w-4 text-white" />
+        </div>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -118,11 +127,10 @@ function DashboardContent() {
   const playedMatches = allMatches.filter(m => m.teamAScore > 0 || m.teamBScore > 0);
   const lastMatch = playedMatches[0];
   
-  // New Stats Engine implementation
+  // Stats Engine implementation
   const leaderboard = getLeaderboard(allPlayers, allMatches);
   const mostInfluential = [...leaderboard].sort((a, b) => b.influenceScore - a.influenceScore)[0];
   const topScorer = [...leaderboard].sort((a, b) => b.totalGoals - a.totalGoals)[0];
-  const topAssists = [...leaderboard].sort((a, b) => b.totalAssists - a.totalAssists)[0];
   const bestStreak = [...leaderboard].sort((a, b) => b.bestStreak - a.bestStreak)[0];
   const clutchPlayer = [...leaderboard].sort((a, b) => b.clutchWins - a.clutchWins)[0];
 
@@ -134,7 +142,7 @@ function DashboardContent() {
     .sort((a, b) => b.matchesPlayed - a.matchesPlayed)
     .slice(0, 2);
 
-  // Pulso de la Competición calculations
+  // Pulso de la Competición
   const maxMvpCount = stats.length > 0 ? Math.max(...stats.map(p => p.totalMvp), 0) : 0;
   const recordGoalsInMatch = allMatches.length > 0 ? Math.max(...allMatches.map(m => m.teamAScore + m.teamBScore), 0) : 0;
   const chemistry = getChemistryRankings(allPlayers, allMatches, 1);
@@ -261,7 +269,7 @@ function DashboardContent() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Link href="/pulse/mvp" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-yellow-500/20 transition-all hover-lift">
             <Star className="h-6 w-6 text-yellow-500" />
-            <span className="text-5xl font-black italic font-bebas leading-none">{maxMvpCount}</span>
+            <span className="text-5xl font-black italic font-bebas leading-none text-white">{maxMvpCount}</span>
             <div className="space-y-0.5">
               <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">REYES MVP</p>
               <p className="text-[8px] font-bold text-muted-foreground/40 uppercase font-oswald">RÉCORD PREMIOS</p>
@@ -269,7 +277,7 @@ function DashboardContent() {
           </Link>
           <Link href="/pulse/league" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-orange-500/20 transition-all hover-lift">
             <Flame className="h-6 w-6 text-orange-500" />
-            <span className="text-5xl font-black italic font-bebas leading-none">{recordGoalsInMatch}</span>
+            <span className="text-5xl font-black italic font-bebas leading-none text-white">{recordGoalsInMatch}</span>
             <div className="space-y-0.5">
               <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">RÉCORD GOLES</p>
               <p className="text-[8px] font-bold text-muted-foreground/40 uppercase font-oswald">EN UN PARTIDO</p>
@@ -277,7 +285,7 @@ function DashboardContent() {
           </Link>
           <Link href="/pulse/partnership" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-primary/20 transition-all hover-lift">
             <LinkIcon className="h-6 w-6 text-primary" />
-            <span className="text-5xl font-black italic font-bebas leading-none">{societyValue}</span>
+            <span className="text-5xl font-black italic font-bebas leading-none text-white">{societyValue}</span>
             <div className="space-y-0.5">
               <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">SOCIEDAD IDEAL</p>
               <p className="text-[8px] font-bold text-muted-foreground/40 uppercase font-oswald truncate max-w-[120px]">{societyText}</p>
@@ -285,7 +293,7 @@ function DashboardContent() {
           </Link>
           <Link href="/pulse/attendance" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-emerald-500/20 transition-all hover-lift">
             <Users className="h-6 w-6 text-emerald-500" />
-            <span className="text-5xl font-black italic font-bebas leading-none">{attendanceValue}</span>
+            <span className="text-5xl font-black italic font-bebas leading-none text-white">{attendanceValue}</span>
             <div className="space-y-0.5">
               <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">INFALTABLES</p>
               <p className="text-[8px] font-bold text-muted-foreground/40 uppercase font-oswald">ASISTENCIA</p>
@@ -297,7 +305,7 @@ function DashboardContent() {
       {/* 4. ESTRELLAS DE LA ACADEMIA (Highlights Premium) */}
       <section className="space-y-6 relative z-10">
         <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 px-1 font-oswald">ESTRELLAS DE LA ACADEMIA</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           
           {/* Most Influential */}
           <HighlightCard 
@@ -307,6 +315,7 @@ function DashboardContent() {
             statLabel="FACTOR"
             statValue="TOP"
             colorClass="text-primary"
+            href="/pulse/influencer"
             extraInfo={
               <div className="pt-2 border-t border-white/5 flex justify-between items-center">
                 <span className="text-[8px] font-bold text-muted-foreground uppercase">{mostInfluential?.matchesPlayed} PJ</span>
@@ -323,16 +332,7 @@ function DashboardContent() {
             statLabel="GOLES"
             statValue={topScorer?.totalGoals || 0}
             colorClass="text-yellow-500"
-          />
-
-          {/* Top Assists */}
-          <HighlightCard 
-            title="ASISTIDOR"
-            player={topAssists}
-            icon={Users}
-            statLabel="PASES GOL"
-            statValue={topAssists?.totalAssists || 0}
-            colorClass="text-emerald-500"
+            href="/standings?tab=goleadores"
           />
 
           {/* Best Streak */}
@@ -343,6 +343,7 @@ function DashboardContent() {
             statLabel="WINS"
             statValue={bestStreak?.bestStreak || 0}
             colorClass="text-orange-500"
+            href="/standings?tab=general"
           />
 
           {/* Clutch Player */}
@@ -353,6 +354,7 @@ function DashboardContent() {
             statLabel="WINS LÍMITE"
             statValue={clutchPlayer?.clutchWins || 0}
             colorClass="text-purple-500"
+            href="/pulse/clutch"
           />
 
         </div>
@@ -382,7 +384,7 @@ function DashboardContent() {
                   <div key={p.playerId} className="space-y-2">
                     <div className="flex items-center justify-between">
                       <div className="flex flex-col">
-                        <Link href={`/players/${p.playerId}`} className="text-xs font-bold uppercase hover:text-red-500 transition-colors leading-none">{p.name}</Link>
+                        <Link href={`/players/${p.playerId}`} className="text-xs font-bold uppercase hover:text-red-500 transition-colors leading-none text-white">{p.name}</Link>
                         <span className="text-[7px] font-bold text-muted-foreground/40 uppercase tracking-widest font-oswald mt-1">{p.wins}V - {p.draws}E - {p.losses}D</span>
                       </div>
                       <div className="text-right">
@@ -414,7 +416,7 @@ function DashboardContent() {
                 {polvoraMojada.map(p => (
                   <div key={p.playerId} className="flex items-center justify-between bg-white/5 p-3 rounded-xl border border-transparent hover:border-blue-400/10 transition-all">
                     <div className="flex flex-col">
-                      <Link href={`/players/${p.playerId}`} className="text-xs font-bold uppercase hover:text-blue-400 transition-colors">{p.name}</Link>
+                      <Link href={`/players/${p.playerId}`} className="text-xs font-bold uppercase hover:text-blue-400 transition-colors text-white">{p.name}</Link>
                       <span className="text-[7px] font-bold text-muted-foreground/40 uppercase tracking-widest font-oswald">{p.totalGoals} GOLES EN {p.matchesPlayed} PJ</span>
                     </div>
                     <div className="text-right">

@@ -65,7 +65,7 @@ export default function PulseDetailPage() {
           <div className={cn("mx-auto w-20 h-20 rounded-full flex items-center justify-center border", colorClass.replace('text-', 'bg-').replace('text-', 'border-') + '/20')}>
               {React.createElement(icon, { className: cn("h-10 w-10", colorClass) })}
           </div>
-          <h1 className="text-4xl font-black italic uppercase tracking-tighter">{title}</h1>
+          <h1 className="text-4xl font-black italic uppercase tracking-tighter text-white">{title}</h1>
           <p className="text-muted-foreground italic text-sm">{description}</p>
           {requirementLabel && (
             <Badge variant="outline" className="mx-auto border-orange-500/20 text-orange-500 uppercase font-black text-[10px] py-1 px-4">
@@ -84,7 +84,7 @@ export default function PulseDetailPage() {
                               <AvatarFallback className="bg-muted font-black text-lg">{getInitials(p.name)}</AvatarFallback>
                           </Avatar>
                           <div className="flex flex-col">
-                              <Link href={`/players/${p.playerId}`} className="font-black text-xl hover:underline italic uppercase tracking-tighter">{p.name}</Link>
+                              <Link href={`/players/${p.playerId}`} className="font-black text-xl hover:underline italic uppercase tracking-tighter text-white">{p.name}</Link>
                               <div className="flex items-center gap-2">
                                 <span className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">{p.matchesPlayed} PJ</span>
                                 {p.isActive && <Badge variant="outline" className="h-3 text-[6px] border-emerald-500/30 text-emerald-500 uppercase">Activo</Badge>}
@@ -108,8 +108,8 @@ export default function PulseDetailPage() {
   );
 
   if (type === 'influencer') {
-    const sorted = [...playerStats].filter(p => p.matchesPlayed > 0).sort((a, b) => b.winPercentage - a.winPercentage || b.matchesPlayed - a.matchesPlayed);
-    return renderRankingList("Cerebros del Campo", "Efectividad pura. Jugadores con mayor porcentaje de victoria histórico.", Brain, sorted, (p) => `${p.winPercentage}%`, (p) => `${p.wins}V - ${p.draws}E - ${p.losses}D`, "text-primary");
+    const sorted = [...playerStats].filter(p => p.matchesPlayed >= 4).sort((a, b) => b.influenceScore - a.influenceScore);
+    return renderRankingList("Cerebros del Campo", "Efectividad ponderada por victorias y regularidad (Fórmula: wins+2 / played+4).", Brain, sorted, (p) => `${p.winPercentage}%`, (p) => `${p.wins}V - ${p.draws}E - ${p.losses}D`, "text-primary", "MÍNIMO 4 PARTIDOS JUGADOS");
   }
 
   if (type === 'mvp') {
@@ -142,6 +142,11 @@ export default function PulseDetailPage() {
     return renderRankingList("Pólvora Mojada", "Sequía ofensiva en roles de ataque. Ranking de promedios de gol bajos.", Droplets, sorted, (p) => p.goalsPerMatch, (p) => `${p.totalGoals} GOLES EN ${p.matchesPlayed} PJ`, "text-blue-400", "MÍNIMO 2 PJ Y ROL OFENSIVO");
   }
 
+  if (type === 'clutch') {
+    const sorted = [...playerStats].filter(p => p.clutchWins > 0).sort((a, b) => b.clutchWins - a.clutchWins || b.winPercentage - a.winPercentage);
+    return renderRankingList("Especialistas Clutch", "Expertos en ganar bajo presión. Jugadores con más victorias por diferencia de 1 gol.", Zap, sorted, (p) => p.clutchWins, () => "WINS AJUSTADOS", "text-purple-500");
+  }
+
   if (type === 'partnership') {
     let pairs = getChemistryRankings(allPlayers, allMatches, 1);
     const topPairs = pairs.filter(p => p.winRate >= 50).slice(0, 15);
@@ -155,7 +160,7 @@ export default function PulseDetailPage() {
             <div className="mx-auto w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center border border-primary/20">
                 <LinkIcon className="h-10 w-10 text-primary" />
             </div>
-            <h1 className="text-4xl font-black italic uppercase tracking-tighter">Sociedades de Élite</h1>
+            <h1 className="text-4xl font-black italic uppercase tracking-tighter text-white">Sociedades de Élite</h1>
             <p className="text-muted-foreground italic text-sm">El Top 15 de química pura. Duplas activas con éxito superior al 50%.</p>
             <Badge variant="outline" className="mx-auto border-primary/20 text-primary uppercase font-black text-[10px] py-1 px-4">
               RANKING DE EXCLUSIVIDAD: TOP 15
@@ -176,7 +181,7 @@ export default function PulseDetailPage() {
                                 </Avatar>
                             </div>
                             <div className="flex flex-col min-w-0">
-                                <span className="font-black text-lg truncate italic uppercase tracking-tighter">
+                                <span className="font-black text-lg truncate italic uppercase tracking-tighter text-white">
                                   {pair.player1.name.split(' ')[0]} + {pair.player2.name.split(' ')[0]}
                                 </span>
                                 <div className="flex items-center gap-2">
@@ -213,7 +218,7 @@ export default function PulseDetailPage() {
             <div className="mx-auto w-20 h-20 bg-orange-500/10 rounded-full flex items-center justify-center border border-orange-500/20">
                 <Flame className="h-10 w-10 text-orange-500 fill-orange-500" />
             </div>
-            <h1 className="text-4xl font-black italic uppercase tracking-tighter">Partido más picante</h1>
+            <h1 className="text-4xl font-black italic uppercase tracking-tighter text-white">Partido más picante</h1>
             <p className="text-muted-foreground italic text-sm">El encuentro con mayor producción ofensiva registrado.</p>
         </div>
         {spiciest ? (
