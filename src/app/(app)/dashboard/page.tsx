@@ -26,6 +26,7 @@ import {
   Activity
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import { calculateAggregatedStats, getChemistryRankings } from "@/lib/data";
 import { getLeaderboard } from "@/lib/statsEngine";
