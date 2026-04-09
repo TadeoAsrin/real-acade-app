@@ -79,6 +79,7 @@ export type AggregatedPlayerStats = {
 export type ChemistryPair = {
   player1: Player;
   player2: Player;
+  player3: Player; // Añadido para el Tridente
   wins: number;
   matches: number;
   winRate: number;

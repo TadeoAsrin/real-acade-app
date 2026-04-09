@@ -146,11 +146,13 @@ function DashboardContent() {
   const maxMvpCount = stats.length > 0 ? Math.max(...stats.map(p => p.totalMvp), 0) : 0;
   const recordGoalsInMatch = allMatches.length > 0 ? Math.max(...allMatches.map(m => m.teamAScore + m.teamBScore), 0) : 0;
   
-  // Sociedad Ideal
+  // Tridente de Oro (antes Sociedad Ideal)
   const chemistry = getChemistryRankings(allPlayers, allMatches, 1);
-  const topPair = chemistry[0];
-  const societyText = topPair ? `${topPair.player1.name.split(' ')[0]} + ${topPair.player2.name.split(' ')[0]}` : "SIN DUPLAS";
-  const societyValue = topPair ? `${topPair.winRate}%` : "0%";
+  const topTrident = chemistry[0];
+  const tridentText = topTrident 
+    ? `${topTrident.player1.name.split(' ')[0]} + ${topTrident.player2.name.split(' ')[0]} + ${topTrident.player3.name.split(' ')[0]}` 
+    : "SIN TRIDENTES";
+  const tridentValue = topTrident ? `${topTrident.winRate}%` : "0%";
   
   // Infaltables (Asistencia)
   const totalPossibleMatches = playedMatches.length;
@@ -301,10 +303,10 @@ function DashboardContent() {
           </Link>
           <Link href="/pulse/partnership" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-primary/20 transition-all hover-lift">
             <LinkIcon className="h-6 w-6 text-primary" />
-            <span className="text-5xl font-black italic font-bebas leading-none text-white">{societyValue}</span>
+            <span className="text-5xl font-black italic font-bebas leading-none text-white">{tridentValue}</span>
             <div className="space-y-0.5">
-              <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">SOCIEDAD IDEAL</p>
-              <p className="text-[8px] font-bold text-muted-foreground/40 uppercase font-oswald truncate max-w-[120px]">{societyText}</p>
+              <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">TRIDENTE DE ORO</p>
+              <p className="text-[8px] font-bold text-muted-foreground/40 uppercase font-oswald truncate max-w-[120px]">{tridentText}</p>
             </div>
           </Link>
           <Link href="/pulse/attendance" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-emerald-500/20 transition-all hover-lift">

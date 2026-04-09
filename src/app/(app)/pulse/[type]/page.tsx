@@ -7,7 +7,7 @@ import { useCollection, useMemoFirebase, useFirestore } from "@/firebase";
 import { collection, query, orderBy } from "firebase/firestore";
 import type { Match, Player, AggregatedPlayerStats, ChemistryPair } from "@/lib/definitions";
 import { Card, CardContent } from "@/components/ui/card";
-import { Brain, Link as LinkIcon, Star, Users, Flame, Skull, Ghost, Droplets, Loader2, ChevronLeft, Zap, TrendingUp, Info, ShieldAlert } from "lucide-react";
+import { Brain, Link as LinkIcon, Star, Users, Flame, Skull, Ghost, Droplets, Loader2, ChevronLeft, Zap, TrendingUp, Info, ShieldAlert, Sparkles } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials, cn } from "@/lib/utils";
 import Link from "next/link";
@@ -148,8 +148,8 @@ export default function PulseDetailPage() {
   }
 
   if (type === 'partnership') {
-    let pairs = getChemistryRankings(allPlayers, allMatches, 1);
-    const topPairs = pairs.filter(p => p.winRate >= 50).slice(0, 15);
+    let tridents = getChemistryRankings(allPlayers, allMatches, 1);
+    const topTridents = tridents.filter(p => p.winRate >= 50).slice(0, 15);
 
     return (
       <div className="space-y-8 max-w-2xl mx-auto pb-20">
@@ -160,38 +160,41 @@ export default function PulseDetailPage() {
             <div className="mx-auto w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center border border-primary/20">
                 <LinkIcon className="h-10 w-10 text-primary" />
             </div>
-            <h1 className="text-4xl font-black italic uppercase tracking-tighter text-white">Sociedades de Élite</h1>
-            <p className="text-muted-foreground italic text-sm">El Top 15 de química pura. Duplas activas con éxito superior al 50%.</p>
+            <h1 className="text-4xl font-black italic uppercase tracking-tighter text-white">Tridentes de Oro</h1>
+            <p className="text-muted-foreground italic text-sm">El Top 15 de química de élite. Sociedades de tres jugadores con éxito superior al 50%.</p>
             <Badge variant="outline" className="mx-auto border-primary/20 text-primary uppercase font-black text-[10px] py-1 px-4">
               RANKING DE EXCLUSIVIDAD: TOP 15
             </Badge>
         </div>
         <div className="space-y-4">
-            {topPairs.length > 0 ? topPairs.map((pair, i) => (
+            {topTridents.length > 0 ? topTridents.map((trident, i) => (
                 <Card key={i} className={cn("competition-card transition-all hover-lift", i === 0 ? "border-l-4 border-l-primary bg-primary/5 shadow-[0_0_30px_rgba(37,99,235,0.1)]" : "border-l-4 border-l-transparent")}>
                     <CardContent className="p-6 flex items-center justify-between">
                         <div className="flex items-center gap-4">
                             <span className="text-2xl font-black italic text-muted-foreground/30 w-8">#{i + 1}</span>
                             <div className="flex -space-x-4">
-                                <Avatar className="h-12 w-12 border-2 border-background ring-2 ring-white/10">
-                                    <AvatarFallback className="bg-muted font-black">{getInitials(pair.player1.name)}</AvatarFallback>
+                                <Avatar className="h-10 w-10 border-2 border-background ring-2 ring-white/10">
+                                    <AvatarFallback className="bg-muted font-black text-[10px]">{getInitials(trident.player1.name)}</AvatarFallback>
                                 </Avatar>
-                                <Avatar className="h-12 w-12 border-2 border-background ring-2 ring-white/10">
-                                    <AvatarFallback className="bg-muted font-black">{getInitials(pair.player2.name)}</AvatarFallback>
+                                <Avatar className="h-10 w-10 border-2 border-background ring-2 ring-white/10">
+                                    <AvatarFallback className="bg-muted font-black text-[10px]">{getInitials(trident.player2.name)}</AvatarFallback>
+                                </Avatar>
+                                <Avatar className="h-10 w-10 border-2 border-background ring-2 ring-white/10">
+                                    <AvatarFallback className="bg-muted font-black text-[10px]">{getInitials(trident.player3.name)}</AvatarFallback>
                                 </Avatar>
                             </div>
                             <div className="flex flex-col min-w-0">
-                                <span className="font-black text-lg truncate italic uppercase tracking-tighter text-white">
-                                  {pair.player1.name.split(' ')[0]} + {pair.player2.name.split(' ')[0]}
+                                <span className="font-black text-sm sm:text-base truncate italic uppercase tracking-tighter text-white">
+                                  {trident.player1.name.split(' ')[0]} + {trident.player2.name.split(' ')[0]} + {trident.player3.name.split(' ')[0]}
                                 </span>
                                 <div className="flex items-center gap-2">
-                                  <span className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">{pair.wins}V en {pair.matches} PJ</span>
-                                  {pair.matches === 1 && <Badge className="h-3 text-[6px] bg-primary/20 text-primary border-none uppercase font-black">Nueva Sociedad</Badge>}
+                                  <span className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">{trident.wins}V en {trident.matches} PJ</span>
+                                  {trident.winRate > 70 && <Badge className="h-3 text-[6px] bg-primary/20 text-primary border-none uppercase font-black"><Sparkles className="h-2 w-2 mr-1" /> Élite</Badge>}
                                 </div>
                             </div>
                         </div>
                         <div className="text-right">
-                            <span className={cn("text-3xl font-black italic leading-none", i === 0 ? "text-primary" : "text-white")}>{pair.winRate}%</span>
+                            <span className={cn("text-3xl font-black italic leading-none", i === 0 ? "text-primary" : "text-white")}>{trident.winRate}%</span>
                             <p className="text-[8px] uppercase font-black text-muted-foreground/40 mt-1">Efectividad</p>
                         </div>
                     </CardContent>
@@ -199,7 +202,7 @@ export default function PulseDetailPage() {
             )) : (
               <div className="h-40 flex flex-col items-center justify-center border-2 border-dashed rounded-3xl opacity-30 italic px-10 text-center">
                 <LinkIcon className="h-10 w-10 mb-2 opacity-50" />
-                <p>No se han detectado sociedades activas con éxito demostrado.</p>
+                <p>No se han detectado tridentes activos con éxito demostrado.</p>
               </div>
             )}
         </div>

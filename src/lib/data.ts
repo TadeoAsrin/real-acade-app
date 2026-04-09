@@ -160,6 +160,9 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
   return Object.values(statsMap);
 };
 
+/**
+ * Calcula el Tridente de Oro: Triadas de jugadores con mejor win rate juntos.
+ */
 export const getChemistryRankings = (players: Player[], matches: Match[], minMatchesThreshold = 1): ChemistryPair[] => {
   if (!players.length || !matches.length) return [];
 
@@ -175,12 +178,15 @@ export const getChemistryRankings = (players: Player[], matches: Match[], minMat
     const processTeam = (teamPlayers: PlayerStats[], won: boolean) => {
       const ids = teamPlayers.map(p => p.playerId).filter(id => players.some(pl => pl.id === id));
       
+      // Triple bucle para encontrar tríos
       for (let i = 0; i < ids.length; i++) {
         for (let j = i + 1; j < ids.length; j++) {
-          const key = [ids[i], ids[j]].sort().join('_::_');
-          if (!chemistryMap[key]) chemistryMap[key] = { matches: 0, wins: 0 };
-          chemistryMap[key].matches++;
-          if (won) chemistryMap[key].wins++;
+          for (let k = j + 1; k < ids.length; k++) {
+            const key = [ids[i], ids[j], ids[k]].sort().join('_::_');
+            if (!chemistryMap[key]) chemistryMap[key] = { matches: 0, wins: 0 };
+            chemistryMap[key].matches++;
+            if (won) chemistryMap[key].wins++;
+          }
         }
       }
     };
@@ -191,27 +197,31 @@ export const getChemistryRankings = (players: Player[], matches: Match[], minMat
 
   return Object.entries(chemistryMap)
     .map(([key, stats]) => {
-      const [id1, id2] = key.split('_::_');
-      const player1 = players.find(p => p.id === id1);
-      const player2 = players.find(p => p.id === id2);
+      const [id1, id2, id3] = key.split('_::_');
+      const p1 = players.find(p => p.id === id1);
+      const p2 = players.find(p => p.id === id2);
+      const p3 = players.find(p => p.id === id3);
       const s1 = playerStats.find(s => s.playerId === id1);
       const s2 = playerStats.find(s => s.playerId === id2);
+      const s3 = playerStats.find(s => s.playerId === id3);
       
-      if (!player1 || !player2 || !s1 || !s2) return null;
+      if (!p1 || !p2 || !p3 || !s1 || !s2 || !s3) return null;
 
-      if (!s1.isActive || !s2.isActive) return null;
+      // Solo tridentes activos
+      if (!s1.isActive || !s2.isActive || !s3.isActive) return null;
 
       const winRate = Math.round((stats.wins / stats.matches) * 100);
 
       if (winRate < 50) return null;
 
       return { 
-        player1, 
-        player2, 
+        player1: p1, 
+        player2: p2, 
+        player3: p3,
         wins: stats.wins, 
         matches: stats.matches,
         winRate,
-        combinedPower: s1.powerPoints + s2.powerPoints
+        combinedPower: s1.powerPoints + s2.powerPoints + s3.powerPoints
       };
     })
     .filter((pair): pair is ChemistryPair => pair !== null && pair.matches >= minMatchesThreshold)
