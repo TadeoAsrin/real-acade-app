@@ -10,6 +10,7 @@ const POINTS = {
 
 export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match[]): AggregatedPlayerStats[] => {
   const statsMap: { [key: string]: AggregatedPlayerStats } = {};
+  const currentStreaks: { [key: string]: number } = {};
 
   allPlayers.forEach(player => {
     statsMap[player.id] = {
@@ -53,6 +54,7 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
       clutchWins: 0,
       bestStreak: 0,
     };
+    currentStreaks[player.id] = 0;
   });
 
   const playedMatches = allMatches.filter(m => m.teamAScore > 0 || m.teamBScore > 0);
@@ -88,13 +90,19 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
                 stats.draws++;
                 stats.powerPoints += POINTS.DRAW;
                 result = 'D';
+                currentStreaks[playerId] = 0;
             } else if ((team === 'A' && teamAWon) || (team === 'B' && teamBWon)) {
                 stats.wins++;
                 stats.powerPoints += POINTS.WIN;
                 result = 'W';
                 if (isClutch) stats.clutchWins++;
+                
+                // Actualizar racha
+                currentStreaks[playerId]++;
+                stats.bestStreak = Math.max(stats.bestStreak, currentStreaks[playerId]);
             } else {
                 stats.losses++;
+                currentStreaks[playerId] = 0;
             }
 
             if (isCaptain) {
@@ -162,9 +170,6 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
   return Object.values(statsMap);
 };
 
-/**
- * Calcula el Tridente de Oro: Triadas de jugadores con mejor win rate juntos.
- */
 export const getChemistryRankings = (players: Player[], matches: Match[], minMatchesThreshold = 1): ChemistryPair[] => {
   if (!players.length || !matches.length) return [];
 
@@ -207,11 +212,9 @@ export const getChemistryRankings = (players: Player[], matches: Match[], minMat
       const s3 = playerStats.find(s => s.playerId === id3);
       
       if (!p1 || !p2 || !p3 || !s1 || !s2 || !s3) return null;
-
       if (!s1.isActive || !s2.isActive || !s3.isActive) return null;
 
       const winRate = Math.round((stats.wins / stats.matches) * 100);
-
       if (winRate < 50) return null;
 
       return { 
@@ -225,11 +228,7 @@ export const getChemistryRankings = (players: Player[], matches: Match[], minMat
       };
     })
     .filter((pair): pair is ChemistryPair => pair !== null && pair.matches >= minMatchesThreshold)
-    .sort((a, b) => 
-      b.winRate - a.winRate || 
-      b.matches - a.matches || 
-      b.combinedPower - a.combinedPower
-    );
+    .sort((a, b) => b.winRate - a.winRate || b.matches - a.matches);
 };
 
 export const getSpiciestMatch = (matches: Match[]) => {

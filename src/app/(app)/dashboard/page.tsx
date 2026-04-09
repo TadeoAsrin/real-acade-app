@@ -28,7 +28,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import { calculateAggregatedStats, getChemistryRankings } from "@/lib/data";
-import { getLeaderboard } from "@/lib/statsEngine";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials, cn } from "@/lib/utils";
@@ -125,14 +124,14 @@ function DashboardContent() {
   const playedMatches = allMatches.filter(m => m.teamAScore > 0 || m.teamBScore > 0);
   const lastMatch = playedMatches[0];
   
-  // Stats Engine implementation
-  const leaderboard = getLeaderboard(allPlayers, allMatches);
-  const mostInfluential = [...leaderboard].sort((a, b) => b.influenceScore - a.influenceScore)[0];
-  const topScorer = [...leaderboard].sort((a, b) => b.totalGoals - a.totalGoals)[0];
-  const bestStreak = [...leaderboard].sort((a, b) => b.bestStreak - a.bestStreak)[0];
-  const theWall = [...leaderboard].sort((a, b) => a.avgGoalsAgainst - b.avgGoalsAgainst)[0];
-
   const stats = calculateAggregatedStats(allPlayers, allMatches);
+  
+  // Estrellas de la Academia (Filtro: min 4 partidos para competitividad real)
+  const leaderboardStats = stats.filter(p => p.matchesPlayed >= 4);
+  const mostInfluential = [...leaderboardStats].sort((a, b) => b.influenceScore - a.influenceScore)[0];
+  const topScorer = [...leaderboardStats].sort((a, b) => b.totalGoals - a.totalGoals)[0];
+  const bestStreak = [...leaderboardStats].sort((a, b) => b.bestStreak - a.bestStreak)[0];
+  const theWall = [...leaderboardStats].sort((a, b) => a.avgGoalsAgainst - b.avgGoalsAgainst)[0];
 
   // Orden de Mando
   const ordenDeMando = [...stats]
@@ -322,7 +321,6 @@ function DashboardContent() {
         <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 px-1 font-oswald">ESTRELLAS DE LA ACADEMIA</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           
-          {/* Most Influential */}
           <HighlightCard 
             title="MÁS INFLUYENTE"
             player={mostInfluential}
@@ -339,7 +337,6 @@ function DashboardContent() {
             }
           />
 
-          {/* Top Scorer */}
           <HighlightCard 
             title="PICHICHI"
             player={topScorer}
@@ -350,7 +347,6 @@ function DashboardContent() {
             href="/standings?tab=goleadores"
           />
 
-          {/* Best Streak */}
           <HighlightCard 
             title="MEJOR RACHA"
             player={bestStreak}
@@ -361,7 +357,6 @@ function DashboardContent() {
             href="/standings?tab=general"
           />
 
-          {/* El Muro */}
           <HighlightCard 
             title="EL MURO"
             player={theWall}
@@ -385,7 +380,6 @@ function DashboardContent() {
         <Card className="competition-card border-none bg-black/20 backdrop-blur-sm overflow-hidden">
           <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-white/5 items-start">
             
-            {/* Iman de Derrotas */}
             <div className="p-8 space-y-6">
               <Link href="/pulse/iman-derrotas" className="flex items-center justify-between group">
                 <div className="flex items-center gap-2 text-red-500/60 group-hover:text-red-500 transition-colors">
@@ -418,7 +412,6 @@ function DashboardContent() {
               </div>
             </div>
 
-            {/* Pólvora Mojada */}
             <div className="p-8 space-y-6">
               <Link href="/pulse/polvora" className="flex items-center justify-between group">
                 <div className="flex items-center gap-2 text-blue-400/60 group-hover:text-blue-400 transition-colors">

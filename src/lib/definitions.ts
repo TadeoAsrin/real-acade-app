@@ -84,6 +84,7 @@ export type ChemistryPair = {
   wins: number;
   matches: number;
   winRate: number;
+  combinedPower: number;
 };
 
 export type Draft = {
