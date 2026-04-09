@@ -162,7 +162,46 @@ function DashboardContent() {
         </section>
       )}
 
-      {/* 2. PULSO DE LA COMPETICIÓN */}
+      {/* 2. ORDEN DE MANDO */}
+      <section className="space-y-4 relative z-10">
+        <div className="flex items-center gap-3 px-1">
+          <ShieldCheck className="h-4 w-4 text-emerald-500" />
+          <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-500 font-oswald">ORDEN DE MANDO</h2>
+          <div className="h-px flex-1 bg-emerald-500/10" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {ordenDeMando.length > 0 ? ordenDeMando.map((p, idx) => (
+            <Link key={p.playerId} href="/pulse/deuda-mando" className="group">
+              <div className="bg-[#111827] border border-emerald-500/20 rounded-2xl p-5 flex items-center justify-between transition-all hover:bg-emerald-500/5 hover:border-emerald-500/40">
+                <div className="flex items-center gap-4">
+                  <div className="relative">
+                    <Avatar className="h-12 w-12 border-2 border-emerald-500/20">
+                      <AvatarFallback className="bg-emerald-500/10 text-emerald-500 font-black">{getInitials(p.name)}</AvatarFallback>
+                    </Avatar>
+                    <div className="absolute -bottom-1 -right-1 bg-emerald-500 rounded-full p-1 shadow-lg ring-2 ring-[#111827]">
+                      <Crown className="h-2.5 w-2.5 text-black" />
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-[8px] font-black text-emerald-500/60 uppercase tracking-widest font-oswald mb-0.5">CANDIDATO #{idx + 1}</p>
+                    <h3 className="text-xl font-black italic uppercase text-white group-hover:text-emerald-500 transition-colors leading-none">{p.name}</h3>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="text-3xl font-black italic font-bebas text-white leading-none">{p.matchesPlayed}</span>
+                  <p className="text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest font-oswald">PJ SIN BRAZALETE</p>
+                </div>
+              </div>
+            </Link>
+          )) : (
+            <div className="bg-[#111827] border border-dashed border-white/5 rounded-2xl p-6 text-center col-span-full">
+              <p className="text-[10px] font-black uppercase text-muted-foreground/40 tracking-widest italic">Todos los jugadores han portado el mando</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* 3. PULSO DE LA COMPETICIÓN */}
       <section className="space-y-6 relative z-10">
         <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 px-1 font-oswald">PULSO DE LA COMPETICIÓN</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -201,7 +240,7 @@ function DashboardContent() {
         </div>
       </section>
 
-      {/* 3. ESTRELLAS DE LA ACADEMIA */}
+      {/* 4. ESTRELLAS DE LA ACADEMIA */}
       <section className="space-y-6 relative z-10">
         <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 px-1 font-oswald">ESTRELLAS DE LA ACADEMIA</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -367,54 +406,14 @@ function DashboardContent() {
         </div>
       </section>
 
-      {/* 4. FINAL ROW (GRID) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 relative z-10 items-start">
-        {/* ORDEN DE MANDO */}
-        <section className="space-y-4">
-          <div className="flex items-center gap-3 px-1">
-            <ShieldCheck className="h-4 w-4 text-emerald-500" />
-            <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-500 font-oswald">ORDEN DE MANDO</h2>
-            <div className="h-px flex-1 bg-emerald-500/10" />
-          </div>
-          <div className="grid grid-cols-1 gap-4">
-            {ordenDeMando.length > 0 ? ordenDeMando.map((p, idx) => (
-              <Link key={p.playerId} href="/pulse/deuda-mando" className="group">
-                <div className="bg-[#111827] border border-emerald-500/20 rounded-2xl p-5 flex items-center justify-between transition-all hover:bg-emerald-500/5 hover:border-emerald-500/40">
-                  <div className="flex items-center gap-4">
-                    <div className="relative">
-                      <Avatar className="h-12 w-12 border-2 border-emerald-500/20">
-                        <AvatarFallback className="bg-emerald-500/10 text-emerald-500 font-black">{getInitials(p.name)}</AvatarFallback>
-                      </Avatar>
-                      <div className="absolute -bottom-1 -right-1 bg-emerald-500 rounded-full p-1 shadow-lg ring-2 ring-[#111827]">
-                        <Crown className="h-2.5 w-2.5 text-black" />
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-[8px] font-black text-emerald-500/60 uppercase tracking-widest font-oswald mb-0.5">CANDIDATO #{idx + 1}</p>
-                      <h3 className="text-xl font-black italic uppercase text-white group-hover:text-emerald-500 transition-colors leading-none">{p.name}</h3>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-3xl font-black italic font-bebas text-white leading-none">{p.matchesPlayed}</span>
-                    <p className="text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest font-oswald">PJ SIN BRAZALETE</p>
-                  </div>
-                </div>
-              </Link>
-            )) : (
-              <div className="bg-[#111827] border border-dashed border-white/5 rounded-2xl p-6 text-center">
-                <p className="text-[10px] font-black uppercase text-muted-foreground/40 tracking-widest italic">Todos los jugadores han portado el mando</p>
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* SALA DE HUMILDAD */}
-        <section className="space-y-6">
-          <div className="flex items-center justify-between px-1">
-            <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 font-oswald">SALA DE HUMILDAD</h2>
-            <Badge variant="outline" className="text-[7px] font-black uppercase tracking-widest border-white/5 text-muted-foreground/40 font-oswald">FILTRO: MÍNIMO 2 PJ</Badge>
-          </div>
-          
+      {/* 5. SALA DE HUMILDAD */}
+      <section className="space-y-6 relative z-10">
+        <div className="flex items-center justify-between px-1">
+          <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 font-oswald">SALA DE HUMILDAD</h2>
+          <Badge variant="outline" className="text-[7px] font-black uppercase tracking-widest border-white/5 text-muted-foreground/40 font-oswald">FILTRO: MÍNIMO 2 PJ</Badge>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-[#111827]/40 rounded-2xl border border-white/5 p-6 space-y-4">
             <Link href="/pulse/iman-derrotas" className="block space-y-6 hover:opacity-80 transition-all">
               <div className="flex items-center justify-between">
@@ -447,9 +446,9 @@ function DashboardContent() {
                 ))}
               </div>
             </Link>
+          </div>
 
-            <div className="h-px w-full bg-white/5 my-4" />
-
+          <div className="bg-[#111827]/40 rounded-2xl border border-white/5 p-6 space-y-4">
             <Link href="/pulse/polvora" className="block space-y-6 hover:opacity-80 transition-all">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-blue-400/60">
@@ -471,8 +470,8 @@ function DashboardContent() {
               </div>
             </Link>
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
     </div>
   );
 }
