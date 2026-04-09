@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from 'react';
@@ -161,42 +162,42 @@ function DashboardContent() {
         </section>
       )}
 
-      {/* 2. ORDEN DE MANDO */}
-      <section className="space-y-4 relative z-10">
-        <div className="flex items-center gap-3 px-1">
-          <ShieldCheck className="h-4 w-4 text-emerald-500" />
-          <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-500 font-oswald">ORDEN DE MANDO</h2>
-          <div className="h-px flex-1 bg-emerald-500/10" />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {ordenDeMando.length > 0 ? ordenDeMando.map((p, idx) => (
-            <Link key={p.playerId} href="/pulse/deuda-mando" className="group">
-              <div className="bg-[#111827] border border-emerald-500/20 rounded-2xl p-5 flex items-center justify-between transition-all hover:bg-emerald-500/5 hover:border-emerald-500/40">
-                <div className="flex items-center gap-4">
-                  <div className="relative">
-                    <Avatar className="h-12 w-12 border-2 border-emerald-500/20">
-                      <AvatarFallback className="bg-emerald-500/10 text-emerald-500 font-black">{getInitials(p.name)}</AvatarFallback>
-                    </Avatar>
-                    <div className="absolute -bottom-1 -right-1 bg-emerald-500 rounded-full p-1 shadow-lg ring-2 ring-[#111827]">
-                      <Crown className="h-2.5 w-2.5 text-black" />
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-[8px] font-black text-emerald-500/60 uppercase tracking-widest font-oswald mb-0.5">CANDIDATO #{idx + 1}</p>
-                    <h3 className="text-xl font-black italic uppercase text-white group-hover:text-emerald-500 transition-colors leading-none">{p.name}</h3>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <span className="text-3xl font-black italic font-bebas text-white leading-none">{p.matchesPlayed}</span>
-                  <p className="text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest font-oswald">PJ SIN BRAZALETE</p>
-                </div>
-              </div>
-            </Link>
-          )) : (
-            <div className="col-span-2 bg-[#111827] border border-dashed border-white/5 rounded-2xl p-6 text-center">
-              <p className="text-[10px] font-black uppercase text-muted-foreground/40 tracking-widest italic">Todos los jugadores activos han portado el mando</p>
+      {/* 2. PULSO DE LA COMPETICIÓN (Movido arriba) */}
+      <section className="space-y-6 relative z-10">
+        <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 px-1 font-oswald">PULSO DE LA COMPETICIÓN</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Link href="/pulse/mvp" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-yellow-500/20 transition-all hover-lift">
+            <Star className="h-6 w-6 text-yellow-500" />
+            <span className="text-5xl font-black italic font-bebas leading-none">{maxMvpCount}</span>
+            <div className="space-y-0.5">
+              <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">REYES MVP</p>
+              <p className="text-[8px] font-bold text-muted-foreground/40 uppercase font-oswald">RÉCORD PREMIOS</p>
             </div>
-          )}
+          </Link>
+          <Link href="/pulse/league" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-orange-500/20 transition-all hover-lift">
+            <Flame className="h-6 w-6 text-orange-500" />
+            <span className="text-5xl font-black italic font-bebas leading-none">{recordGoalsInMatch}</span>
+            <div className="space-y-0.5">
+              <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">RÉCORD GOLES</p>
+              <p className="text-[8px] font-bold text-muted-foreground/40 uppercase font-oswald">EN UN PARTIDO</p>
+            </div>
+          </Link>
+          <Link href="/pulse/partnership" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-primary/20 transition-all hover-lift">
+            <LinkIcon className="h-6 w-6 text-primary" />
+            <span className="text-5xl font-black italic font-bebas leading-none">{societyValue}</span>
+            <div className="space-y-0.5">
+              <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">SOCIEDAD IDEAL</p>
+              <p className="text-[8px] font-bold text-muted-foreground/40 uppercase font-oswald truncate max-w-[120px]">{societyText}</p>
+            </div>
+          </Link>
+          <Link href="/pulse/attendance" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-emerald-500/20 transition-all hover-lift">
+            <Users className="h-6 w-6 text-emerald-500" />
+            <span className="text-5xl font-black italic font-bebas leading-none">{attendanceValue}</span>
+            <div className="space-y-0.5">
+              <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">INFALTABLES</p>
+              <p className="text-[8px] font-bold text-muted-foreground/40 uppercase font-oswald">ASISTENCIA</p>
+            </div>
+          </Link>
         </div>
       </section>
 
@@ -366,108 +367,109 @@ function DashboardContent() {
         </div>
       </section>
 
-      {/* 4. PULSO DE LA COMPETICIÓN */}
-      <section className="space-y-6 relative z-10">
-        <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 px-1 font-oswald">PULSO DE LA COMPETICIÓN</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Link href="/pulse/mvp" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-yellow-500/20 transition-all hover-lift">
-            <Star className="h-6 w-6 text-yellow-500" />
-            <span className="text-5xl font-black italic font-bebas leading-none">{maxMvpCount}</span>
-            <div className="space-y-0.5">
-              <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">REYES MVP</p>
-              <p className="text-[8px] font-bold text-muted-foreground/40 uppercase font-oswald">RÉCORD PREMIOS</p>
-            </div>
-          </Link>
-          <Link href="/pulse/league" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-orange-500/20 transition-all hover-lift">
-            <Flame className="h-6 w-6 text-orange-500" />
-            <span className="text-5xl font-black italic font-bebas leading-none">{recordGoalsInMatch}</span>
-            <div className="space-y-0.5">
-              <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">RÉCORD GOLES</p>
-              <p className="text-[8px] font-bold text-muted-foreground/40 uppercase font-oswald">EN UN PARTIDO</p>
-            </div>
-          </Link>
-          <Link href="/pulse/partnership" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-primary/20 transition-all hover-lift">
-            <LinkIcon className="h-6 w-6 text-primary" />
-            <span className="text-5xl font-black italic font-bebas leading-none">{societyValue}</span>
-            <div className="space-y-0.5">
-              <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">SOCIEDAD IDEAL</p>
-              <p className="text-[8px] font-bold text-muted-foreground/40 uppercase font-oswald truncate max-w-[120px]">{societyText}</p>
-            </div>
-          </Link>
-          <Link href="/pulse/attendance" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-emerald-500/20 transition-all hover-lift">
-            <Users className="h-6 w-6 text-emerald-500" />
-            <span className="text-5xl font-black italic font-bebas leading-none">{attendanceValue}</span>
-            <div className="space-y-0.5">
-              <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">INFALTABLES</p>
-              <p className="text-[8px] font-bold text-muted-foreground/40 uppercase font-oswald">ASISTENCIA</p>
-            </div>
-          </Link>
-        </div>
-      </section>
-
-      {/* 5. SALA DE HUMILDAD */}
-      <section className="space-y-6 relative z-10">
-        <div className="flex items-center justify-between px-1">
-          <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 font-oswald">SALA DE HUMILDAD</h2>
-          <Badge variant="outline" className="text-[7px] font-black uppercase tracking-widest border-white/5 text-muted-foreground/40 font-oswald">FILTRO: MÍNIMO 2 PJ</Badge>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Imán de Derrotas - Ratio de Vulnerabilidad (%) */}
-          <Link href="/pulse/iman-derrotas" className="bg-[#111827]/40 rounded-2xl p-6 border border-white/5 space-y-6 hover:border-red-500/20 transition-all hover-lift">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-red-500/60">
-                <Skull className="h-4 w-4" />
-                <span className="text-[10px] font-black uppercase tracking-widest font-oswald">IMÁN DE DERROTAS</span>
+      {/* 4. FINAL ROW (GRID) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 relative z-10">
+        {/* ORDEN DE MANDO */}
+        <section className="space-y-4">
+          <div className="flex items-center gap-3 px-1">
+            <ShieldCheck className="h-4 w-4 text-emerald-500" />
+            <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-500 font-oswald">ORDEN DE MANDO</h2>
+            <div className="h-px flex-1 bg-emerald-500/10" />
+          </div>
+          <div className="grid grid-cols-1 gap-4">
+            {ordenDeMando.length > 0 ? ordenDeMando.map((p, idx) => (
+              <Link key={p.playerId} href="/pulse/deuda-mando" className="group">
+                <div className="bg-[#111827] border border-emerald-500/20 rounded-2xl p-5 flex items-center justify-between transition-all hover:bg-emerald-500/5 hover:border-emerald-500/40">
+                  <div className="flex items-center gap-4">
+                    <div className="relative">
+                      <Avatar className="h-12 w-12 border-2 border-emerald-500/20">
+                        <AvatarFallback className="bg-emerald-500/10 text-emerald-500 font-black">{getInitials(p.name)}</AvatarFallback>
+                      </Avatar>
+                      <div className="absolute -bottom-1 -right-1 bg-emerald-500 rounded-full p-1 shadow-lg ring-2 ring-[#111827]">
+                        <Crown className="h-2.5 w-2.5 text-black" />
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-[8px] font-black text-emerald-500/60 uppercase tracking-widest font-oswald mb-0.5">CANDIDATO #{idx + 1}</p>
+                      <h3 className="text-xl font-black italic uppercase text-white group-hover:text-emerald-500 transition-colors leading-none">{p.name}</h3>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-3xl font-black italic font-bebas text-white leading-none">{p.matchesPlayed}</span>
+                    <p className="text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest font-oswald">PJ SIN BRAZALETE</p>
+                  </div>
+                </div>
+              </Link>
+            )) : (
+              <div className="bg-[#111827] border border-dashed border-white/5 rounded-2xl p-6 text-center">
+                <p className="text-[10px] font-black uppercase text-muted-foreground/40 tracking-widest italic">Todos los jugadores han portado el mando</p>
               </div>
-              <Badge variant="outline" className="text-[6px] font-black bg-red-500/5 text-red-500/40 border-none uppercase px-1.5 py-0 font-oswald">RATIO DE VULNERABILIDAD</Badge>
-            </div>
-            <div className="space-y-5">
-              {imanDerrotas.map(p => (
-                <div key={p.playerId} className="space-y-2">
-                  <div className="flex items-center justify-between">
+            )}
+          </div>
+        </section>
+
+        {/* SALA DE HUMILDAD */}
+        <section className="space-y-6">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 font-oswald">SALA DE HUMILDAD</h2>
+            <Badge variant="outline" className="text-[7px] font-black uppercase tracking-widest border-white/5 text-muted-foreground/40 font-oswald">FILTRO: MÍNIMO 2 PJ</Badge>
+          </div>
+          <div className="grid grid-cols-1 gap-6">
+            <Link href="/pulse/iman-derrotas" className="bg-[#111827]/40 rounded-2xl p-6 border border-white/5 space-y-6 hover:border-red-500/20 transition-all hover-lift">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-red-500/60">
+                  <Skull className="h-4 w-4" />
+                  <span className="text-[10px] font-black uppercase tracking-widest font-oswald">IMÁN DE DERROTAS</span>
+                </div>
+                <Badge variant="outline" className="text-[6px] font-black bg-red-500/5 text-red-500/40 border-none uppercase px-1.5 py-0 font-oswald">RATIO DE VULNERABILIDAD</Badge>
+              </div>
+              <div className="space-y-5">
+                {imanDerrotas.map(p => (
+                  <div key={p.playerId} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col">
+                        <span className="text-xs font-bold uppercase hover:text-red-500 transition-colors">{p.name}</span>
+                        <span className="text-[7px] font-bold text-muted-foreground/40 uppercase tracking-widest font-oswald">{p.wins}V - {p.draws}E - {p.losses}D ({p.matchesPlayed} PJ)</span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-xl font-black italic text-red-500/80 font-bebas">{p.lossPercentage}%</span>
+                        <p className="text-[6px] font-black uppercase text-red-500/30 font-oswald tracking-widest">CAÍDA</p>
+                      </div>
+                    </div>
+                    <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-red-900/40 transition-all duration-1000 ease-out" 
+                        style={{ width: `${p.lossPercentage}%` }} 
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Link>
+
+            <Link href="/pulse/polvora" className="bg-[#111827]/40 rounded-2xl p-6 border border-white/5 space-y-6 hover:border-blue-400/20 transition-all hover-lift">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-blue-400/60">
+                  <Droplets className="h-4 w-4" />
+                  <span className="text-[10px] font-black uppercase tracking-widest font-oswald">PÓLVORA MOJADA</span>
+                </div>
+                <Badge variant="outline" className="text-[6px] font-black bg-blue-400/5 text-blue-400/40 border-none uppercase px-1.5 py-0 font-oswald">SOLO ROLES OFENSIVOS</Badge>
+              </div>
+              <div className="space-y-4">
+                {polvoraMojada.map(p => (
+                  <div key={p.playerId} className="flex items-center justify-between">
                     <div className="flex flex-col">
-                      <span className="text-xs font-bold uppercase hover:text-red-500 transition-colors">{p.name}</span>
-                      <span className="text-[7px] font-bold text-muted-foreground/40 uppercase tracking-widest font-oswald">{p.wins}V - {p.draws}E - {p.losses}D ({p.matchesPlayed} PJ)</span>
+                      <span className="text-xs font-bold uppercase hover:text-blue-400 transition-colors">{p.name}</span>
+                      <span className="text-[7px] font-bold text-muted-foreground/40 uppercase tracking-widest font-oswald">{p.totalGoals} GOLES EN {p.matchesPlayed} PJ</span>
                     </div>
-                    <div className="text-right">
-                      <span className="text-xl font-black italic text-red-500/80 font-bebas">{p.lossPercentage}%</span>
-                      <p className="text-[6px] font-black uppercase text-red-500/30 font-oswald tracking-widest">CAÍDA</p>
-                    </div>
+                    <span className="text-xl font-black italic text-blue-400/80 font-bebas">{p.goalsPerMatch}</span>
                   </div>
-                  <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-red-900/40 transition-all duration-1000 ease-out" 
-                      style={{ width: `${p.lossPercentage}%` }} 
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Link>
-
-          {/* Pólvora Mojada */}
-          <Link href="/pulse/polvora" className="bg-[#111827]/40 rounded-2xl p-6 border border-white/5 space-y-6 hover:border-blue-400/20 transition-all hover-lift">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-blue-400/60">
-                <Droplets className="h-4 w-4" />
-                <span className="text-[10px] font-black uppercase tracking-widest font-oswald">PÓLVORA MOJADA</span>
+                ))}
               </div>
-              <Badge variant="outline" className="text-[6px] font-black bg-blue-400/5 text-blue-400/40 border-none uppercase px-1.5 py-0 font-oswald">SOLO ROLES OFENSIVOS</Badge>
-            </div>
-            <div className="space-y-4">
-              {polvoraMojada.map(p => (
-                <div key={p.playerId} className="flex items-center justify-between">
-                  <div className="flex flex-col">
-                    <span className="text-xs font-bold uppercase hover:text-blue-400 transition-colors">{p.name}</span>
-                    <span className="text-[7px] font-bold text-muted-foreground/40 uppercase tracking-widest font-oswald">{p.totalGoals} GOLES EN {p.matchesPlayed} PJ</span>
-                  </div>
-                  <span className="text-xl font-black italic text-blue-400/80 font-bebas">{p.goalsPerMatch}</span>
-                </div>
-              ))}
-            </div>
-          </Link>
-        </div>
-      </section>
+            </Link>
+          </div>
+        </section>
+      </div>
     </div>
   );
 }
