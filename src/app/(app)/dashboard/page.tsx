@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from 'react';
@@ -12,7 +13,6 @@ import {
   Flame, 
   Target, 
   Users, 
-  Link as LinkIcon, 
   Crown, 
   Star, 
   Skull, 
@@ -21,7 +21,6 @@ import {
   ShieldCheck, 
   Zap, 
   Brain, 
-  TrendingUp,
   ArrowRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -33,27 +32,17 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials, cn } from "@/lib/utils";
 import { MatchNewsModal } from '@/components/dashboard/match-news-modal';
 
-function HighlightCard({ 
-  title, 
-  player, 
-  icon: Icon, 
-  statLabel, 
-  statValue, 
-  colorClass,
-  extraInfo,
-  href
-}: { 
-  title: string, 
-  player: AggregatedPlayerStats | undefined, 
-  icon: any, 
-  statLabel: string, 
-  statValue: string | number,
-  colorClass: string,
-  extraInfo?: React.ReactNode,
-  href: string
-}) {
-  if (!player) return null;
+interface EliteListCardProps {
+  title: string;
+  icon: any;
+  players: AggregatedPlayerStats[];
+  valueFn: (p: AggregatedPlayerStats) => string | number;
+  label: string;
+  colorClass: string;
+  href: string;
+}
 
+function EliteListCard({ title, icon: Icon, players, valueFn, label, colorClass, href }: EliteListCardProps) {
   return (
     <Link href={href} className="group h-full block">
       <div className="bg-[#111827] rounded-2xl p-6 border border-white/5 flex flex-col h-full hover:border-white/20 transition-all hover-lift relative overflow-hidden">
@@ -62,84 +51,65 @@ function HighlightCard({
           <span className="text-[10px] font-black uppercase tracking-[0.2em] font-oswald">{title}</span>
         </div>
         
-        <div className="flex items-center gap-4 mb-6">
-          <div className="relative">
-            <Avatar className="h-14 w-14 border-2 border-white/10 group-hover:border-white/20 transition-colors">
-              <AvatarFallback className="bg-white/5 text-white font-black text-lg">{getInitials(player.name)}</AvatarFallback>
-            </Avatar>
-            <div className={cn("absolute -top-1 -right-1 rounded-full p-1 border-2 border-[#111827]", colorClass.replace('text-', 'bg-'))}>
-              <Star className="h-2 w-2 text-black" />
-            </div>
-          </div>
-          <div className="min-w-0">
-            <span className="text-xl font-black italic uppercase leading-none truncate block text-white">{player.name}</span>
-            <p className="text-[8px] font-bold text-muted-foreground uppercase mt-1 tracking-widest">{player.position || 'Comodín'}</p>
-          </div>
-        </div>
-
-        <div className="mt-auto space-y-4">
-          <div className="flex items-baseline gap-2">
-            <span className="text-5xl font-black italic leading-none font-bebas text-white">{statValue}</span>
-            <span className="text-[8px] font-black uppercase text-muted-foreground tracking-widest font-oswald">{statLabel}</span>
-          </div>
-          {extraInfo}
-        </div>
-
-        <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-40 transition-opacity">
-          <ArrowRight className="h-4 w-4 text-white" />
-        </div>
-      </div>
-    </Link>
-  );
-}
-
-function PodiumCard({ topPlayers }: { topPlayers: AggregatedPlayerStats[] }) {
-  return (
-    <Link href="/standings?tab=oficial" className="group h-full block">
-      <div className="bg-[#111827] rounded-2xl p-6 border border-white/5 flex flex-col h-full hover:border-white/20 transition-all hover-lift relative overflow-hidden">
-        <div className="flex items-center gap-2 mb-6 text-yellow-500">
-          <Trophy className="h-4 w-4" />
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] font-oswald">EL PODIO</span>
-        </div>
-        
         <div className="space-y-4 flex-1">
-          {topPlayers.map((player, idx) => (
-            <div key={player.playerId} className={cn(
-              "flex items-center justify-between",
-              idx === 0 ? "pb-3 border-b border-white/5 mb-3" : ""
-            )}>
-              <div className="flex items-center gap-3 min-w-0">
-                <span className={cn(
-                  "font-bebas italic text-lg w-4 shrink-0",
-                  idx === 0 ? "text-yellow-500" : "text-muted-foreground/40"
-                )}>#{idx + 1}</span>
-                <Avatar className={cn(
-                  idx === 0 ? "h-10 w-10 border-2 border-yellow-500/50" : "h-8 w-8 border border-white/10"
-                )}>
-                  <AvatarFallback className="bg-white/5 text-white font-black text-[10px]">
-                    {getInitials(player.name)}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="min-w-0 flex-1">
+          {players.map((player, idx) => {
+            const isFirst = idx === 0;
+            return (
+              <div key={player.playerId} className={cn(
+                "flex items-center justify-between",
+                isFirst ? "pb-4 border-b border-white/5 mb-4" : ""
+              )}>
+                <div className="flex items-center gap-3 min-w-0">
                   <span className={cn(
-                    "font-black uppercase italic truncate block",
-                    idx === 0 ? "text-xs text-white" : "text-[10px] text-muted-foreground"
-                  )}>{player.name.split(' ')[0]}</span>
+                    "font-bebas italic text-lg w-4 shrink-0",
+                    isFirst ? colorClass : "text-muted-foreground/40"
+                  )}>#{idx + 1}</span>
+                  
+                  <div className="relative">
+                    <Avatar className={cn(
+                      isFirst ? "h-12 w-12 border-2" : "h-8 w-8 border",
+                      isFirst ? colorClass.replace('text-', 'border-').concat('/50') : "border-white/10"
+                    )}>
+                      <AvatarFallback className="bg-white/5 text-white font-black text-[10px]">
+                        {getInitials(player.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    {isFirst && (
+                      <div className={cn("absolute -top-1 -right-1 rounded-full p-0.5 border-2 border-[#111827]", colorClass.replace('text-', 'bg-'))}>
+                        <Star className="h-2 w-2 text-black" />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <span className={cn(
+                      "font-black uppercase italic truncate block",
+                      isFirst ? "text-sm text-white" : "text-[10px] text-muted-foreground"
+                    )}>{player.name.split(' ')[0]}</span>
+                    {isFirst && (
+                      <p className="text-[7px] font-bold text-muted-foreground uppercase tracking-widest leading-none mt-0.5">
+                        {player.position || 'Comodín'}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="text-right shrink-0 ml-2">
+                  <span className={cn(
+                    "font-bebas italic",
+                    isFirst ? "text-3xl" : "text-xl text-white/60",
+                    isFirst ? colorClass : ""
+                  )}>{valueFn(player)}</span>
+                  <span className="text-[7px] font-black uppercase text-muted-foreground/40 ml-1 font-oswald">{label}</span>
                 </div>
               </div>
-              <div className="text-right shrink-0 ml-2">
-                <span className={cn(
-                  "font-bebas italic",
-                  idx === 0 ? "text-2xl text-yellow-500" : "text-lg text-white/60"
-                )}>{player.wins * 3 + player.draws}</span>
-                <span className="text-[8px] font-black uppercase text-muted-foreground/40 ml-1 font-oswald">PTS</span>
-              </div>
-            </div>
-          ))}
-          {topPlayers.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-4 opacity-20">
-              <Trophy className="h-8 w-8 mb-2" />
-              <p className="text-[8px] font-black uppercase tracking-widest text-center">Esperando Clasificados</p>
+            );
+          })}
+          
+          {players.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-8 opacity-20">
+              <Icon className="h-8 w-8 mb-2" />
+              <p className="text-[8px] font-black uppercase tracking-widest text-center">Esperando Cracks</p>
             </div>
           )}
         </div>
@@ -185,14 +155,26 @@ function DashboardContent() {
   
   const stats = calculateAggregatedStats(allPlayers, allMatches);
   
-  // Estrellas de la Academia
-  const leaderboardStats = stats.filter(p => p.matchesPlayed >= 4);
-  const mostInfluential = [...leaderboardStats].sort((a, b) => b.influenceScore - a.influenceScore)[0];
-  const topScorer = [...leaderboardStats].sort((a, b) => b.totalGoals - a.totalGoals)[0];
-  const bestStreak = [...leaderboardStats].sort((a, b) => b.bestStreak - a.bestStreak)[0];
+  // 1. MÁS INFLUYENTE (Top 3)
+  const topInfluential = [...stats]
+    .filter(p => p.matchesPlayed >= 4)
+    .sort((a, b) => b.influenceScore - a.influenceScore || b.matchesPlayed - a.matchesPlayed)
+    .slice(0, 3);
 
-  // El Podio Oficial (Mínimo 6 partidos)
-  const officialPodium = stats
+  // 2. PICHICHI (Top 3)
+  const topScorers = [...stats]
+    .filter(p => p.totalGoals > 0)
+    .sort((a, b) => b.totalGoals - a.totalGoals || b.goalsPerMatch - a.goalsPerMatch)
+    .slice(0, 3);
+
+  // 3. MEJOR RACHA (Top 3)
+  const topStreaks = [...stats]
+    .filter(p => p.matchesPlayed >= 2)
+    .sort((a, b) => b.bestStreak - a.bestStreak || b.totalGoals - a.totalGoals)
+    .slice(0, 3);
+
+  // 4. EL PODIO OFICIAL (Top 3)
+  const topPodium = stats
     .filter(p => p.matchesPlayed >= 6)
     .sort((a, b) => 
       (b.wins * 3 + b.draws) - (a.wins * 3 + a.draws) || 
@@ -201,39 +183,23 @@ function DashboardContent() {
     )
     .slice(0, 3);
 
+  // Pulso de la Competición
+  const maxMvpCount = stats.length > 0 ? Math.max(...stats.map(p => p.totalMvp), 0) : 0;
+  const recordGoalsInMatch = allMatches.length > 0 ? Math.max(...allMatches.map(m => m.teamAScore + m.teamBScore), 0) : 0;
+  const { maxGoals: individualRecord, holders: recordHolders } = getTopScorerRecord(allMatches, allPlayers);
+  const recordHolderText = recordHolders.length === 0 ? "SIN REGISTROS" : recordHolders.length > 1 ? `${recordHolders[0].name.split(' ')[0]} +${recordHolders.length - 1}` : `HITO: ${recordHolders[0].name.split(' ')[0].toUpperCase()}`;
+  
+  const totalPossibleMatches = playedMatches.length;
+  const topAttendance = stats.length > 0 ? Math.max(...stats.map(p => p.matchesPlayed), 0) : 0;
+  const attendanceValue = totalPossibleMatches > 0 ? `${Math.round((topAttendance / totalPossibleMatches) * 100)}%` : "0%";
+  const topAttendancePlayers = stats.filter(p => p.matchesPlayed === topAttendance && p.matchesPlayed > 0);
+  const attendanceText = topAttendancePlayers.length === 0 ? "SIN REGISTROS" : `LÍDER: ${topAttendancePlayers[0].name.split(' ')[0].toUpperCase()}${topAttendancePlayers.length > 1 ? ` +${topAttendancePlayers.length - 1}` : ''}`;
+
   // Orden de Mando
   const ordenDeMando = [...stats]
     .filter(p => p.totalCaptaincies === 0 && p.isActive)
     .sort((a, b) => b.matchesPlayed - a.matchesPlayed)
     .slice(0, 2);
-
-  // Pulso de la Competición
-  const maxMvpCount = stats.length > 0 ? Math.max(...stats.map(p => p.totalMvp), 0) : 0;
-  const recordGoalsInMatch = allMatches.length > 0 ? Math.max(...allMatches.map(m => m.teamAScore + m.teamBScore), 0) : 0;
-  
-  // Récord Goleador Individual (Artillero Supremo)
-  const { maxGoals: individualRecord, holders: recordHolders } = getTopScorerRecord(allMatches, allPlayers);
-  const recordHolderText = recordHolders.length === 0 
-    ? "SIN REGISTROS" 
-    : recordHolders.length > 1 
-      ? `${recordHolders[0].name.split(' ')[0]} +${recordHolders.length - 1}` 
-      : `HITO: ${recordHolders[0].name.split(' ')[0].toUpperCase()}`;
-  
-  // Infaltables
-  const totalPossibleMatches = playedMatches.length;
-  const topAttendance = stats.length > 0 ? Math.max(...stats.map(p => p.matchesPlayed), 0) : 0;
-  const attendanceValue = totalPossibleMatches > 0 ? `${Math.round((topAttendance / totalPossibleMatches) * 100)}%` : "0%";
-  
-  const topAttendancePlayers = stats.filter(p => p.matchesPlayed === topAttendance && p.matchesPlayed > 0);
-  const attendanceLeaderName = topAttendancePlayers.length > 0 
-    ? topAttendancePlayers[0].name.split(' ')[0].toUpperCase() 
-    : "";
-  const attendanceOthersCount = topAttendancePlayers.length - 1;
-  const attendanceText = topAttendancePlayers.length === 0 
-    ? "SIN REGISTROS" 
-    : attendanceOthersCount > 0 
-      ? `${attendanceLeaderName} +${attendanceOthersCount}` 
-      : `LÍDER: ${attendanceLeaderName}`;
 
   // Sala de Humildad
   const filteredForHumility = stats.filter(p => p.matchesPlayed >= 2);
@@ -345,48 +311,50 @@ function DashboardContent() {
         </div>
       </section>
 
-      {/* 3. ESTRELLAS DE LA ACADEMIA */}
+      {/* 3. ESTRELLAS DE LA ACADEMIA (Format: Top 3 List) */}
       <section className="space-y-6 relative z-10">
         <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 px-1 font-oswald">ESTRELLAS DE LA ACADEMIA</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           
-          <HighlightCard 
+          <EliteListCard 
             title="MÁS INFLUYENTE"
-            player={mostInfluential}
             icon={Brain}
-            statLabel="FACTOR"
-            statValue="TOP"
+            players={topInfluential}
+            valueFn={(p) => `${p.winPercentage}%`}
+            label="WR"
             colorClass="text-primary"
             href="/pulse/influencer"
-            extraInfo={
-              <div className="pt-2 border-t border-white/5 flex justify-between items-center">
-                <span className="text-[8px] font-bold text-muted-foreground uppercase">{mostInfluential?.matchesPlayed} PJ</span>
-                <span className="text-[8px] font-black text-primary uppercase">{mostInfluential?.winPercentage}% WR</span>
-              </div>
-            }
           />
 
-          <HighlightCard 
+          <EliteListCard 
             title="PICHICHI"
-            player={topScorer}
             icon={Target}
-            statLabel="GOLES"
-            statValue={topScorer?.totalGoals || 0}
+            players={topScorers}
+            valueFn={(p) => p.totalGoals}
+            label="GF"
             colorClass="text-yellow-500"
             href="/standings?tab=goleadores"
           />
 
-          <HighlightCard 
+          <EliteListCard 
             title="MEJOR RACHA"
-            player={bestStreak}
             icon={Flame}
-            statLabel="WINS"
-            statValue={bestStreak?.bestStreak || 0}
+            players={topStreaks}
+            valueFn={(p) => p.bestStreak}
+            label="WINS"
             colorClass="text-orange-500"
             href="/standings?tab=general"
           />
 
-          <PodiumCard topPlayers={officialPodium} />
+          <EliteListCard 
+            title="EL PODIO"
+            icon={Trophy}
+            players={topPodium}
+            valueFn={(p) => p.wins * 3 + p.draws}
+            label="PTS"
+            colorClass="text-yellow-500"
+            href="/standings?tab=oficial"
+          />
 
         </div>
       </section>
