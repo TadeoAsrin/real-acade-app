@@ -84,6 +84,14 @@ function StandingsContent() {
     b.totalGoals - a.totalGoals
   );
 
+  const sortedOfficial = stats
+    .filter(p => p.matchesPlayed >= 6)
+    .sort((a, b) => 
+      (b.wins * 3 + b.draws) - (a.wins * 3 + a.draws) || 
+      b.efficiency - a.efficiency || 
+      b.totalGoals - a.totalGoals
+    );
+
   const sortedScorers = [...stats]
     .filter(p => p.totalGoals > 0)
     .sort((a, b) => b.totalGoals - a.totalGoals || b.goalsPerMatch - a.goalsPerMatch);
@@ -126,7 +134,7 @@ function StandingsContent() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="bg-black/40 border border-white/5 p-1 h-14 rounded-lg w-full flex overflow-x-auto no-scrollbar backdrop-blur-md shadow-2xl">
-          {["General", "Goleadores", "Goles Fecha", "Efectividad", "Capitanes"].map((tab) => (
+          {["OFICIAL", "General", "Goleadores", "Goles Fecha", "Efectividad", "Capitanes"].map((tab) => (
             <TabsTrigger key={tab.toLowerCase().replace(" ", "-")} value={tab.toLowerCase().replace(" ", "-")} className="flex-1 min-w-[120px] font-bebas tracking-widest text-lg data-[state=active]:bg-white data-[state=active]:text-black rounded-md transition-all">
               {tab}
             </TabsTrigger>
@@ -134,6 +142,55 @@ function StandingsContent() {
         </TabsList>
 
         <div className="mt-10">
+          <TabsContent value="oficial" className="animate-in fade-in slide-in-from-bottom-2 space-y-6">
+            <div className="flex items-center justify-center gap-3 p-4 bg-primary/5 border border-primary/10 rounded-lg">
+              <ShieldCheck className="h-4 w-4 text-primary" />
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">TABLA OFICIAL: MÍNIMO 6 PARTIDOS JUGADOS</p>
+            </div>
+
+            <Card className="competition-card border-none bg-black/20 backdrop-blur-sm">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-black/40 border-white/5 h-14">
+                    <TableHead className="w-16 text-center font-bebas text-sm">POS</TableHead>
+                    <TableHead className="font-bebas text-sm">JUGADOR</TableHead>
+                    <TableHead className="text-center font-bebas text-sm">PJ</TableHead>
+                    <TableHead className="text-center font-bebas text-sm">V-E-D</TableHead>
+                    <TableHead className="text-center font-bebas text-sm text-yellow-500">GOLES</TableHead>
+                    <TableHead className="text-center font-bebas text-sm">%</TableHead>
+                    <TableHead className="text-center font-bebas text-sm bg-primary/10 text-primary">PTS</TableHead>
+                    <TableHead className="text-center font-bebas text-sm">TREND</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {sortedOfficial.map((player, index) => (
+                    <TableRow key={player.playerId} className={cn("official-table-row h-20 transition-all", index === 0 ? "podium-1" : index === 1 ? "podium-2" : index === 2 ? "podium-3" : "")}>
+                      <TableCell className="text-center font-bebas text-3xl italic">
+                        {index === 0 ? <Crown className="h-6 w-6 mx-auto text-yellow-500 animate-pulse" /> : index + 1}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-4">
+                          <Avatar className={cn("h-12 w-12 border-2", index === 0 ? "border-yellow-500 shadow-lg shadow-yellow-500/20" : "border-white/10")}>
+                            <AvatarFallback className="bg-muted text-xs font-black">{getInitials(player.name)}</AvatarFallback>
+                          </Avatar>
+                          <Link href={`/players/${player.playerId}`} className="font-black uppercase tracking-tight hover:text-primary transition-colors text-lg italic">{player.name}</Link>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center font-bebas text-2xl">{player.matchesPlayed}</TableCell>
+                      <TableCell className="text-center font-oswald text-[10px] tracking-widest font-bold">
+                        <span className="text-emerald-500">{player.wins}</span>-<span className="text-orange-400">{player.draws}</span>-<span className="text-red-500">{player.losses}</span>
+                      </TableCell>
+                      <TableCell className="text-center font-bebas text-2xl text-yellow-500/80">{player.totalGoals}</TableCell>
+                      <TableCell className="text-center font-bebas text-2xl text-muted-foreground/60">{player.efficiency}%</TableCell>
+                      <TableCell className="text-center font-bebas text-4xl italic bg-primary/5 text-primary">{player.wins * 3 + player.draws}</TableCell>
+                      <TableCell className="text-center"><TrendIcon form={player.form} /></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="general" className="animate-in fade-in slide-in-from-bottom-2">
             <Card className="competition-card border-none bg-black/20 backdrop-blur-sm">
               <Table>
