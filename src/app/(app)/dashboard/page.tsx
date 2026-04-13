@@ -345,46 +345,7 @@ function DashboardContent() {
         </div>
       </section>
 
-      {/* 3. PULSO DE LA COMPETICIÓN */}
-      <section className="space-y-6 relative z-10">
-        <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 px-1 font-oswald">PULSO DE LA COMPETICIÓN</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Link href="/pulse/mvp" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-yellow-500/20 transition-all hover-lift">
-            <Star className="h-6 w-6 text-yellow-500" />
-            <span className="text-5xl font-black italic font-bebas leading-none text-white">{maxMvpCount}</span>
-            <div className="space-y-0.5">
-              <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">REYES MVP</p>
-              <p className="text-[8px] font-bold text-muted-foreground/40 uppercase font-oswald">RÉCORD PREMIOS</p>
-            </div>
-          </Link>
-          <Link href="/pulse/league" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-orange-500/20 transition-all hover-lift">
-            <Flame className="h-6 w-6 text-orange-500" />
-            <span className="text-5xl font-black italic font-bebas leading-none text-white">{recordGoalsInMatch}</span>
-            <div className="space-y-0.5">
-              <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">RÉCORD GOLES</p>
-              <p className="text-[8px] font-bold text-muted-foreground/40 uppercase font-oswald">EN UN PARTIDO</p>
-            </div>
-          </Link>
-          <Link href="/pulse/partnership" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-primary/20 transition-all hover-lift">
-            <LinkIcon className="h-6 w-6 text-primary" />
-            <span className="text-5xl font-black italic font-bebas leading-none text-white">{tridentValue}</span>
-            <div className="space-y-0.5">
-              <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">TRIDENTE DE ORO</p>
-              <p className="text-[8px] font-bold text-muted-foreground/40 uppercase font-oswald truncate max-w-[120px]">{tridentText}</p>
-            </div>
-          </Link>
-          <Link href="/pulse/attendance" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-emerald-500/20 transition-all hover-lift">
-            <Users className="h-6 w-6 text-emerald-500" />
-            <span className="text-5xl font-black italic font-bebas leading-none text-white">{attendanceValue}</span>
-            <div className="space-y-0.5">
-              <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">INFALTABLES</p>
-              <p className="text-[8px] font-bold text-muted-foreground/40 uppercase font-oswald truncate max-w-[120px]">{attendanceText}</p>
-            </div>
-          </Link>
-        </div>
-      </section>
-
-      {/* 4. ESTRELLAS DE LA ACADEMIA */}
+      {/* 3. ESTRELLAS DE LA ACADEMIA */}
       <section className="space-y-6 relative z-10">
         <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 px-1 font-oswald">ESTRELLAS DE LA ACADEMIA</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -427,6 +388,45 @@ function DashboardContent() {
 
           <PodiumCard topPlayers={officialPodium} />
 
+        </div>
+      </section>
+
+      {/* 4. PULSO DE LA COMPETICIÓN */}
+      <section className="space-y-6 relative z-10">
+        <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 px-1 font-oswald">PULSO DE LA COMPETICIÓN</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Link href="/pulse/mvp" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-yellow-500/20 transition-all hover-lift">
+            <Star className="h-6 w-6 text-yellow-500" />
+            <span className="text-5xl font-black italic font-bebas leading-none text-white">{maxMvpCount}</span>
+            <div className="space-y-0.5">
+              <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">REYES MVP</p>
+              <p className="text-[8px] font-bold text-muted-foreground/40 uppercase font-oswald">RÉCORD PREMIOS</p>
+            </div>
+          </Link>
+          <Link href="/pulse/league" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-orange-500/20 transition-all hover-lift">
+            <Flame className="h-6 w-6 text-orange-500" />
+            <span className="text-5xl font-black italic font-bebas leading-none text-white">{recordGoalsInMatch}</span>
+            <div className="space-y-0.5">
+              <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">RÉCORD GOLES</p>
+              <p className="text-[8px] font-bold text-muted-foreground/40 uppercase font-oswald">EN UN PARTIDO</p>
+            </div>
+          </Link>
+          <Link href="/pulse/partnership" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-primary/20 transition-all hover-lift">
+            <LinkIcon className="h-6 w-6 text-primary" />
+            <span className="text-5xl font-black italic font-bebas leading-none text-white">{tridentValue}</span>
+            <div className="space-y-0.5">
+              <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">TRIDENTE DE ORO</p>
+              <p className="text-[8px] font-bold text-muted-foreground/40 uppercase font-oswald truncate max-w-[120px]">{tridentText}</p>
+            </div>
+          </Link>
+          <Link href="/pulse/attendance" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-emerald-500/20 transition-all hover-lift">
+            <Users className="h-6 w-6 text-emerald-500" />
+            <span className="text-5xl font-black italic font-bebas leading-none text-white">{attendanceValue}</span>
+            <div className="space-y-0.5">
+              <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">INFALTABLES</p>
+              <p className="text-[8px] font-bold text-muted-foreground/40 uppercase font-oswald truncate max-w-[120px]">{attendanceText}</p>
+            </div>
+          </Link>
         </div>
       </section>
 
