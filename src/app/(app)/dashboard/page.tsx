@@ -131,7 +131,6 @@ function DashboardContent() {
   const mostInfluential = [...leaderboardStats].sort((a, b) => b.influenceScore - a.influenceScore)[0];
   const topScorer = [...leaderboardStats].sort((a, b) => b.totalGoals - a.totalGoals)[0];
   const bestStreak = [...leaderboardStats].sort((a, b) => b.bestStreak - a.bestStreak)[0];
-  const theWall = [...leaderboardStats].sort((a, b) => a.avgGoalsAgainst - b.avgGoalsAgainst)[0];
 
   // Orden de Mando
   const ordenDeMando = [...stats]
@@ -319,7 +318,7 @@ function DashboardContent() {
       {/* 4. ESTRELLAS DE LA ACADEMIA */}
       <section className="space-y-6 relative z-10">
         <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 px-1 font-oswald">ESTRELLAS DE LA ACADEMIA</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           
           <HighlightCard 
             title="MÁS INFLUYENTE"
@@ -355,16 +354,6 @@ function DashboardContent() {
             statValue={bestStreak?.bestStreak || 0}
             colorClass="text-orange-500"
             href="/standings?tab=general"
-          />
-
-          <HighlightCard 
-            title="EL MURO"
-            player={theWall}
-            icon={ShieldCheck}
-            statLabel="G/PJ RECIBIDOS"
-            statValue={theWall?.avgGoalsAgainst || 0}
-            colorClass="text-emerald-500"
-            href="/pulse/wall"
           />
 
         </div>
