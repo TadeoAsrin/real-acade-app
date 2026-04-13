@@ -337,7 +337,7 @@ function DashboardContent() {
           />
 
           <EliteListCard 
-            title="EL PODIO"
+            title="EL PODIO OFICIAL"
             icon={Trophy}
             players={topPodium}
             valueFn={(p) => p.wins * 3 + p.draws}
