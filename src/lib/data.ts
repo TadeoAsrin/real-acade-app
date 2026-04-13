@@ -237,6 +237,27 @@ export const getSpiciestMatch = (matches: Match[]) => {
   return [...playedMatches].sort((a, b) => (b.teamAScore + b.teamBScore) - (a.teamAScore + a.teamBScore))[0];
 };
 
+export const getTopScorerRecord = (matches: Match[], players: Player[]) => {
+  let maxGoals = 0;
+  let holders: Player[] = [];
+
+  matches.forEach(match => {
+    const allMatchStats = [...match.teamAPlayers, ...match.teamBPlayers];
+    allMatchStats.forEach(stat => {
+      if (stat.goals > maxGoals) {
+        maxGoals = stat.goals;
+        const p = players.find(pl => pl.id === stat.playerId);
+        if (p) holders = [p];
+      } else if (stat.goals === maxGoals && maxGoals > 0) {
+        const p = players.find(pl => pl.id === stat.playerId);
+        if (p && !holders.find(h => h.id === p.id)) holders.push(p);
+      }
+    });
+  });
+
+  return { maxGoals, holders };
+};
+
 export const balanceTeams = (selectedPlayers: AggregatedPlayerStats[]) => {
   const goalkeepers = selectedPlayers.filter(p => p.position === 'Arquero');
   const outfieldPlayers = selectedPlayers.filter(p => p.position !== 'Arquero');

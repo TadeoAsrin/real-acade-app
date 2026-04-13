@@ -27,7 +27,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
-import { calculateAggregatedStats, getChemistryRankings } from "@/lib/data";
+import { calculateAggregatedStats, getTopScorerRecord } from "@/lib/data";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials, cn } from "@/lib/utils";
@@ -211,13 +211,13 @@ function DashboardContent() {
   const maxMvpCount = stats.length > 0 ? Math.max(...stats.map(p => p.totalMvp), 0) : 0;
   const recordGoalsInMatch = allMatches.length > 0 ? Math.max(...allMatches.map(m => m.teamAScore + m.teamBScore), 0) : 0;
   
-  // Tridente de Oro
-  const chemistry = getChemistryRankings(allPlayers, allMatches, 1);
-  const topTrident = chemistry[0];
-  const tridentText = topTrident 
-    ? `${topTrident.player1.name.split(' ')[0]} + ${topTrident.player2.name.split(' ')[0]} + ${topTrident.player3.name.split(' ')[0]}` 
-    : "SIN TRIDENTES";
-  const tridentValue = topTrident ? `${topTrident.winRate}%` : "0%";
+  // Récord Goleador Individual (Artillero Supremo)
+  const { maxGoals: individualRecord, holders: recordHolders } = getTopScorerRecord(allMatches, allPlayers);
+  const recordHolderText = recordHolders.length === 0 
+    ? "SIN REGISTROS" 
+    : recordHolders.length > 1 
+      ? `${recordHolders[0].name.split(' ')[0]} +${recordHolders.length - 1}` 
+      : `HITO: ${recordHolders[0].name.split(' ')[0].toUpperCase()}`;
   
   // Infaltables
   const totalPossibleMatches = playedMatches.length;
@@ -411,12 +411,12 @@ function DashboardContent() {
               <p className="text-[8px] font-bold text-muted-foreground/40 uppercase font-oswald">EN UN PARTIDO</p>
             </div>
           </Link>
-          <Link href="/pulse/partnership" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-primary/20 transition-all hover-lift">
-            <LinkIcon className="h-6 w-6 text-primary" />
-            <span className="text-5xl font-black italic font-bebas leading-none text-white">{tridentValue}</span>
+          <Link href="/standings?tab=goleadores" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-primary/20 transition-all hover-lift">
+            <Target className="h-6 w-6 text-primary" />
+            <span className="text-5xl font-black italic font-bebas leading-none text-white">{individualRecord}</span>
             <div className="space-y-0.5">
-              <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">TRIDENTE DE ORO</p>
-              <p className="text-[8px] font-bold text-muted-foreground/40 uppercase font-oswald truncate max-w-[120px]">{tridentText}</p>
+              <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">ARTILLERO SUPREMO</p>
+              <p className="text-[8px] font-bold text-muted-foreground/40 uppercase font-oswald truncate max-w-[120px]">{recordHolderText}</p>
             </div>
           </Link>
           <Link href="/pulse/attendance" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-emerald-500/20 transition-all hover-lift">
