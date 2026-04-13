@@ -8,6 +8,9 @@ const POINTS = {
   BEST_GOAL: 5,
 };
 
+/**
+ * Calcula todas las estadísticas agregadas de los jugadores basadas en el historial de partidos.
+ */
 export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match[]): AggregatedPlayerStats[] => {
   const statsMap: { [key: string]: AggregatedPlayerStats } = {};
   const currentStreaks: { [key: string]: number } = {};
@@ -96,8 +99,6 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
                 stats.powerPoints += POINTS.WIN;
                 result = 'W';
                 if (isClutch) stats.clutchWins++;
-                
-                // Actualizar racha
                 currentStreaks[playerId]++;
                 stats.bestStreak = Math.max(stats.bestStreak, currentStreaks[playerId]);
             } else {
@@ -118,6 +119,7 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
 
             if (goals > 0) stats.lastGoalDate = match.date;
 
+            // Detección robusta de booleanos en Firestore
             if (isMvp === true || String(isMvp) === "true" || (isMvp as any) === 1) {
               stats.totalMvp++;
               stats.powerPoints += POINTS.MVP;

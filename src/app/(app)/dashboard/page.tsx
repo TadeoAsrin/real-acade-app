@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from 'react';
@@ -24,7 +23,6 @@ import {
   ArrowRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import { calculateAggregatedStats, getTopScorerRecord } from "@/lib/data";
 import { Badge } from "@/components/ui/badge";
@@ -201,14 +199,6 @@ function DashboardContent() {
     .sort((a, b) => b.matchesPlayed - a.matchesPlayed)
     .slice(0, 2);
 
-  // Sala de Humildad
-  const filteredForHumility = stats.filter(p => p.matchesPlayed >= 2);
-  const imanDerrotas = [...filteredForHumility].sort((a, b) => b.lossPercentage - a.lossPercentage).slice(0, 3);
-  const polvoraMojada = [...filteredForHumility]
-    .filter(p => p.position === 'Mediocampista' || p.position === 'Delantero')
-    .sort((a, b) => a.goalsPerMatch - b.goalsPerMatch)
-    .slice(0, 3);
-
   const forcedMatch = gacetaMatchId ? allMatches.find(m => m.id === gacetaMatchId) : null;
   const matchForModal = forcedMatch || (lastMatch?.aiSummary ? lastMatch : null);
 
@@ -311,7 +301,7 @@ function DashboardContent() {
         </div>
       </section>
 
-      {/* 3. ESTRELLAS DE LA ACADEMIA (Format: Top 3 List) */}
+      {/* 3. ESTRELLAS DE LA ACADEMIA */}
       <section className="space-y-6 relative z-10">
         <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 px-1 font-oswald">ESTRELLAS DE LA ACADEMIA</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -405,9 +395,8 @@ function DashboardContent() {
           <Badge variant="outline" className="text-[7px] font-black uppercase tracking-widest border-white/5 text-muted-foreground/40 font-oswald">FILTRO: MÍNIMO 2 PJ</Badge>
         </div>
         
-        <Card className="competition-card border-none bg-black/20 backdrop-blur-sm overflow-hidden">
+        <div className="bg-black/20 backdrop-blur-sm rounded-[2rem] overflow-hidden border border-white/5">
           <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-white/5 items-start">
-            
             <div className="p-8 space-y-6">
               <Link href="/pulse/iman-derrotas" className="flex items-center justify-between group">
                 <div className="flex items-center gap-2 text-red-500/60 group-hover:text-red-500 transition-colors">
@@ -417,7 +406,7 @@ function DashboardContent() {
                 <Badge variant="outline" className="text-[6px] font-black bg-red-500/5 text-red-500/40 border-none uppercase px-1.5 py-0 font-oswald">RATIO DE VULNERABILIDAD</Badge>
               </Link>
               <div className="space-y-5">
-                {imanDerrotas.map(p => (
+                {stats.filter(p => p.matchesPlayed >= 2).sort((a, b) => b.lossPercentage - a.lossPercentage).slice(0, 3).map(p => (
                   <div key={p.playerId} className="space-y-2">
                     <div className="flex items-center justify-between">
                       <div className="flex flex-col">
@@ -449,7 +438,7 @@ function DashboardContent() {
                 <Badge variant="outline" className="text-[6px] font-black bg-blue-400/5 text-blue-400/40 border-none uppercase px-1.5 py-0 font-oswald">SOLO ROLES OFENSIVOS</Badge>
               </Link>
               <div className="space-y-4">
-                {polvoraMojada.map(p => (
+                {stats.filter(p => (p.position === 'Mediocampista' || p.position === 'Delantero') && p.matchesPlayed >= 2).sort((a, b) => a.goalsPerMatch - b.goalsPerMatch).slice(0, 3).map(p => (
                   <div key={p.playerId} className="flex items-center justify-between bg-white/5 p-3 rounded-xl border border-transparent hover:border-blue-400/10 transition-all">
                     <div className="flex flex-col">
                       <Link href={`/players/${p.playerId}`} className="text-xs font-bold uppercase hover:text-blue-400 transition-colors text-white">{p.name}</Link>
@@ -463,9 +452,8 @@ function DashboardContent() {
                 ))}
               </div>
             </div>
-
           </div>
-        </Card>
+        </div>
       </section>
     </div>
   );
