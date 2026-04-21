@@ -1,14 +1,12 @@
-
 'use client';
 
 import * as React from 'react';
-import { generateMatchSummary, type MatchSummaryOutput, type MatchSummaryInput } from '@/ai/flows/match-summary-flow';
+import { generateMatchSummary, type MatchSummaryInput } from '@/ai/flows/match-summary-flow';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Loader2, Quote, LogIn, AlertCircle, RefreshCw } from 'lucide-react';
-import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
-import { doc, updateDoc } from 'firebase/firestore';
-import Link from 'next/link';
+import { Sparkles, Loader2, Quote, AlertCircle, RefreshCw } from 'lucide-react';
+import { useUser, useFirestore, useDoc, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
+import { doc } from 'firebase/firestore';
 import type { Match } from '@/lib/definitions';
 
 interface MatchAiSummaryProps {
@@ -43,14 +41,15 @@ export function MatchAiSummary({ matchId, matchData }: MatchAiSummaryProps) {
     try {
       const result = await generateMatchSummary(matchData);
       
-      if ('error' in result) {
+      if (result && 'error' in result) {
         if (result.error === 'QUOTA_EXCEEDED') {
           setError('Límite de la IA alcanzado. Intenta nuevamente en un minuto.');
         } else {
           setError('La IA de la redacción está ocupada. Reintenta pronto.');
         }
-      } else {
-        await updateDoc(matchRef, {
+      } else if (result) {
+        // pattern: use non-blocking update
+        updateDocumentNonBlocking(matchRef, {
           aiSummary: result
         });
       }

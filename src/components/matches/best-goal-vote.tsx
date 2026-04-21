@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -9,9 +8,9 @@ import { Loader2, Award, CheckCircle2, LogIn } from "lucide-react";
 import type { Player } from "@/lib/definitions";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Label } from "../ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { useFirestore, useUser, useDoc, useCollection, useMemoFirebase } from "@/firebase";
-import { doc, setDoc, collection } from "firebase/firestore";
+import { Avatar, AvatarFallback } from "../ui/avatar";
+import { useFirestore, useUser, useDoc, useCollection, useMemoFirebase, setDocumentNonBlocking } from "@/firebase";
+import { doc, collection } from "firebase/firestore";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
@@ -41,23 +40,20 @@ export function BestGoalVote({ matchId, scorers }: GoalVoterProps) {
   const { data: allVotes } = useCollection<{votedPlayerId: string}>(allVotesRef);
 
   const handleSubmit = async () => {
-    if (!selectedPlayer || !firestore || !user) return;
+    if (!selectedPlayer || !firestore || !user || !userVoteRef) return;
     setIsLoading(true);
     try {
-      await setDoc(doc(firestore, 'matches', matchId, 'votes', user.uid), {
+      // Use non-blocking setDocument per guidelines
+      setDocumentNonBlocking(userVoteRef, {
         votedPlayerId: selectedPlayer
-      });
+      }, { merge: true });
+      
       toast({
         title: "Voto Registrado",
         description: "Tu voto ha sido guardado correctamente.",
       });
     } catch (error) {
-      console.error(error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "No se pudo registrar tu voto.",
-      });
+      // Errors handled centrally via emitter in setDocumentNonBlocking
     } finally {
       setIsLoading(false);
     }
@@ -69,12 +65,12 @@ export function BestGoalVote({ matchId, scorers }: GoalVoterProps) {
 
   if (scorers.length === 0) {
     return (
-        <Card>
+        <Card className="competition-card opacity-50">
             <CardHeader>
-                <CardTitle>Votar por el Mejor Gol</CardTitle>
+                <CardTitle className="text-lg font-black uppercase italic">Mejor Gol</CardTitle>
             </CardHeader>
             <CardContent>
-                <p className="text-muted-foreground italic">No hubo goles en este partido para votar.</p>
+                <p className="text-xs text-muted-foreground italic">No hubo goles en este partido para habilitar la votación.</p>
             </CardContent>
         </Card>
     );
@@ -82,20 +78,20 @@ export function BestGoalVote({ matchId, scorers }: GoalVoterProps) {
 
   if (!user) {
     return (
-      <Card className="border-primary/20 bg-primary/5">
+      <Card className="competition-card border-primary/20 bg-primary/5">
         <CardHeader>
-          <CardTitle>Elección del Mejor Gol</CardTitle>
-          <CardDescription>
-            Los miembros del club pueden votar por la joya de la jornada.
+          <CardTitle className="text-lg font-black uppercase italic">Elección del Mejor Gol</CardTitle>
+          <CardDescription className="text-[10px] uppercase font-bold text-muted-foreground/60">
+            SOLO PARA MIEMBROS OFICIALES
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center gap-4 py-6">
           <LogIn className="h-10 w-10 text-primary/40 mb-2" />
-          <p className="text-sm text-center text-muted-foreground max-w-[200px]">
-            Inicia sesión para participar en la votación oficial.
+          <p className="text-xs text-center text-muted-foreground max-w-[200px]">
+            Inicia sesión para participar en la votación de la jornada.
           </p>
-          <Button asChild className="w-full">
-            <Link href="/login">Iniciar Sesión</Link>
+          <Button asChild className="w-full font-black uppercase italic">
+            <Link href="/login">Acceder al Club</Link>
           </Button>
         </CardContent>
       </Card>
@@ -104,14 +100,14 @@ export function BestGoalVote({ matchId, scorers }: GoalVoterProps) {
 
   if (myVote) {
     return (
-      <Card className="border-green-500/20 bg-green-500/5">
+      <Card className="competition-card border-emerald-500/20 bg-emerald-500/5">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CheckCircle2 className="h-5 w-5 text-green-500" />
-            Voto Enviado
+          <CardTitle className="flex items-center gap-2 text-emerald-500 text-lg font-black uppercase italic">
+            <CheckCircle2 className="h-5 w-5" />
+            Voto Registrado
           </CardTitle>
-          <CardDescription>
-            Ya has participado en la elección del mejor gol de este encuentro.
+          <CardDescription className="text-[10px] uppercase font-bold text-emerald-500/60">
+            PARTICIPACIÓN COMPLETADA
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -120,18 +116,18 @@ export function BestGoalVote({ matchId, scorers }: GoalVoterProps) {
                 const isMyVote = myVote.votedPlayerId === scorer.id;
                 return (
                     <div key={scorer.id} className={cn(
-                        "flex items-center justify-between p-3 rounded-md border",
-                        isMyVote ? "border-green-500 bg-green-500/10" : "bg-muted/50"
+                        "flex items-center justify-between p-3 rounded-xl border transition-all",
+                        isMyVote ? "border-emerald-500 bg-emerald-500/10 shadow-lg" : "bg-white/5 border-transparent"
                     )}>
                         <div className="flex items-center gap-3">
                             <Avatar className="h-8 w-8">
-                                <AvatarFallback>{scorer.name.charAt(0)}</AvatarFallback>
+                                <AvatarFallback className="text-[10px] font-black">{scorer.name.charAt(0)}</AvatarFallback>
                             </Avatar>
-                            <span className="font-medium">{scorer.name}</span>
+                            <span className={cn("font-bold text-sm", isMyVote ? "text-emerald-500" : "text-white")}>{scorer.name}</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <span className="text-xs text-muted-foreground">votos</span>
-                            <span className="font-bold text-lg">{count}</span>
+                        <div className="flex flex-col items-end">
+                            <span className={cn("font-bebas text-xl leading-none", isMyVote ? "text-emerald-500" : "text-white")}>{count}</span>
+                            <span className="text-[7px] font-black uppercase text-muted-foreground/40">VOTOS</span>
                         </div>
                     </div>
                 );
@@ -142,11 +138,11 @@ export function BestGoalVote({ matchId, scorers }: GoalVoterProps) {
   }
 
   return (
-    <Card>
+    <Card className="competition-card">
       <CardHeader>
-        <CardTitle>Votar por el Mejor Gol</CardTitle>
-        <CardDescription>
-          Elige al jugador que crees que marcó el mejor gol del partido.
+        <CardTitle className="text-lg font-black uppercase italic">Votar Mejor Gol</CardTitle>
+        <CardDescription className="text-[10px] uppercase font-bold text-muted-foreground/60">
+          TU VOTO DECIDE LA JOYA DE LA FECHA
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -154,13 +150,13 @@ export function BestGoalVote({ matchId, scorers }: GoalVoterProps) {
           {scorers.map(scorer => (
             <div key={scorer.id} className="flex items-center space-x-3">
                 <RadioGroupItem value={scorer.id} id={`player-${scorer.id}`} />
-                <Label htmlFor={`player-${scorer.id}`} className="flex flex-1 items-center gap-3 cursor-pointer rounded-md border p-3 hover:bg-accent/50 transition-colors">
+                <Label htmlFor={`player-${scorer.id}`} className="flex flex-1 items-center gap-3 cursor-pointer rounded-xl border border-white/5 p-4 hover:bg-accent/10 transition-colors">
                 <Avatar className="h-10 w-10">
-                    <AvatarFallback>{scorer.name.charAt(0)}</AvatarFallback>
+                    <AvatarFallback className="bg-muted font-black">{scorer.name.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col">
-                    <span className="font-medium">{scorer.name}</span>
-                    <span className="text-sm text-muted-foreground">{scorer.goals} {scorer.goals > 1 ? 'goles' : 'gol'} marcados</span>
+                    <span className="font-black uppercase italic text-sm">{scorer.name}</span>
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase">{scorer.goals} {scorer.goals > 1 ? 'goles marcados' : 'gol marcado'}</span>
                     </div>
                 </Label>
             </div>
@@ -168,10 +164,10 @@ export function BestGoalVote({ matchId, scorers }: GoalVoterProps) {
         </RadioGroup>
 
         <div className="flex justify-end pt-4">
-          <Button onClick={handleSubmit} disabled={isLoading || !selectedPlayer}>
+          <Button onClick={handleSubmit} disabled={isLoading || !selectedPlayer} className="w-full h-12 font-black uppercase italic shadow-lg shadow-primary/20">
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             <Award className="mr-2 h-4 w-4" />
-            Enviar Voto
+            Confirmar Voto
           </Button>
         </div>
       </CardContent>
