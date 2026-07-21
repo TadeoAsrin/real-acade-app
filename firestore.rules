@@ -16,9 +16,9 @@ service cloud.firestore {
 
     function isAdmin() {
       return isSignedIn() && (
-             exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid)) && 
-             get(/databases/$(database)/documents/roles_admin/$(request.auth.uid)).data.isAdmin == true
-             || request.auth.token.email == 'tadeoasrin@gmail.com'
+        request.auth.token.email == 'tadeoasrin@gmail.com' ||
+        (exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid)) && 
+         get(/databases/$(database)/documents/roles_admin/$(request.auth.uid)).data.isAdmin == true)
       );
     }
 
@@ -28,7 +28,7 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // Partidos: Lectura para miembros, escritura solo admin
+    // Partidos: Lectura para todos los miembros, escritura solo admin
     match /matches/{matchId} {
       allow read: if isSignedIn();
       allow write: if isAdmin();
