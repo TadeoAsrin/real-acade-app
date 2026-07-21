@@ -10,6 +10,7 @@ import { Loader2, Database, ShieldAlert, CheckCircle2 } from 'lucide-react';
 
 /**
  * Página de administración para la migración inicial de temporadas.
+ * Ubicada dentro de (app) para heredar el layout del club.
  */
 export default function MigrationPage() {
   const firestore = useFirestore();

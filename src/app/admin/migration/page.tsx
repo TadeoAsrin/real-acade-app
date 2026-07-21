@@ -1,11 +1,9 @@
-import { redirect } from 'next/navigation';
+import { redirect } from "next/navigation";
 
 /**
- * REDIRECCIÓN DE SEGURIDAD.
- * Este archivo existe solo para satisfacer al compilador de Next.js y evitar errores de exportación.
- * La página real reside en src/app/(app)/admin/migration/page.tsx para heredar el layout con Sidebar.
+ * Redirección para resolver el conflicto de rutas paralelas.
+ * Este archivo debe ser eliminado manualmente si el error persiste.
  */
-export default function AdminMigrationRoot() {
-  redirect('/admin/migration');
-  return null;
+export default function RedirectToOfficialMigration() {
+  redirect("/admin/migration");
 }
