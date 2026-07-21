@@ -42,6 +42,7 @@ export default function MigrationPage() {
 
   React.useEffect(() => {
     async function loadPreview() {
+      // Critical Guard: Only load preview if admin status is confirmed
       if (!firestore || adminLoading) return;
       
       if (!adminRole?.isAdmin) {
