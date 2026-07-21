@@ -106,14 +106,14 @@ export default function MigrationPage() {
               <p className="text-xs text-muted-foreground leading-relaxed">
                 Esta acción creará la <strong>Temporada Fundacional (2024)</strong> y asignará automáticamente todos los partidos y fotos existentes a este nuevo ciclo oficial.
               </p>
-              <Button 
+              <button 
                 onClick={handleMigrate} 
                 disabled={migrating || (preview?.pendingMatches === 0 && preview?.pendingGallery === 0)}
-                className="w-full h-16 font-bebas text-2xl tracking-widest shadow-xl shadow-primary/20"
+                className="w-full h-16 bg-primary text-white font-bebas text-2xl tracking-widest shadow-xl shadow-primary/20 rounded-xl flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors disabled:opacity-50"
               >
-                {migrating ? <Loader2 className="h-6 w-6 animate-spin mr-2" /> : <Database className="h-6 w-6 mr-2" />}
+                {migrating ? <Loader2 className="h-6 w-6 animate-spin" /> : <Database className="h-6 w-6" />}
                 INICIAR MIGRACIÓN OFICIAL
-              </Button>
+              </button>
             </div>
           )}
         </CardContent>

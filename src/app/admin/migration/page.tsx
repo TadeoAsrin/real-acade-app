@@ -1,6 +1,11 @@
+import { redirect } from 'next/navigation';
+
 /**
- * NEUTRALIZACIÓN DE RUTA RAÍZ.
- * Para evitar errores de Parallel Routes en Next.js, esta ruta ya no exporta un componente por defecto.
- * La página funcional reside exclusivamente en src/app/(app)/admin/migration/page.tsx.
+ * REDIRECCIÓN DE SEGURIDAD.
+ * Este archivo existe solo para satisfacer al compilador de Next.js y evitar errores de exportación.
+ * La página real reside en src/app/(app)/admin/migration/page.tsx para heredar el layout con Sidebar.
  */
-const InactivePage = () => null;
+export default function AdminMigrationRoot() {
+  redirect('/admin/migration');
+  return null;
+}
