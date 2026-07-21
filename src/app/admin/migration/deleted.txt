@@ -1,0 +1,1 @@
+Este archivo ha sido reemplazado por la estructura plana en src/app/admin/migration/page.tsx
