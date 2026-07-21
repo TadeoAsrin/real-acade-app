@@ -1,3 +1,6 @@
-// Archivo desactivado para resolver conflicto de rutas paralelas. 
-// La implementación oficial reside en src/app/(app)/admin/migration/page.tsx
-export default function InactivePage() { return null; }
+/** 
+ * ERROR: PARALLEL ROUTE COLLISION.
+ * Este archivo se mantiene como comentario para evitar que Next.js lo registre como ruta duplicada.
+ * La página activa se encuentra en: src/app/(app)/admin/migration/page.tsx
+ */
+export default function MigrationRedirect() { return null; }

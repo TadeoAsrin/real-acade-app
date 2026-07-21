@@ -11,13 +11,8 @@ import { MatchNewsModal } from '@/components/dashboard/match-news-modal';
 import { Trophy, History, LayoutDashboard, Loader2, Star } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
-/**
- * Dashboard principal de Real Acade.
- * Muestra el Power Ranking, el último partido y estadísticas generales.
- */
 export default function DashboardPage() {
   const firestore = useFirestore();
-  const { user } = useUser();
 
   const settingsRef = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -58,16 +53,14 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8 p-4 lg:p-8 animate-in fade-in duration-700">
-      <div className="flex flex-col lg:flex-row gap-6 items-start justify-between">
-        <div className="space-y-1">
-          <h2 className="text-4xl lg:text-7xl font-black uppercase tracking-tighter italic text-white flex items-center gap-4">
-            <LayoutDashboard className="h-8 w-8 lg:h-14 lg:w-14 text-primary shrink-0" />
-            RESUMEN DE TEMPORADA
-          </h2>
-          <p className="text-[10px] lg:text-xs font-black uppercase tracking-[0.4em] text-primary/60 ml-1">
-            ESTADÍSTICAS OFICIALES • REAL ACADE
-          </p>
-        </div>
+      <div className="space-y-1">
+        <h2 className="text-4xl lg:text-7xl font-black uppercase tracking-tighter italic text-white flex items-center gap-4">
+          <LayoutDashboard className="h-8 w-8 lg:h-14 lg:w-14 text-primary shrink-0" />
+          RESUMEN DE TEMPORADA
+        </h2>
+        <p className="text-[10px] lg:text-xs font-black uppercase tracking-[0.4em] text-primary/60 ml-1">
+          ESTADÍSTICAS OFICIALES • REAL ACADE
+        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -85,13 +78,11 @@ export default function DashboardPage() {
                 <CardDescription className="text-[10px] uppercase font-bold">Carga el primer encuentro de la temporada.</CardDescription>
             </Card>
           )}
-
           <GoalsChart matches={matches || []} />
         </div>
 
         <div className="space-y-8">
           <PowerRanking players={players || []} matches={matches || []} />
-          
           <Card className="competition-card bg-primary/5 border-primary/20">
             <CardHeader>
               <CardTitle className="text-lg font-bebas tracking-widest flex items-center gap-2">

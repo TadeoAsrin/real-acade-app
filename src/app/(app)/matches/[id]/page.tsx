@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -11,10 +10,9 @@ import { es } from 'date-fns/locale';
 import { MatchAiSummary } from '@/components/matches/match-ai-summary';
 import { BestGoalVote } from '@/components/matches/best-goal-vote';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { getInitials } from '@/lib/utils';
-import { Trophy, Calendar, MapPin, Loader2, ArrowLeft } from 'lucide-react';
+import { Calendar, MapPin, Loader2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 export default function MatchDetailPage() {
@@ -154,10 +152,6 @@ export default function MatchDetailPage() {
                  <CardTitle className="text-lg font-bebas tracking-widest">DATOS DE CAMPO</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                 <div className="flex items-center justify-between py-2 border-b border-white/5">
-                    <span className="text-[10px] font-black uppercase text-muted-foreground">TEMPORADA</span>
-                    <Badge variant="outline" className="font-bebas tracking-widest text-primary">{match.seasonId.substring(0, 8)}</Badge>
-                 </div>
                  <div className="flex items-center justify-between py-2">
                     <span className="text-[10px] font-black uppercase text-muted-foreground">UBICACIÓN</span>
                     <span className="text-xs font-bold text-white flex items-center gap-1.5 uppercase">

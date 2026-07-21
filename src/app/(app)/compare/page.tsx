@@ -1,33 +1,15 @@
-
 'use client';
 
 import * as React from 'react';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy } from 'firebase/firestore';
 import { calculateAggregatedStats } from '@/lib/data';
-import type { Player, Match, AggregatedPlayerStats } from '@/lib/definitions';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import type { Player, Match } from '@/lib/definitions';
+import { Card, CardHeader, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { 
-  ArrowLeftRight, 
-  ChevronRight, 
-  Trophy, 
-  Goal, 
-  Shield, 
-  Target, 
-  Flame,
-  Loader2,
-  Swords
-} from 'lucide-react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { ArrowLeftRight, Loader2, Swords } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getInitials, cn } from '@/lib/utils';
-import { Progress } from "@/components/ui/progress";
 
 export default function ComparePage() {
   const firestore = useFirestore();
@@ -77,36 +59,31 @@ export default function ComparePage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-         <Card className="competition-card border-primary/20 bg-primary/5">
-            <CardHeader>
-               <CardDescription className="text-[8px] font-black uppercase tracking-widest text-primary">JUGADOR A</CardDescription>
-               <Select value={player1Id} onValueChange={setPlayer1Id}>
-                  <SelectTrigger className="h-14 font-bebas text-2xl tracking-widest bg-black/40 border-primary/20">
-                     <SelectValue placeholder="SELECCIONAR..." />
-                  </SelectTrigger>
-                  <SelectContent className="bg-surface-900 font-bebas tracking-widest">
-                     {players?.map(p => (
-                       <SelectItem key={p.id} value={p.id}>{p.name.toUpperCase()}</SelectItem>
-                     ))}
-                  </SelectContent>
-               </Select>
-            </CardHeader>
+         <Card className="competition-card border-primary/20 bg-primary/5 p-4">
+            <CardDescription className="text-[8px] font-black uppercase tracking-widest text-primary mb-2">JUGADOR A</CardDescription>
+            <Select value={player1Id} onValueChange={setPlayer1Id}>
+               <SelectTrigger className="h-14 font-bebas text-2xl tracking-widest bg-black/40">
+                  <SelectValue placeholder="SELECCIONAR..." />
+               </SelectTrigger>
+               <SelectContent className="bg-surface-900 font-bebas tracking-widest">
+                  {players?.map(p => (
+                    <SelectItem key={p.id} value={p.id}>{p.name.toUpperCase()}</SelectItem>
+                  ))}
+               </SelectContent>
+            </Select>
          </Card>
-
-         <Card className="competition-card border-accent/20 bg-accent/5">
-            <CardHeader>
-               <CardDescription className="text-[8px] font-black uppercase tracking-widest text-accent">JUGADOR B</CardDescription>
-               <Select value={player2Id} onValueChange={setPlayer2Id}>
-                  <SelectTrigger className="h-14 font-bebas text-2xl tracking-widest bg-black/40 border-accent/20">
-                     <SelectValue placeholder="SELECCIONAR..." />
-                  </SelectTrigger>
-                  <SelectContent className="bg-surface-900 font-bebas tracking-widest">
-                     {players?.map(p => (
-                       <SelectItem key={p.id} value={p.id}>{p.name.toUpperCase()}</SelectItem>
-                     ))}
-                  </SelectContent>
-               </Select>
-            </CardHeader>
+         <Card className="competition-card border-accent/20 bg-accent/5 p-4">
+            <CardDescription className="text-[8px] font-black uppercase tracking-widest text-accent mb-2">JUGADOR B</CardDescription>
+            <Select value={player2Id} onValueChange={setPlayer2Id}>
+               <SelectTrigger className="h-14 font-bebas text-2xl tracking-widest bg-black/40">
+                  <SelectValue placeholder="SELECCIONAR..." />
+               </SelectTrigger>
+               <SelectContent className="bg-surface-900 font-bebas tracking-widest">
+                  {players?.map(p => (
+                    <SelectItem key={p.id} value={p.id}>{p.name.toUpperCase()}</SelectItem>
+                  ))}
+               </SelectContent>
+            </Select>
          </Card>
       </div>
 
@@ -120,13 +97,10 @@ export default function ComparePage() {
               </div>
               <PlayerHead stats={p2} side="right" />
            </div>
-
            <div className="space-y-10 max-w-3xl mx-auto">
               <ComparisonRow label="Goles Totales" val1={p1.totalGoals} val2={p2.totalGoals} />
               <ComparisonRow label="Power Points" val1={p1.powerPoints} val2={p2.powerPoints} highlight />
               <ComparisonRow label="Win %" val1={p1.winPercentage} val2={p2.winPercentage} suffix="%" />
-              <ComparisonRow label="Goles / Partido" val1={p1.goalsPerMatch} val2={p2.goalsPerMatch} />
-              <ComparisonRow label="MVP Totales" val1={p1.totalMvp} val2={p2.totalMvp} />
            </div>
         </Card>
       ) : (
@@ -139,46 +113,28 @@ export default function ComparePage() {
   );
 }
 
-function PlayerHead({ stats, side }: { stats: AggregatedPlayerStats, side: 'left' | 'right' }) {
+function PlayerHead({ stats, side }: { stats: any, side: 'left' | 'right' }) {
   return (
     <div className={cn("flex items-center gap-6", side === 'right' && "flex-row-reverse")}>
-       <Avatar className={cn(
-         "h-20 w-20 md:h-32 md:w-32 border-4",
-         side === 'left' ? "border-primary shadow-[0_0_30px_rgba(59,130,246,0.2)]" : "border-accent shadow-[0_0_30_px_rgba(244,63,94,0.2)]"
-       )}>
+       <Avatar className={cn("h-20 w-20 md:h-32 md:w-32 border-4", side === 'left' ? "border-primary" : "border-accent")}>
           <AvatarImage src={stats.avatar} alt={stats.name} />
           <AvatarFallback className="text-3xl font-bebas bg-surface-900">{getInitials(stats.name)}</AvatarFallback>
        </Avatar>
        <div className={cn("flex flex-col", side === 'right' && "items-end")}>
           <h3 className="text-xl md:text-3xl font-black uppercase tracking-tighter italic text-white">{stats.name.split(' ')[0]}</h3>
-          <span className={cn(
-            "text-[10px] font-black uppercase tracking-widest mt-1",
-            side === 'left' ? "text-primary" : "text-accent"
-          )}>{stats.position || 'COMODÍN'}</span>
+          <span className={cn("text-[10px] font-black uppercase tracking-widest mt-1", side === 'left' ? "text-primary" : "text-accent")}>{stats.position || 'COMODÍN'}</span>
        </div>
     </div>
   );
 }
 
 function ComparisonRow({ label, val1, val2, suffix = "", highlight = false }: { label: string, val1: number, val2: number, suffix?: string, highlight?: boolean }) {
-  const max = Math.max(val1, val2);
-  const p1Width = (val1 / max) * 100;
-  const p2Width = (val2 / max) * 100;
-
   return (
     <div className="space-y-4">
        <div className="flex items-center justify-between">
           <span className={cn("text-2xl font-bebas leading-none", val1 >= val2 ? "text-primary scale-110" : "text-muted-foreground/40")}>{val1}{suffix}</span>
           <span className={cn("text-[9px] font-black uppercase tracking-[0.3em] font-oswald", highlight ? "text-orange-500" : "text-muted-foreground/40")}>{label}</span>
           <span className={cn("text-2xl font-bebas leading-none", val2 >= val1 ? "text-accent scale-110" : "text-muted-foreground/40")}>{val2}{suffix}</span>
-       </div>
-       <div className="flex gap-4 h-2">
-          <div className="flex-1 bg-white/5 rounded-full overflow-hidden rotate-180">
-             <div className="h-full bg-primary shadow-[0_0_10px_rgba(59,130,246,0.5)]" style={{ width: `${p1Width}%` }} />
-          </div>
-          <div className="flex-1 bg-white/5 rounded-full overflow-hidden">
-             <div className="h-full bg-accent shadow-[0_0_10px_rgba(244,63,94,0.5)]" style={{ width: `${p2Width}%` }} />
-          </div>
        </div>
     </div>
   );

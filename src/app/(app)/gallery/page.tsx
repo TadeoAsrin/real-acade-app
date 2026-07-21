@@ -1,12 +1,11 @@
-
 'use client';
 
 import * as React from 'react';
 import { useFirestore, useCollection, useMemoFirebase, useDoc } from '@/firebase';
 import { collection, query, orderBy, where, doc } from 'firebase/firestore';
 import type { GalleryItem, AppSettings } from '@/lib/definitions';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Image as ImageIcon, Play, Calendar, Trophy, Loader2, Info } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Image as ImageIcon, Play, Calendar, Trophy, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -42,15 +41,6 @@ export default function GalleryPage() {
     );
   }
 
-  if (!activeSeasonId) {
-    return (
-      <div className="p-12 text-center">
-        <Info className="h-12 w-12 text-orange-500 mx-auto mb-4" />
-        <h2 className="text-2xl font-bebas tracking-widest text-white mb-2">Temporada No Iniciada</h2>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-8 p-4 lg:p-8 animate-in fade-in duration-700">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -69,24 +59,16 @@ export default function GalleryPage() {
         {items?.map((item) => (
           <Card key={item.id} className="competition-card group overflow-hidden border-white/5 bg-black/40 shadow-2xl">
             <div className="relative aspect-video">
-              <img 
-                src={item.url} 
-                alt={item.description || 'Gallery item'} 
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
+              <img src={item.url} alt={item.description} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
               {item.type === 'video' && (
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="bg-primary/80 p-4 rounded-full shadow-2xl transition-transform group-hover:scale-125">
+                  <div className="bg-primary/80 p-4 rounded-full shadow-2xl">
                     <Play className="h-8 w-8 text-white fill-current" />
                   </div>
                 </div>
               )}
               <div className="absolute top-4 right-4">
-                 <Badge className={cn(
-                   "bg-black/60 backdrop-blur-md border-white/20 font-bold uppercase text-[8px] tracking-widest",
-                   item.type === 'video' ? "text-orange-500" : "text-primary"
-                 )}>
+                 <Badge className="bg-black/60 backdrop-blur-md border-white/20 font-bold uppercase text-[8px] tracking-widest">
                    {item.type === 'video' ? 'VIDEO' : 'IMAGEN'}
                  </Badge>
               </div>
@@ -96,14 +78,7 @@ export default function GalleryPage() {
                   <Calendar className="h-3 w-3" />
                   {format(parseISO(item.date), "dd MMMM yyyy", { locale: es })}
                </div>
-               <p className="font-bold text-sm uppercase tracking-tight text-white/90 line-clamp-2">
-                 {item.description || 'Sin descripción'}
-               </p>
-               {item.category && (
-                 <span className="inline-block px-2 py-0.5 rounded bg-white/5 text-[8px] font-black uppercase text-primary/60 tracking-widest mt-2">
-                    {item.category}
-                 </span>
-               )}
+               <p className="font-bold text-sm uppercase tracking-tight text-white/90 line-clamp-2">{item.description}</p>
             </CardContent>
           </Card>
         ))}

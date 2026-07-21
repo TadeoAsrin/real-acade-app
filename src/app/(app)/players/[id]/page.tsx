@@ -1,18 +1,17 @@
-
 'use client';
 
 import * as React from 'react';
 import { useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase';
-import { doc, collection, query, where, orderBy } from 'firebase/firestore';
+import { doc, collection, query, orderBy } from 'firebase/firestore';
 import { useParams } from 'next/navigation';
 import { calculateAggregatedStats } from '@/lib/data';
-import type { Player, Match, AggregatedPlayerStats } from '@/lib/definitions';
+import type { Player, Match } from '@/lib/definitions';
 import { PlayerPerformanceChart } from '@/components/players/player-performance-chart';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { getInitials, cn } from '@/lib/utils';
-import { Trophy, Goal, Target, Star, Shield, TrendingUp, Loader2, Calendar } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 export default function PlayerProfilePage() {
   const { id } = useParams<{ id: string }>();
@@ -76,7 +75,6 @@ export default function PlayerProfilePage() {
               <div className="flex flex-wrap gap-2 justify-center mt-6">
                  {stats.totalMvp > 0 && <Badge className="bg-yellow-500 font-bold">{stats.totalMvp} MVP</Badge>}
                  {stats.wins > 5 && <Badge className="bg-primary font-bold">VETERANO</Badge>}
-                 {stats.goalsPerMatch > 1 && <Badge className="bg-accent font-bold">GOLEADOR</Badge>}
               </div>
            </Card>
 
@@ -90,39 +88,6 @@ export default function PlayerProfilePage() {
 
         <div className="flex-1 space-y-8">
            <PlayerPerformanceChart matchHistory={matchHistory} />
-
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <Card className="competition-card">
-                 <CardHeader>
-                    <CardTitle className="text-lg font-bebas tracking-widest">RACHA RECIENTE</CardTitle>
-                 </CardHeader>
-                 <CardContent>
-                    <div className="flex gap-2">
-                       {stats.form.map((res, i) => (
-                         <div key={i} className={cn(
-                           "w-10 h-14 rounded-lg flex items-center justify-center font-bebas text-2xl border shadow-lg",
-                           res === 'W' ? "bg-emerald-500/20 text-emerald-500 border-emerald-500/20" : 
-                           res === 'D' ? "bg-zinc-500/20 text-zinc-500 border-zinc-500/20" : 
-                           "bg-accent/20 text-accent border-accent/20"
-                         )}>
-                           {res}
-                         </div>
-                       ))}
-                    </div>
-                 </CardContent>
-              </Card>
-
-              <Card className="competition-card border-orange-500/20 bg-orange-500/5">
-                 <CardHeader>
-                    <CardTitle className="text-lg font-bebas tracking-widest text-orange-500">POWER RANKING INFO</CardTitle>
-                 </CardHeader>
-                 <CardContent>
-                    <p className="text-xs text-muted-foreground leading-relaxed italic">
-                      Actualmente ocupas el puesto de élite en el club con {stats.powerPoints} puntos de poder acumulados. Sigue participando para mejorar tu índice de influencia.
-                    </p>
-                 </CardContent>
-              </Card>
-           </div>
         </div>
       </div>
     </div>

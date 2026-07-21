@@ -1,14 +1,13 @@
-
 'use client';
 
 import * as React from 'react';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy } from 'firebase/firestore';
 import type { Player } from '@/lib/definitions';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
-import { Users, Search, ChevronRight, Star, Shield, Target } from 'lucide-react';
+import { Users, Search, ChevronRight, Star } from 'lucide-react';
 import Link from 'next/link';
 import { getInitials } from '@/lib/utils';
 
@@ -21,7 +20,7 @@ export default function PlayersPage() {
     return query(collection(firestore, 'players'), orderBy('name', 'asc'));
   }, [firestore]);
 
-  const { data: players, isLoading } = useCollection<Player>(playersRef);
+  const { data: players } = useCollection<Player>(playersRef);
 
   const filteredPlayers = players?.filter(p => 
     p.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -39,12 +38,11 @@ export default function PlayersPage() {
             ESTADÍSTICAS OFICIALES • MIEMBROS DEL CLUB
           </p>
         </div>
-        
         <div className="relative w-full md:w-80">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input 
             placeholder="BUSCAR LEYENDA..." 
-            className="pl-10 h-12 bg-black/40 border-white/10 font-bold tracking-widest uppercase placeholder:text-[10px]"
+            className="pl-10 h-12 bg-black/40 border-white/10 font-bold tracking-widest uppercase"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -68,14 +66,12 @@ export default function PlayersPage() {
                     </div>
                   )}
                </div>
-               
                <h3 className="font-bold text-sm lg:text-base uppercase tracking-tighter text-white truncate w-full group-hover:text-primary transition-colors">
                  {player.name}
                </h3>
                <p className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/40 mt-1 mb-4">
                  {player.position || 'COMODÍN'}
                </p>
-
                <div className="mt-auto w-full pt-4 border-t border-white/5 flex items-center justify-between text-[10px] font-black uppercase text-muted-foreground/20 group-hover:text-primary/40">
                   <span>VER PERFIL</span>
                   <ChevronRight className="h-3 w-3" />
@@ -83,13 +79,6 @@ export default function PlayersPage() {
             </Card>
           </Link>
         ))}
-
-        {filteredPlayers?.length === 0 && !isLoading && (
-          <div className="col-span-full py-20 text-center opacity-40">
-            <Search className="h-12 w-12 mx-auto mb-4" />
-            <p className="font-bebas text-xl tracking-widest uppercase">No se encontraron jugadores</p>
-          </div>
-        )}
       </div>
     </div>
   );

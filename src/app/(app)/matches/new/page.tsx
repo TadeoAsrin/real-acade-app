@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -11,12 +10,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Save, Goal, UserPlus, Trash2, ArrowRight } from 'lucide-react';
+import { Loader2, Save, Goal, UserPlus, Trash2 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 
 export default function NewMatchPage() {
   const firestore = useFirestore();
-  const { user } = useUser();
   const { toast } = useToast();
   const router = useRouter();
 
@@ -84,7 +82,7 @@ export default function NewMatchPage() {
       toast({ title: "Victoria!", description: "El partido ha sido registrado oficialmente." });
       router.push('/matches');
     } catch (error: any) {
-      toast({ variant: "destructive", title: "Error de Sistema", description: error.message });
+      toast({ variant: "destructive", title: "Error", description: error.message });
       setIsSubmitting(false);
     }
   };
@@ -207,12 +205,6 @@ export default function NewMatchPage() {
                  <div className="space-y-2">
                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">FECHA DEL ENCUENTRO</Label>
                     <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-                 </div>
-                 <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl">
-                    <p className="text-[9px] font-black text-primary uppercase tracking-[0.2em]">SISTEMA DE ÉLITE</p>
-                    <p className="text-[10px] mt-1 text-muted-foreground leading-relaxed italic">
-                      Al guardar, el algoritmo de Real Acade recalculará automáticamente el Power Ranking y las estadísticas globales de la temporada activa.
-                    </p>
                  </div>
               </CardContent>
               <CardContent className="pt-0">
