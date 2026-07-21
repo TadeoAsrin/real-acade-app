@@ -1,11 +1,12 @@
+
 'use client';
 
 import * as React from 'react';
 import { useParams } from "next/navigation";
 import { calculateAggregatedStats, getChemistryRankings, getSpiciestMatch } from "@/lib/data";
-import { useCollection, useMemoFirebase, useFirestore } from "@/firebase";
-import { collection, query, orderBy } from "firebase/firestore";
-import type { Match, Player, AggregatedPlayerStats, ChemistryPair } from "@/lib/definitions";
+import { useCollection, useMemoFirebase, useFirestore, useDoc } from "@/firebase";
+import { collection, query, orderBy, where, doc } from "firebase/firestore";
+import type { Match, Player, AggregatedPlayerStats, ChemistryPair, AppSettings } from "@/lib/definitions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Brain, Link as LinkIcon, Star, Users, Flame, Skull, Ghost, Droplets, Loader2, ChevronLeft, Zap, TrendingUp, Info, ShieldAlert, Sparkles, ShieldCheck } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -17,15 +18,27 @@ export default function PulseDetailPage() {
   const { type } = useParams();
   const firestore = useFirestore();
 
+  // Settings for Active Season
+  const settingsRef = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return doc(firestore, 'app_settings', 'global');
+  }, [firestore]);
+  const { data: settings, isLoading: settingsLoading } = useDoc<AppSettings>(settingsRef);
+  const activeSeasonId = settings?.activeSeasonId;
+
   const playersQuery = useMemoFirebase(() => {
     if (!firestore) return null;
     return query(collection(firestore, 'players'), orderBy('name', 'asc'));
   }, [firestore]);
 
   const matchesQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return query(collection(firestore, 'matches'), orderBy('date', 'desc'));
-  }, [firestore]);
+    if (!firestore || !activeSeasonId) return null;
+    return query(
+      collection(firestore, 'matches'), 
+      where('seasonId', '==', activeSeasonId),
+      orderBy('date', 'desc')
+    );
+  }, [firestore, activeSeasonId]);
 
   const { data: playersData, isLoading: playersLoading } = useCollection<Player>(playersQuery);
   const { data: matchesData, isLoading: matchesLoading } = useCollection<Match>(matchesQuery);
@@ -38,7 +51,7 @@ export default function PulseDetailPage() {
     return calculateAggregatedStats(allPlayers, allMatches);
   }, [allPlayers, allMatches]);
 
-  if (playersLoading || matchesLoading) {
+  if (playersLoading || matchesLoading || settingsLoading) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
         <Loader2 className="animate-spin text-primary h-12 w-12" />
@@ -109,7 +122,7 @@ export default function PulseDetailPage() {
 
   if (type === 'influencer') {
     const sorted = [...playerStats].filter(p => p.matchesPlayed >= 4).sort((a, b) => b.influenceScore - a.influenceScore);
-    return renderRankingList("Cerebros del Campo", "Efectividad ponderada por victorias y regularidad (Fórmula: wins+2 / played+4).", Brain, sorted, (p) => `${p.winPercentage}%`, (p) => `${p.wins}V - ${p.draws}E - ${p.losses}D`, "text-primary", "MÍNIMO 4 PARTIDOS JUGADOS");
+    return renderRankingList("Cerebros del Campo", "Efectividad ponderada por victorias y regularidad (Fórmula: wins+2 / played+4).", Brain, sorted, (p) => `${p.winPercentage}%`, (p) => `${p.wins}V - {p.draws}E - {p.losses}D`, "text-primary", "MÍNIMO 4 PARTIDOS JUGADOS");
   }
 
   if (type === 'mvp') {

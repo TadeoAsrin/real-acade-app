@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -7,10 +8,10 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import type { Player, Match } from "@/lib/definitions";
+import type { Player, Match, AppSettings } from "@/lib/definitions";
 import { Star, Loader2, Share2, Pencil, ChevronLeft, Trophy, Goal, Sparkles, Crown, Newspaper, ArrowRight, PlayCircle } from "lucide-react";
 import { useDoc, useCollection, useMemoFirebase, useFirestore, useUser } from "@/firebase";
-import { doc, collection, query, orderBy } from "firebase/firestore";
+import { doc, collection, query, orderBy, where } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { format, parseISO } from "date-fns";
@@ -34,33 +35,45 @@ export default function MatchDetailPage() {
     return collection(firestore, 'players');
   }, [firestore]);
 
-  const matchesRef = useMemoFirebase(() => {
+  const { data: match, isLoading: matchLoading } = useDoc<Match>(matchRef);
+  const { data: players, isLoading: playersLoading } = useCollection<Player>(playersRef);
+  
+  // Settings for context (needed for relative jornada calculation)
+  const settingsRef = useMemoFirebase(() => {
     if (!firestore) return null;
-    return query(collection(firestore, 'matches'), orderBy('date', 'asc'));
+    return doc(firestore, 'app_settings', 'global');
   }, [firestore]);
+  const { data: settings } = useDoc<AppSettings>(settingsRef);
+
+  // We only query matches of the SAME season as the current match to calculate the relative "Jornada"
+  const matchesInSeasonRef = useMemoFirebase(() => {
+    if (!firestore || !match?.seasonId) return null;
+    return query(
+      collection(firestore, 'matches'), 
+      where('seasonId', '==', match.seasonId),
+      orderBy('date', 'asc')
+    );
+  }, [firestore, match?.seasonId]);
 
   const adminRoleRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return doc(firestore, 'roles_admin', user.uid);
   }, [firestore, user]);
 
-  const { data: match, isLoading: matchLoading } = useDoc<Match>(matchRef);
-  const { data: players, isLoading: playersLoading } = useCollection<Player>(playersRef);
-  const { data: allMatches, isLoading: allMatchesLoading } = useCollection<Match>(matchesRef);
+  const { data: seasonMatches, isLoading: seasonMatchesLoading } = useCollection<Match>(matchesInSeasonRef);
   const { data: adminRole } = useDoc<{isAdmin: boolean}>(adminRoleRef);
 
   const allPlayers = players || [];
   
   const matchNumber = React.useMemo(() => {
-    if (!allMatches || !id) return 0;
-    const index = allMatches.findIndex(m => m.id === id);
+    if (!seasonMatches || !id) return 0;
+    const index = seasonMatches.findIndex(m => m.id === id);
     return index !== -1 ? index + 1 : 0;
-  }, [allMatches, id]);
+  }, [seasonMatches, id]);
 
   const mvpPlayer = React.useMemo(() => {
     if (!match || !allPlayers.length) return null;
     const allStats = [...(match.teamAPlayers || []), ...(match.teamBPlayers || [])];
-    // Detección robusta: acepta booleanos puros, strings "true" o números truthy
     const stat = allStats.find(s => 
       s.isMvp === true || 
       String(s.isMvp) === "true" || 
@@ -72,7 +85,6 @@ export default function MatchDetailPage() {
   const bestGoalPlayer = React.useMemo(() => {
     if (!match || !allPlayers.length) return null;
     const allStats = [...(match.teamAPlayers || []), ...(match.teamBPlayers || [])];
-    // Detección robusta: acepta booleanos puros, strings "true" o números truthy
     const stat = allStats.find(s => 
       s.hasBestGoal === true || 
       String(s.hasBestGoal) === "true" || 
@@ -81,7 +93,7 @@ export default function MatchDetailPage() {
     return allPlayers.find(p => p.id === stat?.playerId);
   }, [match, allPlayers]);
 
-  if (matchLoading || playersLoading || allMatchesLoading) {
+  if (matchLoading || playersLoading || (match?.seasonId && seasonMatchesLoading)) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -113,7 +125,7 @@ export default function MatchDetailPage() {
         </Link>
         
         <div className="space-y-1">
-          <p className="text-primary font-bebas text-2xl tracking-[0.2em] uppercase">JORNADA {matchNumber}</p>
+          <p className="text-primary font-bebas text-2xl tracking-[0.2em] uppercase">JORNADA {matchNumber || '...'}</p>
           <p className="text-xs font-bold text-muted-foreground/60 uppercase tracking-[0.2em] font-oswald">
             {format(date, "eeee d MMMM", { locale: es })}
           </p>
