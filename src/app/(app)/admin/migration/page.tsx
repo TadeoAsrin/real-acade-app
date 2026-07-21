@@ -141,7 +141,6 @@ export default function MigrationPage() {
         <p className="text-muted-foreground">Diagnóstico de permisos y migración oficial de Real Acade.</p>
       </div>
 
-      {/* DIAGNOSTIC PANEL */}
       <Card className="competition-card border-blue-500/20 bg-blue-500/5">
         <CardHeader>
           <CardTitle className="text-xl font-black italic uppercase flex items-center gap-2">
