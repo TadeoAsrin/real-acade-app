@@ -1,10 +1,11 @@
+
 "use client";
 
 import * as React from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useCollection, useMemoFirebase, useFirestore } from "@/firebase";
-import { collection, query, orderBy } from "firebase/firestore";
-import type { Match, Player, AggregatedPlayerStats } from "@/lib/definitions";
+import { useCollection, useMemoFirebase, useFirestore, useDoc } from "@/firebase";
+import { collection, query, orderBy, where, doc } from "firebase/firestore";
+import type { Match, Player, AggregatedPlayerStats, AppSettings } from "@/lib/definitions";
 import { 
   Loader2, 
   Newspaper, 
@@ -125,20 +126,32 @@ function DashboardContent() {
   const gacetaMatchId = searchParams.get('gaceta');
   const firestore = useFirestore();
 
+  // Settings for Active Season
+  const settingsRef = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return doc(firestore, 'app_settings', 'global');
+  }, [firestore]);
+  const { data: settings, isLoading: settingsLoading } = useDoc<AppSettings>(settingsRef);
+  const activeSeasonId = settings?.activeSeasonId;
+
   const playersQuery = useMemoFirebase(() => {
     if (!firestore) return null;
     return query(collection(firestore, 'players'), orderBy('name', 'asc'));
   }, [firestore]);
 
   const matchesQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return query(collection(firestore, 'matches'), orderBy('date', 'desc'));
-  }, [firestore]);
+    if (!firestore || !activeSeasonId) return null;
+    return query(
+      collection(firestore, 'matches'), 
+      where('seasonId', '==', activeSeasonId),
+      orderBy('date', 'desc')
+    );
+  }, [firestore, activeSeasonId]);
 
   const { data: playersData, isLoading: playersLoading } = useCollection<Player>(playersQuery);
   const { data: matchesData, isLoading: matchesLoading } = useCollection<Match>(matchesQuery);
 
-  if (playersLoading || matchesLoading) {
+  if (playersLoading || matchesLoading || settingsLoading) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />

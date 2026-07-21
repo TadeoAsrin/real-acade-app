@@ -11,8 +11,8 @@ import { cn } from "@/lib/utils";
 import { ArrowRight, CalendarIcon, Plus, Loader2, Trash2, Pencil, Camera, MessageSquare, Flame, Newspaper } from "lucide-react";
 import Link from "next/link";
 import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc, deleteDocumentNonBlocking } from "@/firebase";
-import { collection, query, orderBy, doc } from "firebase/firestore";
-import type { Match } from "@/lib/definitions";
+import { collection, query, orderBy, where, doc } from "firebase/firestore";
+import type { Match, AppSettings } from "@/lib/definitions";
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog,
@@ -161,17 +161,29 @@ export default function MatchesPage() {
   const { user } = useUser();
   const { toast } = useToast();
 
-  const matchesQuery = useMemoFirebase(() => {
+  // Settings for Active Season
+  const settingsRef = useMemoFirebase(() => {
     if (!firestore) return null;
-    return query(collection(firestore, 'matches'), orderBy('date', 'desc'));
+    return doc(firestore, 'app_settings', 'global');
   }, [firestore]);
+  const { data: settings, isLoading: settingsLoading } = useDoc<AppSettings>(settingsRef);
+  const activeSeasonId = settings?.activeSeasonId;
+
+  const matchesQuery = useMemoFirebase(() => {
+    if (!firestore || !activeSeasonId) return null;
+    return query(
+      collection(firestore, 'matches'), 
+      where('seasonId', '==', activeSeasonId),
+      orderBy('date', 'desc')
+    );
+  }, [firestore, activeSeasonId]);
 
   const adminRoleRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return doc(firestore, 'roles_admin', user.uid);
   }, [firestore, user]);
 
-  const { data: matchesData, isLoading } = useCollection<Match>(matchesQuery);
+  const { data: matchesData, isLoading: matchesLoading } = useCollection<Match>(matchesQuery);
   const { data: adminRole } = useDoc<{isAdmin: boolean}>(adminRoleRef);
   
   const isAdmin = !!adminRole?.isAdmin;
@@ -183,7 +195,7 @@ export default function MatchesPage() {
     toast({ title: "Jornada Eliminada", description: "El registro ha sido borrado de la base oficial." });
   };
 
-  if (isLoading) return <div className="flex h-[50vh] items-center justify-center"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div>;
+  if (matchesLoading || settingsLoading) return <div className="flex h-[50vh] items-center justify-center"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div>;
 
   const matches = matchesData || [];
   const upcomingMatches = matches.filter(m => {

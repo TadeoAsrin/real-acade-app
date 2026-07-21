@@ -225,7 +225,7 @@ export default function EditMatchPage() {
   };
 
   async function onSubmit(data: FormValues) {
-    if (!firestore || !id) return;
+    if (!firestore || !id || !match) return;
     setIsSaving(true);
     
     const teamAPlayers = data.teamAPlayerIds.map(playerId => ({
@@ -248,6 +248,8 @@ export default function EditMatchPage() {
 
     const matchRef = doc(firestore, 'matches', id);
     updateDocumentNonBlocking(matchRef, {
+        // Keep existing seasonId
+        seasonId: match.seasonId, 
         date: data.date.toISOString(),
         teamAScore,
         teamBScore,

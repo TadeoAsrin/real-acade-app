@@ -1,9 +1,10 @@
+
 'use client';
 
 import * as React from 'react';
 import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc, setDocumentNonBlocking, deleteDocumentNonBlocking } from "@/firebase";
-import { collection, query, orderBy, doc } from "firebase/firestore";
-import type { Match, GalleryItem } from "@/lib/definitions";
+import { collection, query, orderBy, where, doc } from "firebase/firestore";
+import type { Match, GalleryItem, AppSettings } from "@/lib/definitions";
 import { Loader2, Plus, Play, X, Trash2, Camera, Video, Link as LinkIcon, ExternalLink, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -37,15 +38,31 @@ export default function GalleryPage() {
   const [uploadCategory, setUploadCategory] = React.useState('Social');
   const [isSaving, setIsSaving] = React.useState(false);
 
-  const galleryQuery = useMemoFirebase(() => {
+  // Settings for Active Season
+  const settingsRef = useMemoFirebase(() => {
     if (!firestore) return null;
-    return query(collection(firestore, 'gallery'), orderBy('date', 'desc'));
+    return doc(firestore, 'app_settings', 'global');
   }, [firestore]);
+  const { data: settings, isLoading: settingsLoading } = useDoc<AppSettings>(settingsRef);
+  const activeSeasonId = settings?.activeSeasonId;
+
+  const galleryQuery = useMemoFirebase(() => {
+    if (!firestore || !activeSeasonId) return null;
+    return query(
+      collection(firestore, 'gallery'), 
+      where('seasonId', '==', activeSeasonId),
+      orderBy('date', 'desc')
+    );
+  }, [firestore, activeSeasonId]);
 
   const matchesQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return query(collection(firestore, 'matches'), orderBy('date', 'desc'));
-  }, [firestore]);
+    if (!firestore || !activeSeasonId) return null;
+    return query(
+      collection(firestore, 'matches'), 
+      where('seasonId', '==', activeSeasonId),
+      orderBy('date', 'desc')
+    );
+  }, [firestore, activeSeasonId]);
 
   const adminRoleRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -69,6 +86,7 @@ export default function GalleryPage() {
           match.photos.forEach((url, idx) => {
             items.push({
               id: `match-${match.id}-${idx}`,
+              seasonId: match.seasonId,
               type: 'image',
               url,
               date: match.date,
@@ -92,7 +110,7 @@ export default function GalleryPage() {
   }, [matchesData, galleryData]);
 
   const handleUpload = async () => {
-    if (!firestore || !uploadUrl) return;
+    if (!firestore || !uploadUrl || !activeSeasonId) return;
     setIsSaving(true);
     
     const itemId = Math.random().toString(36).substring(2, 15);
@@ -100,6 +118,7 @@ export default function GalleryPage() {
     
     const newItem: GalleryItem = {
       id: itemId,
+      seasonId: activeSeasonId, // Auto-assigned
       type: uploadType,
       url: uploadUrl,
       description: uploadDesc,
@@ -109,7 +128,7 @@ export default function GalleryPage() {
 
     setDocumentNonBlocking(itemRef, newItem, {});
     
-    toast({ title: "Subida Exitosa", description: "El momento ha sido guardado en la galería." });
+    toast({ title: "Subida Exitosa", description: "El momento ha sido guardado en la temporada activa." });
     setUploadUrl('');
     setUploadDesc('');
     setIsUploadOpen(false);
@@ -123,7 +142,7 @@ export default function GalleryPage() {
     toast({ title: "Eliminado", description: "El ítem ha sido borrado de la galería exclusiva." });
   };
 
-  if (galleryLoading || matchesLoading) {
+  if (galleryLoading || matchesLoading || settingsLoading) {
     return <div className="flex h-[50vh] items-center justify-center"><Loader2 className="animate-spin h-10 w-10 text-primary" /></div>;
   }
 

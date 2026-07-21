@@ -15,10 +15,10 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc } from "@/firebase";
-import { collection, query, orderBy, doc } from "firebase/firestore";
-import type { Player, Match, AggregatedPlayerStats } from "@/lib/definitions";
+import { collection, query, orderBy, where, doc } from "firebase/firestore";
+import type { Player, Match, AggregatedPlayerStats, AppSettings } from "@/lib/definitions";
 import { Loader2, TrendingUp, TrendingDown, Minus, Trophy, Target, Zap, Crown, ShieldCheck, Calendar, Info, AlertCircle, ArrowUpDown, ChevronUp, ChevronDown } from "lucide-react";
-import Link from 'next/link';
+import Link from 'link';
 import { cn, getInitials } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -57,15 +57,27 @@ function StandingsContent() {
     if (tabParam) setActiveTab(tabParam);
   }, [searchParams]);
 
+  // Settings for Active Season
+  const settingsRef = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return doc(firestore, 'app_settings', 'global');
+  }, [firestore]);
+  const { data: settings, isLoading: settingsLoading } = useDoc<AppSettings>(settingsRef);
+  const activeSeasonId = settings?.activeSeasonId;
+
   const playersQuery = useMemoFirebase(() => {
     if (!firestore) return null;
     return collection(firestore, 'players');
   }, [firestore]);
 
   const matchesQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return query(collection(firestore, 'matches'), orderBy('date', 'desc'));
-  }, [firestore]);
+    if (!firestore || !activeSeasonId) return null;
+    return query(
+      collection(firestore, 'matches'), 
+      where('seasonId', '==', activeSeasonId),
+      orderBy('date', 'desc')
+    );
+  }, [firestore, activeSeasonId]);
 
   const adminRoleRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -131,7 +143,7 @@ function StandingsContent() {
     }
   }, [allMatches, selectedMatchId]);
 
-  if (playersLoading || matchesLoading) return <div className="flex h-[50vh] items-center justify-center"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div>;
+  if (playersLoading || matchesLoading || settingsLoading) return <div className="flex h-[50vh] items-center justify-center"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div>;
 
   const sortedScorers = [...stats]
     .filter(p => p.totalGoals > 0)

@@ -45,12 +45,13 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useCollection, useMemoFirebase, useFirestore, setDocumentNonBlocking } from "@/firebase";
+import { useCollection, useMemoFirebase, useFirestore, setDocumentNonBlocking, useDoc } from "@/firebase";
 import { collection, doc, serverTimestamp, query, orderBy } from "firebase/firestore";
-import type { Player } from "@/lib/definitions";
+import type { Player, AppSettings } from "@/lib/definitions";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { generateMatchSummary } from "@/ai/flows/match-summary-flow";
+import { getActiveSeasonId } from "@/lib/seasons";
 
 const playerStatsSchema = z.object({
   goals: z.coerce.number().min(0).default(0),
@@ -89,6 +90,13 @@ export default function NewMatchPage() {
   const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
   const [photoUrl, setPhotoUrl] = React.useState("");
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  // Get active season ID for auto-assignment
+  const settingsRef = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return doc(firestore, 'app_settings', 'global');
+  }, [firestore]);
+  const { data: settings } = useDoc<AppSettings>(settingsRef);
 
   const playersRef = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -141,6 +149,13 @@ export default function NewMatchPage() {
 
   async function onSubmit(data: FormValues) {
     if (!firestore) return;
+    
+    const activeSeasonId = settings?.activeSeasonId;
+    if (!activeSeasonId) {
+      toast({ variant: "destructive", title: "Configuración Requerida", description: "No hay una temporada activa configurada." });
+      return;
+    }
+
     setIsLoading(true);
     
     try {
@@ -180,6 +195,7 @@ export default function NewMatchPage() {
 
       const matchRef = doc(collection(firestore, 'matches'));
       const matchData = {
+          seasonId: activeSeasonId, // Auto-assigned
           date: data.date.toISOString(),
           teamAScore,
           teamBScore,
@@ -196,7 +212,7 @@ export default function NewMatchPage() {
 
       toast({
         title: "Partido Guardado",
-        description: "Las estadísticas y la crónica se han guardado correctamente.",
+        description: `Las estadísticas se han vinculado al ciclo ${activeSeasonId.substring(0,5)}...`,
       });
       router.push("/matches");
     } catch (err) {
