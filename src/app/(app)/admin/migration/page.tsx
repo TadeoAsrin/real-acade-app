@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -24,7 +23,7 @@ export default function MigrationPage() {
   const [preview, setPreview] = React.useState<{alreadyMigrated: boolean, pendingMatches: number, pendingGallery: number} | null>(null);
   const [result, setResult] = React.useState<any>(null);
 
-  // Form State for initial season - Updated defaults per user request
+  // Form State for initial season
   const [seasonName, setSeasonName] = React.useState("Apertura 2026");
   const [seasonYear, setSeasonYear] = React.useState(2026);
   const [seasonType, setSeasonType] = React.useState<'Apertura' | 'Clausura' | 'Histórico'>("Apertura");
@@ -41,10 +40,11 @@ export default function MigrationPage() {
     async function loadPreview() {
       // CRITICAL: Only load preview if user is authenticated and is an admin
       // This prevents rogue unfiltered queries during app initialization
-      if (!firestore || adminLoading || !adminRole?.isAdmin) {
-        if (!adminLoading && adminRole && !adminRole.isAdmin) {
-            setIsLoading(false);
-        }
+      if (!firestore || adminLoading) return;
+      
+      // If we finished loading admin info and they are not admin, stop loading and return
+      if (!adminRole?.isAdmin) {
+        setIsLoading(false);
         return;
       }
       
@@ -61,7 +61,7 @@ export default function MigrationPage() {
   }, [firestore, adminLoading, adminRole]);
 
   const handleMigrate = async () => {
-    if (!firestore) return;
+    if (!firestore || !adminRole?.isAdmin) return;
     setIsMigrating(true);
     try {
       const data = await runInitialMigration(firestore, {
