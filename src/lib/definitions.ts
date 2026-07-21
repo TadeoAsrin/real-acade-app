@@ -1,3 +1,4 @@
+
 export type PlayerPosition = 'Arquero' | 'Lateral Derecho' | 'Defensor Central' | 'Lateral Izquierdo' | 'Mediocampista' | 'Delantero';
 
 export type Player = {
@@ -24,6 +25,7 @@ export type MatchAiSummary = {
 
 export type Match = {
   id: string;
+  seasonId: string;
   date: string;
   teamAScore: number;
   teamBScore: number;
@@ -101,10 +103,27 @@ export type Draft = {
 
 export type GalleryItem = {
   id: string;
+  seasonId: string;
   type: 'image' | 'video';
   url: string;
   description?: string;
   date: string;
   category?: string;
   matchId?: string;
+};
+
+export type Season = {
+  id: string;
+  name: string;
+  year: number;
+  type: 'Apertura' | 'Clausura';
+  half: 1 | 2;
+  startDate: string;
+  endDate?: string | null;
+  createdAt: string;
+};
+
+export type AppSettings = {
+  activeSeasonId: string;
+  isMigrated?: boolean;
 };

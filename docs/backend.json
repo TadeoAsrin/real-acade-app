@@ -11,6 +11,10 @@
           "type": "string",
           "description": "Unique identifier for the match."
         },
+        "seasonId": {
+          "type": "string",
+          "description": "The ID of the season this match belongs to."
+        },
         "date": {
           "type": "string",
           "description": "Date and time the match was played.",
@@ -48,6 +52,7 @@
       },
       "required": [
         "id",
+        "seasonId",
         "date",
         "teamAScore",
         "teamBScore"
@@ -108,13 +113,39 @@
       "type": "object",
       "properties": {
         "id": { "type": "string" },
+        "seasonId": { "type": "string" },
         "type": { "type": "string", "enum": ["image", "video"] },
         "url": { "type": "string" },
         "description": { "type": "string" },
         "date": { "type": "string", "format": "date-time" },
-        "category": { "type": "string" }
+        "category": { "type": "string" },
+        "matchId": { "type": "string" }
       },
-      "required": ["id", "type", "url", "date"]
+      "required": ["id", "seasonId", "type", "url", "date"]
+    },
+    "Season": {
+      "title": "Season",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "year": { "type": "number" },
+        "type": { "type": "string", "enum": ["Apertura", "Clausura"] },
+        "half": { "type": "number", "enum": [1, 2] },
+        "startDate": { "type": "string", "format": "date-time" },
+        "endDate": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "name", "year", "type", "half", "startDate", "createdAt"]
+    },
+    "AppSettings": {
+      "title": "AppSettings",
+      "type": "object",
+      "properties": {
+        "activeSeasonId": { "type": "string" },
+        "isMigrated": { "type": "boolean" }
+      },
+      "required": ["activeSeasonId"]
     }
   },
   "auth": {
@@ -173,6 +204,26 @@
             "$ref": "#/backend/entities/GalleryItem"
           },
           "description": "Stores exclusive photos and video links for the club gallery."
+        }
+      },
+      {
+        "path": "/seasons/{seasonId}",
+        "definition": {
+          "entityName": "Season",
+          "schema": {
+            "$ref": "#/backend/entities/Season"
+          },
+          "description": "Stores seasonal information for the club."
+        }
+      },
+      {
+        "path": "/app_settings/global",
+        "definition": {
+          "entityName": "AppSettings",
+          "schema": {
+            "$ref": "#/backend/entities/AppSettings"
+          },
+          "description": "Global application settings including the active season pointer."
         }
       }
     ]
