@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -15,8 +16,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc, setDocumentNonBlocking, updateDocumentNonBlocking, deleteDocumentNonBlocking } from "@/firebase";
-import { collection, doc, query, orderBy } from "firebase/firestore";
-import type { Player, Match, AggregatedPlayerStats, PlayerPosition } from "@/lib/definitions";
+import { collection, doc, query, orderBy, where } from "firebase/firestore";
+import type { Player, Match, AggregatedPlayerStats, PlayerPosition, AppSettings } from "@/lib/definitions";
 import { Loader2, UserPlus, Trash2, Pencil, ArrowUpDown, ChevronUp, ChevronDown, ShieldCheck, Users, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -80,7 +81,15 @@ function PlayersList() {
     if (sortParam === 'totalGoals') {
       setSortConfig({ key: 'totalGoals', direction: 'desc' });
     }
-  }, [searchParams]); // CORREGIDO: Usando searchParams en lugar de sortParams inexistente
+  }, [searchParams]);
+
+  // Active Season Context
+  const settingsRef = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return doc(firestore, 'app_settings', 'global');
+  }, [firestore]);
+  const { data: settings, isLoading: settingsLoading } = useDoc<AppSettings>(settingsRef);
+  const activeSeasonId = settings?.activeSeasonId;
 
   const playersQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -88,9 +97,12 @@ function PlayersList() {
   }, [firestore]);
 
   const matchesQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return collection(firestore, 'matches');
-  }, [firestore]);
+    if (!firestore || !activeSeasonId) return null;
+    return query(
+      collection(firestore, 'matches'),
+      where('seasonId', '==', activeSeasonId)
+    );
+  }, [firestore, activeSeasonId]);
 
   const adminRoleRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -161,7 +173,7 @@ function PlayersList() {
     return sortConfig.direction === 'asc' ? <ChevronUp className="ml-2 h-4 w-4 text-primary" /> : <ChevronDown className="ml-2 h-4 w-4 text-primary" />;
   };
 
-  if (playersLoading || matchesLoading) {
+  if (playersLoading || matchesLoading || settingsLoading) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />

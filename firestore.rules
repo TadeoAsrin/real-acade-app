@@ -21,9 +21,9 @@ service cloud.firestore {
              get(/databases/$(database)/documents/roles_admin/$(request.auth.uid)).data.isAdmin == true;
     }
 
-    // Regla para roles de administrador (solo lectura propia)
+    // Regla para roles de administrador
     match /roles_admin/{uid} {
-      allow get: if isOwner(uid);
+      allow read: if isSignedIn();
       allow write: if false;
     }
 
