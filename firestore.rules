@@ -27,7 +27,7 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // Partidos: Lectura para miembros (get y list), escritura solo admin
+    // Partidos: Lectura para miembros, escritura solo admin
     match /matches/{matchId} {
       allow read: if isSignedIn();
       allow write: if isAdmin();

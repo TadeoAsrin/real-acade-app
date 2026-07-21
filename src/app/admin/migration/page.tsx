@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -43,7 +44,7 @@ export default function MigrationPage() {
 
   React.useEffect(() => {
     async function loadPreview() {
-      // Critical Guard: Only load preview if admin status is confirmed
+      // Critical Guard: Wait for admin status
       if (!firestore || adminLoading) return;
       
       if (!adminRole?.isAdmin) {
@@ -54,8 +55,9 @@ export default function MigrationPage() {
       try {
         const data = await getMigrationPreview(firestore);
         setPreview(data);
-      } catch (err) {
+      } catch (err: any) {
         console.error("Error loading migration preview:", err);
+        setDiagLog(prev => prev + `\nError al cargar preview: ${err.message}`);
       } finally {
         setIsLoading(false);
       }
@@ -116,7 +118,18 @@ export default function MigrationPage() {
   }
 
   if (!adminRole?.isAdmin) {
-    return <div className="text-center py-20 italic">Acceso denegado. Solo administradores. <Link href="/" className='underline'>Volver</Link></div>;
+    return (
+      <div className="flex flex-col items-center justify-center h-screen gap-4">
+        <ShieldAlert className="h-16 w-16 text-destructive" />
+        <div className="text-center">
+          <h1 className="text-2xl font-black uppercase italic">Acceso Denegado</h1>
+          <p className="text-muted-foreground">Solo administradores verificados pueden acceder a esta herramienta.</p>
+        </div>
+        <Button asChild variant="outline">
+          <Link href="/dashboard">Volver al Inicio</Link>
+        </Button>
+      </div>
+    );
   }
 
   return (
