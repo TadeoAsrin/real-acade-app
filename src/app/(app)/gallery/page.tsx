@@ -1,6 +1,7 @@
+
 'use client';
 
-import * as React from 'reavy';
+import * as React from 'react';
 import { useFirestore, useCollection, useMemoFirebase, useDoc } from '@/firebase';
 import { collection, query, orderBy, where, doc } from 'firebase/firestore';
 import type { GalleryItem, AppSettings } from '@/lib/definitions';
