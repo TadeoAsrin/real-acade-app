@@ -1,10 +1,10 @@
 'use client';
 
 import * as React from 'react';
-import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy } from 'firebase/firestore';
+import { useFirestore, useCollection, useMemoFirebase, useDoc } from '@/firebase';
+import { collection, query, orderBy, where, doc } from 'firebase/firestore';
 import { calculateAggregatedStats } from '@/lib/data';
-import type { Player, Match } from '@/lib/definitions';
+import type { Player, Match, AppSettings } from '@/lib/definitions';
 import { Card, CardHeader, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeftRight, Loader2, Swords } from 'lucide-react';
@@ -16,15 +16,27 @@ export default function ComparePage() {
   const [player1Id, setPlayer1Id] = React.useState<string>("");
   const [player2Id, setPlayer2Id] = React.useState<string>("");
 
+  const settingsRef = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return doc(firestore, 'app_settings', 'global');
+  }, [firestore]);
+
+  const { data: settings } = useDoc<AppSettings>(settingsRef);
+  const activeSeasonId = settings?.activeSeasonId;
+
   const playersRef = useMemoFirebase(() => {
     if (!firestore) return null;
     return query(collection(firestore, 'players'), orderBy('name', 'asc'));
   }, [firestore]);
 
   const matchesRef = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return query(collection(firestore, 'matches'), orderBy('date', 'desc'));
-  }, [firestore]);
+    if (!firestore || !activeSeasonId) return null;
+    return query(
+      collection(firestore, 'matches'), 
+      where('seasonId', '==', activeSeasonId),
+      orderBy('date', 'desc')
+    );
+  }, [firestore, activeSeasonId]);
 
   const { data: players, isLoading: playersLoading } = useCollection<Player>(playersRef);
   const { data: matches, isLoading: matchesLoading } = useCollection<Match>(matchesRef);

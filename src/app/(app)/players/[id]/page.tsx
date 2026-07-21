@@ -2,10 +2,10 @@
 
 import * as React from 'react';
 import { useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase';
-import { doc, collection, query, orderBy } from 'firebase/firestore';
+import { doc, collection, query, orderBy, where } from 'firebase/firestore';
 import { useParams } from 'next/navigation';
 import { calculateAggregatedStats } from '@/lib/data';
-import type { Player, Match } from '@/lib/definitions';
+import type { Player, Match, AppSettings } from '@/lib/definitions';
 import { PlayerPerformanceChart } from '@/components/players/player-performance-chart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -17,15 +17,27 @@ export default function PlayerProfilePage() {
   const { id } = useParams<{ id: string }>();
   const firestore = useFirestore();
 
+  const settingsRef = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return doc(firestore, 'app_settings', 'global');
+  }, [firestore]);
+
+  const { data: settings } = useDoc<AppSettings>(settingsRef);
+  const activeSeasonId = settings?.activeSeasonId;
+
   const playerRef = useMemoFirebase(() => {
     if (!firestore || !id) return null;
     return doc(firestore, 'players', id);
   }, [firestore, id]);
 
   const matchesRef = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return query(collection(firestore, 'matches'), orderBy('date', 'desc'));
-  }, [firestore]);
+    if (!firestore || !activeSeasonId) return null;
+    return query(
+      collection(firestore, 'matches'), 
+      where('seasonId', '==', activeSeasonId),
+      orderBy('date', 'desc')
+    );
+  }, [firestore, activeSeasonId]);
 
   const { data: player, isLoading: playerLoading } = useDoc<Player>(playerRef);
   const { data: matches, isLoading: matchesLoading } = useCollection<Match>(matchesRef);

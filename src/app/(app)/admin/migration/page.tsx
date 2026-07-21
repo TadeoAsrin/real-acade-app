@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/componen
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Database, AlertTriangle, CheckCircle2, Loader2, ShieldAlert } from 'lucide-react';
+import { Database, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 
@@ -66,7 +66,7 @@ export default function MigrationPage() {
     }
   };
 
-  if (isLoading || roleLoading) return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 className="animate-spin" /></div>;
+  if (isLoading || roleLoading) return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 className="animate-spin text-primary" /></div>;
   if (!hasAccess) return <div className="p-20 text-center uppercase font-bebas text-2xl tracking-widest text-accent">Acceso Denegado</div>;
 
   return (
@@ -80,12 +80,12 @@ export default function MigrationPage() {
           <CardHeader><CardTitle className="text-lg font-bebas tracking-widest">Datos Pendientes</CardTitle></CardHeader>
           <CardContent>
              <div className="grid grid-cols-2 gap-4">
-               <div className="p-4 bg-black/40 rounded-xl">
-                 <span className="text-3xl font-bebas">{preview?.pendingMatches || 0}</span>
+               <div className="p-4 bg-black/40 rounded-xl text-center">
+                 <span className="text-3xl font-bebas text-white">{preview?.pendingMatches || 0}</span>
                  <p className="text-[8px] uppercase font-black text-muted-foreground">Partidos</p>
                </div>
-               <div className="p-4 bg-black/40 rounded-xl">
-                 <span className="text-3xl font-bebas">{preview?.pendingGallery || 0}</span>
+               <div className="p-4 bg-black/40 rounded-xl text-center">
+                 <span className="text-3xl font-bebas text-white">{preview?.pendingGallery || 0}</span>
                  <p className="text-[8px] uppercase font-black text-muted-foreground">Galería</p>
                </div>
              </div>

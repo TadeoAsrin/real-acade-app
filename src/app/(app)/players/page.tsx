@@ -7,7 +7,7 @@ import type { Player } from '@/lib/definitions';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
-import { Users, Search, ChevronRight, Star } from 'lucide-react';
+import { Users, Search, ChevronRight, Star, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { getInitials } from '@/lib/utils';
 
@@ -20,11 +20,20 @@ export default function PlayersPage() {
     return query(collection(firestore, 'players'), orderBy('name', 'asc'));
   }, [firestore]);
 
-  const { data: players } = useCollection<Player>(playersRef);
+  const { data: players, isLoading } = useCollection<Player>(playersRef);
 
   const filteredPlayers = players?.filter(p => 
     p.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+        <p className="font-bebas text-xl tracking-widest text-muted-foreground uppercase">Pasando lista...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 p-4 lg:p-8 animate-in fade-in duration-700">
@@ -42,7 +51,7 @@ export default function PlayersPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input 
             placeholder="BUSCAR LEYENDA..." 
-            className="pl-10 h-12 bg-black/40 border-white/10 font-bold tracking-widest uppercase"
+            className="pl-10 h-12 bg-black/40 border-white/10 font-bold tracking-widest uppercase text-white"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -52,11 +61,11 @@ export default function PlayersPage() {
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {filteredPlayers?.map((player) => (
           <Link key={player.id} href={`/players/${player.id}`}>
-            <Card className="competition-card official-table-row hover-lift h-full flex flex-col items-center p-6 text-center group">
+            <Card className="competition-card official-table-row hover-lift h-full flex flex-col items-center p-6 text-center group border-white/5 bg-black/40">
                <div className="relative mb-4">
                   <Avatar className="h-20 w-20 md:h-24 md:w-24 border-2 border-white/5 transition-transform duration-500 group-hover:scale-110">
                     <AvatarImage src={player.avatar} alt={player.name} />
-                    <AvatarFallback className="bg-surface-900 text-xl font-bebas text-primary">
+                    <AvatarFallback className="bg-zinc-900 text-xl font-bebas text-primary">
                       {getInitials(player.name)}
                     </AvatarFallback>
                   </Avatar>

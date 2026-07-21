@@ -6,7 +6,7 @@ import { collection, query, orderBy, where, doc } from 'firebase/firestore';
 import type { Match, AppSettings } from '@/lib/definitions';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, Goal, Calendar, ChevronRight, Trophy } from 'lucide-react';
+import { Plus, Goal, Calendar, ChevronRight, Trophy, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -42,6 +42,15 @@ export default function MatchesPage() {
 
   const { data: matches, isLoading } = useCollection<Match>(matchesRef);
 
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+        <p className="font-bebas text-xl tracking-widest text-muted-foreground uppercase">Abriendo historial...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8 p-4 lg:p-8 animate-in fade-in duration-700">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -67,7 +76,7 @@ export default function MatchesPage() {
       <div className="grid grid-cols-1 gap-6">
         {matches?.map((match) => (
           <Link key={match.id} href={`/matches/${match.id}`}>
-            <Card className="competition-card official-table-row hover-lift overflow-hidden group">
+            <Card className="competition-card official-table-row hover-lift overflow-hidden group border-white/5 bg-black/40">
               <div className="flex flex-col md:flex-row">
                 <div className="flex-1 p-6 md:p-8 flex items-center justify-between">
                   <div className="flex flex-col items-center gap-1 w-24">
