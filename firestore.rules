@@ -57,5 +57,15 @@ service cloud.firestore {
       allow get, list: if true;
       allow create, update, delete: if isAdmin();
     }
+
+    match /seasons/{seasonId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /app_settings/{docId} {
+      allow get: if true;
+      allow create, update, delete: if isAdmin();
+    }
   }
 }
