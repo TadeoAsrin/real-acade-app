@@ -38,8 +38,10 @@ export default function MigrationPage() {
 
   React.useEffect(() => {
     async function loadPreview() {
-      // CRITICAL: Only load preview if user is authenticated and is an admin
-      // This prevents rogue unfiltered queries during app initialization
+      // CRITICAL GUARD: Only load preview if:
+      // 1. Firestore is initialized
+      // 2. Auth state is determined (not loading)
+      // 3. User is explicitly an Administrator
       if (!firestore || adminLoading) return;
       
       // If we finished loading admin info and they are not admin, stop loading and return

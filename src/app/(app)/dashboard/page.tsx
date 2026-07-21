@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from 'react';
@@ -140,6 +139,7 @@ function DashboardContent() {
   }, [firestore]);
 
   const matchesQuery = useMemoFirebase(() => {
+    // Audit: Only run query if activeSeasonId is explicitly present
     if (!firestore || !activeSeasonId) return null;
     return query(
       collection(firestore, 'matches'), 
