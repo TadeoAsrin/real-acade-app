@@ -13,12 +13,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc } from "@/firebase";
 import { collection, query, orderBy, where, doc } from "firebase/firestore";
 import type { Player, Match, AggregatedPlayerStats, AppSettings } from "@/lib/definitions";
 import { Loader2, TrendingUp, TrendingDown, Minus, Trophy, Target, Zap, Crown, ShieldCheck, Calendar, Info, AlertCircle, ArrowUpDown, ChevronUp, ChevronDown } from "lucide-react";
-import Link from "next/link";
 import { cn, getInitials } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";

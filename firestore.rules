@@ -29,7 +29,14 @@ service cloud.firestore {
 
     // Partidos: Lectura para miembros, escritura solo admin
     match /matches/{matchId} {
-      allow read: if isSignedIn();
+      // Lectura individual permitida para miembros
+      allow get: if isSignedIn();
+      
+      // Listado permitido:
+      // 1. Para administradores (permite lecturas completas/unfiltered para migración)
+      // 2. Para miembros si la consulta es acotada (protección contra scraping)
+      allow list: if isSignedIn() && (isAdmin() || request.query.limit <= 50);
+
       allow write: if isAdmin();
 
       // Votos para mejor gol (sub-colección)
