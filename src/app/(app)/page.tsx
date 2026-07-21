@@ -1,5 +1,7 @@
-// This file is deprecated to avoid parallel route conflicts with root src/app/page.tsx.
-import { redirect } from 'next/navigation';
-export default function RedirectPage() {
-  redirect('/dashboard');
+/**
+ * Archivo neutralizado para evitar conflictos de rutas paralelas con src/app/page.tsx.
+ * Next.js no permite tener dos archivos 'page.tsx' que resuelvan a la misma ruta raíz.
+ */
+export default function DeprecatedPage() {
+  return null;
 }
