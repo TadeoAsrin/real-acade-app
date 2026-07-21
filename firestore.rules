@@ -45,7 +45,7 @@ service cloud.firestore {
       allow write: if isOwner(playerId) || isAdmin();
     }
 
-    // Pan y Queso (Drafts): Lectura pública, escritura usuarios o admin
+    // Pan y Queso (Drafts): Lectura miembros, escritura miembros o admin
     match /drafts/{draftId} {
       allow read: if isSignedIn();
       allow write: if isSignedIn() || isAdmin();

@@ -12,9 +12,9 @@ import Link from "next/link";
 import { PlayerPerformanceChart } from "@/components/players/player-performance-chart";
 import { Badge } from "@/components/ui/badge";
 import { useDoc, useCollection, useMemoFirebase, useFirestore } from "@/firebase";
-import { doc, collection, query, orderBy } from "firebase/firestore";
+import { doc, collection, query, orderBy, where } from "firebase/firestore";
 import { calculateAggregatedStats } from "@/lib/data";
-import type { Player, Match, AggregatedPlayerStats } from "@/lib/definitions";
+import type { Player, Match, AggregatedPlayerStats, AppSettings } from "@/lib/definitions";
 import { getInitials, cn } from "@/lib/utils";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
@@ -24,15 +24,27 @@ export default function PlayerProfilePage() {
   const id = params.id as string;
   const firestore = useFirestore();
 
+  // Active Season Context
+  const settingsRef = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return doc(firestore, 'app_settings', 'global');
+  }, [firestore]);
+  const { data: settings, isLoading: settingsLoading } = useDoc<AppSettings>(settingsRef);
+  const activeSeasonId = settings?.activeSeasonId;
+
   const playerRef = useMemoFirebase(() => {
     if (!firestore || !id) return null;
     return doc(firestore, 'players', id);
   }, [firestore, id]);
 
   const matchesQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return query(collection(firestore, 'matches'), orderBy('date', 'desc'));
-  }, [firestore]);
+    if (!firestore || !activeSeasonId) return null;
+    return query(
+      collection(firestore, 'matches'), 
+      where('seasonId', '==', activeSeasonId),
+      orderBy('date', 'desc')
+    );
+  }, [firestore, activeSeasonId]);
 
   const playersQuery = useMemoFirebase(() => {
       if (!firestore) return null;
@@ -43,7 +55,7 @@ export default function PlayerProfilePage() {
   const { data: matches, isLoading: matchesLoading } = useCollection<Match>(matchesQuery);
   const { data: allPlayers, isLoading: allPlayersLoading } = useCollection<Player>(playersQuery);
 
-  if (playerLoading || matchesLoading || allPlayersLoading) {
+  if (playerLoading || matchesLoading || allPlayersLoading || settingsLoading) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -57,7 +69,7 @@ export default function PlayerProfilePage() {
   const statsList = calculateAggregatedStats(allPlayers || [], allMatches);
   const playerStats = statsList.find(s => s.playerId === id);
 
-  if (!playerStats) return <div className="text-center py-12 italic opacity-20">Sin estadísticas disponibles aún.</div>;
+  if (!playerStats) return <div className="text-center py-12 italic opacity-20">Sin estadísticas en la temporada actual.</div>;
 
   const playerMatchHistory = allMatches
     .filter(match => 
@@ -134,7 +146,7 @@ export default function PlayerProfilePage() {
                     </div>
                 )}
                 <Badge variant="outline" className="px-3 py-1 uppercase tracking-widest text-[9px] font-black border-white/10">
-                    MODO COMPETITIVO
+                    TEMPORADA ACTUAL
                 </Badge>
               </div>
             </div>
@@ -170,7 +182,7 @@ export default function PlayerProfilePage() {
           <Card className="competition-card">
             <CardHeader>
               <CardTitle className="text-xl font-black uppercase italic tracking-tighter">Historial de Combates</CardTitle>
-              <CardDescription>Desempeño cronológico en la liga.</CardDescription>
+              <CardDescription>Desempeño cronológico en el torneo actual.</CardDescription>
             </CardHeader>
             <CardContent className="p-0">
               <div className="overflow-x-auto">

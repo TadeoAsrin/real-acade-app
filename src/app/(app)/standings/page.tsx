@@ -56,6 +56,7 @@ function StandingsContent() {
     if (tabParam) setActiveTab(tabParam);
   }, [searchParams]);
 
+  // Active Season Context
   const settingsRef = useMemoFirebase(() => {
     if (!firestore) return null;
     return doc(firestore, 'app_settings', 'global');

@@ -1,10 +1,11 @@
+
 'use client';
 
 import * as React from 'react';
 import { calculateAggregatedStats } from "@/lib/data";
-import { useCollection, useMemoFirebase, useFirestore } from "@/firebase";
-import { collection } from "firebase/firestore";
-import type { Player, Match, AggregatedPlayerStats } from "@/lib/definitions";
+import { useCollection, useMemoFirebase, useFirestore, useDoc } from "@/firebase";
+import { collection, query, where, orderBy, doc } from "firebase/firestore";
+import type { Player, Match, AggregatedPlayerStats, AppSettings } from "@/lib/definitions";
 import { Loader2, ArrowLeftRight, Trophy, Zap, Shield, Target, TrendingUp, MapPin, ShieldCheck, Star } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -18,15 +19,26 @@ export default function ComparePage() {
   const [player1Id, setPlayer1Id] = React.useState<string>("");
   const [player2Id, setPlayer2Id] = React.useState<string>("");
 
+  // Get active season
+  const settingsRef = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return doc(firestore, 'app_settings', 'global');
+  }, [firestore]);
+  const { data: settings, isLoading: settingsLoading } = useDoc<AppSettings>(settingsRef);
+  const activeSeasonId = settings?.activeSeasonId;
+
   const playersQuery = useMemoFirebase(() => {
     if (!firestore) return null;
     return collection(firestore, 'players');
   }, [firestore]);
 
   const matchesQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return collection(firestore, 'matches');
-  }, [firestore]);
+    if (!firestore || !activeSeasonId) return null;
+    return query(
+      collection(firestore, 'matches'), 
+      where('seasonId', '==', activeSeasonId)
+    );
+  }, [firestore, activeSeasonId]);
 
   const { data: playersData, isLoading: playersLoading } = useCollection<Player>(playersQuery);
   const { data: matchesData, isLoading: matchesLoading } = useCollection<Match>(matchesQuery);
@@ -39,7 +51,7 @@ export default function ComparePage() {
   const p1 = stats.find(s => s.playerId === player1Id);
   const p2 = stats.find(s => s.playerId === player2Id);
 
-  if (playersLoading || matchesLoading) {
+  if (playersLoading || matchesLoading || settingsLoading) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -88,7 +100,7 @@ export default function ComparePage() {
           <ArrowLeftRight className="h-10 w-10 text-primary" />
           Versus Mode
         </h1>
-        <p className="text-muted-foreground">Compara el rendimiento de dos leyendas del club cara a cara.</p>
+        <p className="text-muted-foreground">Compara el rendimiento de la temporada actual cara a cara.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">

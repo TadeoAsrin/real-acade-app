@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -8,8 +9,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2, Dices, RefreshCw, Swords, Shield, Zap, Lock } from "lucide-react";
 import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc } from "@/firebase";
-import { collection, doc } from "firebase/firestore";
-import type { Player, Match, AggregatedPlayerStats } from "@/lib/definitions";
+import { collection, query, where, doc } from "firebase/firestore";
+import type { Player, Match, AggregatedPlayerStats, AppSettings } from "@/lib/definitions";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
@@ -19,15 +20,26 @@ export default function TeamGeneratorPage() {
   const [selectedIds, setSelectedIds] = React.useState<string[]>([]);
   const [teams, setTeams] = React.useState<{ teamA: AggregatedPlayerStats[], teamB: AggregatedPlayerStats[], scoreA: number, scoreB: number } | null>(null);
 
+  // Active Season Context
+  const settingsRef = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return doc(firestore, 'app_settings', 'global');
+  }, [firestore]);
+  const { data: settings, isLoading: settingsLoading } = useDoc<AppSettings>(settingsRef);
+  const activeSeasonId = settings?.activeSeasonId;
+
   const playersQuery = useMemoFirebase(() => {
     if (!firestore) return null;
     return collection(firestore, 'players');
   }, [firestore]);
 
   const matchesQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return collection(firestore, 'matches');
-  }, [firestore]);
+    if (!firestore || !activeSeasonId) return null;
+    return query(
+      collection(firestore, 'matches'), 
+      where('seasonId', '==', activeSeasonId)
+    );
+  }, [firestore, activeSeasonId]);
 
   const adminRoleRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -43,7 +55,7 @@ export default function TeamGeneratorPage() {
     return calculateAggregatedStats(playersData, matchesData);
   }, [playersData, matchesData]);
 
-  if (playersLoading || matchesLoading || adminLoading) {
+  if (playersLoading || matchesLoading || adminLoading || settingsLoading) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -85,7 +97,7 @@ export default function TeamGeneratorPage() {
             <Dices className="h-10 w-10" />
             Equilibrador Pro
           </h1>
-          <p className="text-muted-foreground">Selecciona a los jugadores presentes y genera equipos nivelados automáticamente.</p>
+          <p className="text-muted-foreground">Utilizando datos de la temporada activa.</p>
         </div>
         <div className="flex items-center gap-3">
             <Badge variant="outline" className="text-lg py-1 px-4 border-orange-500/20 text-orange-400">
@@ -128,7 +140,7 @@ export default function TeamGeneratorPage() {
                     </Avatar>
                     <div className="flex flex-col">
                         <span className="font-bold text-sm">{player.name}</span>
-                        <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">Nivel: {player.powerPoints}</span>
+                        <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">Power: {player.powerPoints}</span>
                     </div>
                   </div>
                   <Checkbox 
@@ -231,7 +243,7 @@ export default function TeamGeneratorPage() {
                 </div>
                 <div className="max-w-xs">
                     <h3 className="text-xl font-bold uppercase italic mb-2 tracking-tight">Listo para el Pick</h3>
-                    <p className="text-sm text-muted-foreground">Selecciona a los jugadores que han venido hoy a la izquierda para armar los equipos más parejos del club basándose en su nivel actual.</p>
+                    <p className="text-sm text-muted-foreground">Selecciona a los jugadores que han venido hoy a la izquierda para armar los equipos basándose en el Power Ranking de la temporada activa.</p>
                 </div>
             </div>
           )}
