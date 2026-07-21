@@ -247,7 +247,7 @@ function StandingsContent() {
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">TABLA OFICIAL: MÍNIMO 6 PARTIDOS JUGADOS</p>
             </div>
 
-            <Card className="competition-card border-none bg-black/20 backdrop-blur-sm">
+            <Card className="competition-card border-none bg-black/20 backdrop-blur-md">
               <Table>
                 <TableHeaderSortable />
                 <TableBody>
