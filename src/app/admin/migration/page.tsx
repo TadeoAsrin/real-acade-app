@@ -1,7 +1,8 @@
-// Este archivo ha sido desactivado para resolver el conflicto de rutas duplicadas.
-// La implementación oficial y protegida se encuentra en:
-// src/app/(app)/admin/migration/page.tsx
+/**
+ * @fileOverview ARCHIVO DESACTIVADO
+ * 
+ * Se ha eliminado la exportación por defecto para resolver la colisión de rutas
+ * con la implementación oficial ubicada en: src/app/(app)/admin/migration/page.tsx
+ */
 
-export default function DuplicateConflictResolver() {
-  return null;
-}
+export const dynamic = 'force-static';
