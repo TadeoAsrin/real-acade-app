@@ -1,2 +1,7 @@
-// Este archivo ha sido desactivado para evitar colisiones de rutas con src/app/page.tsx
-export const dynamic = 'force-static';
+/**
+ * Archivo desactivado para resolver la colisión de rutas con la raíz src/app/page.tsx.
+ * El redireccionamiento principal se gestiona en la raíz para evitar loops.
+ */
+export default function InactivePage() {
+  return null;
+}

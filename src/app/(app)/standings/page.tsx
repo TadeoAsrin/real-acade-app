@@ -458,7 +458,7 @@ function StandingsContent() {
                       <TableCell className="text-center font-oswald text-xs tracking-widest font-bold">
                         <span className="text-emerald-500">{player.wins}</span>-<span className="text-orange-400">{player.draws}</span>-<span className="text-red-500">{player.losses}</span>
                       </TableCell>
-                      <TableCell className="text-center font-bebas text-5xl italic bg-emerald-500/5 text-emerald-500">
+                      <TableCell className="text-center font-bebas text-5xl italic bg-emerald-500/10 text-emerald-500">
                         {player.efficiency}%
                       </TableCell>
                     </TableRow>
