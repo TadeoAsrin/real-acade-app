@@ -24,9 +24,9 @@ export default function MigrationPage() {
   const [preview, setPreview] = React.useState<{alreadyMigrated: boolean, pendingMatches: number, pendingGallery: number} | null>(null);
   const [result, setResult] = React.useState<any>(null);
 
-  // Form State for initial season
-  const [seasonName, setSeasonName] = React.useState("Temporada Inaugural");
-  const [seasonYear, setSeasonYear] = React.useState(new Date().getFullYear());
+  // Form State for initial season - Updated defaults per user request
+  const [seasonName, setSeasonName] = React.useState("Apertura 2026");
+  const [seasonYear, setSeasonYear] = React.useState(2026);
   const [seasonType, setSeasonType] = React.useState<'Apertura' | 'Clausura' | 'Histórico'>("Apertura");
   const [seasonHalf, setSeasonHalf] = React.useState<1 | 2>(1);
 
@@ -129,7 +129,7 @@ export default function MigrationPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label className="text-[10px] uppercase font-black text-muted-foreground">Nombre de Temporada</Label>
-                      <Input value={seasonName} onChange={(e) => setSeasonName(e.target.value)} className="bg-black/40 border-white/10" placeholder="Ej: Temporada 2024" />
+                      <Input value={seasonName} onChange={(e) => setSeasonName(e.target.value)} className="bg-black/40 border-white/10" placeholder="Ej: Apertura 2026" />
                     </div>
                     <div className="space-y-2">
                       <Label className="text-[10px] uppercase font-black text-muted-foreground">Año</Label>
