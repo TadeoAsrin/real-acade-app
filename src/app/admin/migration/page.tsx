@@ -1,5 +1,2 @@
-/** 
- * ARCHIVO ELIMINADO FÍSICAMENTE PARA RESOLVER COLISIÓN DE RUTAS 
- * La implementación oficial se encuentra en: src/app/(app)/admin/migration/page.tsx
- */
-export default function DeletedPage() { return null; }
+// Este archivo ha sido desactivado para evitar colisiones de rutas con src/app/(app)/admin/migration/page.tsx
+export const dynamic = 'force-static';

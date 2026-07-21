@@ -1,5 +1,2 @@
-/** 
- * ARCHIVO ELIMINADO FÍSICAMENTE PARA RESOLVER COLISIÓN DE RUTAS 
- * La ruta raíz se gestiona exclusivamente en: src/app/page.tsx
- */
-export default function DeletedPage() { return null; }
+// Este archivo ha sido desactivado para evitar colisiones de rutas con src/app/page.tsx
+export const dynamic = 'force-static';

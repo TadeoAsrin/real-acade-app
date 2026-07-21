@@ -6,12 +6,10 @@ import { doc, getDocs, collection, query, where } from "firebase/firestore";
 import { getMigrationPreview, runInitialMigration } from "@/lib/seasons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Loader2, Database, AlertTriangle, CheckCircle2, Info, Settings2, ShieldAlert, PlayCircle } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Loader2, Database, AlertTriangle, CheckCircle2, ShieldAlert, PlayCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Link from 'next/link';
 
 export default function MigrationPage() {
