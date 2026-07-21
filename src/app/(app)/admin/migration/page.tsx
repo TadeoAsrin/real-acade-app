@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import Link from 'next/link';
 
 export default function MigrationPage() {
   const firestore = useFirestore();
@@ -42,7 +43,7 @@ export default function MigrationPage() {
 
   React.useEffect(() => {
     async function loadPreview() {
-      // Critical Guard: Only load preview if admin status is confirmed
+      // Critical Guard: Wait for admin status
       if (!firestore || adminLoading) return;
       
       if (!adminRole?.isAdmin) {
@@ -53,8 +54,9 @@ export default function MigrationPage() {
       try {
         const data = await getMigrationPreview(firestore);
         setPreview(data);
-      } catch (err) {
+      } catch (err: any) {
         console.error("Error loading migration preview:", err);
+        setDiagLog(prev => prev + `\nError al cargar preview: ${err.message}`);
       } finally {
         setIsLoading(false);
       }
@@ -115,7 +117,18 @@ export default function MigrationPage() {
   }
 
   if (!adminRole?.isAdmin) {
-    return <div className="text-center py-20 italic">Acceso denegado. Solo administradores.</div>;
+    return (
+      <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
+        <ShieldAlert className="h-16 w-16 text-destructive" />
+        <div className="text-center">
+          <h1 className="text-2xl font-black uppercase italic">Acceso Denegado</h1>
+          <p className="text-muted-foreground">Solo administradores verificados pueden acceder a esta herramienta.</p>
+        </div>
+        <Button asChild variant="outline">
+          <Link href="/dashboard">Volver al Inicio</Link>
+        </Button>
+      </div>
+    );
   }
 
   return (
@@ -284,7 +297,7 @@ export default function MigrationPage() {
             <div className="flex flex-col items-center gap-4">
               <p className="text-center text-sm italic text-muted-foreground">La arquitectura multi-temporada ya es la base oficial de Real Acade. Próximo paso: Refactorizar consultas.</p>
               <Button variant="outline" asChild className="border-white/10 uppercase font-black italic">
-                <a href="/dashboard">VOLVER AL PANEL</a>
+                <Link href="/dashboard">VOLVER AL PANEL</Link>
               </Button>
             </div>
           </CardContent>
