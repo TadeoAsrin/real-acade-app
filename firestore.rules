@@ -27,14 +27,14 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // Partidos: Lectura pública, escritura solo admin
+    // Partidos: Lectura para miembros, escritura solo admin
     match /matches/{matchId} {
-      allow read: if true;
+      allow read: if isSignedIn();
       allow write: if isAdmin();
 
       // Votos para mejor gol (sub-colección)
       match /votes/{userId} {
-        allow read: if true;
+        allow read: if isSignedIn();
         allow write: if isOwner(userId);
       }
     }
@@ -47,25 +47,25 @@ service cloud.firestore {
 
     // Pan y Queso (Drafts): Lectura pública, escritura usuarios o admin
     match /drafts/{draftId} {
-      allow read: if true;
+      allow read: if isSignedIn();
       allow write: if isSignedIn() || isAdmin();
     }
 
-    // Galería: Lectura pública, escritura solo admin
+    // Galería: Lectura miembros, escritura solo admin
     match /gallery/{itemId} {
-      allow read: if true;
+      allow read: if isSignedIn();
       allow write: if isAdmin();
     }
 
-    // Temporadas: Lectura pública, escritura solo admin
+    // Temporadas: Lectura miembros, escritura solo admin
     match /seasons/{seasonId} {
-      allow read: if true;
+      allow read: if isSignedIn();
       allow write: if isAdmin();
     }
 
-    // Configuración de la App: Lectura pública, escritura solo admin
+    // Configuración de la App: Lectura miembros, escritura solo admin
     match /app_settings/{docId} {
-      allow read: if true;
+      allow read: if isSignedIn();
       allow write: if isAdmin();
     }
   }
