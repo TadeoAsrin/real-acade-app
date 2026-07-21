@@ -49,7 +49,6 @@ function StandingsContent() {
   const [activeTab, setActiveTab] = React.useState("oficial");
   const [selectedMatchId, setSelectedMatchId] = React.useState<string>("");
   
-  // State for dynamic sorting
   const [sortConfig, setSortConfig] = React.useState<SortConfig>({ key: 'points', direction: 'desc' });
 
   React.useEffect(() => {
@@ -57,7 +56,6 @@ function StandingsContent() {
     if (tabParam) setActiveTab(tabParam);
   }, [searchParams]);
 
-  // Settings for Active Season
   const settingsRef = useMemoFirebase(() => {
     if (!firestore) return null;
     return doc(firestore, 'app_settings', 'global');
@@ -79,21 +77,14 @@ function StandingsContent() {
     );
   }, [firestore, activeSeasonId]);
 
-  const adminRoleRef = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
-    return doc(firestore, 'roles_admin', user.uid);
-  }, [firestore, user]);
-
   const { data: playersData, isLoading: playersLoading } = useCollection<Player>(playersQuery);
   const { data: matchesData, isLoading: matchesLoading } = useCollection<Match>(matchesQuery);
-  const { data: adminRole } = useDoc<{isAdmin: boolean}>(adminRoleRef);
 
   const allPlayers = playersData || [];
   const allMatches = matchesData || [];
   
   const stats = React.useMemo(() => calculateAggregatedStats(allPlayers, allMatches), [allPlayers, allMatches]);
 
-  // Helper function to handle sorting
   const sortStats = (data: AggregatedPlayerStats[]) => {
     return [...data].sort((a, b) => {
       let aVal: number;
@@ -114,7 +105,6 @@ function StandingsContent() {
       }
 
       if (aVal === bVal) {
-        // Tie-breaker: efficiency then goals
         return b.efficiency - a.efficiency || b.totalGoals - a.totalGoals;
       }
 

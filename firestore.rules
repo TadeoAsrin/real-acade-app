@@ -15,53 +15,55 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    function isExistingOwner(userId) {
-      return resource != null && isOwner(userId);
-    }
-
     function isAdmin() {
       return isSignedIn() && 
              exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid)) && 
              get(/databases/$(database)/documents/roles_admin/$(request.auth.uid)).data.isAdmin == true;
     }
 
+    // Regla para roles de administrador (solo lectura propia)
     match /roles_admin/{uid} {
       allow get: if isOwner(uid);
-      allow list, create, update, delete: if false;
+      allow write: if false;
     }
 
+    // Partidos: Lectura pública, escritura solo admin
     match /matches/{matchId} {
       allow read: if true;
       allow write: if isAdmin();
 
+      // Votos para mejor gol (sub-colección)
       match /votes/{userId} {
         allow read: if true;
         allow write: if isOwner(userId);
       }
     }
 
+    // Jugadores: Lectura pública, creación/edición propia o admin
     match /players/{playerId} {
       allow read: if true;
-      allow create: if isOwner(playerId) || isAdmin();
-      allow update, delete: if isExistingOwner(playerId) || isAdmin();
+      allow write: if isOwner(playerId) || isAdmin();
     }
 
+    // Pan y Queso (Drafts): Lectura pública, escritura usuarios o admin
     match /drafts/{draftId} {
       allow read: if true;
-      allow create: if isAdmin();
-      allow update: if true;
+      allow write: if isSignedIn() || isAdmin();
     }
 
+    // Galería: Lectura pública, escritura solo admin
     match /gallery/{itemId} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
+    // Temporadas: Lectura pública, escritura solo admin
     match /seasons/{seasonId} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
+    // Configuración de la App: Lectura pública, escritura solo admin
     match /app_settings/{docId} {
       allow read: if true;
       allow write: if isAdmin();
