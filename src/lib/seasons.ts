@@ -9,11 +9,9 @@ import {
   collection, 
   runTransaction, 
   getDocs, 
-  query, 
-  where,
   writeBatch
 } from 'firebase/firestore';
-import type { Season, AppSettings, Match, GalleryItem } from './definitions';
+import type { Season, AppSettings } from './definitions';
 
 /**
  * Gets the current active season ID from global settings.
@@ -25,6 +23,31 @@ export async function getActiveSeasonId(db: Firestore): Promise<string | null> {
     return (snap.data() as AppSettings).activeSeasonId;
   }
   return null;
+}
+
+/**
+ * Returns a preview of what would be migrated.
+ */
+export async function getMigrationPreview(db: Firestore) {
+  const matchesSnap = await getDocs(collection(db, 'matches'));
+  const gallerySnap = await getDocs(collection(db, 'gallery'));
+  const settingsSnap = await getDoc(doc(db, 'app_settings', 'global'));
+
+  const pendingMatches = [];
+  matchesSnap.forEach(doc => {
+    if (!doc.data().seasonId) pendingMatches.push(doc.id);
+  });
+
+  const pendingGallery = [];
+  gallerySnap.forEach(doc => {
+    if (!doc.data().seasonId) pendingGallery.push(doc.id);
+  });
+
+  return {
+    alreadyMigrated: settingsSnap.exists() && (settingsSnap.data() as any).isMigrated,
+    pendingMatches: pendingMatches.length,
+    pendingGallery: pendingGallery.length
+  };
 }
 
 /**
@@ -43,13 +66,11 @@ export async function createNewSeason(
     const settingsSnap = await transaction.get(settingsRef);
     const activeSeasonId = settingsSnap.exists() ? (settingsSnap.data() as AppSettings).activeSeasonId : null;
 
-    // 1. Close current season if exists
     if (activeSeasonId) {
       const currentSeasonRef = doc(db, 'seasons', activeSeasonId);
       transaction.update(currentSeasonRef, { endDate: now });
     }
 
-    // 2. Create new season
     const newSeason: Season = {
       ...data,
       id: newSeasonRef.id,
@@ -57,11 +78,7 @@ export async function createNewSeason(
       endDate: null
     };
     transaction.set(newSeasonRef, newSeason);
-
-    // 3. Update global settings
-    transaction.set(settingsRef, { 
-      activeSeasonId: newSeasonRef.id 
-    }, { merge: true });
+    transaction.set(settingsRef, { activeSeasonId: newSeasonRef.id }, { merge: true });
   });
 
   return newSeasonRef.id;
@@ -70,18 +87,16 @@ export async function createNewSeason(
 /**
  * Standalone migration script.
  * Creates the initial season and assigns it to all existing data.
- * Idempotent: won't run if app is already marked as migrated.
  */
-export async function runInitialMigration(db: Firestore): Promise<{ success: boolean, message: string }> {
+export async function runInitialMigration(db: Firestore) {
   const settingsRef = doc(db, 'app_settings', 'global');
   const settingsSnap = await getDoc(settingsRef);
   
   if (settingsSnap.exists() && (settingsSnap.data() as AppSettings).isMigrated) {
-    return { success: true, message: "La base de datos ya ha sido migrada." };
+    throw new Error("La base de datos ya ha sido migrada.");
   }
 
   try {
-    // 1. Create Initial Season
     const seasonsCol = collection(db, 'seasons');
     const initialSeasonRef = doc(seasonsCol);
     const now = new Date().toISOString();
@@ -97,28 +112,26 @@ export async function runInitialMigration(db: Firestore): Promise<{ success: boo
       endDate: null
     };
 
-    // 2. Prepare batches for data updates
     const batch = writeBatch(db);
+    let matchesCount = 0;
+    let galleryCount = 0;
     
-    // Process Matches
     const matchesSnap = await getDocs(collection(db, 'matches'));
     matchesSnap.forEach((m) => {
-      const data = m.data();
-      if (!data.seasonId) {
+      if (!m.data().seasonId) {
         batch.update(m.ref, { seasonId: initialSeasonRef.id });
+        matchesCount++;
       }
     });
 
-    // Process Gallery
     const gallerySnap = await getDocs(collection(db, 'gallery'));
     gallerySnap.forEach((g) => {
-      const data = g.data();
-      if (!data.seasonId) {
+      if (!g.data().seasonId) {
         batch.update(g.ref, { seasonId: initialSeasonRef.id });
+        galleryCount++;
       }
     });
 
-    // 3. Execute everything
     await setDoc(initialSeasonRef, initialSeason);
     await batch.commit();
     await setDoc(settingsRef, { 
@@ -126,9 +139,14 @@ export async function runInitialMigration(db: Firestore): Promise<{ success: boo
       isMigrated: true 
     }, { merge: true });
 
-    return { success: true, message: "Migración inicial completada con éxito." };
+    return {
+      success: true,
+      seasonCreated: initialSeason.name,
+      matchesMigrated: matchesCount,
+      galleryMigrated: galleryCount
+    };
   } catch (error: any) {
     console.error("Migration Error:", error);
-    return { success: false, message: `Error en la migración: ${error.message}` };
+    throw error;
   }
 }
