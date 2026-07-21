@@ -1,74 +1,41 @@
 'use client';
 
 import * as React from 'react';
-import { useSearchParams } from 'next/navigation';
-import { calculateAggregatedStats } from "@/lib/data";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
-import { useCollection, useMemoFirebase, useFirestore, useUser, useDoc } from "@/firebase";
-import { collection, query, orderBy, where, doc } from "firebase/firestore";
-import type { Player, Match, AggregatedPlayerStats, AppSettings } from "@/lib/definitions";
-import { Loader2, TrendingUp, TrendingDown, Minus, Trophy, Target, Zap, Crown, ShieldCheck, Calendar, Info, AlertCircle, ArrowUpDown, ChevronUp, ChevronDown } from "lucide-react";
-import { cn, getInitials } from "@/lib/utils";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { format, parseISO } from "date-fns";
-import { es } from "date-fns/locale";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useFirestore, useCollection, useMemoFirebase, useDoc } from '@/firebase';
+import { collection, query, orderBy, where, doc } from 'firebase/firestore';
+import { calculateAggregatedStats } from '@/lib/data';
+import type { Player, Match, AppSettings } from '@/lib/definitions';
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from '@/components/ui/table';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { getInitials, cn } from '@/lib/utils';
+import { Trophy, Medal, Star, Target, Info, Loader2 } from 'lucide-react';
+import Link from 'next/link';
 
-const TrendIcon = ({ form }: { form: ('W' | 'D' | 'L')[] }) => {
-  const last3 = form.slice(0, 3);
-  const wins = last3.filter(r => r === 'W').length;
-  const losses = last3.filter(r => r === 'L').length;
-  if (wins >= 2) return <TrendingUp className="h-4 w-4 text-emerald-500" />;
-  if (losses >= 2) return <TrendingDown className="h-4 w-4 text-red-500" />;
-  return <Minus className="h-4 w-4 text-muted-foreground/40" />;
-};
-
-type SortKey = 'matchesPlayed' | 'wins' | 'totalGoals' | 'efficiency' | 'points';
-
-interface SortConfig {
-  key: SortKey;
-  direction: 'asc' | 'desc';
-}
-
-function StandingsContent() {
-  const searchParams = useSearchParams();
+export default function StandingsPage() {
   const firestore = useFirestore();
-  const { user } = useUser();
-  const [activeTab, setActiveTab] = React.useState("oficial");
-  const [selectedMatchId, setSelectedMatchId] = React.useState<string>("");
-  
-  const [sortConfig, setSortConfig] = React.useState<SortConfig>({ key: 'points', direction: 'desc' });
 
-  React.useEffect(() => {
-    const tabParam = searchParams.get('tab');
-    if (tabParam) setActiveTab(tabParam);
-  }, [searchParams]);
-
-  // Active Season Context
   const settingsRef = useMemoFirebase(() => {
     if (!firestore) return null;
     return doc(firestore, 'app_settings', 'global');
   }, [firestore]);
+
   const { data: settings, isLoading: settingsLoading } = useDoc<AppSettings>(settingsRef);
   const activeSeasonId = settings?.activeSeasonId;
 
-  const playersQuery = useMemoFirebase(() => {
+  const playersRef = useMemoFirebase(() => {
     if (!firestore) return null;
-    return collection(firestore, 'players');
+    return query(collection(firestore, 'players'), orderBy('name', 'asc'));
   }, [firestore]);
 
-  const matchesQuery = useMemoFirebase(() => {
+  const matchesRef = useMemoFirebase(() => {
     if (!firestore || !activeSeasonId) return null;
     return query(
       collection(firestore, 'matches'), 
@@ -77,466 +44,112 @@ function StandingsContent() {
     );
   }, [firestore, activeSeasonId]);
 
-  const { data: playersData, isLoading: playersLoading } = useCollection<Player>(playersQuery);
-  const { data: matchesData, isLoading: matchesLoading } = useCollection<Match>(matchesQuery);
+  const { data: players, isLoading: playersLoading } = useCollection<Player>(playersRef);
+  const { data: matches, isLoading: matchesLoading } = useCollection<Match>(matchesRef);
 
-  const allPlayers = playersData || [];
-  const allMatches = matchesData || [];
-  
-  const stats = React.useMemo(() => calculateAggregatedStats(allPlayers, allMatches), [allPlayers, allMatches]);
+  const stats = React.useMemo(() => {
+    if (!players || !matches) return [];
+    return calculateAggregatedStats(players, matches)
+      .sort((a, b) => b.efficiency - a.efficiency || b.powerPoints - a.powerPoints);
+  }, [players, matches]);
 
-  const sortStats = (data: AggregatedPlayerStats[]) => {
-    return [...data].sort((a, b) => {
-      let aVal: number;
-      let bVal: number;
+  const isLoading = settingsLoading || playersLoading || matchesLoading;
 
-      switch (sortConfig.key) {
-        case 'points':
-          aVal = a.wins * 3 + a.draws;
-          bVal = b.wins * 3 + b.draws;
-          break;
-        case 'wins':
-          aVal = a.wins;
-          bVal = b.wins;
-          break;
-        default:
-          aVal = (a as any)[sortConfig.key];
-          bVal = (b as any)[sortConfig.key];
-      }
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+        <p className="font-bebas text-xl tracking-widest text-muted-foreground uppercase">Procesando Clasificación...</p>
+      </div>
+    );
+  }
 
-      if (aVal === bVal) {
-        return b.efficiency - a.efficiency || b.totalGoals - a.totalGoals;
-      }
-
-      return sortConfig.direction === 'desc' ? bVal - aVal : aVal - bVal;
-    });
-  };
-
-  const handleSort = (key: SortKey) => {
-    setSortConfig(prev => ({
-      key,
-      direction: prev.key === key && prev.direction === 'desc' ? 'asc' : 'desc'
-    }));
-  };
-
-  const getSortIcon = (key: SortKey) => {
-    if (sortConfig.key !== key) return <ArrowUpDown className="ml-2 h-3 w-3 opacity-20" />;
-    return sortConfig.direction === 'desc' ? <ChevronDown className="ml-2 h-4 w-4 text-primary" /> : <ChevronUp className="ml-2 h-4 w-4 text-primary" />;
-  };
-
-  const sortedGeneral = React.useMemo(() => sortStats(stats), [stats, sortConfig]);
-  const sortedOfficial = React.useMemo(() => sortStats(stats.filter(p => p.matchesPlayed >= 6)), [stats, sortConfig]);
-
-  React.useEffect(() => {
-    if (allMatches.length > 0 && !selectedMatchId) {
-      setSelectedMatchId(allMatches[0].id);
-    }
-  }, [allMatches, selectedMatchId]);
-
-  if (playersLoading || matchesLoading || settingsLoading) return <div className="flex h-[50vh] items-center justify-center"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div>;
-
-  const sortedScorers = [...stats]
-    .filter(p => p.totalGoals > 0)
-    .sort((a, b) => b.totalGoals - a.totalGoals || b.goalsPerMatch - a.goalsPerMatch);
-
-  const sniper = [...stats]
-    .filter(p => p.matchesPlayed >= 3)
-    .sort((a, b) => b.goalsPerMatch - a.goalsPerMatch || b.totalGoals - a.totalGoals)[0];
-  
-  const sortedEfficiency = [...stats]
-    .filter(p => p.matchesPlayed >= 2)
-    .sort((a, b) => b.efficiency - a.efficiency || b.matchesPlayed - a.matchesPlayed);
-
-  const leadershipRanking = [...stats]
-    .sort((a, b) => {
-      const aNever = a.totalCaptaincies === 0;
-      const bNever = b.totalCaptaincies === 0;
-      if (aNever && !bNever) return -1;
-      if (!aNever && bNever) return 1;
-      if (aNever && bNever) return b.matchesPlayed - a.matchesPlayed;
-      return b.captaincyPriorityScore - a.captaincyPriorityScore;
-    });
-
-  const suggestedCandidates = leadershipRanking.filter(p => p.isActive).slice(0, 2);
-  const selectedMatch = allMatches.find(m => m.id === selectedMatchId);
-  const matchScorers = selectedMatch ? [...selectedMatch.teamAPlayers, ...selectedMatch.teamBPlayers].filter(p => p.goals > 0).sort((a, b) => b.goals - a.goals) : [];
-
-  const TableHeaderSortable = () => (
-    <TableHeader>
-      <TableRow className="bg-black/40 border-white/5 h-14">
-        <TableHead className="w-16 text-center font-bebas text-sm">POS</TableHead>
-        <TableHead className="font-bebas text-sm">JUGADOR</TableHead>
-        
-        <TableHead 
-          className="text-center font-bebas text-sm cursor-pointer hover:text-primary transition-colors group"
-          onClick={() => handleSort('matchesPlayed')}
-        >
-          <div className="flex items-center justify-center">
-            PJ {getSortIcon('matchesPlayed')}
-          </div>
-        </TableHead>
-
-        <TableHead 
-          className="text-center font-bebas text-sm cursor-pointer hover:text-primary transition-colors group"
-          onClick={() => handleSort('wins')}
-        >
-          <div className="flex items-center justify-center">
-            V-E-D {getSortIcon('wins')}
-          </div>
-        </TableHead>
-
-        <TableHead 
-          className="text-center font-bebas text-sm text-yellow-500 cursor-pointer hover:text-yellow-400 transition-colors group"
-          onClick={() => handleSort('totalGoals')}
-        >
-          <div className="flex items-center justify-center">
-            GOLES {getSortIcon('totalGoals')}
-          </div>
-        </TableHead>
-
-        <TableHead 
-          className="text-center font-bebas text-sm cursor-pointer hover:text-primary transition-colors group"
-          onClick={() => handleSort('efficiency')}
-        >
-          <div className="flex items-center justify-center">
-            % {getSortIcon('efficiency')}
-          </div>
-        </TableHead>
-
-        <TableHead 
-          className="text-center font-bebas text-sm bg-primary/10 text-primary cursor-pointer hover:bg-primary/20 transition-colors group"
-          onClick={() => handleSort('points')}
-        >
-          <div className="flex items-center justify-center">
-            PTS {getSortIcon('points')}
-          </div>
-        </TableHead>
-
-        <TableHead className="text-center font-bebas text-sm">TREND</TableHead>
-      </TableRow>
-    </TableHeader>
-  );
+  if (!activeSeasonId) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-6">
+        <Info className="h-12 w-12 text-muted-foreground/20 mb-4" />
+        <h2 className="text-2xl font-bebas tracking-widest text-white mb-2">Temporada No Inicializada</h2>
+        <p className="text-muted-foreground text-sm max-w-md">
+          El administrador debe inicializar la temporada actual para ver la clasificación.
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col gap-10 max-w-7xl mx-auto pb-20">
-      <section className="cinematic-banner p-8 md:p-12">
-        <div className="absolute inset-0 bg-black/40 pointer-events-none" />
-        <div className="relative z-10 space-y-4">
-          <div className="flex items-center gap-3">
-            <Badge className="bg-primary text-primary-foreground font-bebas tracking-widest px-3 py-1 text-sm rounded-none shadow-lg shadow-primary/20">EDICIÓN ESPECIAL</Badge>
-            <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] font-oswald">COMPETICIÓN OFICIAL</span>
-          </div>
-          <h1 className="text-5xl md:text-7xl font-bebas text-white tracking-wider leading-none uppercase">TABLA DE POSICIONES</h1>
-          <p className="text-lg md:text-xl text-muted-foreground font-lora italic max-w-2xl">El registro histórico de la gloria y el esfuerzo en Real Acade.</p>
+    <div className="space-y-8 p-4 lg:p-8 animate-in fade-in duration-700">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="space-y-1">
+          <h2 className="text-4xl lg:text-6xl font-black uppercase tracking-tighter italic text-white flex items-center gap-4">
+            <Trophy className="h-8 w-8 lg:h-12 lg:w-12 text-yellow-500 shrink-0" />
+            Clasificación Oficial
+          </h2>
+          <p className="text-[10px] lg:text-xs font-black uppercase tracking-[0.3em] text-primary/60 ml-1">
+            Métricas de Élite • Temporada {activeSeasonId.substring(0, 8)}
+          </p>
         </div>
-      </section>
+      </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="bg-black/40 border border-white/5 p-1 h-14 rounded-lg w-full flex overflow-x-auto no-scrollbar backdrop-blur-md shadow-2xl">
-          {["OFICIAL", "General", "Goleadores", "Goles Fecha", "Efectividad", "Capitanes"].map((tab) => (
-            <TabsTrigger key={tab.toLowerCase().replace(" ", "-")} value={tab.toLowerCase().replace(" ", "-")} className="flex-1 min-w-[120px] font-bebas tracking-widest text-lg data-[state=active]:bg-white data-[state=active]:text-black rounded-md transition-all">
-              {tab}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+      <Card className="competition-card border-white/5 bg-black/20 shadow-2xl overflow-hidden">
+        <Table>
+          <TableHeader className="bg-white/5">
+            <TableRow className="hover:bg-transparent border-white/10">
+              <TableHead className="w-12 text-center font-black text-[10px] uppercase">Pos</TableHead>
+              <TableHead className="font-black text-[10px] uppercase">Jugador</TableHead>
+              <TableHead className="text-center font-black text-[10px] uppercase">PJ</TableHead>
+              <TableHead className="text-center font-black text-[10px] uppercase">G</TableHead>
+              <TableHead className="text-center font-black text-[10px] uppercase">E</TableHead>
+              <TableHead className="text-center font-black text-[10px] uppercase">P</TableHead>
+              <TableHead className="text-center font-black text-[10px] uppercase">Goles</TableHead>
+              <TableHead className="text-center font-black text-[10px] uppercase text-primary">EFIC %</TableHead>
+              <TableHead className="text-right font-black text-[10px] uppercase text-orange-500">POWER</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {stats.map((player, index) => {
+              const isPodium = index < 3;
+              const podiumClass = index === 0 ? "podium-1" : index === 1 ? "podium-2" : index === 2 ? "podium-3" : "";
 
-        <div className="mt-10">
-          <TabsContent value="oficial" className="animate-in fade-in slide-in-from-bottom-2 space-y-6">
-            <div className="flex items-center justify-center gap-3 p-4 bg-primary/5 border border-primary/10 rounded-lg">
-              <ShieldCheck className="h-4 w-4 text-primary" />
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">TABLA OFICIAL: MÍNIMO 6 PARTIDOS JUGADOS</p>
-            </div>
-
-            <Card className="competition-card border-none bg-black/20 backdrop-blur-md">
-              <Table>
-                <TableHeaderSortable />
-                <TableBody>
-                  {sortedOfficial.map((player, index) => (
-                    <TableRow key={player.playerId} className={cn("official-table-row h-20 transition-all", index === 0 && sortConfig.key === 'points' && sortConfig.direction === 'desc' ? "podium-1" : "")}>
-                      <TableCell className="text-center font-bebas text-3xl italic">
-                        {index === 0 && sortConfig.key === 'points' && sortConfig.direction === 'desc' ? <Crown className="h-6 w-6 mx-auto text-yellow-500 animate-pulse" /> : index + 1}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-4">
-                          <Avatar className={cn("h-12 w-12 border-2", index === 0 && sortConfig.key === 'points' && sortConfig.direction === 'desc' ? "border-yellow-500 shadow-lg shadow-yellow-500/20" : "border-white/10")}>
-                            <AvatarFallback className="bg-muted text-xs font-black">{getInitials(player.name)}</AvatarFallback>
-                          </Avatar>
-                          <Link href={`/players/${player.playerId}`} className="font-black uppercase tracking-tight hover:text-primary transition-colors text-lg italic">{player.name}</Link>
-                        </div>
-                      </TableCell>
-                      <TableCell className={cn("text-center font-bebas text-2xl", sortConfig.key === 'matchesPlayed' && "text-primary")}>{player.matchesPlayed}</TableCell>
-                      <TableCell className={cn("text-center font-oswald text-[10px] tracking-widest font-bold", sortConfig.key === 'wins' && "bg-white/5")}>
-                        <span className="text-emerald-500">{player.wins}</span>-<span className="text-orange-400">{player.draws}</span>-<span className="text-red-500">{player.losses}</span>
-                      </TableCell>
-                      <TableCell className={cn("text-center font-bebas text-2xl text-yellow-500/80", sortConfig.key === 'totalGoals' && "bg-yellow-500/10")}>{player.totalGoals}</TableCell>
-                      <TableCell className={cn("text-center font-bebas text-2xl text-muted-foreground/60", sortConfig.key === 'efficiency' && "text-primary/80")}>{player.efficiency}%</TableCell>
-                      <TableCell className={cn("text-center font-bebas text-4xl italic bg-primary/5 text-primary", sortConfig.key === 'points' && "bg-primary/20 shadow-inner")}>{player.wins * 3 + player.draws}</TableCell>
-                      <TableCell className="text-center"><TrendIcon form={player.form} /></TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="general" className="animate-in fade-in slide-in-from-bottom-2">
-            <Card className="competition-card border-none bg-black/20 backdrop-blur-sm">
-              <Table>
-                <TableHeaderSortable />
-                <TableBody>
-                  {sortedGeneral.map((player, index) => (
-                    <TableRow key={player.playerId} className={cn("official-table-row h-20 transition-all", index === 0 && sortConfig.key === 'points' && sortConfig.direction === 'desc' ? "podium-1" : "")}>
-                      <TableCell className="text-center font-bebas text-3xl italic">
-                        {index === 0 && sortConfig.key === 'points' && sortConfig.direction === 'desc' ? <Crown className="h-6 w-6 mx-auto text-yellow-500 animate-pulse" /> : index + 1}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-4">
-                          <Avatar className={cn("h-12 w-12 border-2", index === 0 && sortConfig.key === 'points' && sortConfig.direction === 'desc' ? "border-yellow-500 shadow-lg shadow-yellow-500/20" : "border-white/10")}>
-                            <AvatarFallback className="bg-muted text-xs font-black">{getInitials(player.name)}</AvatarFallback>
-                          </Avatar>
-                          <Link href={`/players/${player.playerId}`} className="font-black uppercase tracking-tight hover:text-primary transition-colors text-lg italic">{player.name}</Link>
-                        </div>
-                      </TableCell>
-                      <TableCell className={cn("text-center font-bebas text-2xl", sortConfig.key === 'matchesPlayed' && "text-primary")}>{player.matchesPlayed}</TableCell>
-                      <TableCell className={cn("text-center font-oswald text-[10px] tracking-widest font-bold", sortConfig.key === 'wins' && "bg-white/5")}>
-                        <span className="text-emerald-500">{player.wins}</span>-<span className="text-orange-400">{player.draws}</span>-<span className="text-red-500">{player.losses}</span>
-                      </TableCell>
-                      <TableCell className={cn("text-center font-bebas text-2xl text-yellow-500/80", sortConfig.key === 'totalGoals' && "bg-yellow-500/10")}>{player.totalGoals}</TableCell>
-                      <TableCell className={cn("text-center font-bebas text-2xl text-muted-foreground/60", sortConfig.key === 'efficiency' && "text-primary/80")}>{player.efficiency}%</TableCell>
-                      <TableCell className={cn("text-center font-bebas text-4xl italic bg-primary/5 text-primary", sortConfig.key === 'points' && "bg-primary/20 shadow-inner")}>{player.wins * 3 + player.draws}</TableCell>
-                      <TableCell className="text-center"><TrendIcon form={player.form} /></TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="goleadores" className="animate-in fade-in slide-in-from-bottom-2 space-y-6">
-            <div className="flex items-center justify-center gap-3 p-4 bg-yellow-500/5 border border-yellow-500/10 rounded-lg">
-              <Info className="h-4 w-4 text-yellow-500" />
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-yellow-500">PICHICHI OFICIAL: ORDENADO POR GOLES. DESEMPATE POR PROMEDIO G/PJ.</p>
-            </div>
-
-            <Card className="competition-card border-none bg-black/20">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-black/40 border-white/5 h-14">
-                    <TableHead className="w-16 text-center font-bebas text-sm">POS</TableHead>
-                    <TableHead className="font-bebas text-sm">ARTILLERO</TableHead>
-                    <TableHead className="text-center font-bebas text-sm">PJ</TableHead>
-                    <TableHead className="text-center font-bebas text-sm bg-yellow-500/10 text-yellow-500">GOLES</TableHead>
-                    <TableHead className="text-center font-bebas text-sm">G/PJ</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {sortedScorers.map((player, index) => {
-                    const isSniper = player.playerId === sniper?.playerId;
-                    return (
-                      <TableRow key={player.playerId} className={cn("official-table-row h-20", index === 0 ? "podium-1" : index === 1 ? "podium-2" : index === 2 ? "podium-3" : "")}>
-                        <TableCell className="text-center font-bebas text-3xl italic">{index + 1}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-4">
-                            <Avatar className="h-12 w-12 border-2 border-white/10"><AvatarFallback className="bg-muted text-xs font-black">{getInitials(player.name)}</AvatarFallback></Avatar>
-                            <div className="flex flex-col">
-                              <Link href={`/players/${player.playerId}`} className="font-black uppercase tracking-tight hover:text-yellow-500 flex items-center gap-2 text-lg italic">
-                                {player.name}
-                                {isSniper && <Target className="h-4 w-4 text-yellow-500" />}
-                              </Link>
-                              {isSniper && <span className="text-[8px] font-black text-yellow-500 uppercase tracking-widest font-oswald">MÁXIMA LETALIDAD</span>}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-center font-bebas text-2xl text-muted-foreground">{player.matchesPlayed}</TableCell>
-                        <TableCell className="text-center font-bebas text-5xl italic bg-yellow-500/5 text-yellow-500">{player.totalGoals}</TableCell>
-                        <TableCell className="text-center font-bebas text-3xl italic text-white/60">{player.goalsPerMatch}</TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="goles-fecha" className="animate-in fade-in slide-in-from-bottom-2 space-y-8">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-black/40 p-6 rounded-2xl border border-white/5 backdrop-blur-md shadow-2xl">
-              <div className="flex items-center gap-3">
-                <Calendar className="h-6 w-6 text-primary" />
-                <span className="font-bebas text-2xl tracking-widest uppercase text-white">Seleccionar Jornada</span>
-              </div>
-              <Select value={selectedMatchId} onValueChange={setSelectedMatchId}>
-                <SelectTrigger className="w-full md:w-[300px] font-black h-12 bg-black/60 border-white/10 italic uppercase rounded-none">
-                  <SelectValue placeholder="Elegir partido" />
-                </SelectTrigger>
-                <SelectContent className="bg-surface-900 border-white/10">
-                  {allMatches.map(m => (
-                    <SelectItem key={m.id} value={m.id} className="font-bold uppercase italic">
-                      {format(parseISO(m.date), "dd MMM yyyy", { locale: es })} • {m.teamAScore}-{m.teamBScore}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {selectedMatch ? (
-              <Card className="competition-card border-t-4 border-t-primary overflow-hidden shadow-2xl">
-                <div className="bg-black/40 p-4 border-b border-white/5 flex items-center justify-between">
-                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">REPORTE DE ARTILLERÍA</span>
-                  <Badge variant="outline" className="font-bebas tracking-widest text-primary border-primary/20 text-lg px-4 rounded-none">
-                    {format(parseISO(selectedMatch.date), "PPPP", { locale: es })}
-                  </Badge>
-                </div>
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-black/20 border-white/5 h-12">
-                      <TableHead className="pl-8 font-bebas text-xs uppercase">Jugador</TableHead>
-                      <TableHead className="text-center font-bebas text-xs uppercase">Equipo</TableHead>
-                      <TableHead className="text-right pr-8 font-bebas text-xs uppercase text-yellow-500">Goles en Fecha</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {matchScorers.length > 0 ? matchScorers.map((stat) => {
-                      const player = allPlayers.find(p => p.id === stat.playerId);
-                      const isBlue = selectedMatch.teamAPlayers.some(p => p.playerId === stat.playerId);
-                      return (
-                        <TableRow key={stat.playerId} className="official-table-row h-20">
-                          <TableCell className="pl-8">
-                            <div className="flex items-center gap-4">
-                              <Avatar className="h-10 w-10 border border-white/10"><AvatarFallback className="text-[10px] font-black">{getInitials(player?.name || "?")}</AvatarFallback></Avatar>
-                              <span className="font-black uppercase text-lg italic text-white">{player?.name}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <Badge className={cn("uppercase font-black text-[10px] italic rounded-none px-3 shadow-lg", isBlue ? "bg-primary" : "bg-accent")}>
-                              {isBlue ? "AZUL" : "ROJO"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right pr-8 font-bebas text-5xl italic text-yellow-500">
-                            {stat.goals}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    }) : (
-                      <TableRow>
-                        <TableCell colSpan={3} className="text-center py-24 opacity-20 italic font-bebas text-2xl tracking-widest">No se registraron goles en esta jornada.</TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </Card>
-            ) : null}
-          </TabsContent>
-
-          <TabsContent value="efectividad" className="animate-in fade-in slide-in-from-bottom-2 space-y-6">
-            <div className="flex items-center justify-center gap-3 p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-lg">
-              <AlertCircle className="h-4 w-4 text-emerald-500" />
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500">REQUISITO: MÍNIMO 2 PARTIDOS JUGADOS</p>
-            </div>
-            
-            <Card className="competition-card border-none bg-black/20">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-black/40 border-white/5 h-14">
-                    <TableHead className="w-16 text-center font-bebas text-sm">POS</TableHead>
-                    <TableHead className="font-bebas text-sm">JUGADOR</TableHead>
-                    <TableHead className="text-center font-bebas text-sm">PJ</TableHead>
-                    <TableHead className="text-center font-bebas text-sm">V-E-D</TableHead>
-                    <TableHead className="text-center font-bebas text-sm bg-emerald-500/10 text-emerald-500">EFECTIVIDAD %</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {sortedEfficiency.map((player, index) => (
-                    <TableRow key={player.playerId} className={cn("official-table-row h-20", index === 0 ? "podium-1" : index === 1 ? "podium-2" : index === 2 ? "podium-3" : "")}>
-                      <TableCell className="text-center font-bebas text-3xl italic">{index + 1}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-4">
-                          <Avatar className="h-12 w-12 border-2 border-white/10"><AvatarFallback className="bg-muted text-xs font-black">{getInitials(player.name)}</AvatarFallback></Avatar>
-                          <Link href={`/players/${player.playerId}`} className="font-black uppercase tracking-tight hover:text-emerald-500 text-lg italic">{player.name}</Link>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-center font-bebas text-2xl text-muted-foreground">{player.matchesPlayed}</TableCell>
-                      <TableCell className="text-center font-oswald text-xs tracking-widest font-bold">
-                        <span className="text-emerald-500">{player.wins}</span>-<span className="text-orange-400">{player.draws}</span>-<span className="text-red-500">{player.losses}</span>
-                      </TableCell>
-                      <TableCell className="text-center font-bebas text-5xl italic bg-emerald-500/10 text-emerald-500">
-                        {player.efficiency}%
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="capitanes" className="animate-in fade-in slide-in-from-bottom-2 space-y-12">
-            {suggestedCandidates.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {suggestedCandidates.map((cap, idx) => (
-                  <Card key={cap.playerId} className="competition-card border-t-4 border-t-emerald-500 bg-surface-900 relative group hover-lift overflow-hidden shadow-2xl">
-                    <div className="absolute top-0 right-0 p-4 opacity-5"><Crown className="h-24 w-24 text-emerald-500" /></div>
-                    <CardContent className="p-10 flex items-center gap-8">
-                      <div className="relative">
-                        <Avatar className="h-24 w-24 border-4 border-emerald-500/20 shadow-2xl shadow-emerald-500/20">
-                          <AvatarFallback className="text-4xl font-bebas bg-emerald-500/10 text-emerald-500">{getInitials(cap.name)}</AvatarFallback>
-                        </Avatar>
-                        <Badge className="absolute -bottom-2 -right-2 bg-emerald-500 text-black font-bebas px-3 py-1 rounded-none text-lg shadow-lg">CANDIDATO</Badge>
+              return (
+                <TableRow key={player.playerId} className={cn("official-table-row group", podiumClass)}>
+                  <TableCell className="text-center">
+                    <span className={cn(
+                      "font-bebas text-xl",
+                      isPodium ? "text-white" : "text-muted-foreground/40"
+                    )}>
+                      {index + 1}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8 border border-white/10">
+                        <AvatarFallback className="text-[10px] font-bold bg-zinc-900">{getInitials(player.name)}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col">
+                        <Link 
+                          href={`/players/${player.playerId}`} 
+                          className="font-bold text-sm hover:text-primary transition-colors uppercase tracking-tighter"
+                        >
+                          {player.name}
+                        </Link>
+                        <span className="text-[7px] font-black uppercase text-muted-foreground/40">{player.position || 'COMODÍN'}</span>
                       </div>
-                      <div>
-                        <p className="text-[10px] font-black uppercase text-emerald-500 tracking-[0.3em] font-oswald mb-1">MANDO SUGERIDO #{idx + 1}</p>
-                        <h3 className="text-5xl font-bebas text-white uppercase leading-none">{cap.name}</h3>
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase mt-2 tracking-widest font-oswald">{cap.totalCaptaincies === 0 ? "DEBUT HISTÓRICO PENDIENTE" : "PRIORIDAD POR ASISTENCIA"}</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-
-            <Card className="competition-card border-none bg-black/20 shadow-2xl">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-black/40 border-white/5 h-14">
-                    <TableHead className="pl-8 font-bebas text-sm">JUGADOR</TableHead>
-                    <TableHead className="text-center font-bebas text-sm">PJ</TableHead>
-                    <TableHead className="text-center font-bebas text-sm">CAPI</TableHead>
-                    <TableHead className="text-right pr-8 font-bebas text-sm">ESTADO</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {leadershipRanking.map((player) => (
-                    <TableRow key={player.playerId} className={cn("official-table-row h-16", !player.isActive && "opacity-40")}>
-                      <TableCell className="pl-8">
-                        <div className="flex items-center gap-4">
-                          <Avatar className="h-10 w-10 border border-white/10"><AvatarFallback className="text-[10px] font-black">{getInitials(player.name)}</AvatarFallback></Avatar>
-                          <div className="flex flex-col">
-                            <Link href={`/players/${player.playerId}`} className="font-black text-base uppercase hover:text-primary transition-colors italic">{player.name}</Link>
-                            {!player.isActive && <span className="text-[7px] font-black text-muted-foreground uppercase tracking-widest font-oswald">EN RESERVA</span>}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-center font-bebas text-2xl italic text-muted-foreground">{player.matchesPlayed}</TableCell>
-                      <TableCell className="text-center font-bebas text-3xl text-white italic">{player.totalCaptaincies}</TableCell>
-                      <TableCell className="text-right pr-8">
-                        <Badge variant="outline" className={cn("text-[8px] uppercase font-black rounded-none px-3 py-1", player.totalCaptaincies === 0 ? "border-emerald-500 text-emerald-500 bg-emerald-500/5 shadow-[0_0_15px_rgba(16,185,129,0.1)]" : "border-white/10 text-muted-foreground")}>
-                          {player.totalCaptaincies === 0 ? "EL REY SIN CORONA" : "VETERANO DE MANDO"}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Card>
-          </TabsContent>
-        </div>
-      </Tabs>
+                      {index === 0 && <Medal className="h-3 w-3 text-yellow-500 ml-1" />}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-center font-medium">{player.matchesPlayed}</TableCell>
+                  <TableCell className="text-center text-emerald-500 font-bold">{player.wins}</TableCell>
+                  <TableCell className="text-center text-zinc-500 font-bold">{player.draws}</TableCell>
+                  <TableCell className="text-center text-accent font-bold">{player.losses}</TableCell>
+                  <TableCell className="text-center font-bold">{player.totalGoals}</TableCell>
+                  <TableCell className="text-center font-bebas text-lg text-primary">{player.efficiency}%</TableCell>
+                  <TableCell className="text-right font-bebas text-2xl text-orange-500">{player.powerPoints}</TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </Card>
     </div>
-  );
-}
-
-export default function StandingsPage() {
-  return (
-    <React.Suspense fallback={<div className="flex h-[50vh] items-center justify-center"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div>}>
-      <StandingsContent />
-    </React.Suspense>
   );
 }

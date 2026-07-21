@@ -1,2 +1,6 @@
-// DELETED: El archivo ha sido eliminado físicamente para consolidar la ruta en src/app/(app)/admin/migration/page.tsx
-export default function InactivePage() { return null; }
+// This file is deprecated to avoid parallel route conflicts.
+// The logic has been moved to src/app/(app)/admin/migration/page.tsx.
+import { redirect } from 'next/navigation';
+export default function RedirectPage() {
+  redirect('/admin/migration');
+}

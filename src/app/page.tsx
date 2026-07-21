@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
 
 /**
- * Componente principal de la ruta raíz.
- * Realiza una redirección limpia al dashboard para asegurar que
- * la aplicación siempre tenga un punto de entrada válido.
+ * Root route that handles initial redirection.
+ * This is the only page.tsx allowed in the root app directory 
+ * when using route groups like (app) to avoid parallel route conflicts.
  */
 export default function RootPage() {
   redirect("/dashboard");

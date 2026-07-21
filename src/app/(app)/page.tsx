@@ -1,2 +1,5 @@
-// DELETED: El archivo ha sido eliminado físicamente para centralizar el redireccionamiento en src/app/page.tsx
-export default function InactivePage() { return null; }
+// This file is deprecated to avoid parallel route conflicts with root src/app/page.tsx.
+import { redirect } from 'next/navigation';
+export default function RedirectPage() {
+  redirect('/dashboard');
+}
