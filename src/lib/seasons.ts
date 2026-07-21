@@ -27,31 +27,33 @@ export async function getActiveSeasonId(db: Firestore): Promise<string | null> {
 
 /**
  * Returns a preview of what would be migrated.
+ * It counts documents in 'matches' and 'gallery' that lack a 'seasonId'.
  */
 export async function getMigrationPreview(db: Firestore) {
   const matchesSnap = await getDocs(collection(db, 'matches'));
   const gallerySnap = await getDocs(collection(db, 'gallery'));
   const settingsSnap = await getDoc(doc(db, 'app_settings', 'global'));
 
-  const pendingMatches = [];
+  let pendingMatches = 0;
   matchesSnap.forEach(doc => {
-    if (!doc.data().seasonId) pendingMatches.push(doc.id);
+    if (!doc.data().seasonId) pendingMatches++;
   });
 
-  const pendingGallery = [];
+  let pendingGallery = 0;
   gallerySnap.forEach(doc => {
-    if (!doc.data().seasonId) pendingGallery.push(doc.id);
+    if (!doc.data().seasonId) pendingGallery++;
   });
 
   return {
     alreadyMigrated: settingsSnap.exists() && (settingsSnap.data() as any).isMigrated,
-    pendingMatches: pendingMatches.length,
-    pendingGallery: pendingGallery.length
+    pendingMatches,
+    pendingGallery
   };
 }
 
 /**
  * Creates a new season and updates the global active season ID atomically.
+ * This is used for creating FUTURE seasons (Clausura, etc.)
  */
 export async function createNewSeason(
   db: Firestore, 
@@ -87,6 +89,7 @@ export async function createNewSeason(
 /**
  * Standalone migration script.
  * Creates the initial season and assigns it to all existing data.
+ * All existing items are assumed to belong to this first official cycle.
  */
 export async function runInitialMigration(
   db: Firestore, 
@@ -110,7 +113,7 @@ export async function runInitialMigration(
       year: config.year,
       type: config.type,
       half: config.half,
-      startDate: "2024-01-01T00:00:00Z",
+      startDate: "2024-01-01T00:00:00Z", // Data usually started around this time
       createdAt: now,
       endDate: null
     };
@@ -119,6 +122,7 @@ export async function runInitialMigration(
     let matchesCount = 0;
     let galleryCount = 0;
     
+    // 1. Migrar Partidos
     const matchesSnap = await getDocs(collection(db, 'matches'));
     matchesSnap.forEach((m) => {
       if (!m.data().seasonId) {
@@ -127,6 +131,8 @@ export async function runInitialMigration(
       }
     });
 
+    // 2. Migrar Galería (Documentos exclusivos que no tienen seasonId)
+    // Las fotos que están DENTRO de los partidos se migran automáticamente al migrar el partido.
     const gallerySnap = await getDocs(collection(db, 'gallery'));
     gallerySnap.forEach((g) => {
       if (!g.data().seasonId) {
@@ -135,12 +141,14 @@ export async function runInitialMigration(
       }
     });
 
-    await setDoc(initialSeasonRef, initialSeason);
-    await batch.commit();
-    await setDoc(settingsRef, { 
+    // 3. Crear el registro de temporada y actualizar configuración global
+    batch.set(initialSeasonRef, initialSeason);
+    batch.set(settingsRef, { 
       activeSeasonId: initialSeasonRef.id,
       isMigrated: true 
     }, { merge: true });
+
+    await batch.commit();
 
     return {
       success: true,
