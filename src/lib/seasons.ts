@@ -88,7 +88,10 @@ export async function createNewSeason(
  * Standalone migration script.
  * Creates the initial season and assigns it to all existing data.
  */
-export async function runInitialMigration(db: Firestore) {
+export async function runInitialMigration(
+  db: Firestore, 
+  config: { name: string, year: number, type: 'Apertura' | 'Clausura' | 'Histórico', half: 1 | 2 }
+) {
   const settingsRef = doc(db, 'app_settings', 'global');
   const settingsSnap = await getDoc(settingsRef);
   
@@ -103,10 +106,10 @@ export async function runInitialMigration(db: Firestore) {
     
     const initialSeason: Season = {
       id: initialSeasonRef.id,
-      name: "Temporada Fundacional",
-      year: 2024,
-      type: "Apertura",
-      half: 1,
+      name: config.name,
+      year: config.year,
+      type: config.type,
+      half: config.half,
       startDate: "2024-01-01T00:00:00Z",
       createdAt: now,
       endDate: null

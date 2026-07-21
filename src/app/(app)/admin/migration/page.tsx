@@ -7,9 +7,12 @@ import { doc } from "firebase/firestore";
 import { getMigrationPreview, runInitialMigration } from "@/lib/seasons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Loader2, Database, AlertTriangle, CheckCircle2, ChevronRight, Info } from "lucide-react";
+import { Loader2, Database, AlertTriangle, CheckCircle2, Info, Settings2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function MigrationPage() {
   const firestore = useFirestore();
@@ -20,6 +23,12 @@ export default function MigrationPage() {
   const [isMigrating, setIsMigrating] = React.useState(false);
   const [preview, setPreview] = React.useState<{alreadyMigrated: boolean, pendingMatches: number, pendingGallery: number} | null>(null);
   const [result, setResult] = React.useState<any>(null);
+
+  // Form State for initial season
+  const [seasonName, setSeasonName] = React.useState("Temporada Inaugural");
+  const [seasonYear, setSeasonYear] = React.useState(new Date().getFullYear());
+  const [seasonType, setSeasonType] = React.useState<'Apertura' | 'Clausura' | 'Histórico'>("Apertura");
+  const [seasonHalf, setSeasonHalf] = React.useState<1 | 2>(1);
 
   const adminRoleRef = React.useMemo(() => {
     if (!firestore || !user) return null;
@@ -47,7 +56,12 @@ export default function MigrationPage() {
     if (!firestore) return;
     setIsMigrating(true);
     try {
-      const data = await runInitialMigration(firestore);
+      const data = await runInitialMigration(firestore, {
+        name: seasonName,
+        year: seasonYear,
+        type: seasonType,
+        half: seasonHalf
+      });
       setResult(data);
       toast({ title: "Migración Exitosa", description: "La base de datos ha sido actualizada a Temporadas." });
     } catch (err: any) {
@@ -94,7 +108,7 @@ export default function MigrationPage() {
                 </div>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="bg-white/5 p-4 rounded-xl border border-white/5 flex items-center justify-between">
                     <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Partidos a Migrar</span>
@@ -106,13 +120,56 @@ export default function MigrationPage() {
                   </div>
                 </div>
 
+                <div className="space-y-6 bg-black/20 p-6 rounded-2xl border border-white/5 shadow-inner">
+                  <div className="flex items-center gap-2 mb-4 border-b border-white/5 pb-2">
+                    <Settings2 className="h-4 w-4 text-primary" />
+                    <h3 className="text-xs font-black uppercase tracking-widest text-primary">Configuración Temporada Inicial</h3>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label className="text-[10px] uppercase font-black text-muted-foreground">Nombre de Temporada</Label>
+                      <Input value={seasonName} onChange={(e) => setSeasonName(e.target.value)} className="bg-black/40 border-white/10" placeholder="Ej: Temporada 2024" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[10px] uppercase font-black text-muted-foreground">Año</Label>
+                      <Input type="number" value={seasonYear} onChange={(e) => setSeasonYear(parseInt(e.target.value))} className="bg-black/40 border-white/10" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[10px] uppercase font-black text-muted-foreground">Tipo de Ciclo</Label>
+                      <Select value={seasonType} onValueChange={(val: any) => setSeasonType(val)}>
+                        <SelectTrigger className="bg-black/40 border-white/10">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Apertura">Apertura</SelectItem>
+                          <SelectItem value="Clausura">Clausura</SelectItem>
+                          <SelectItem value="Histórico">Histórico</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[10px] uppercase font-black text-muted-foreground">Semestre</Label>
+                      <Select value={seasonHalf.toString()} onValueChange={(val) => setSeasonHalf(parseInt(val) as 1 | 2)}>
+                        <SelectTrigger className="bg-black/40 border-white/10">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="1">Primer Semestre (1)</SelectItem>
+                          <SelectItem value="2">Segundo Semestre (2)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="bg-primary/5 p-4 rounded-xl border border-primary/10 flex gap-3">
                   <Info className="h-5 w-5 text-primary shrink-0" />
                   <div className="text-xs leading-relaxed">
                     <p className="font-bold text-primary uppercase mb-1">Acción Planificada:</p>
                     <ul className="space-y-1 list-disc pl-4 text-muted-foreground">
-                      <li>Se creará la <span className="text-white font-bold italic">"Temporada Fundacional"</span> (2024 Apertura).</li>
-                      <li>Se asignará el ID de esta temporada a todos los documentos mostrados arriba.</li>
+                      <li>Se creará la temporada personalizada mostrada arriba.</li>
+                      <li>Se asignará el ID de esta temporada a todos los documentos huérfanos.</li>
                       <li>Se marcará <span className="text-white font-bold italic">activeSeasonId</span> como el puntero oficial.</li>
                     </ul>
                   </div>

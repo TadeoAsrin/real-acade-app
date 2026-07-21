@@ -117,7 +117,7 @@
         "type": { "type": "string", "enum": ["image", "video"] },
         "url": { "type": "string" },
         "description": { "type": "string" },
-        "date": { "type": "string", "format": "date-time" },
+        "date": { "type": "string", format: "date-time" },
         "category": { "type": "string" },
         "matchId": { "type": "string" }
       },
@@ -130,7 +130,7 @@
         "id": { "type": "string" },
         "name": { "type": "string" },
         "year": { "type": "number" },
-        "type": { "type": "string", "enum": ["Apertura", "Clausura"] },
+        "type": { "type": "string", "enum": ["Apertura", "Clausura", "Histórico"] },
         "half": { "type": "number", "enum": [1, 2] },
         "startDate": { "type": "string", "format": "date-time" },
         "endDate": { "type": "string", "format": "date-time" },
