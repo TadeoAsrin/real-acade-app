@@ -1,2 +1,6 @@
-// ESTE ARCHIVO HA SIDO NEUTRALIZADO PARA EVITAR COLISIONES DE RUTAS PARALELAS EN NEXT.JS.
-// LA REDIRECCIÓN DE LA RAÍZ SE MANEJA EN src/app/page.tsx
+/**
+ * ESTE ARCHIVO HA SIDO NEUTRALIZADO.
+ * Se evita la colisión con src/app/page.tsx que maneja la redirección raíz.
+ */
+const InactivePage = () => null;
+// No hay export default aquí.

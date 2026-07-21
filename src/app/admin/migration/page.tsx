@@ -1,2 +1,7 @@
-// ESTE ARCHIVO HA SIDO NEUTRALIZADO PARA EVITAR COLISIONES DE RUTAS PARALELAS EN NEXT.JS.
-// LA LÓGICA DE MIGRACIÓN RESIDE EN src/app/(app)/admin/migration/page.tsx
+/**
+ * ESTE ARCHIVO HA SIDO NEUTRALIZADO.
+ * No tiene exportaciones para evitar conflictos de rutas paralelas con /(app)/admin/migration/page.tsx.
+ * La funcionalidad de migración reside ahora exclusivamente en la carpeta (app).
+ */
+const InactivePage = () => null;
+// No hay export default aquí.
