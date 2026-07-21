@@ -2,11 +2,11 @@
 
 import * as React from 'react';
 import { useFirestore, useUser, useDoc } from "@/firebase";
-import { doc } from "firebase/firestore";
+import { doc, getDocs, collection, query, where } from "firebase/firestore";
 import { getMigrationPreview, runInitialMigration } from "@/lib/seasons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Loader2, Database, AlertTriangle, CheckCircle2, Info, Settings2 } from "lucide-react";
+import { Loader2, Database, AlertTriangle, CheckCircle2, Info, Settings2, ShieldAlert, PlayCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
@@ -23,6 +23,10 @@ export default function MigrationPage() {
   const [preview, setPreview] = React.useState<{alreadyMigrated: boolean, pendingMatches: number, pendingGallery: number} | null>(null);
   const [result, setResult] = React.useState<any>(null);
 
+  // Diagnostic State
+  const [diagLog, setDiagLog] = React.useState<string>("");
+  const [isRunningDiag, setIsRunningDiag] = React.useState(false);
+
   // Form State for initial season
   const [seasonName, setSeasonName] = React.useState("Apertura 2026");
   const [seasonYear, setSeasonYear] = React.useState(2026);
@@ -38,13 +42,8 @@ export default function MigrationPage() {
 
   React.useEffect(() => {
     async function loadPreview() {
-      // CRITICAL GUARD: Only load preview if:
-      // 1. Firestore is initialized
-      // 2. Auth state is determined (not loading)
-      // 3. User is explicitly an Administrator
       if (!firestore || adminLoading) return;
       
-      // If we finished loading admin info and they are not admin, stop loading and return
       if (!adminRole?.isAdmin) {
         setIsLoading(false);
         return;
@@ -61,6 +60,35 @@ export default function MigrationPage() {
     }
     loadPreview();
   }, [firestore, adminLoading, adminRole]);
+
+  const runDiagnostic = async () => {
+    if (!firestore) return;
+    setIsRunningDiag(true);
+    let log = `--- INICIO DIAGNÓSTICO [${new Date().toLocaleTimeString()}] ---\n\n`;
+    
+    // Test 1: Simple Read
+    try {
+      log += "PRUEBA 1: Lectura Simple (getDocs /matches)...\n";
+      const snap = await getDocs(collection(firestore, 'matches'));
+      log += `✅ ÉXITO. Documentos encontrados: ${snap.size}\n\n`;
+    } catch (e: any) {
+      log += `❌ FALLÓ PRUEBA 1.\nError: ${e.code}\nMensaje: ${e.message}\nPath: /matches\n\n`;
+    }
+
+    // Test 2: Filtered Query
+    try {
+      log += "PRUEBA 2: Query Filtrada (seasonId == 'TEST')...\n";
+      const q = query(collection(firestore, 'matches'), where('seasonId', '==', 'TEST'));
+      const snap = await getDocs(q);
+      log += `✅ ÉXITO. Query permitida (0 docs encontrados).\n\n`;
+    } catch (e: any) {
+      log += `❌ FALLÓ PRUEBA 2.\nError: ${e.code}\nMensaje: ${e.message}\nQuery: seasonId == 'TEST'\n\n`;
+    }
+
+    log += "--- FIN DIAGNÓSTICO ---";
+    setDiagLog(log);
+    setIsRunningDiag(false);
+  };
 
   const handleMigrate = async () => {
     if (!firestore || !adminRole?.isAdmin) return;
@@ -94,10 +122,40 @@ export default function MigrationPage() {
       <div className="flex flex-col gap-2">
         <h1 className="text-4xl font-black italic uppercase tracking-tighter flex items-center gap-3">
           <Database className="h-10 w-10 text-primary" />
-          Migración de Datos: Temporadas
+          Herramientas de Administración
         </h1>
-        <p className="text-muted-foreground">Prepara la base de datos oficial para el soporte multi-temporada de Real Acade.</p>
+        <p className="text-muted-foreground">Diagnóstico de permisos y migración oficial de Real Acade.</p>
       </div>
+
+      {/* DIAGNOSTIC PANEL */}
+      <Card className="competition-card border-blue-500/20 bg-blue-500/5">
+        <CardHeader>
+          <CardTitle className="text-xl font-black italic uppercase flex items-center gap-2">
+            <ShieldAlert className="h-5 w-5 text-blue-500" />
+            Diagnóstico de Firestore
+          </CardTitle>
+          <CardDescription>Ejecuta pruebas aisladas para identificar la raíz del error de permisos.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Button 
+            onClick={runDiagnostic} 
+            disabled={isRunningDiag}
+            variant="outline"
+            className="w-full border-blue-500/20 hover:bg-blue-500/10 font-bold uppercase italic"
+          >
+            {isRunningDiag ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlayCircle className="mr-2 h-4 w-4" />}
+            Ejecutar Prueba de Aislamiento
+          </Button>
+          
+          {diagLog && (
+            <div className="bg-black/40 p-4 rounded-xl border border-white/5 shadow-inner">
+              <pre className="text-[10px] font-mono leading-relaxed overflow-x-auto whitespace-pre-wrap text-blue-200">
+                {diagLog}
+              </pre>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {!result ? (
         <Card className="competition-card border-orange-500/20 bg-orange-500/5">
