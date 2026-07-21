@@ -1,85 +1,63 @@
 'use client';
 
 import * as React from 'react';
-import { useFirestore, useUser, useDoc, useMemoFirebase } from '@/firebase';
-import { doc } from 'firebase/firestore';
-import { runInitialMigration, getMigrationPreview } from '@/lib/seasons';
+import { useFirestore } from '@/firebase';
+import { getMigrationPreview, runInitialMigration } from '@/lib/seasons';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Database, AlertTriangle, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { Loader2, Database, ShieldAlert, CheckCircle2 } from 'lucide-react';
 
 /**
- * Panel de Migración de Base de Datos (Versión Consolidada).
- * Permite inicializar el sistema de temporadas en una base de datos existente.
+ * Página de administración para la migración inicial de temporadas.
  */
 export default function MigrationPage() {
   const firestore = useFirestore();
-  const { user } = useUser();
   const { toast } = useToast();
-  
-  const [config, setConfig] = React.useState({
-    name: "Temporada Inaugural",
-    year: new Date().getFullYear(),
-    type: "Apertura" as const,
-    half: 1 as const
-  });
-  
-  const [isPreviewLoading, setIsPreviewLoading] = React.useState(true);
+  const [loading, setLoading] = React.useState(true);
+  const [migrating, setMigrating] = React.useState(false);
   const [preview, setPreview] = React.useState<any>(null);
-  const [isMigrating, setIsMigrating] = React.useState(false);
-
-  const adminRoleRef = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
-    return doc(firestore, 'roles_admin', user.uid);
-  }, [firestore, user]);
-
-  const { data: adminRole } = useDoc<{isAdmin: boolean}>(adminRoleRef);
-  const isAdmin = adminRole?.isAdmin || user?.email === 'tadeoasrin@gmail.com';
 
   React.useEffect(() => {
-    async function loadPreview() {
+    async function load() {
       if (!firestore) return;
       try {
         const data = await getMigrationPreview(firestore);
         setPreview(data);
-      } catch (error) {
-        console.error(error);
+      } catch (err) {
+        console.error(err);
       } finally {
-        setIsPreviewLoading(false);
+        setLoading(false);
       }
     }
-    loadPreview();
+    load();
   }, [firestore]);
 
   const handleMigrate = async () => {
-    if (!firestore || !isAdmin) return;
-    setIsMigrating(true);
+    if (!firestore) return;
+    setMigrating(true);
     try {
-      const result = await runInitialMigration(firestore, config);
-      toast({ title: "Migración Exitosa", description: `Se migraron ${result.matchesMigrated} partidos y ${result.galleryMigrated} items.` });
+      await runInitialMigration(firestore, {
+        name: "Temporada Fundacional",
+        year: 2024,
+        type: 'Apertura',
+        half: 1
+      });
+      toast({ title: "Migración Exitosa", description: "El club ha entrado en la era de temporadas." });
       const data = await getMigrationPreview(firestore);
       setPreview(data);
-    } catch (error: any) {
-      toast({ variant: "destructive", title: "Error de Migración", description: error.message });
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "Error", description: err.message });
     } finally {
-      setIsMigrating(false);
+      setMigrating(false);
     }
   };
 
-  if (!isAdmin) {
+  if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Card className="max-w-md border-destructive/20 bg-destructive/5">
-          <CardHeader className="text-center">
-            <AlertTriangle className="h-12 w-12 text-destructive mx-auto mb-2" />
-            <CardTitle className="text-destructive">Acceso Restringido</CardTitle>
-            <CardDescription>Solo los administradores de nivel élite pueden acceder a las herramientas de base de datos.</CardDescription>
-          </CardHeader>
-        </Card>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+        <p className="font-bebas text-xl tracking-widest text-muted-foreground uppercase">Analizando base de datos...</p>
       </div>
     );
   }
@@ -87,88 +65,59 @@ export default function MigrationPage() {
   return (
     <div className="max-w-4xl mx-auto p-4 lg:p-8 space-y-8 animate-in fade-in duration-700">
       <div className="space-y-1">
-        <h2 className="text-4xl lg:text-6xl font-black uppercase tracking-tighter italic text-white flex items-center gap-4">
-          <Database className="h-8 w-8 lg:h-12 lg:w-12 text-primary shrink-0" />
-          SISTEMA DE MIGRACIÓN
+        <h2 className="text-4xl lg:text-7xl font-black uppercase tracking-tighter italic text-white flex items-center gap-4">
+          <Database className="h-8 w-8 lg:h-14 lg:w-14 text-primary shrink-0" />
+          MIGRACIÓN DE ÉLITE
         </h2>
         <p className="text-[10px] lg:text-xs font-black uppercase tracking-[0.4em] text-primary/60 ml-1">
-          CONFIGURACIÓN DE TEMPORADAS • NIVEL DATA-MASTER
+          ACTUALIZACIÓN ESTRUCTURAL • REAL ACADE
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <Card className="md:col-span-2 competition-card border-primary/20 bg-primary/5">
-          <CardHeader>
-            <CardTitle className="font-bebas tracking-widest text-2xl">CONFIGURAR TEMPORADA 0</CardTitle>
-            <CardDescription className="text-xs uppercase font-bold text-muted-foreground/60">Define el punto de partida histórico</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest">Nombre de Temporada</Label>
-                <Input value={config.name} onChange={e => setConfig({...config, name: e.target.value})} className="bg-black/40 border-white/10" />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest">Año Oficial</Label>
-                <Input type="number" value={config.year} onChange={e => setConfig({...config, year: parseInt(e.target.value)})} className="bg-black/40 border-white/10" />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest">Tipo de Torneo</Label>
-                <Select value={config.type} onValueChange={(val: any) => setConfig({...config, type: val})}>
-                  <SelectTrigger className="bg-black/40 border-white/10">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Apertura">Apertura</SelectItem>
-                    <SelectItem value="Clausura">Clausura</SelectItem>
-                    <SelectItem value="Histórico">Histórico</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+      <Card className="competition-card border-orange-500/20 bg-orange-500/5">
+        <CardHeader>
+          <div className="flex items-center gap-4">
+            <ShieldAlert className="h-8 w-8 text-orange-500" />
+            <div>
+              <CardTitle className="text-xl font-bebas tracking-widest uppercase">Zona de Riesgo</CardTitle>
+              <CardDescription className="text-xs uppercase font-bold text-orange-500/60">Operación irreversible de base de datos</CardDescription>
             </div>
-            
-            <div className="pt-6 border-t border-white/5">
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-4 rounded-xl bg-black/40 border border-white/5">
+              <span className="text-[8px] font-black uppercase text-muted-foreground tracking-widest">Partidos sin Temporada</span>
+              <p className="text-3xl font-bebas text-white mt-1">{preview?.pendingMatches || 0}</p>
+            </div>
+            <div className="p-4 rounded-xl bg-black/40 border border-white/5">
+              <span className="text-[8px] font-black uppercase text-muted-foreground tracking-widest">Elementos de Galería</span>
+              <p className="text-3xl font-bebas text-white mt-1">{preview?.pendingGallery || 0}</p>
+            </div>
+          </div>
+
+          {preview?.alreadyMigrated ? (
+            <div className="flex items-center gap-3 p-4 bg-emerald-500/20 border border-emerald-500/40 rounded-xl">
+              <CheckCircle2 className="h-6 w-6 text-emerald-500" />
+              <p className="text-xs font-bold uppercase text-emerald-500">Este club ya ha sido migrado a la nueva estructura.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Esta acción creará la <strong>Temporada Fundacional (2024)</strong> y asignará automáticamente todos los partidos y fotos existentes a este nuevo ciclo oficial.
+              </p>
               <Button 
                 onClick={handleMigrate} 
-                disabled={isMigrating || preview?.alreadyMigrated} 
-                className="w-full h-14 font-bebas text-xl tracking-widest shadow-lg shadow-primary/20"
+                disabled={migrating || (preview?.pendingMatches === 0 && preview?.pendingGallery === 0)}
+                className="w-full h-16 font-bebas text-2xl tracking-widest shadow-xl shadow-primary/20"
               >
-                {isMigrating ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : <ShieldCheck className="h-5 w-5 mr-2" />}
-                {preview?.alreadyMigrated ? "BASE DE DATOS YA MIGRADA" : "INICIAR MIGRACIÓN ATÓMICA"}
+                {migrating ? <Loader2 className="h-6 w-6 animate-spin mr-2" /> : <Database className="h-6 w-6 mr-2" />}
+                INICIAR MIGRACIÓN OFICIAL
               </Button>
             </div>
-          </CardContent>
-        </Card>
-
-        <div className="space-y-8">
-          <Card className="competition-card border-white/5 bg-black/40">
-            <CardHeader>
-              <CardTitle className="text-sm font-black uppercase tracking-widest">Estado Actual</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isPreviewLoading ? (
-                <div className="flex justify-center py-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
-              ) : preview?.alreadyMigrated ? (
-                <div className="space-y-4 text-center">
-                  <CheckCircle2 className="h-12 w-12 text-emerald-500 mx-auto" />
-                  <p className="text-xs font-bold text-emerald-500 uppercase">Sistema Operativo</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between py-2 border-b border-white/5">
-                    <span className="text-[10px] font-black text-muted-foreground uppercase">Partidos Huérfanos</span>
-                    <span className="text-lg font-bebas text-primary">{preview?.pendingMatches}</span>
-                  </div>
-                  <div className="flex items-center justify-between py-2 border-b border-white/5">
-                    <span className="text-[10px] font-black text-muted-foreground uppercase">Galería Huérfana</span>
-                    <span className="text-lg font-bebas text-primary">{preview?.pendingGallery}</span>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

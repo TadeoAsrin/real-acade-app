@@ -1,7 +1,6 @@
 /**
- * ESTE ARCHIVO HA SIDO NEUTRALIZADO.
- * No tiene exportaciones para evitar conflictos de rutas paralelas con /(app)/admin/migration/page.tsx.
- * La funcionalidad de migración reside ahora exclusivamente en la carpeta (app).
+ * NEUTRALIZACIÓN DE RUTA RAÍZ.
+ * Para evitar errores de Parallel Routes en Next.js, esta ruta ya no exporta un componente por defecto.
+ * La página funcional reside exclusivamente en src/app/(app)/admin/migration/page.tsx.
  */
 const InactivePage = () => null;
-// No hay export default aquí.

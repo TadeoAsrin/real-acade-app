@@ -1,6 +1,5 @@
 /**
- * ESTE ARCHIVO HA SIDO NEUTRALIZADO.
- * Se evita la colisión con src/app/page.tsx que maneja la redirección raíz.
+ * NEUTRALIZACIÓN DE RUTA RAÍZ EN GRUPO.
+ * Se evita el conflicto con src/app/page.tsx que maneja la redirección.
  */
 const InactivePage = () => null;
-// No hay export default aquí.
