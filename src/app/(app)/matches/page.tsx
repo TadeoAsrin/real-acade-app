@@ -4,9 +4,9 @@ import * as React from 'react';
 import { useFirestore, useCollection, useMemoFirebase, useDoc, useUser } from '@/firebase';
 import { collection, query, orderBy, where, doc } from 'firebase/firestore';
 import type { Match, AppSettings } from '@/lib/definitions';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, Goal, Calendar, ChevronRight, Trophy, Info } from 'lucide-react';
+import { Plus, Goal, Calendar, ChevronRight, Trophy } from 'lucide-react';
 import Link from 'next/link';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -51,7 +51,7 @@ export default function MatchesPage() {
             HISTORIAL OFICIAL
           </h2>
           <p className="text-[10px] lg:text-xs font-black uppercase tracking-[0.3em] text-primary/60 ml-1">
-            REGISTRO DE BATALLAS • TEMPORADA {activeSeasonId?.substring(0, 8) || '...'}
+            REGISTRO DE BATALLAS • TEMPORADA ACTUAL
           </p>
         </div>
         {isAdmin && (

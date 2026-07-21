@@ -1,11 +1,11 @@
 'use client';
 
 import * as React from 'react';
-import { useFirestore, useCollection, useMemoFirebase, useUser, useDoc, addDocumentNonBlocking } from '@/firebase';
+import { useFirestore, useCollection, useMemoFirebase, useDoc, addDocumentNonBlocking } from '@/firebase';
 import { collection, query, orderBy, doc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import type { Player, AppSettings } from '@/lib/definitions';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,8 +21,8 @@ export default function NewMatchPage() {
   const [date, setDate] = React.useState(new Date().toISOString().split('T')[0]);
   const [teamAScore, setTeamAScore] = React.useState(0);
   const [teamBScore, setTeamBScore] = React.useState(0);
-  const [teamAPlayers, setTeamAPlayers] = React.useState<{playerId: string, goals: number, isMvp: boolean, hasBestGoal: boolean}[]>([]);
-  const [teamBPlayers, setTeamBPlayers] = React.useState<{playerId: string, goals: number, isMvp: boolean, hasBestGoal: boolean}[]>([]);
+  const [teamAPlayers, setTeamAPlayers] = React.useState<{playerId: string, goals: number, isMvp: boolean}[]>([]);
+  const [teamBPlayers, setTeamBPlayers] = React.useState<{playerId: string, goals: number, isMvp: boolean}[]>([]);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const settingsRef = useMemoFirebase(() => {
@@ -41,7 +41,7 @@ export default function NewMatchPage() {
   const { data: players } = useCollection<Player>(playersRef);
 
   const handleAddPlayer = (team: 'A' | 'B') => {
-    const newPlayer = { playerId: '', goals: 0, isMvp: false, hasBestGoal: false };
+    const newPlayer = { playerId: '', goals: 0, isMvp: false };
     if (team === 'A') setTeamAPlayers([...teamAPlayers, newPlayer]);
     else setTeamBPlayers([...teamBPlayers, newPlayer]);
   };
@@ -95,22 +95,20 @@ export default function NewMatchPage() {
           NUEVO ENCUENTRO
         </h2>
         <p className="text-[10px] lg:text-xs font-black uppercase tracking-[0.4em] text-primary/60 ml-1">
-          CARGA DE RESULTADOS OFICIALES • TEMPORADA {activeSeasonId?.substring(0, 8) || '...'}
+          CARGA DE RESULTADOS • TEMPORADA ACTUAL
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
           <Card className="competition-card">
-            <CardHeader className="bg-primary/5 border-b border-white/5">
-              <CardTitle className="text-primary font-bebas tracking-widest">EQUIPO AZUL</CardTitle>
+            <CardHeader className="bg-primary/5">
+              <CardTitle className="text-primary font-bebas tracking-widest uppercase">Equipo Azul</CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                 <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">GOLES TOTALES</Label>
-                    <Input type="number" value={teamAScore} onChange={(e) => setTeamAScore(parseInt(e.target.value))} className="bg-black/40 h-14 text-3xl font-bebas" />
-                 </div>
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Goles Totales</Label>
+                <Input type="number" value={teamAScore} onChange={(e) => setTeamAScore(parseInt(e.target.value))} className="bg-black/40 h-14 text-3xl font-bebas" />
               </div>
               <div className="space-y-4">
                 {teamAPlayers.map((p, i) => (
@@ -119,7 +117,7 @@ export default function NewMatchPage() {
                       <select 
                         value={p.playerId} 
                         onChange={(e) => handlePlayerChange('A', i, 'playerId', e.target.value)}
-                        className="w-full bg-black/40 border border-white/10 rounded-lg h-10 px-3 text-sm font-bold uppercase"
+                        className="w-full bg-black/40 border border-white/10 rounded-lg h-10 px-3 text-sm font-bold uppercase text-white"
                       >
                         <option value="">Seleccionar Jugador</option>
                         {players?.map(pl => (
@@ -128,9 +126,7 @@ export default function NewMatchPage() {
                       </select>
                     </div>
                     <div className="flex items-center gap-4">
-                      <div className="w-20">
-                        <Input type="number" value={p.goals} onChange={(e) => handlePlayerChange('A', i, 'goals', parseInt(e.target.value))} placeholder="G" className="text-center font-bold" />
-                      </div>
+                      <Input type="number" value={p.goals} onChange={(e) => handlePlayerChange('A', i, 'goals', parseInt(e.target.value))} className="w-20 text-center font-bold" />
                       <div className="flex items-center gap-2">
                         <Checkbox checked={p.isMvp} onCheckedChange={(val) => handlePlayerChange('A', i, 'isMvp', val)} />
                         <span className="text-[8px] font-black uppercase text-yellow-500">MVP</span>
@@ -149,15 +145,13 @@ export default function NewMatchPage() {
           </Card>
 
           <Card className="competition-card">
-            <CardHeader className="bg-accent/5 border-b border-white/5">
-              <CardTitle className="text-accent font-bebas tracking-widest">EQUIPO ROJO</CardTitle>
+            <CardHeader className="bg-accent/5">
+              <CardTitle className="text-accent font-bebas tracking-widest uppercase">Equipo Rojo</CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                 <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">GOLES TOTALES</Label>
-                    <Input type="number" value={teamBScore} onChange={(e) => setTeamBScore(parseInt(e.target.value))} className="bg-black/40 h-14 text-3xl font-bebas" />
-                 </div>
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Goles Totales</Label>
+                <Input type="number" value={teamBScore} onChange={(e) => setTeamBScore(parseInt(e.target.value))} className="bg-black/40 h-14 text-3xl font-bebas" />
               </div>
               <div className="space-y-4">
                 {teamBPlayers.map((p, i) => (
@@ -166,7 +160,7 @@ export default function NewMatchPage() {
                       <select 
                         value={p.playerId} 
                         onChange={(e) => handlePlayerChange('B', i, 'playerId', e.target.value)}
-                        className="w-full bg-black/40 border border-white/10 rounded-lg h-10 px-3 text-sm font-bold uppercase"
+                        className="w-full bg-black/40 border border-white/10 rounded-lg h-10 px-3 text-sm font-bold uppercase text-white"
                       >
                         <option value="">Seleccionar Jugador</option>
                         {players?.map(pl => (
@@ -175,9 +169,7 @@ export default function NewMatchPage() {
                       </select>
                     </div>
                     <div className="flex items-center gap-4">
-                      <div className="w-20">
-                        <Input type="number" value={p.goals} onChange={(e) => handlePlayerChange('B', i, 'goals', parseInt(e.target.value))} placeholder="G" className="text-center font-bold" />
-                      </div>
+                      <Input type="number" value={p.goals} onChange={(e) => handlePlayerChange('B', i, 'goals', parseInt(e.target.value))} className="w-20 text-center font-bold" />
                       <div className="flex items-center gap-2">
                         <Checkbox checked={p.isMvp} onCheckedChange={(val) => handlePlayerChange('B', i, 'isMvp', val)} />
                         <span className="text-[8px] font-black uppercase text-yellow-500">MVP</span>
@@ -206,12 +198,11 @@ export default function NewMatchPage() {
                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">FECHA DEL ENCUENTRO</Label>
                     <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
                  </div>
-              </CardContent>
-              <CardContent className="pt-0">
-                 <Button onClick={handleSubmit} disabled={isSubmitting} className="w-full h-16 font-bebas text-2xl tracking-widest shadow-xl shadow-primary/20">
+                 <Button onClick={handleSubmit} disabled={isSubmitting || !activeSeasonId} className="w-full h-16 font-bebas text-2xl tracking-widest shadow-xl shadow-primary/20">
                     {isSubmitting ? <Loader2 className="h-6 w-6 animate-spin mr-2" /> : <Save className="h-6 w-6 mr-2" />}
                     FINALIZAR CARGA
                  </Button>
+                 {!activeSeasonId && <p className="text-[8px] text-destructive uppercase text-center font-bold">Activa una temporada para cargar partidos</p>}
               </CardContent>
            </Card>
         </div>

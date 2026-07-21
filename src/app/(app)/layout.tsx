@@ -9,7 +9,6 @@ import { Loader2 } from "lucide-react";
 
 /**
  * Layout oficial para el área privada de Real Acade.
- * Provee la estructura de Sidebar + Header y el contexto de navegación.
  */
 export default function AppLayout({
   children,

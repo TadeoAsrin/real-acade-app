@@ -1,6 +1,7 @@
-/** 
- * ERROR: PARALLEL ROUTE COLLISION.
- * Este archivo se mantiene como comentario para evitar que Next.js lo registre como ruta duplicada.
- * La raíz oficial del sitio se encuentra en: src/app/page.tsx
+/**
+ * CONSOLIDATION: This page was causing a collision with src/app/page.tsx.
+ * The primary redirect to /dashboard is now handled by src/app/page.tsx.
+ * We remove the default export to prevent Next.js from seeing this as a parallel route.
  */
-export default function GroupRootRedirect() { return null; }
+// export default function InertPage() { return null; }
+const PageConflictResolver = () => null;

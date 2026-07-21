@@ -1,15 +1,15 @@
 'use client';
 
 import * as React from 'react';
-import { useFirestore, useCollection, useMemoFirebase, useUser, useDoc } from '@/firebase';
+import { useFirestore, useCollection, useMemoFirebase, useDoc } from '@/firebase';
 import { collection, query, orderBy, where, doc } from 'firebase/firestore';
 import type { Player, Match, AppSettings } from '@/lib/definitions';
 import { PowerRanking } from '@/components/dashboard/power-ranking';
 import { GoalsChart } from '@/components/dashboard/goals-chart';
 import { FieldView } from '@/components/dashboard/field-view';
 import { MatchNewsModal } from '@/components/dashboard/match-news-modal';
-import { Trophy, History, LayoutDashboard, Loader2, Star } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { LayoutDashboard, Loader2, History, Star } from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 
 export default function DashboardPage() {
   const firestore = useFirestore();
