@@ -11,6 +11,9 @@ import { MatchNewsModal } from '@/components/dashboard/match-news-modal';
 import { LayoutDashboard, Loader2, History, Star } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 
+/**
+ * Dashboard principal de Real Acade. Muestra estadísticas y crónicas de la temporada activa.
+ */
 export default function DashboardPage() {
   const firestore = useFirestore();
 

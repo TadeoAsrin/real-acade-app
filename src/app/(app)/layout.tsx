@@ -8,8 +8,8 @@ import { useUser } from "@/firebase";
 import { Loader2 } from "lucide-react";
 
 /**
- * Layout oficial para el área privada de Real Acade.
- * Restaura la navegación lateral y el encabezado oficial.
+ * Layout maestro para el área privada del club.
+ * Provee la Sidebar, el Header y el fondo con patrón de puntos.
  */
 export default function AppLayout({
   children,

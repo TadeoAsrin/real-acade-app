@@ -1,5 +1,3 @@
-/**
- * NEUTRALIZACIÓN DE RUTA RAÍZ EN GRUPO.
- * Se evita el conflicto con src/app/page.tsx que maneja la redirección.
- */
+// Ruta neutralizada para evitar colisión con src/app/page.tsx
 const InactivePage = () => null;
+export default InactivePage;
