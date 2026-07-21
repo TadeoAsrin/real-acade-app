@@ -39,18 +39,26 @@ export default function MigrationPage() {
 
   React.useEffect(() => {
     async function loadPreview() {
-      if (!firestore) return;
+      // CRITICAL: Only load preview if user is authenticated and is an admin
+      // This prevents rogue unfiltered queries during app initialization
+      if (!firestore || adminLoading || !adminRole?.isAdmin) {
+        if (!adminLoading && adminRole && !adminRole.isAdmin) {
+            setIsLoading(false);
+        }
+        return;
+      }
+      
       try {
         const data = await getMigrationPreview(firestore);
         setPreview(data);
       } catch (err) {
-        console.error(err);
+        console.error("Error loading migration preview:", err);
       } finally {
         setIsLoading(false);
       }
     }
     loadPreview();
-  }, [firestore]);
+  }, [firestore, adminLoading, adminRole]);
 
   const handleMigrate = async () => {
     if (!firestore) return;
