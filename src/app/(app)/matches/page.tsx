@@ -3,25 +3,20 @@
 import * as React from 'react';
 import { useFirestore, useCollection, useMemoFirebase, useDoc, useUser } from '@/firebase';
 import { collection, query, orderBy, where, doc } from 'firebase/firestore';
-import type { Match, AppSettings } from '@/lib/definitions';
+import type { Match } from '@/lib/definitions';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus, Goal, Calendar, ChevronRight, Trophy, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useSeason } from '@/context/season-context';
+import { SeasonSelector } from '@/components/layout/season-selector';
 
 export default function MatchesPage() {
   const firestore = useFirestore();
   const { user } = useUser();
-
-  const settingsRef = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return doc(firestore, 'app_settings', 'global');
-  }, [firestore]);
-
-  const { data: settings } = useDoc<AppSettings>(settingsRef);
-  const activeSeasonId = settings?.activeSeasonId;
+  const { selectedSeasonId, loading: seasonLoading } = useSeason();
 
   const adminRoleRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -32,17 +27,17 @@ export default function MatchesPage() {
   const isAdmin = adminRole?.isAdmin || user?.email === 'tadeoasrin@gmail.com';
 
   const matchesRef = useMemoFirebase(() => {
-    if (!firestore || !activeSeasonId) return null;
+    if (!firestore || !selectedSeasonId) return null;
     return query(
       collection(firestore, 'matches'), 
-      where('seasonId', '==', activeSeasonId),
+      where('seasonId', '==', selectedSeasonId),
       orderBy('date', 'desc')
     );
-  }, [firestore, activeSeasonId]);
+  }, [firestore, selectedSeasonId]);
 
   const { data: matches, isLoading } = useCollection<Match>(matchesRef);
 
-  if (isLoading) {
+  if (isLoading || seasonLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -60,17 +55,20 @@ export default function MatchesPage() {
             HISTORIAL OFICIAL
           </h2>
           <p className="text-[10px] lg:text-xs font-black uppercase tracking-[0.3em] text-primary/60 ml-1">
-            REGISTRO DE BATALLAS • TEMPORADA ACTUAL
+            REGISTRO DE BATALLAS • TEMPORADA SELECCIONADA
           </p>
         </div>
-        {isAdmin && (
-          <Button asChild size="lg" className="h-14 px-8 font-bebas text-xl tracking-widest shadow-lg shadow-primary/20">
-            <Link href="/matches/new">
-              <Plus className="h-5 w-5 mr-2" />
-              REGISTRAR PARTIDO
-            </Link>
-          </Button>
-        )}
+        <div className="flex flex-col sm:flex-row items-end gap-4">
+          <SeasonSelector className="w-64" />
+          {isAdmin && (
+            <Button asChild size="lg" className="h-10 px-8 font-bebas text-xl tracking-widest shadow-lg shadow-primary/20">
+              <Link href="/matches/new">
+                <Plus className="h-5 w-5 mr-2" />
+                REGISTRAR PARTIDO
+              </Link>
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6">

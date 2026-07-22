@@ -7,6 +7,7 @@ import { Header } from "@/components/layout/header";
 import { useUser } from "@/firebase";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { SeasonProvider } from '@/context/season-context';
 
 export default function AppLayout({
   children,
@@ -55,27 +56,28 @@ export default function AppLayout({
     );
   }
 
-  // Si no hay usuario y ya no está cargando, no renderizamos nada mientras redirige
   if (!user && !isUserLoading) {
     return null;
   }
 
   return (
-    <SidebarProvider>
-      <div className="flex h-screen w-full overflow-hidden bg-background">
-        <AppSidebar />
+    <SeasonProvider>
+      <SidebarProvider>
+        <div className="flex h-screen w-full overflow-hidden bg-background">
+          <AppSidebar />
 
-        <SidebarInset className="flex flex-col flex-1 overflow-hidden">
-          <Header />
+          <SidebarInset className="flex flex-col flex-1 overflow-hidden">
+            <Header />
 
-          <main className="flex-1 overflow-y-auto bg-dot-pattern">
-            <div className="container mx-auto max-w-7xl">
-              {children}
-            </div>
-          </main>
+            <main className="flex-1 overflow-y-auto bg-dot-pattern">
+              <div className="container mx-auto max-w-7xl">
+                {children}
+              </div>
+            </main>
 
-        </SidebarInset>
-      </div>
-    </SidebarProvider>
+          </SidebarInset>
+        </div>
+      </SidebarProvider>
+    </SeasonProvider>
   );
 }

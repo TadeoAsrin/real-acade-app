@@ -2,9 +2,9 @@
 
 import * as React from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useCollection, useMemoFirebase, useFirestore, useDoc } from "@/firebase";
-import { collection, query, orderBy, where, doc } from "firebase/firestore";
-import type { Match, Player, AggregatedPlayerStats, AppSettings } from "@/lib/definitions";
+import { useCollection, useMemoFirebase, useFirestore } from "@/firebase";
+import { collection, query, orderBy, where } from "firebase/firestore";
+import type { Match, Player, AggregatedPlayerStats } from "@/lib/definitions";
 import { 
   Loader2, 
   Newspaper, 
@@ -29,6 +29,8 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials, cn } from "@/lib/utils";
 import { MatchNewsModal } from '@/components/dashboard/match-news-modal';
+import { useSeason } from '@/context/season-context';
+import { SeasonSelector } from '@/components/layout/season-selector';
 
 interface EliteListCardProps {
   title: string;
@@ -124,14 +126,7 @@ function DashboardContent() {
   const searchParams = useSearchParams();
   const gacetaMatchId = searchParams.get('gaceta');
   const firestore = useFirestore();
-
-  // Settings for Active Season
-  const settingsRef = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return doc(firestore, 'app_settings', 'global');
-  }, [firestore]);
-  const { data: settings, isLoading: settingsLoading } = useDoc<AppSettings>(settingsRef);
-  const activeSeasonId = settings?.activeSeasonId;
+  const { selectedSeasonId, loading: seasonLoading } = useSeason();
 
   const playersQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -139,18 +134,18 @@ function DashboardContent() {
   }, [firestore]);
 
   const matchesQuery = useMemoFirebase(() => {
-    if (!firestore || !activeSeasonId) return null;
+    if (!firestore || !selectedSeasonId) return null;
     return query(
       collection(firestore, 'matches'), 
-      where('seasonId', '==', activeSeasonId),
+      where('seasonId', '==', selectedSeasonId),
       orderBy('date', 'desc')
     );
-  }, [firestore, activeSeasonId]);
+  }, [firestore, selectedSeasonId]);
 
   const { data: playersData, isLoading: playersLoading } = useCollection<Player>(playersQuery);
   const { data: matchesData, isLoading: matchesLoading } = useCollection<Match>(matchesQuery);
 
-  if (playersLoading || matchesLoading || settingsLoading) {
+  if (playersLoading || matchesLoading || seasonLoading) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -165,25 +160,21 @@ function DashboardContent() {
   
   const stats = calculateAggregatedStats(allPlayers, allMatches);
   
-  // 1. MÁS INFLUYENTE (Top 3)
   const topInfluential = [...stats]
     .filter(p => p.matchesPlayed >= 4)
     .sort((a, b) => b.influenceScore - a.influenceScore || b.matchesPlayed - a.matchesPlayed)
     .slice(0, 3);
 
-  // 2. PICHICHI (Top 3)
   const topScorers = [...stats]
     .filter(p => p.totalGoals > 0)
     .sort((a, b) => b.totalGoals - a.totalGoals || b.goalsPerMatch - a.goalsPerMatch)
     .slice(0, 3);
 
-  // 3. MEJOR RACHA (Top 3)
   const topStreaks = [...stats]
     .filter(p => p.matchesPlayed >= 2)
     .sort((a, b) => b.bestStreak - a.bestStreak || b.totalGoals - a.totalGoals)
     .slice(0, 3);
 
-  // 4. EL PODIO OFICIAL (Top 3)
   const topPodium = stats
     .filter(p => p.matchesPlayed >= 4)
     .sort((a, b) => 
@@ -193,7 +184,6 @@ function DashboardContent() {
     )
     .slice(0, 3);
 
-  // Pulso de la Competición
   const maxMvpCount = stats.length > 0 ? Math.max(...stats.map(p => p.totalMvp), 0) : 0;
   const recordGoalsInMatch = allMatches.length > 0 ? Math.max(...allMatches.map(m => m.teamAScore + m.teamBScore), 0) : 0;
   const { maxGoals: individualRecord, holders: recordHolders } = getTopScorerRecord(allMatches, allPlayers);
@@ -205,7 +195,6 @@ function DashboardContent() {
   const topAttendancePlayers = stats.filter(p => p.matchesPlayed === topAttendance && p.matchesPlayed > 0);
   const attendanceText = topAttendancePlayers.length === 0 ? "SIN REGISTROS" : `LÍDER: ${topAttendancePlayers[0].name.split(' ')[0].toUpperCase()}${topAttendancePlayers.length > 1 ? ` +${topAttendancePlayers.length - 1}` : ''}`;
 
-  // Orden de Mando
   const ordenDeMando = [...stats]
     .filter(p => p.totalCaptaincies === 0 && p.isActive)
     .sort((a, b) => b.matchesPlayed - a.matchesPlayed)
@@ -215,7 +204,7 @@ function DashboardContent() {
   const matchForModal = forcedMatch || (lastMatch?.aiSummary ? lastMatch : null);
 
   return (
-    <div className="flex flex-col gap-10 max-w-7xl mx-auto pb-20">
+    <div className="flex flex-col gap-10 max-w-7xl mx-auto pb-20 p-4 lg:p-8">
       <div className="fixed inset-0 bg-dot-pattern pointer-events-none opacity-20 z-0" />
 
       {matchForModal && (
@@ -225,6 +214,15 @@ function DashboardContent() {
           forceOpen={!!forcedMatch} 
         />
       )}
+
+      {/* HEADER DINÁMICO */}
+      <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <h2 className="text-4xl lg:text-7xl font-black uppercase tracking-tighter italic text-white leading-none">REAL ACADE</h2>
+          <p className="text-[10px] lg:text-xs font-black uppercase tracking-[0.4em] text-primary/60 ml-1 mt-2">DASHBOARD ESTRATÉGICO</p>
+        </div>
+        <SeasonSelector className="w-full md:w-64" />
+      </div>
 
       {/* 1. HERO SECTION */}
       {lastMatch && (
