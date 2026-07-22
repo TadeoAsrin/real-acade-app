@@ -12,11 +12,27 @@ export default function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const { isUserLoading } = useUser();
 
-  const { user, isUserLoading } = useUser();
+  const [showLoading, setShowLoading] = React.useState(true);
 
+  React.useEffect(() => {
+    if (!isUserLoading) {
+      setShowLoading(false);
+      return;
+    }
 
-  if (isUserLoading) {
+    const timer = setTimeout(() => {
+      console.warn(
+        "Firebase Auth tardó demasiado. Continuando sin esperar autenticación."
+      );
+      setShowLoading(false);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [isUserLoading]);
+
+  if (showLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
@@ -29,27 +45,12 @@ export default function AppLayout({
     );
   }
 
-
-  // Si no hay usuario, mandamos al login
-  if (!user) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center bg-background">
-        <p className="text-muted-foreground">
-          Redirigiendo al login...
-        </p>
-      </div>
-    );
-  }
-
-
   return (
     <SidebarProvider>
       <div className="flex h-screen w-full overflow-hidden bg-background">
-
         <AppSidebar />
 
         <SidebarInset className="flex flex-col flex-1 overflow-hidden">
-
           <Header />
 
           <main className="flex-1 overflow-y-auto bg-dot-pattern">
@@ -59,7 +60,6 @@ export default function AppLayout({
           </main>
 
         </SidebarInset>
-
       </div>
     </SidebarProvider>
   );
