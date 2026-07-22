@@ -111,8 +111,9 @@ export default function ComparePage() {
            </div>
            <div className="space-y-10 max-w-3xl mx-auto">
               <ComparisonRow label="Goles Totales" val1={p1.totalGoals} val2={p2.totalGoals} />
-              <ComparisonRow label="Power Points" val1={p1.powerPoints} val2={p2.powerPoints} highlight />
+              <ComparisonRow label="Partidos Jugados" val1={p1.matchesPlayed} val2={p2.matchesPlayed} />
               <ComparisonRow label="Win %" val1={p1.winPercentage} val2={p2.winPercentage} suffix="%" />
+              <ComparisonRow label="Efectividad (Pts)" val1={p1.efficiency} val2={p2.efficiency} suffix="%" highlight />
            </div>
         </Card>
       ) : (

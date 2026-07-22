@@ -78,9 +78,6 @@ export default function PlayerProfilePage() {
                   <AvatarImage src={player.avatar} alt={player.name} />
                   <AvatarFallback className="text-4xl font-bebas bg-surface-900">{getInitials(player.name)}</AvatarFallback>
                 </Avatar>
-                <div className="absolute -bottom-2 -right-2 bg-orange-500 text-white font-bebas text-xl w-12 h-12 rounded-2xl flex items-center justify-center border-4 border-black/40">
-                   {stats.powerPoints}
-                </div>
               </div>
               <h2 className="text-2xl font-black uppercase tracking-tighter italic">{player.name}</h2>
               <p className="text-[10px] font-black uppercase tracking-widest text-primary mt-1">{player.position || 'COMODÍN'}</p>

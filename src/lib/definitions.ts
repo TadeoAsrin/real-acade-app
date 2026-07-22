@@ -1,4 +1,3 @@
-
 export type PlayerPosition = 'Arquero' | 'Lateral Derecho' | 'Defensor Central' | 'Lateral Izquierdo' | 'Mediocampista' | 'Delantero';
 
 export type Player = {
@@ -56,7 +55,6 @@ export type AggregatedPlayerStats = {
   mvpPerMatch: number;
   matchesAsBlue: number;
   matchesAsRed: number;
-  powerPoints: number;
   form: ('W' | 'D' | 'L')[];
   goalsFor: number;
   goalsAgainst: number;

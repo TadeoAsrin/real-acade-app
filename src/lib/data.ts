@@ -1,13 +1,5 @@
 import type { Player, Match, AggregatedPlayerStats, PlayerStats, ChemistryPair } from "./definitions";
 
-const POINTS = {
-  WIN: 10,
-  DRAW: 5,
-  GOAL: 2,
-  MVP: 15,
-  BEST_GOAL: 5,
-};
-
 /**
  * Calcula todas las estadísticas agregadas de los jugadores basadas en el historial de partidos.
  */
@@ -35,7 +27,6 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
       mvpPerMatch: 0,
       matchesAsBlue: 0,
       matchesAsRed: 0,
-      powerPoints: 0,
       form: [],
       goalsFor: 0,
       goalsAgainst: 0,
@@ -80,7 +71,6 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
             const stats = statsMap[playerId];
             stats.matchesPlayed++;
             stats.totalGoals += goals;
-            stats.powerPoints += goals * POINTS.GOAL;
 
             const myTeamScore = team === 'A' ? match.teamAScore : match.teamBScore;
             const otherTeamScore = team === 'A' ? match.teamBScore : match.teamAScore;
@@ -91,12 +81,10 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
             let result: 'W' | 'D' | 'L' = 'L';
             if (draw) {
                 stats.draws++;
-                stats.powerPoints += POINTS.DRAW;
                 result = 'D';
                 currentStreaks[playerId] = 0;
             } else if ((team === 'A' && teamAWon) || (team === 'B' && teamBWon)) {
                 stats.wins++;
-                stats.powerPoints += POINTS.WIN;
                 result = 'W';
                 if (isClutch) stats.clutchWins++;
                 currentStreaks[playerId]++;
@@ -119,14 +107,11 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
 
             if (goals > 0) stats.lastGoalDate = match.date;
 
-            // Detección robusta de booleanos en Firestore
             if (isMvp === true || String(isMvp) === "true" || (isMvp as any) === 1) {
               stats.totalMvp++;
-              stats.powerPoints += POINTS.MVP;
             }
             if (hasBestGoal === true || String(hasBestGoal) === "true" || (hasBestGoal as any) === 1) {
               stats.totalBestGoals++;
-              stats.powerPoints += POINTS.BEST_GOAL;
             }
 
             if (team === 'A') stats.matchesAsBlue++;
@@ -226,7 +211,7 @@ export const getChemistryRankings = (players: Player[], matches: Match[], minMat
         wins: stats.wins, 
         matches: stats.matches,
         winRate,
-        combinedPower: s1.powerPoints + s2.powerPoints + s3.powerPoints
+        combinedPower: s1.totalGoals + s2.totalGoals + s3.totalGoals // Temporal logic
       };
     })
     .filter((pair): pair is ChemistryPair => pair !== null && pair.matches >= minMatchesThreshold)
@@ -260,6 +245,10 @@ export const getTopScorerRecord = (matches: Match[], players: Player[]) => {
   return { maxGoals, holders };
 };
 
+/**
+ * Balance teams using current stats. 
+ * Temporarily uses totalGoals as ranking factor to avoid build errors.
+ */
 export const balanceTeams = (selectedPlayers: AggregatedPlayerStats[]) => {
   const goalkeepers = selectedPlayers.filter(p => p.position === 'Arquero');
   const outfieldPlayers = selectedPlayers.filter(p => p.position !== 'Arquero');
@@ -267,14 +256,14 @@ export const balanceTeams = (selectedPlayers: AggregatedPlayerStats[]) => {
   const teamB: AggregatedPlayerStats[] = [];
   let scoreA = 0; let scoreB = 0;
 
-  [...goalkeepers].sort((a, b) => b.powerPoints - a.powerPoints).forEach(gk => {
-    if (scoreA <= scoreB) { teamA.push(gk); scoreA += gk.powerPoints; }
-    else { teamB.push(gk); scoreB += gk.powerPoints; }
+  [...goalkeepers].sort((a, b) => b.totalGoals - a.totalGoals).forEach(gk => {
+    if (scoreA <= scoreB) { teamA.push(gk); scoreA += gk.totalGoals; }
+    else { teamB.push(gk); scoreB += gk.totalGoals; }
   });
 
-  [...outfieldPlayers].sort((a, b) => b.powerPoints - a.powerPoints).forEach(p => {
-    if (scoreA <= scoreB) { teamA.push(p); scoreA += p.powerPoints; }
-    else { teamB.push(p); scoreB += p.powerPoints; }
+  [...outfieldPlayers].sort((a, b) => b.totalGoals - a.totalGoals).forEach(p => {
+    if (scoreA <= scoreB) { teamA.push(p); scoreA += p.totalGoals; }
+    else { teamB.push(p); scoreB += p.totalGoals; }
   });
 
   return { teamA, teamB, scoreA, scoreB };

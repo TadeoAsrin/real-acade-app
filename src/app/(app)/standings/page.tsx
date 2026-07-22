@@ -13,10 +13,10 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { getInitials, cn } from '@/lib/utils';
-import { Trophy, Medal, Star, Target, Info, Loader2 } from 'lucide-react';
+import { Trophy, Medal, Info, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function StandingsPage() {
@@ -50,7 +50,11 @@ export default function StandingsPage() {
   const stats = React.useMemo(() => {
     if (!players || !matches) return [];
     return calculateAggregatedStats(players, matches)
-      .sort((a, b) => b.efficiency - a.efficiency || b.powerPoints - a.powerPoints);
+      .sort((a, b) => 
+        (b.wins * 3 + b.draws) - (a.wins * 3 + a.draws) || 
+        b.efficiency - a.efficiency ||
+        b.goalDifference - a.goalDifference
+      );
   }, [players, matches]);
 
   const isLoading = settingsLoading || playersLoading || matchesLoading;
@@ -85,7 +89,7 @@ export default function StandingsPage() {
             Clasificación Oficial
           </h2>
           <p className="text-[10px] lg:text-xs font-black uppercase tracking-[0.3em] text-primary/60 ml-1">
-            Métricas de Élite • Temporada {activeSeasonId.substring(0, 8)}
+            Métricas de Élite • Temporada Actual
           </p>
         </div>
       </div>
@@ -97,18 +101,21 @@ export default function StandingsPage() {
               <TableHead className="w-12 text-center font-black text-[10px] uppercase">Pos</TableHead>
               <TableHead className="font-black text-[10px] uppercase">Jugador</TableHead>
               <TableHead className="text-center font-black text-[10px] uppercase">PJ</TableHead>
-              <TableHead className="text-center font-black text-[10px] uppercase">G</TableHead>
+              <TableHead className="text-center font-black text-[10px] uppercase text-emerald-500">G</TableHead>
               <TableHead className="text-center font-black text-[10px] uppercase">E</TableHead>
-              <TableHead className="text-center font-black text-[10px] uppercase">P</TableHead>
-              <TableHead className="text-center font-black text-[10px] uppercase">Goles</TableHead>
+              <TableHead className="text-center font-black text-[10px] uppercase text-accent">P</TableHead>
+              <TableHead className="text-center font-black text-[10px] uppercase">GF</TableHead>
+              <TableHead className="text-center font-black text-[10px] uppercase">GC</TableHead>
+              <TableHead className="text-center font-black text-[10px] uppercase">DG</TableHead>
               <TableHead className="text-center font-black text-[10px] uppercase text-primary">EFIC %</TableHead>
-              <TableHead className="text-right font-black text-[10px] uppercase text-orange-500">POWER</TableHead>
+              <TableHead className="text-right font-black text-[10px] uppercase text-yellow-500">PUNTOS</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {stats.map((player, index) => {
               const isPodium = index < 3;
               const podiumClass = index === 0 ? "podium-1" : index === 1 ? "podium-2" : index === 2 ? "podium-3" : "";
+              const leaguePoints = (player.wins * 3) + player.draws;
 
               return (
                 <TableRow key={player.playerId} className={cn("official-table-row group", podiumClass)}>
@@ -141,9 +148,11 @@ export default function StandingsPage() {
                   <TableCell className="text-center text-emerald-500 font-bold">{player.wins}</TableCell>
                   <TableCell className="text-center text-zinc-500 font-bold">{player.draws}</TableCell>
                   <TableCell className="text-center text-accent font-bold">{player.losses}</TableCell>
-                  <TableCell className="text-center font-bold">{player.totalGoals}</TableCell>
+                  <TableCell className="text-center font-bold">{player.goalsFor}</TableCell>
+                  <TableCell className="text-center font-bold text-muted-foreground/40">{player.goalsAgainst}</TableCell>
+                  <TableCell className="text-center font-bold">{player.goalDifference > 0 ? `+${player.goalDifference}` : player.goalDifference}</TableCell>
                   <TableCell className="text-center font-bebas text-lg text-primary">{player.efficiency}%</TableCell>
-                  <TableCell className="text-right font-bebas text-2xl text-orange-500">{player.powerPoints}</TableCell>
+                  <TableCell className="text-right font-bebas text-2xl text-yellow-500">{leaguePoints}</TableCell>
                 </TableRow>
               );
             })}
