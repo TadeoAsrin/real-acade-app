@@ -13,9 +13,9 @@ export default function AppLayout({
   children: React.ReactNode;
 }) {
 
-  const { isUserLoading, user } = useUser();
+  const { user, isUserLoading } = useUser();
 
-  // Esperar solamente mientras Firebase verifica la sesión inicial
+
   if (isUserLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
@@ -25,6 +25,18 @@ export default function AppLayout({
             Preparando vestuario...
           </p>
         </div>
+      </div>
+    );
+  }
+
+
+  // Si no hay usuario, mandamos al login
+  if (!user) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <p className="text-muted-foreground">
+          Redirigiendo al login...
+        </p>
       </div>
     );
   }
@@ -41,7 +53,7 @@ export default function AppLayout({
           <Header />
 
           <main className="flex-1 overflow-y-auto bg-dot-pattern">
-            <div className="container mx-auto max-w-7xl px-4 py-6">
+            <div className="container mx-auto max-w-7xl">
               {children}
             </div>
           </main>
