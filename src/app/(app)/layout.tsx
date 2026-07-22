@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -8,40 +7,47 @@ import { Header } from "@/components/layout/header";
 import { useUser } from "@/firebase";
 import { Loader2 } from "lucide-react";
 
-/**
- * Layout oficial para la zona privada del club.
- * Gestiona la barra lateral y el encabezado de forma exclusiva.
- */
 export default function AppLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { isUserLoading } = useUser();
 
+  const { isUserLoading, user } = useUser();
+
+  // Esperar solamente mientras Firebase verifica la sesión inicial
   if (isUserLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-10 w-10 animate-spin text-primary" />
-          <p className="font-bebas text-xl tracking-widest text-muted-foreground uppercase">Preparando vestuario...</p>
+          <p className="font-bebas text-xl tracking-widest text-muted-foreground uppercase">
+            Preparando vestuario...
+          </p>
         </div>
       </div>
     );
   }
 
+
   return (
     <SidebarProvider>
       <div className="flex h-screen w-full overflow-hidden bg-background">
+
         <AppSidebar />
+
         <SidebarInset className="flex flex-col flex-1 overflow-hidden">
+
           <Header />
+
           <main className="flex-1 overflow-y-auto bg-dot-pattern">
-            <div className="container mx-auto max-w-7xl">
+            <div className="container mx-auto max-w-7xl px-4 py-6">
               {children}
             </div>
           </main>
+
         </SidebarInset>
+
       </div>
     </SidebarProvider>
   );
