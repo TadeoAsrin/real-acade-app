@@ -9,8 +9,8 @@ import { useUser } from "@/firebase";
 import { Loader2 } from "lucide-react";
 
 /**
- * Layout maestro para el área privada del club.
- * Provee la Sidebar, el Header y el fondo con patrón de puntos.
+ * Layout oficial para la zona privada del club.
+ * Gestiona la barra lateral y el encabezado de forma exclusiva.
  */
 export default function AppLayout({
   children,
