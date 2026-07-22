@@ -64,9 +64,9 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Configuración de la App: Lectura miembros, escritura solo admin
+    // Configuración de la App: Lectura pública (ID de temporada activa), escritura solo admin
     match /app_settings/{docId} {
-      allow read: if isSignedIn();
+      allow read: if true;
       allow write: if isAdmin();
     }
   }

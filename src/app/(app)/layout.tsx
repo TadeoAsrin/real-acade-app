@@ -6,31 +6,41 @@ import { AppSidebar } from "@/components/layout/app-sidebar";
 import { Header } from "@/components/layout/header";
 import { useUser } from "@/firebase";
 import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function AppLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { isUserLoading } = useUser();
+  const { user, isUserLoading } = useUser();
+  const router = useRouter();
 
   const [showLoading, setShowLoading] = React.useState(true);
 
   React.useEffect(() => {
     if (!isUserLoading) {
-      setShowLoading(false);
+      if (!user) {
+        router.replace('/login');
+      } else {
+        setShowLoading(false);
+      }
       return;
     }
 
     const timer = setTimeout(() => {
       console.warn(
-        "Firebase Auth tardó demasiado. Continuando sin esperar autenticación."
+        "Firebase Auth tardó demasiado. Continuando con precaución."
       );
-      setShowLoading(false);
+      if (!user && !isUserLoading) {
+        router.replace('/login');
+      } else {
+        setShowLoading(false);
+      }
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, [isUserLoading]);
+  }, [isUserLoading, user, router]);
 
   if (showLoading) {
     return (
@@ -43,6 +53,11 @@ export default function AppLayout({
         </div>
       </div>
     );
+  }
+
+  // Si no hay usuario y ya no está cargando, no renderizamos nada mientras redirige
+  if (!user && !isUserLoading) {
+    return null;
   }
 
   return (
