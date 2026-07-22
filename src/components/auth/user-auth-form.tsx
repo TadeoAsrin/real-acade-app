@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -13,7 +12,11 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAuth, useFirestore } from "@/firebase";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import {
   Select,
@@ -28,7 +31,10 @@ interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const formSchema = z.object({
-  name: z.string().min(2, { message: "El nombre debe tener al menos 2 caracteres." }).optional(),
+  name: z
+    .string()
+    .min(2, { message: "El nombre debe tener al menos 2 caracteres." })
+    .optional(),
   email: z.string().email({ message: "Por favor ingresa un email válido." }),
   password: z
     .string()
@@ -38,13 +44,25 @@ const formSchema = z.object({
 
 type UserFormValue = z.infer<typeof formSchema>;
 
-const POSITIONS = ["Arquero", "Lateral Derecho", "Defensor Central", "Lateral Izquierdo", "Mediocampista", "Delantero"];
+const POSITIONS = [
+  "Arquero",
+  "Lateral Derecho",
+  "Defensor Central",
+  "Lateral Izquierdo",
+  "Mediocampista",
+  "Delantero",
+];
 
-export function UserAuthForm({ className, mode, ...props }: UserAuthFormProps) {
+export function UserAuthForm({
+  className,
+  mode,
+  ...props
+}: UserAuthFormProps) {
   const router = useRouter();
   const { toast } = useToast();
   const auth = useAuth();
   const firestore = useFirestore();
+
   const [isLoading, setIsLoading] = React.useState(false);
 
   const {
@@ -58,30 +76,60 @@ export function UserAuthForm({ className, mode, ...props }: UserAuthFormProps) {
 
   const onSubmit = async (data: UserFormValue) => {
     setIsLoading(true);
+
     try {
       if (mode === "login") {
-        await signInWithEmailAndPassword(auth, data.email, data.password);
-        toast({ title: "Inicio de sesión exitoso", description: "Bienvenido a Real Acade." });
+        await signInWithEmailAndPassword(
+          auth,
+          data.email,
+          data.password
+        );
+
+        toast({
+          title: "Inicio de sesión exitoso",
+          description: "Bienvenido a Real Acade.",
+        });
+
       } else {
-        const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+        const userCredential =
+          await createUserWithEmailAndPassword(
+            auth,
+            data.email,
+            data.password
+          );
+
         const user = userCredential.user;
-        
+
         await updateProfile(user, {
           displayName: data.name,
         });
 
-        await setDoc(doc(firestore, 'players', user.uid), {
-          name: data.name || user.email?.split('@')[0],
+        await setDoc(doc(firestore, "players", user.uid), {
+          name: data.name || user.email?.split("@")[0],
           email: user.email,
           position: data.position || null,
-          role: 'player'
+          role: "player",
         });
 
-        toast({ title: "Registro exitoso", description: "Tu cuenta ha sido creada." });
+        toast({
+          title: "Registro exitoso",
+          description: "Tu cuenta ha sido creada.",
+        });
       }
-      router.push("/dashboard");
+
+      // Esperamos a que Firebase actualice el estado global del usuario
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      router.replace("/dashboard");
+      router.refresh();
+
     } catch (error: any) {
-      toast({ variant: "destructive", title: "Error", description: error.message });
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message,
+      });
+
     } finally {
       setIsLoading(false);
     }
@@ -91,42 +139,112 @@ export function UserAuthForm({ className, mode, ...props }: UserAuthFormProps) {
     <div className={cn("grid gap-6", className)} {...props}>
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="grid gap-4">
+
           {mode === "register" && (
             <>
-                <div className="grid gap-2">
-                    <Label htmlFor="name">Nombre Completo</Label>
-                    <Input id="name" placeholder="Juan Pérez" type="text" disabled={isLoading} {...register("name")} />
-                    {errors?.name && <p className="px-1 text-xs text-destructive">{errors.name.message}</p>}
-                </div>
-                <div className="grid gap-2">
-                    <Label htmlFor="position">Posición Principal</Label>
-                    <Select onValueChange={(val) => setValue("position", val)} disabled={isLoading}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Selecciona tu posición" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {POSITIONS.map(pos => (
-                                <SelectItem key={pos} value={pos}>{pos}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
+              <div className="grid gap-2">
+                <Label htmlFor="name">
+                  Nombre Completo
+                </Label>
+
+                <Input
+                  id="name"
+                  placeholder="Juan Pérez"
+                  type="text"
+                  disabled={isLoading}
+                  {...register("name")}
+                />
+
+                {errors?.name && (
+                  <p className="px-1 text-xs text-destructive">
+                    {errors.name.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="position">
+                  Posición Principal
+                </Label>
+
+                <Select
+                  onValueChange={(val) =>
+                    setValue("position", val)
+                  }
+                  disabled={isLoading}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona tu posición" />
+                  </SelectTrigger>
+
+                  <SelectContent>
+                    {POSITIONS.map((pos) => (
+                      <SelectItem
+                        key={pos}
+                        value={pos}
+                      >
+                        {pos}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+
+                </Select>
+              </div>
             </>
           )}
+
           <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" placeholder="nombre@ejemplo.com" type="email" disabled={isLoading} {...register("email")} />
-            {errors?.email && <p className="px-1 text-xs text-destructive">{errors.email.message}</p>}
+            <Label htmlFor="email">
+              Email
+            </Label>
+
+            <Input
+              id="email"
+              placeholder="nombre@ejemplo.com"
+              type="email"
+              disabled={isLoading}
+              {...register("email")}
+            />
+
+            {errors?.email && (
+              <p className="px-1 text-xs text-destructive">
+                {errors.email.message}
+              </p>
+            )}
           </div>
+
+
           <div className="grid gap-2">
-            <Label htmlFor="password">Contraseña</Label>
-            <Input id="password" placeholder="••••••••" type="password" disabled={isLoading} {...register("password")} />
-            {errors?.password && <p className="px-1 text-xs text-destructive">{errors.password.message}</p>}
+            <Label htmlFor="password">
+              Contraseña
+            </Label>
+
+            <Input
+              id="password"
+              placeholder="••••••••"
+              type="password"
+              disabled={isLoading}
+              {...register("password")}
+            />
+
+            {errors?.password && (
+              <p className="px-1 text-xs text-destructive">
+                {errors.password.message}
+              </p>
+            )}
           </div>
+
+
           <Button disabled={isLoading}>
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {mode === "login" ? "Iniciar Sesión" : "Crear Cuenta"}
+            {isLoading && (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            )}
+
+            {mode === "login"
+              ? "Iniciar Sesión"
+              : "Crear Cuenta"}
           </Button>
+
         </div>
       </form>
     </div>
