@@ -114,7 +114,7 @@ export type Season = {
   id: string;
   name: string;
   year: number;
-  type: 'Apertura' | 'Clausura' | 'Histórico';
+  type: 'Apertura' | 'Clausura';
   half: 1 | 2;
   startDate: string;
   endDate?: string | null;

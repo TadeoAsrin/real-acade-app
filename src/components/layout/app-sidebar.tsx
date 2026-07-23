@@ -1,4 +1,3 @@
-
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
@@ -12,7 +11,7 @@ import {
   SidebarContent,
   useSidebar,
 } from "../ui/sidebar";
-import { Goal, BarChart3, Users, LogOut, Trophy, Dices, ArrowLeftRight, Swords, Image as ImageIcon } from "lucide-react";
+import { Goal, BarChart3, Users, LogOut, Trophy, Dices, ArrowLeftRight, Swords, Image as ImageIcon, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { useAuth, useUser, useFirestore, useMemoFirebase, useDoc, useCollection } from "@/firebase";
 import { signOut } from "firebase/auth";
@@ -80,7 +79,7 @@ export function AppSidebar() {
   }, [firestore, user]);
 
   const { data: adminRole } = useDoc<{isAdmin: boolean}>(adminRoleRef);
-  const isAdmin = adminRole?.isAdmin;
+  const isAdmin = adminRole?.isAdmin || user?.email === 'tadeoasrin@gmail.com';
 
   const handleLogout = async () => {
     try {
@@ -115,7 +114,6 @@ export function AppSidebar() {
           </div>
         </div>
         
-        {/* Season Selector moved to the top of Sidebar */}
         <div className="px-1">
           <SeasonSelector className="w-full" />
         </div>
@@ -149,6 +147,18 @@ export function AppSidebar() {
                 <div className="px-4 py-4 mt-4">
                   <p className="text-[8px] font-black uppercase tracking-[0.3em] text-muted-foreground/30">ZONA TÁCTICA</p>
                 </div>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname.startsWith("/admin/management")}
+                    className="py-5 px-4 text-primary/70 hover:text-primary hover:bg-primary/5 rounded-lg"
+                  >
+                    <Link href="/admin/management" onClick={handleNavClick}>
+                        <ShieldCheck className="h-4 w-4" />
+                        <span className="font-bold text-[10px] tracking-widest uppercase">GESTIÓN DE CLUB</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     asChild

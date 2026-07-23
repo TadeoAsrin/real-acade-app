@@ -1,13 +1,10 @@
-
 'use client';
 
 import { 
   Firestore, 
   doc, 
   getDoc, 
-  setDoc, 
   collection, 
-  runTransaction, 
   getDocs, 
   writeBatch
 } from 'firebase/firestore';
@@ -53,7 +50,7 @@ export async function getMigrationPreview(db: Firestore) {
 
 /**
  * Creates a new season and updates the global active season ID atomically.
- * This is used for creating FUTURE seasons (Clausura, etc.)
+ * Optimized for management panel use.
  */
 export async function createNewSeason(
   db: Firestore, 
@@ -64,24 +61,22 @@ export async function createNewSeason(
   const newSeasonRef = doc(seasonsCol);
   const now = new Date().toISOString();
 
-  await runTransaction(db, async (transaction) => {
-    const settingsSnap = await transaction.get(settingsRef);
-    const activeSeasonId = settingsSnap.exists() ? (settingsSnap.data() as AppSettings).activeSeasonId : null;
+  const batch = writeBatch(db);
 
-    if (activeSeasonId) {
-      const currentSeasonRef = doc(db, 'seasons', activeSeasonId);
-      transaction.update(currentSeasonRef, { endDate: now });
-    }
+  const newSeason: Season = {
+    ...data,
+    id: newSeasonRef.id,
+    createdAt: now,
+    endDate: null
+  };
 
-    const newSeason: Season = {
-      ...data,
-      id: newSeasonRef.id,
-      createdAt: now,
-      endDate: null
-    };
-    transaction.set(newSeasonRef, newSeason);
-    transaction.set(settingsRef, { activeSeasonId: newSeasonRef.id }, { merge: true });
-  });
+  // Create the season document
+  batch.set(newSeasonRef, newSeason);
+
+  // Update global settings to point to the new season as active
+  batch.set(settingsRef, { activeSeasonId: newSeasonRef.id }, { merge: true });
+
+  await batch.commit();
 
   return newSeasonRef.id;
 }
@@ -89,11 +84,10 @@ export async function createNewSeason(
 /**
  * Standalone migration script.
  * Creates the initial season and assigns it to all existing data.
- * All existing items are assumed to belong to this first official cycle.
  */
 export async function runInitialMigration(
   db: Firestore, 
-  config: { name: string, year: number, type: 'Apertura' | 'Clausura' | 'Histórico', half: 1 | 2 }
+  config: { name: string, year: number, type: 'Apertura' | 'Clausura', half: 1 | 2 }
 ) {
   const settingsRef = doc(db, 'app_settings', 'global');
   const settingsSnap = await getDoc(settingsRef);
@@ -113,7 +107,7 @@ export async function runInitialMigration(
       year: config.year,
       type: config.type,
       half: config.half,
-      startDate: "2024-01-01T00:00:00Z", // Data usually started around this time
+      startDate: "2024-01-01T00:00:00Z",
       createdAt: now,
       endDate: null
     };
@@ -122,7 +116,6 @@ export async function runInitialMigration(
     let matchesCount = 0;
     let galleryCount = 0;
     
-    // 1. Migrar Partidos
     const matchesSnap = await getDocs(collection(db, 'matches'));
     matchesSnap.forEach((m) => {
       if (!m.data().seasonId) {
@@ -131,8 +124,6 @@ export async function runInitialMigration(
       }
     });
 
-    // 2. Migrar Galería (Documentos exclusivos que no tienen seasonId)
-    // Las fotos que están DENTRO de los partidos se migran automáticamente al migrar el partido.
     const gallerySnap = await getDocs(collection(db, 'gallery'));
     gallerySnap.forEach((g) => {
       if (!g.data().seasonId) {
@@ -141,7 +132,6 @@ export async function runInitialMigration(
       }
     });
 
-    // 3. Crear el registro de temporada y actualizar configuración global
     batch.set(initialSeasonRef, initialSeason);
     batch.set(settingsRef, { 
       activeSeasonId: initialSeasonRef.id,
