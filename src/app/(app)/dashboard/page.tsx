@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from 'react';
@@ -198,8 +197,8 @@ function DashboardContent() {
   const attendanceText = topAttendancePlayers.length === 0 ? "SIN REGISTROS" : `LÍDER: ${topAttendancePlayers[0].name.split(' ')[0].toUpperCase()}${topAttendancePlayers.length > 1 ? ` +${topAttendancePlayers.length - 1}` : ''}`;
 
   const ordenDeMando = [...stats]
-    .filter(p => p.totalCaptaincies === 0 && p.isActive)
-    .sort((a, b) => b.matchesPlayed - a.matchesPlayed)
+    .filter(p => p.isActive)
+    .sort((a, b) => b.captaincyPriorityScore - a.captaincyPriorityScore || b.matchesPlayed - a.matchesPlayed)
     .slice(0, 2);
 
   const forcedMatch = gacetaMatchId ? allMatches.find(m => m.id === gacetaMatchId) : null;
@@ -286,7 +285,7 @@ function DashboardContent() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {ordenDeMando.map((p, idx) => (
-            <Link key={p.playerId} href="/players" className="group">
+            <Link key={p.playerId} href="/hierarchy" className="group">
               <div className="bg-[#111827] border border-emerald-500/20 rounded-2xl p-5 flex items-center justify-between transition-all hover:bg-emerald-500/5 hover:border-emerald-500/40">
                 <div className="flex items-center gap-4">
                   <div className="relative">
@@ -303,7 +302,7 @@ function DashboardContent() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <span className="text-3xl font-black italic font-bebas text-white leading-none">{p.matchesPlayed}</span>
+                  <span className="text-3xl font-black italic font-bebas text-white leading-none">{p.matchesSinceLastCaptain}</span>
                   <p className="text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest font-oswald">PJ SIN BRAZALETE</p>
                 </div>
               </div>

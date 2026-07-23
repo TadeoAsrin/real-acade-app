@@ -150,6 +150,23 @@ export function AppSidebar() {
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     asChild
+                    isActive={pathname.startsWith("/hierarchy")}
+                    className={cn(
+                      "py-5 px-4 transition-all duration-200 rounded-lg",
+                      pathname.startsWith("/hierarchy") 
+                        ? "bg-emerald-500/10 text-emerald-500" 
+                        : "text-emerald-500/70 hover:text-emerald-400 hover:bg-emerald-500/5"
+                    )}
+                  >
+                    <Link href="/hierarchy" onClick={handleNavClick}>
+                        <ShieldCheck className="h-4 w-4" />
+                        <span className="font-bold text-[10px] tracking-widest uppercase">ORDEN DE MANDO</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
                     isActive={pathname.startsWith("/admin/management")}
                     className="py-5 px-4 text-primary/70 hover:text-primary hover:bg-primary/5 rounded-lg"
                   >
