@@ -23,7 +23,8 @@ import {
   Users,
   Search,
   Target,
-  ArrowLeft
+  ArrowLeft,
+  Edit3
 } from 'lucide-react';
 import { getInitials, cn } from '@/lib/utils';
 import {
