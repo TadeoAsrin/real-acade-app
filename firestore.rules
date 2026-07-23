@@ -4,61 +4,60 @@ service cloud.firestore {
 
     /**
      * REAL ACADE SECURITY MODEL
-     * Reglas optimizadas para acceso público total en lectura y 
-     * protección estricta en escritura.
+     * Acceso público total en lectura y protección estricta en escritura.
      */
     
     function isAdmin() {
+      // Validación ultra-segura para evitar errores de evaluación con auth nulo
       return request.auth != null && (
         request.auth.token.email == 'tadeoasrin@gmail.com' ||
-        exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid)) && 
-        get(/databases/$(database)/documents/roles_admin/$(request.auth.uid)).data.isAdmin == true
+        (exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid)) && 
+         get(/databases/$(database)/documents/roles_admin/$(request.auth.uid)).data.isAdmin == true)
       );
     }
 
-    // 1. CONFIGURACIÓN Y TEMPORADAS (PÚBLICO)
+    // 1. CONFIGURACIÓN Y TEMPORADAS (LECTURA PÚBLICA)
     match /app_settings/{id} {
-      allow get, list: if true;
+      allow read: if true;
       allow write: if isAdmin();
     }
     
-    match /seasons/{id} {
-      allow get, list: if true;
+    match /seasons/{document=**} {
+      allow read: if true;
       allow write: if isAdmin();
     }
     
-    // 2. PARTIDOS Y VOTOS (PÚBLICO / VOTO PROTEGIDO)
-    match /matches/{id} {
-      allow get, list: if true;
-      allow write: if isAdmin();
-      
-      match /votes/{uid} {
-        allow get, list: if true;
-        allow write: if request.auth != null && request.auth.uid == uid;
-      }
-    }
-    
-    // 3. JUGADORES (PÚBLICO / PERFIL PROTEGIDO)
-    match /players/{id} {
-      allow get, list: if true;
-      allow write: if isAdmin() || (request.auth != null && request.auth.uid == id);
-    }
-    
-    // 4. ROLES Y ADMINISTRACIÓN (ADMIN ONLY)
-    match /roles_admin/{id} {
-      allow get, list: if true;
+    // 2. PARTIDOS Y VOTOS (LECTURA PÚBLICA)
+    match /matches/{document=**} {
+      allow read: if true;
       allow write: if isAdmin();
     }
     
-    // 5. GALERÍA (PÚBLICO)
-    match /gallery/{id} {
-      allow get, list: if true;
+    // Permiso especial para votar (incluso si el partido es público)
+    match /matches/{matchId}/votes/{uid} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == uid;
+    }
+    
+    // 3. JUGADORES (LECTURA PÚBLICA)
+    match /players/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin() || (request.auth != null && request.auth.uid == request.resource.id);
+    }
+    
+    // 4. ADMINISTRACIÓN (ADMIN ONLY)
+    match /roles_admin/{document=**} {
+      allow read, write: if isAdmin();
+    }
+    
+    // 5. GALERÍA Y DRAFTS (PÚBLICO / MIEMBROS)
+    match /gallery/{document=**} {
+      allow read: if true;
       allow write: if isAdmin();
     }
     
-    // 6. DRAFTS (MIEMBROS)
-    match /drafts/{id} {
-      allow get, list: if true;
+    match /drafts/{document=**} {
+      allow read: if true;
       allow write: if request.auth != null;
     }
   }
