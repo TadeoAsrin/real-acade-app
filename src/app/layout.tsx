@@ -1,6 +1,3 @@
-
-'use client';
-
 import * as React from 'react';
 import { Inter, Bebas_Neue, Oswald, Playfair_Display, Lora } from "next/font/google";
 import "./globals.css";
@@ -16,8 +13,8 @@ const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfa
 const lora = Lora({ subsets: ["latin"], variable: "--font-lora" });
 
 /**
- * Root Layout global. Solo contiene los proveedores base y la estructura HTML.
- * No incluye navegación para permitir layouts específicos en (auth) y (app).
+ * Root Layout global. Ahora es un Server Component por defecto.
+ * Los proveedores (Client Components) se inyectan como hijos.
  */
 export default function RootLayout({
   children,

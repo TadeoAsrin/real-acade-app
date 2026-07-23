@@ -1,11 +1,9 @@
-
-'use client';
-
 import * as React from 'react';
 
 /**
  * Layout para páginas de autenticación (Login/Register).
  * Centra el contenido y evita la carga de la navegación del club.
+ * Convertido a Server Component para mejorar la estabilidad de carga.
  */
 export default function AuthLayout({
   children,
