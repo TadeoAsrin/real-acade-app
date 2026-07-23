@@ -28,7 +28,7 @@ export function SeasonProvider({ children }: { children: React.ReactNode }) {
   }, [firestore]);
   const { data: settings, isLoading: settingsLoading } = useDoc<AppSettings>(settingsRef);
 
-  // 2. Cargar todas las temporadas (Sin orderBy múltiple para evitar requerir índices compuestos)
+  // 2. Cargar todas las temporadas
   const seasonsRef = useMemoFirebase(() => {
     if (!firestore) return null;
     return query(collection(firestore, 'seasons'));
@@ -44,26 +44,28 @@ export function SeasonProvider({ children }: { children: React.ReactNode }) {
     }
   }, [activeSeasonId, selectedSeasonId]);
 
-  // Ordenar las temporadas en el cliente para evitar dependencia de índices de Firestore
+  // Ordenar las temporadas en el cliente
   const contextSeasons = React.useMemo(() => {
-    if (!seasons) return [];
+    if (!seasons) return null;
+    
     return [...seasons].sort((a, b) => {
       if (b.year !== a.year) return b.year - a.year;
       return b.half - a.half;
     });
   }, [seasons]);
 
-  const activeSeason = contextSeasons.find(s => s.id === activeSeasonId) || null;
-  const selectedSeason = contextSeasons.find(s => s.id === selectedSeasonId) || null;
+  const activeSeason = (contextSeasons || []).find(s => s.id === activeSeasonId) || null;
+  const selectedSeason = (contextSeasons || []).find(s => s.id === selectedSeasonId) || null;
 
   const value = {
-    seasons: contextSeasons,
+    seasons: contextSeasons || [],
     activeSeasonId,
     selectedSeasonId,
     selectedSeason,
     activeSeason,
     setSelectedSeasonId,
-    loading: settingsLoading || seasonsLoading,
+    // Aseguramos que 'loading' sea verdadero si los datos son null (aún no han llegado o error de permiso inicial)
+    loading: settingsLoading || seasonsLoading || (seasons === null && !seasonsLoading),
   };
 
   return (

@@ -4,12 +4,15 @@ service cloud.firestore {
 
     /**
      * REAL ACADE SECURITY MODEL - ACCESO PÚBLICO TOTAL DE LECTURA
+     * Se permite que cualquier persona vea los datos (get, list).
+     * La escritura (create, update, delete) queda reservada para administradores.
      */
 
     function isSignedIn() {
       return request.auth != null;
     }
 
+    // Función isAdmin mejorada: segura para usuarios no autenticados
     function isAdmin() {
       return isSignedIn() && (
         request.auth.token.email == 'tadeoasrin@gmail.com' ||
@@ -22,51 +25,51 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    // Configuración de la App: Lectura pública vital para el arranque
+    // Configuración de la App: Lectura pública total
     match /app_settings/{docId} {
-      allow get, list: if true;
+      allow read: if true;
       allow write: if isAdmin();
     }
 
-    // Temporadas: Lectura pública para historial y filtros
+    // Temporadas: Lectura pública total
     match /seasons/{seasonId} {
-      allow get, list: if true;
+      allow read: if true;
       allow write: if isAdmin();
     }
 
-    // Partidos: Lectura pública total para amigos y miembros
+    // Partidos: Lectura pública total
     match /matches/{matchId} {
-      allow get, list: if true;
+      allow read: if true;
       allow write: if isAdmin();
 
-      // Votos para mejor gol: Solo miembros pueden votar
+      // Votos para mejor gol: Solo miembros registrados pueden votar
       match /votes/{userId} {
-        allow get, list: if true;
+        allow read: if true;
         allow write: if isOwner(userId);
       }
     }
 
-    // Jugadores: Lectura pública, escritura propia o admin
+    // Jugadores: Lectura pública total
     match /players/{playerId} {
-      allow get, list: if true;
+      allow read: if true;
       allow write: if isOwner(playerId) || isAdmin();
     }
 
     // Roles de administrador: Lectura pública necesaria para lógica de UI
     match /roles_admin/{uid} {
-      allow get, list: if true;
+      allow read: if true;
       allow write: if false;
     }
 
-    // Galería: Lectura pública de momentos de élite
+    // Galería: Lectura pública total
     match /gallery/{itemId} {
-      allow get, list: if true;
+      allow read: if true;
       allow write: if isAdmin();
     }
 
     // Pan y Queso (Drafts)
     match /drafts/{draftId} {
-      allow get, list: if true;
+      allow read: if true;
       allow write: if isSignedIn() || isAdmin();
     }
   }

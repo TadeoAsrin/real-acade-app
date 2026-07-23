@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from 'react';
@@ -30,10 +29,11 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials, cn } from "@/lib/utils";
 import { MatchNewsModal } from '@/components/dashboard/match-news-modal';
 import { useSeason } from '@/context/season-context';
+import type { LucideIcon } from 'lucide-react';
 
 interface EliteListCardProps {
   title: string;
-  icon: any;
+  icon: LucideIcon;
   players: AggregatedPlayerStats[];
   valueFn: (p: AggregatedPlayerStats) => string | number;
   label: string;
@@ -160,8 +160,7 @@ function DashboardContent() {
     }
   }, [lastMatch]);
 
-  // CRITICAL: Ensure we wait for season resolution and data arrival
-  if (seasonLoading || playersLoading || matchesLoading || !selectedSeasonId || !playersData) {
+  if (seasonLoading || playersLoading || matchesLoading || !selectedSeasonId || playersData === null) {
     return (
       <div className="flex h-[80vh] flex-col items-center justify-center gap-4">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -174,8 +173,8 @@ function DashboardContent() {
   const stats = calculateAggregatedStats(allPlayers, allMatches);
   
   const topInfluential = [...stats]
-    .filter(p => p.matchesPlayed >= 4)
-    .sort((a, b) => b.influenceScore - a.influenceScore || b.matchesPlayed - a.matchesPlayed)
+    .filter(p => p.matchesPlayed >= 1)
+    .sort((a, b) => b.winPercentage - a.winPercentage || b.matchesPlayed - a.matchesPlayed)
     .slice(0, 3);
 
   const topScorers = [...stats]
@@ -184,12 +183,12 @@ function DashboardContent() {
     .slice(0, 3);
 
   const topStreaks = [...stats]
-    .filter(p => p.matchesPlayed >= 2)
+    .filter(p => p.matchesPlayed >= 1)
     .sort((a, b) => b.bestStreak - a.bestStreak || b.totalGoals - a.totalGoals)
     .slice(0, 3);
 
   const topPodium = stats
-    .filter(p => p.matchesPlayed >= 4)
+    .filter(p => p.matchesPlayed >= 1)
     .sort((a, b) => 
       (b.wins * 3 + b.draws) - (a.wins * 3 + a.draws) || 
       b.efficiency - a.efficiency || 
@@ -381,7 +380,7 @@ function DashboardContent() {
           <section className="space-y-6 relative z-10">
             <div className="flex items-center justify-between px-1">
               <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 font-oswald">SALA DE HUMILDAD</h2>
-              <Badge variant="outline" className="text-[7px] font-black uppercase tracking-widest border-white/5 text-muted-foreground/40 font-oswald">FILTRO: MÍNIMO 2 PJ</Badge>
+              <Badge variant="outline" className="text-[7px] font-black uppercase tracking-widest border-white/5 text-muted-foreground/40 font-oswald">FILTRO: MÍNIMO 1 PJ</Badge>
             </div>
             
             <div className="bg-black/20 backdrop-blur-sm rounded-[2rem] overflow-hidden border border-white/5">
@@ -395,7 +394,7 @@ function DashboardContent() {
                     <Badge variant="outline" className="text-[6px] font-black bg-red-500/5 text-red-500/40 border-none uppercase px-1.5 py-0 font-oswald">RATIO DE VULNERABILIDAD</Badge>
                   </div>
                   <div className="space-y-5">
-                    {stats.filter(p => p.matchesPlayed >= 2).sort((a, b) => b.lossPercentage - a.lossPercentage).slice(0, 3).map(p => (
+                    {stats.filter(p => p.matchesPlayed >= 1).sort((a, b) => b.lossPercentage - a.lossPercentage).slice(0, 3).map(p => (
                       <div key={p.playerId} className="space-y-2">
                         <div className="flex items-center justify-between">
                           <div className="flex flex-col">
@@ -424,7 +423,7 @@ function DashboardContent() {
                     <Badge variant="outline" className="text-[6px] font-black bg-blue-400/5 text-blue-400/40 border-none uppercase px-1.5 py-0 font-oswald">SOLO ROLES OFENSIVOS</Badge>
                   </div>
                   <div className="space-y-4">
-                    {stats.filter(p => (p.position === 'Mediocampista' || p.position === 'Delantero') && p.matchesPlayed >= 2).sort((a, b) => a.goalsPerMatch - b.goalsPerMatch).slice(0, 3).map(p => (
+                    {stats.filter(p => (p.position === 'Mediocampista' || p.position === 'Delantero') && p.matchesPlayed >= 1).sort((a, b) => a.goalsPerMatch - b.goalsPerMatch).slice(0, 3).map(p => (
                       <div key={p.playerId} className="flex items-center justify-between bg-white/5 p-3 rounded-xl border border-transparent hover:border-blue-400/10 transition-all">
                         <div className="flex flex-col">
                           <Link href={`/players/${p.playerId}`} className="text-xs font-bold uppercase hover:text-blue-400 transition-colors text-white">{p.name}</Link>
