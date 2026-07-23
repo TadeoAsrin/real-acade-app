@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy, where } from 'firebase/firestore';
+import { collection, query, where } from 'firebase/firestore';
 import type { GalleryItem } from '@/lib/definitions';
 import { Card, CardContent } from '@/components/ui/card';
 import { Image as ImageIcon, Play, Calendar, Trophy, Loader2 } from 'lucide-react';
@@ -20,12 +20,16 @@ export default function GalleryPage() {
     if (!firestore || !selectedSeasonId) return null;
     return query(
       collection(firestore, 'gallery'), 
-      where('seasonId', '==', selectedSeasonId),
-      orderBy('date', 'desc')
+      where('seasonId', '==', selectedSeasonId)
     );
   }, [firestore, selectedSeasonId]);
 
-  const { data: items, isLoading: galleryLoading } = useCollection<GalleryItem>(galleryRef);
+  const { data: galleryData, isLoading: galleryLoading } = useCollection<GalleryItem>(galleryRef);
+
+  const items = React.useMemo(() => {
+    if (!galleryData) return [];
+    return [...galleryData].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [galleryData]);
 
   if (galleryLoading || seasonLoading) {
     return (
@@ -44,7 +48,7 @@ export default function GalleryPage() {
             <ImageIcon className="h-8 w-8 lg:h-14 lg:w-14 text-primary shrink-0" />
             GALERÍA DEL CLUB
           </h2>
-          <p className="text-[10px] lg:text-xs font-black uppercase tracking-[0.3em] text-primary/60 ml-1">
+          <p className="text-[10px] lg:text-xs font-black uppercase tracking-[0.4em] text-primary/60 ml-1">
             MOMENTOS DE ÉLITE • REAL ACADE
           </p>
         </div>

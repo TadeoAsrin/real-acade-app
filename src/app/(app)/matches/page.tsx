@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import { useFirestore, useCollection, useMemoFirebase, useDoc, useUser } from '@/firebase';
-import { collection, query, orderBy, where, doc } from 'firebase/firestore';
+import { collection, query, where, doc } from 'firebase/firestore';
 import type { Match } from '@/lib/definitions';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -30,12 +30,16 @@ export default function MatchesPage() {
     if (!firestore || !selectedSeasonId) return null;
     return query(
       collection(firestore, 'matches'), 
-      where('seasonId', '==', selectedSeasonId),
-      orderBy('date', 'desc')
+      where('seasonId', '==', selectedSeasonId)
     );
   }, [firestore, selectedSeasonId]);
 
-  const { data: matches, isLoading } = useCollection<Match>(matchesRef);
+  const { data: matchesData, isLoading } = useCollection<Match>(matchesRef);
+
+  const matches = React.useMemo(() => {
+    if (!matchesData) return [];
+    return [...matchesData].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [matchesData]);
 
   if (isLoading || seasonLoading) {
     return (

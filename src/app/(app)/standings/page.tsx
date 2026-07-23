@@ -34,8 +34,7 @@ export default function StandingsPage() {
     if (!firestore || !selectedSeasonId) return null;
     return query(
       collection(firestore, 'matches'), 
-      where('seasonId', '==', selectedSeasonId),
-      orderBy('date', 'desc')
+      where('seasonId', '==', selectedSeasonId)
     );
   }, [firestore, selectedSeasonId]);
 

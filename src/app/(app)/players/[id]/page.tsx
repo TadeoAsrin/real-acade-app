@@ -29,13 +29,17 @@ export default function PlayerProfilePage() {
     if (!firestore || !selectedSeasonId) return null;
     return query(
       collection(firestore, 'matches'), 
-      where('seasonId', '==', selectedSeasonId),
-      orderBy('date', 'desc')
+      where('seasonId', '==', selectedSeasonId)
     );
   }, [firestore, selectedSeasonId]);
 
   const { data: player, isLoading: playerLoading } = useDoc<Player>(playerRef);
-  const { data: matches, isLoading: matchesLoading } = useCollection<Match>(matchesRef);
+  const { data: matchesRaw, isLoading: matchesLoading } = useCollection<Match>(matchesRef);
+
+  const matches = React.useMemo(() => {
+    if (!matchesRaw) return [];
+    return [...matchesRaw].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [matchesRaw]);
 
   const stats = React.useMemo(() => {
     if (!player || !matches) return null;

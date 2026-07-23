@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from 'react';
@@ -135,13 +136,17 @@ function DashboardContent() {
     if (!firestore || !selectedSeasonId) return null;
     return query(
       collection(firestore, 'matches'), 
-      where('seasonId', '==', selectedSeasonId),
-      orderBy('date', 'desc')
+      where('seasonId', '==', selectedSeasonId)
     );
   }, [firestore, selectedSeasonId]);
 
   const { data: playersData, isLoading: playersLoading } = useCollection<Player>(playersQuery);
-  const { data: matchesData, isLoading: matchesLoading } = useCollection<Match>(matchesQuery);
+  const { data: matchesDataRaw, isLoading: matchesLoading } = useCollection<Match>(matchesQuery);
+
+  const allMatches = React.useMemo(() => {
+    if (!matchesDataRaw) return [];
+    return [...matchesDataRaw].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [matchesDataRaw]);
 
   if (playersLoading || matchesLoading || seasonLoading) {
     return (
@@ -152,7 +157,6 @@ function DashboardContent() {
   }
 
   const allPlayers = playersData || [];
-  const allMatches = matchesData || [];
   const playedMatches = allMatches.filter(m => m.teamAScore > 0 || m.teamBScore > 0);
   const lastMatch = playedMatches[0];
   
