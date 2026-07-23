@@ -20,6 +20,13 @@ interface SeasonSelectorProps {
 export function SeasonSelector({ className }: SeasonSelectorProps) {
   const { seasons, selectedSeasonId, setSelectedSeasonId, loading } = useSeason();
 
+  // DIAGNÓSTICO TEMPORAL: SeasonSelector
+  console.log('DIAGNOSTICO: SeasonSelector', {
+    seasonsCount: seasons.length,
+    selectedSeasonId,
+    loading
+  });
+
   if (loading && !selectedSeasonId) {
     return (
       <div className={cn("flex items-center gap-2 px-4 py-2 bg-white/5 rounded-xl border border-white/10 animate-pulse", className)}>

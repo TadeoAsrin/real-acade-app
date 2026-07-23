@@ -58,6 +58,15 @@ export function SeasonProvider({ children }: { children: React.ReactNode }) {
     loading: settingsLoading || seasonsLoading,
   };
 
+  // DIAGNÓSTICO TEMPORAL: SeasonProvider
+  console.log('DIAGNOSTICO: SeasonProvider', {
+    seasons: contextSeasons,
+    activeSeasonId,
+    selectedSeasonId,
+    selectedSeason,
+    loading: value.loading
+  });
+
   return (
     <SeasonContext.Provider value={value}>
       {children}
