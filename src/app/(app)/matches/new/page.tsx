@@ -6,9 +6,10 @@ import { collection, query, orderBy } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { useSeason } from '@/context/season-context';
 import type { Player } from '@/lib/definitions';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
@@ -22,7 +23,11 @@ import {
   Minus, 
   Users,
   Search,
-  Target
+  Target,
+  FileText,
+  Video,
+  Image as ImageIcon,
+  Trash2
 } from 'lucide-react';
 import { getInitials, cn } from '@/lib/utils';
 import {
@@ -56,6 +61,11 @@ export default function NewMatchPage() {
   const [date, setDate] = React.useState(new Date().toISOString().split('T')[0]);
   const [playerStates, setPlayerMatchStates] = React.useState<Record<string, typeof initialPlayerMatchState>>({});
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+  // Social Chronicle State
+  const [comment, setComment] = React.useState('');
+  const [videoUrl, setVideoUrl] = React.useState('');
+  const [photoUrls, setPhotos] = React.useState<string[]>(['']);
 
   React.useEffect(() => {
     if (players) {
@@ -99,15 +109,11 @@ export default function NewMatchPage() {
     setPlayerMatchStates(prev => {
       const newStates = { ...prev };
       const currentVal = !!prev[playerId]?.isCaptain;
-      
-      // Reset only isCaptain for others on the same team
       Object.keys(newStates).forEach(id => {
         if (newStates[id].team === team) {
           newStates[id] = { ...newStates[id], isCaptain: false };
         }
       });
-      
-      // Toggle only isCaptain for selected player
       newStates[playerId] = { ...newStates[playerId], isCaptain: !currentVal };
       return newStates;
     });
@@ -117,13 +123,9 @@ export default function NewMatchPage() {
     setPlayerMatchStates(prev => {
       const newStates = { ...prev };
       const currentVal = !!prev[playerId]?.isMvp;
-      
-      // Reset only isMvp for everyone else
       Object.keys(newStates).forEach(id => {
         newStates[id] = { ...newStates[id], isMvp: false };
       });
-      
-      // Toggle only isMvp for selected player
       newStates[playerId] = { ...newStates[playerId], isMvp: !currentVal };
       return newStates;
     });
@@ -133,16 +135,28 @@ export default function NewMatchPage() {
     setPlayerMatchStates(prev => {
       const newStates = { ...prev };
       const currentVal = !!prev[playerId]?.hasBestGoal;
-      
-      // Reset only hasBestGoal for everyone else
       Object.keys(newStates).forEach(id => {
         newStates[id] = { ...newStates[id], hasBestGoal: false };
       });
-      
-      // Toggle only hasBestGoal for selected player
       newStates[playerId] = { ...newStates[playerId], hasBestGoal: !currentVal };
       return newStates;
     });
+  };
+
+  const handleAddPhoto = () => {
+    if (photoUrls.length < 5) setPhotos([...photoUrls, '']);
+  };
+
+  const handlePhotoChange = (idx: number, val: string) => {
+    const next = [...photoUrls];
+    next[idx] = val;
+    setPhotos(next);
+  };
+
+  const handleRemovePhoto = (idx: number) => {
+    const next = photoUrls.filter((_, i) => i !== idx);
+    if (next.length === 0) next.push('');
+    setPhotos(next);
   };
 
   const handleSubmit = async () => {
@@ -174,6 +188,9 @@ export default function NewMatchPage() {
           isMvp: s.isMvp,
           hasBestGoal: s.hasBestGoal
         })),
+        comment: comment.trim(),
+        videoUrl: videoUrl.trim(),
+        photos: photoUrls.filter(url => url.trim() !== ''),
         createdAt: new Date().toISOString(),
       };
 
@@ -262,7 +279,7 @@ export default function NewMatchPage() {
           </div>
         </section>
 
-        <section className="space-y-6 pb-32">
+        <section className="space-y-6">
           <div className="flex items-center gap-3 px-2">
              <Users className="h-5 w-5 text-muted-foreground/40" />
              <h3 className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground/60">PLANTILLA DEL CLUB</h3>
@@ -447,6 +464,82 @@ export default function NewMatchPage() {
               );
             })}
           </div>
+        </section>
+
+        {/* CRÓNICA SOCIAL SECTION */}
+        <section className="space-y-6 pb-40">
+          <div className="flex items-center gap-3 px-2">
+             <ImageIcon className="h-5 w-5 text-muted-foreground/40" />
+             <h3 className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground/60">4. LA CRÓNICA SOCIAL</h3>
+          </div>
+
+          <Card className="competition-card border-white/5 bg-black/40 p-6 lg:p-10 space-y-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+              <div className="space-y-4">
+                <Label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary/60">
+                  <FileText className="h-3 w-3" /> Resumen del Administrador
+                </Label>
+                <Textarea 
+                  placeholder="Escribe la mística del partido, anécdotas o análisis táctico..."
+                  className="min-h-[200px] bg-black/40 border-white/10 focus:border-primary/40 text-sm leading-relaxed"
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-8">
+                <div className="space-y-4">
+                  <Label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary/60">
+                    <Video className="h-3 w-3" /> Link de la Cámara (Video)
+                  </Label>
+                  <Input 
+                    placeholder="URL de YouTube, Drive o Instagram..."
+                    className="bg-black/40 border-white/10 h-12"
+                    value={videoUrl}
+                    onChange={(e) => setVideoUrl(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary/60">
+                      <ImageIcon className="h-3 w-3" /> Galería de Fotos (Máx 5)
+                    </Label>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={handleAddPhoto} 
+                      disabled={photoUrls.length >= 5}
+                      className="h-6 text-[8px] font-black uppercase tracking-widest hover:bg-primary/10 hover:text-primary"
+                    >
+                      <Plus className="h-3 w-3 mr-1" /> AÑADIR URL
+                    </Button>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    {photoUrls.map((url, idx) => (
+                      <div key={idx} className="flex gap-2">
+                        <Input 
+                          placeholder={`URL de la foto #${idx + 1}`}
+                          className="bg-black/40 border-white/10 flex-1"
+                          value={url}
+                          onChange={(e) => handlePhotoChange(idx, e.target.value)}
+                        />
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => handleRemovePhoto(idx)}
+                          className="h-10 w-10 text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Card>
         </section>
 
         <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-background via-background/95 to-transparent z-50 pointer-events-none md:pl-[16rem]">
