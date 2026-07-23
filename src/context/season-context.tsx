@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useFirestore, useCollection, useDoc, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy, doc } from 'firebase/firestore';
+import { collection, query, doc } from 'firebase/firestore';
 import type { Season, AppSettings } from '@/lib/definitions';
 
 interface SeasonContextType {
@@ -28,10 +28,10 @@ export function SeasonProvider({ children }: { children: React.ReactNode }) {
   }, [firestore]);
   const { data: settings, isLoading: settingsLoading } = useDoc<AppSettings>(settingsRef);
 
-  // 2. Cargar todas las temporadas
+  // 2. Cargar todas las temporadas (Sin orderBy múltiple para evitar requerir índices compuestos)
   const seasonsRef = useMemoFirebase(() => {
     if (!firestore) return null;
-    return query(collection(firestore, 'seasons'), orderBy('year', 'desc'), orderBy('half', 'desc'));
+    return query(collection(firestore, 'seasons'));
   }, [firestore]);
   const { data: seasons, isLoading: seasonsLoading } = useCollection<Season>(seasonsRef);
 
@@ -44,7 +44,15 @@ export function SeasonProvider({ children }: { children: React.ReactNode }) {
     }
   }, [activeSeasonId, selectedSeasonId]);
 
-  const contextSeasons = seasons || [];
+  // Ordenar las temporadas en el cliente para evitar dependencia de índices de Firestore
+  const contextSeasons = React.useMemo(() => {
+    if (!seasons) return [];
+    return [...seasons].sort((a, b) => {
+      if (b.year !== a.year) return b.year - a.year;
+      return b.half - a.half;
+    });
+  }, [seasons]);
+
   const activeSeason = contextSeasons.find(s => s.id === activeSeasonId) || null;
   const selectedSeason = contextSeasons.find(s => s.id === selectedSeasonId) || null;
 
@@ -57,15 +65,6 @@ export function SeasonProvider({ children }: { children: React.ReactNode }) {
     setSelectedSeasonId,
     loading: settingsLoading || seasonsLoading,
   };
-
-  // DIAGNÓSTICO TEMPORAL: SeasonProvider
-  console.log('DIAGNOSTICO: SeasonProvider', {
-    seasons: contextSeasons,
-    activeSeasonId,
-    selectedSeasonId,
-    selectedSeason,
-    loading: value.loading
-  });
 
   return (
     <SeasonContext.Provider value={value}>
