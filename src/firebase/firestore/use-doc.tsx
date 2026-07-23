@@ -8,8 +8,6 @@ import {
   FirestoreError,
   DocumentSnapshot,
 } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
-import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 
 /** Utility type to add an 'id' field to a given type T. */
@@ -38,18 +36,12 @@ export function useDoc<T = any>(
   const [error, setError] = useState<FirestoreError | Error | null>(null);
 
   useEffect(() => {
-    const auth = getAuth();
-    const currentUid = auth.currentUser?.uid || 'ANONYMOUS';
-
     if (!memoizedDocRef) {
-      console.log(`[FIRESTORE DIAGNOSTIC] useDoc: Reference is NULL. Auth: ${currentUid}`);
       setData(null);
       setIsLoading(false);
       setError(null);
       return;
     }
-
-    console.log(`[FIRESTORE DIAGNOSTIC] useDoc: STARTING fetch for [${memoizedDocRef.path}]. Auth: ${currentUid}`);
 
     setIsLoading(true);
     setError(null);
@@ -58,18 +50,14 @@ export function useDoc<T = any>(
       memoizedDocRef,
       (snapshot: DocumentSnapshot<DocumentData>) => {
         if (snapshot.exists()) {
-          console.log(`[FIRESTORE DIAGNOSTIC] useDoc: SUCCESS for [${memoizedDocRef.path}]. Auth: ${currentUid}. Document EXISTS.`);
           setData({ ...(snapshot.data() as T), id: snapshot.id });
         } else {
-          console.log(`[FIRESTORE DIAGNOSTIC] useDoc: SUCCESS (MISSING) for [${memoizedDocRef.path}]. Auth: ${currentUid}. Document NOT FOUND.`);
           setData(null);
         }
         setError(null);
         setIsLoading(false);
       },
       (serverError: FirestoreError) => {
-        console.error(`[FIRESTORE DIAGNOSTIC] useDoc: ERROR for [${memoizedDocRef.path}]. Auth: ${currentUid}. Code: ${serverError.code}. Message: ${serverError.message}`);
-        
         if (serverError.code === 'permission-denied') {
           const contextualError = new FirestorePermissionError({
             operation: 'get',

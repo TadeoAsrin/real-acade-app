@@ -9,7 +9,6 @@ import {
   QuerySnapshot,
   CollectionReference,
 } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
 
 /** Utility type to add an 'id' field to a given type T. */
 export type WithId<T> = T & { id: string };
@@ -38,21 +37,12 @@ export function useCollection<T = any>(
   const [error, setError] = useState<FirestoreError | Error | null>(null);
 
   useEffect(() => {
-    const auth = getAuth();
-    const currentUid = auth.currentUser?.uid || 'ANONYMOUS';
-    
     if (!memoizedTargetRefOrQuery) {
       setData(null);
       setIsLoading(false);
       setError(null);
       return;
     }
-
-    // Diagnostic log using only PUBLIC properties to avoid SDK crashes
-    console.log(`[FIRESTORE DIAGNOSTIC] EXECUTION START:`, {
-      type: memoizedTargetRefOrQuery.type,
-      auth: currentUid
-    });
 
     setIsLoading(true);
     setError(null);
@@ -64,23 +54,13 @@ export function useCollection<T = any>(
         for (const doc of snapshot.docs) {
           results.push({ ...(doc.data() as T), id: doc.id });
         }
-        
-        console.log(`[FIRESTORE DIAGNOSTIC] SUCCESS. Results: ${results.length} docs.`);
-        
         setData(results);
         setError(null);
         setIsLoading(false);
       },
       (serverError: FirestoreError) => {
-        // Safe logging to avoid error overlays in Dev mode while diagnosing
-        console.log(`[FIRESTORE DIAGNOSTIC] ERROR:`, {
-          code: serverError.code,
-          message: serverError.message,
-          auth: currentUid
-        });
-        
         setError(serverError);
-        setData([]); // Return empty list on permission error to prevent infinite spinners
+        setData([]); // Devuelve array vacío para no bloquear la UI
         setIsLoading(false);
       }
     );
