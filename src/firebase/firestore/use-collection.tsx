@@ -85,7 +85,8 @@ export function useCollection<T = any>(
         setIsLoading(false);
       },
       async (serverError: FirestoreError) => {
-        console.error(`[FIRESTORE DIAGNOSTIC] useCollection: ERROR for [${path}]. Auth: ${currentUid}. Code: ${serverError.code}. Message: ${serverError.message}`);
+        // FIXED: Using console.log instead of console.error to keep diagnostic info without crashing the UI overlay
+        console.log(`[FIRESTORE DIAGNOSTIC] useCollection: ERROR for [${path}]. Auth: ${currentUid}. Code: ${serverError.code}. Message: ${serverError.message}`);
         
         if (serverError.code === 'permission-denied') {
           const contextualError = new FirestorePermissionError({
@@ -95,10 +96,6 @@ export function useCollection<T = any>(
 
           setError(contextualError);
           setData([]); 
-          
-          // CRITICAL: Silent diagnostic. We don't emit to the global listener to avoid crashing the UI 
-          // but we still set the error in state and log it to console as requested.
-          // errorEmitter.emit('permission-error', contextualError);
         } else {
           setError(serverError);
           setData(null);
