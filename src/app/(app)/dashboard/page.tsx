@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from 'react';
@@ -125,6 +126,7 @@ function DashboardContent() {
   const gacetaMatchId = searchParams.get('gaceta');
   const firestore = useFirestore();
   const { selectedSeasonId, loading: seasonLoading } = useSeason();
+  const [formattedLastMatchDate, setFormattedLastMatchDate] = React.useState<string | null>(null);
 
   const playersQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -147,6 +149,18 @@ function DashboardContent() {
     return [...matchesDataRaw].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [matchesDataRaw]);
 
+  const playedMatches = React.useMemo(() => allMatches.filter(m => m.teamAScore > 0 || m.teamBScore > 0), [allMatches]);
+  const lastMatch = playedMatches[0];
+
+  // FIXED: Formatting date in useEffect to avoid hydration errors
+  React.useEffect(() => {
+    if (lastMatch?.date) {
+      setFormattedLastMatchDate(
+        new Date(lastMatch.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })
+      );
+    }
+  }, [lastMatch]);
+
   if (playersLoading || matchesLoading || seasonLoading) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
@@ -156,8 +170,6 @@ function DashboardContent() {
   }
 
   const allPlayers = playersData || [];
-  const playedMatches = allMatches.filter(m => m.teamAScore > 0 || m.teamBScore > 0);
-  const lastMatch = playedMatches[0];
   
   const stats = calculateAggregatedStats(allPlayers, allMatches);
   
@@ -232,9 +244,11 @@ function DashboardContent() {
             <div className="lg:col-span-8 space-y-8 relative z-10">
               <div className="flex items-center gap-3">
                 <Badge className="bg-primary text-primary-foreground font-bebas tracking-widest px-4 py-1.5 text-sm rounded-none shadow-lg shadow-primary/20">EDICIÓN ESPECIAL</Badge>
-                <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] font-oswald">
-                  {new Date(lastMatch.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}
-                </span>
+                {formattedLastMatchDate && (
+                  <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] font-oswald">
+                    {formattedLastMatchDate}
+                  </span>
+                )}
               </div>
               <h1 className="text-5xl md:text-[5.5rem] font-bebas text-white tracking-wider leading-[0.85] uppercase">
                 {lastMatch.aiSummary?.title || "CRÓNICA DE LA JORNADA"}
