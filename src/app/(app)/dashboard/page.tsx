@@ -152,7 +152,6 @@ function DashboardContent() {
   const playedMatches = React.useMemo(() => allMatches.filter(m => m.teamAScore > 0 || m.teamBScore > 0), [allMatches]);
   const lastMatch = playedMatches[0];
 
-  // FIXED: Formatting date in useEffect to avoid hydration errors
   React.useEffect(() => {
     if (lastMatch?.date) {
       setFormattedLastMatchDate(
@@ -161,16 +160,17 @@ function DashboardContent() {
     }
   }, [lastMatch]);
 
-  if (playersLoading || matchesLoading || seasonLoading) {
+  // CRITICAL: Ensure we wait for season resolution and data arrival
+  if (seasonLoading || playersLoading || matchesLoading || !selectedSeasonId || !playersData) {
     return (
-      <div className="flex h-[50vh] items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      <div className="flex h-[80vh] flex-col items-center justify-center gap-4">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <p className="font-bebas text-2xl tracking-widest text-muted-foreground uppercase animate-pulse">Sincronizando Real Acade...</p>
       </div>
     );
   }
 
   const allPlayers = playersData || [];
-  
   const stats = calculateAggregatedStats(allPlayers, allMatches);
   
   const topInfluential = [...stats]
@@ -228,7 +228,6 @@ function DashboardContent() {
         />
       )}
 
-      {/* HEADER DINÁMICO */}
       <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <h2 className="text-4xl lg:text-7xl font-black uppercase tracking-tighter italic text-white leading-none">REAL ACADE</h2>
@@ -236,8 +235,7 @@ function DashboardContent() {
         </div>
       </div>
 
-      {/* 1. HERO SECTION */}
-      {lastMatch && (
+      {lastMatch ? (
         <section className="relative z-10">
           <div className="cinematic-banner p-8 md:p-16 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             <div className="absolute inset-0 bg-black/40 pointer-events-none" />
@@ -257,7 +255,7 @@ function DashboardContent() {
                 {lastMatch.aiSummary?.subtitle || "Exhibición de fútbol y mística en el último encuentro del club."}
               </p>
               <div className="flex flex-wrap gap-4 pt-6">
-                <Button asChild size="lg" className="h-16 px-10 font-bebas text-2xl tracking-[0.2em] bg-white text-black hover:bg-white/90 shadow-[0_0_40px_rgba(255,255,255,0.25)] rounded-none transition-all group-hover:px-12">
+                <Button asChild size="lg" className="h-16 px-10 font-bebas text-2xl tracking-[0.2em] bg-white text-black hover:bg-white/90 shadow-[0_0_40px_rgba(255,255,255,0.25)] rounded-none transition-all">
                   <Link href={`/dashboard?gaceta=${lastMatch.id}`} className="flex items-center gap-3">
                     <Newspaper className="h-6 w-6" /> LEER EL DIARIO
                   </Link>
@@ -288,197 +286,163 @@ function DashboardContent() {
             </div>
           </div>
         </section>
+      ) : (
+        <section className="bg-white/5 border border-dashed border-white/10 rounded-[2rem] p-20 text-center space-y-4">
+          <Trophy className="h-16 w-16 text-muted-foreground/20 mx-auto" />
+          <h3 className="font-bebas text-4xl uppercase tracking-widest text-muted-foreground/40">Sin Partidos en esta Temporada</h3>
+          <p className="text-xs font-black uppercase text-muted-foreground/20 tracking-[0.3em]">Selecciona otra temporada o espera a que el Admin registre la primera batalla.</p>
+        </section>
       )}
 
-      {/* 2. ORDEN DE MANDO */}
-      <section className="space-y-4 relative z-10">
-        <div className="flex items-center gap-3 px-1">
-          <ShieldCheck className="h-4 w-4 text-emerald-500" />
-          <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-500 font-oswald">ORDEN DE MANDO</h2>
-          <div className="h-px flex-1 bg-emerald-500/10" />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {ordenDeMando.map((p, idx) => (
-            <Link key={p.playerId} href="/hierarchy" className="group">
-              <div className="bg-[#111827] border border-emerald-500/20 rounded-2xl p-5 flex items-center justify-between transition-all hover:bg-emerald-500/5 hover:border-emerald-500/40">
-                <div className="flex items-center gap-4">
-                  <div className="relative">
-                    <Avatar className="h-12 w-12 border-2 border-emerald-500/20">
-                      <AvatarFallback className="bg-emerald-500/10 text-emerald-500 font-black">{getInitials(p.name)}</AvatarFallback>
-                    </Avatar>
-                    <div className="absolute -bottom-1 -right-1 bg-emerald-500 rounded-full p-1 shadow-lg ring-2 ring-[#111827]">
-                      <Crown className="h-2.5 w-2.5 text-black" />
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-[8px] font-black text-emerald-500/60 uppercase tracking-widest font-oswald mb-0.5">CANDIDATO #{idx + 1}</p>
-                    <h3 className="text-xl font-black italic uppercase text-white group-hover:text-emerald-500 transition-colors leading-none">{p.name}</h3>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <span className="text-3xl font-black italic font-bebas text-white leading-none">{p.matchesSinceLastCaptain}</span>
-                  <p className="text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest font-oswald">PJ SIN BRAZALETE</p>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* 3. ESTRELLAS DE LA ACADEMIA */}
-      <section className="space-y-6 relative z-10">
-        <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 px-1 font-oswald">ESTRELLAS DE LA ACADEMIA</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          
-          <EliteListCard 
-            title="MÁS INFLUYENTE"
-            icon={Brain}
-            players={topInfluential}
-            valueFn={(p) => `${p.winPercentage}%`}
-            label="WR"
-            colorClass="text-primary"
-            href="/standings"
-          />
-
-          <EliteListCard 
-            title="PICHICHI"
-            icon={Target}
-            players={topScorers}
-            valueFn={(p) => p.totalGoals}
-            label="GF"
-            colorClass="text-yellow-500"
-            href="/standings"
-          />
-
-          <EliteListCard 
-            title="MEJOR RACHA"
-            icon={Flame}
-            players={topStreaks}
-            valueFn={(p) => p.bestStreak}
-            label="WINS"
-            colorClass="text-orange-500"
-            href="/standings"
-          />
-
-          <EliteListCard 
-            title="EL PODIO OFICIAL"
-            icon={Trophy}
-            players={topPodium}
-            valueFn={(p) => p.wins * 3 + p.draws}
-            label="PTS"
-            colorClass="text-yellow-500"
-            href="/standings"
-          />
-
-        </div>
-      </section>
-
-      {/* 4. PULSO DE LA COMPETICIÓN */}
-      <section className="space-y-6 relative z-10">
-        <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 px-1 font-oswald">PULSO DE LA COMPETICIÓN</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Link href="/standings" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-yellow-500/20 transition-all hover-lift">
-            <Star className="h-6 w-6 text-yellow-500" />
-            <span className="text-5xl font-black italic font-bebas leading-none text-white">{maxMvpCount}</span>
-            <div className="space-y-1">
-              <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">REYES MVP</p>
-              <p className="text-[10px] font-black uppercase text-yellow-500/60 font-oswald">RÉCORD PREMIOS</p>
+      {playedMatches.length > 0 && (
+        <>
+          <section className="space-y-4 relative z-10">
+            <div className="flex items-center gap-3 px-1">
+              <ShieldCheck className="h-4 w-4 text-emerald-500" />
+              <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-500 font-oswald">ORDEN DE MANDO</h2>
+              <div className="h-px flex-1 bg-emerald-500/10" />
             </div>
-          </Link>
-          <div className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-orange-500/20 transition-all hover-lift">
-            <Flame className="h-6 w-6 text-orange-500" />
-            <span className="text-5xl font-black italic font-bebas leading-none text-white">{recordGoalsInMatch}</span>
-            <div className="space-y-1">
-              <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">RÉCORD GOLES</p>
-              <p className="text-[10px] font-black uppercase text-orange-500/60 font-oswald">EN UN PARTIDO</p>
-            </div>
-          </div>
-          <Link href="/standings" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-primary/20 transition-all hover-lift">
-            <Target className="h-6 w-6 text-primary" />
-            <span className="text-5xl font-black italic font-bebas leading-none text-white">{individualRecord}</span>
-            <div className="space-y-1">
-              <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">ARTILLERO SUPREMO</p>
-              <p className="text-[11px] font-black uppercase text-primary font-oswald truncate max-w-[140px] drop-shadow-[0_0_10px_rgba(59,130,246,0.3)]">{recordHolderText}</p>
-            </div>
-          </Link>
-          <Link href="/attendance" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-emerald-500/20 transition-all hover-lift">
-            <Users className="h-6 w-6 text-emerald-500" />
-            <span className="text-5xl font-black italic font-bebas leading-none text-white">{attendanceValue}</span>
-            <div className="space-y-1">
-              <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">INFALTABLES</p>
-              <p className="text-[11px] font-black uppercase text-emerald-500 font-oswald truncate max-w-[140px] drop-shadow-[0_0_10px_rgba(16,185,129,0.3)]">{attendanceText}</p>
-            </div>
-          </Link>
-        </div>
-      </section>
-
-      {/* 5. SALA DE HUMILDAD */}
-      <section className="space-y-6 relative z-10">
-        <div className="flex items-center justify-between px-1">
-          <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 font-oswald">SALA DE HUMILDAD</h2>
-          <Badge variant="outline" className="text-[7px] font-black uppercase tracking-widest border-white/5 text-muted-foreground/40 font-oswald">FILTRO: MÍNIMO 2 PJ</Badge>
-        </div>
-        
-        <div className="bg-black/20 backdrop-blur-sm rounded-[2rem] overflow-hidden border border-white/5">
-          <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-white/5 items-start">
-            <div className="p-8 space-y-6">
-              <div className="flex items-center justify-between group">
-                <div className="flex items-center gap-2 text-red-500/60 group-hover:text-red-500 transition-colors">
-                  <Skull className="h-4 w-4" />
-                  <span className="text-[10px] font-black uppercase tracking-widest font-oswald">IMÁN DE DERROTAS</span>
-                </div>
-                <Badge variant="outline" className="text-[6px] font-black bg-red-500/5 text-red-500/40 border-none uppercase px-1.5 py-0 font-oswald">RATIO DE VULNERABILIDAD</Badge>
-              </div>
-              <div className="space-y-5">
-                {stats.filter(p => p.matchesPlayed >= 2).sort((a, b) => b.lossPercentage - a.lossPercentage).slice(0, 3).map(p => (
-                  <div key={p.playerId} className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex flex-col">
-                        <Link href={`/players/${p.playerId}`} className="text-xs font-bold uppercase hover:text-red-500 transition-colors leading-none text-white">{p.name}</Link>
-                        <span className="text-[7px] font-bold text-muted-foreground/40 uppercase tracking-widest font-oswald mt-1">{p.wins}V - {p.draws}E - {p.losses}D</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {ordenDeMando.map((p, idx) => (
+                <Link key={p.playerId} href="/hierarchy" className="group">
+                  <div className="bg-[#111827] border border-emerald-500/20 rounded-2xl p-5 flex items-center justify-between transition-all hover:bg-emerald-500/5 hover:border-emerald-500/40">
+                    <div className="flex items-center gap-4">
+                      <div className="relative">
+                        <Avatar className="h-12 w-12 border-2 border-emerald-500/20">
+                          <AvatarFallback className="bg-emerald-500/10 text-emerald-500 font-black">{getInitials(p.name)}</AvatarFallback>
+                        </Avatar>
+                        <div className="absolute -bottom-1 -right-1 bg-emerald-500 rounded-full p-1 shadow-lg ring-2 ring-[#111827]">
+                          <Crown className="h-2.5 w-2.5 text-black" />
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <span className="text-xl font-black italic text-red-500/80 font-bebas">{p.lossPercentage}%</span>
-                        <p className="text-[6px] font-black uppercase text-red-500/30 font-oswald tracking-widest">CAÍDA</p>
+                      <div>
+                        <p className="text-[8px] font-black text-emerald-500/60 uppercase tracking-widest font-oswald mb-0.5">CANDIDATO #{idx + 1}</p>
+                        <h3 className="text-xl font-black italic uppercase text-white group-hover:text-emerald-500 transition-colors leading-none">{p.name}</h3>
                       </div>
-                    </div>
-                    <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-red-900/40 transition-all duration-1000 ease-out" 
-                        style={{ width: `${p.lossPercentage}%` }} 
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="p-8 space-y-6">
-              <div className="flex items-center justify-between group">
-                <div className="flex items-center gap-2 text-blue-400/60 group-hover:text-blue-400 transition-colors">
-                  <Droplets className="h-4 w-4" />
-                  <span className="text-[10px] font-black uppercase tracking-widest font-oswald">PÓLVORA MOJADA</span>
-                </div>
-                <Badge variant="outline" className="text-[6px] font-black bg-blue-400/5 text-blue-400/40 border-none uppercase px-1.5 py-0 font-oswald">SOLO ROLES OFENSIVOS</Badge>
-              </div>
-              <div className="space-y-4">
-                {stats.filter(p => (p.position === 'Mediocampista' || p.position === 'Delantero') && p.matchesPlayed >= 2).sort((a, b) => a.goalsPerMatch - b.goalsPerMatch).slice(0, 3).map(p => (
-                  <div key={p.playerId} className="flex items-center justify-between bg-white/5 p-3 rounded-xl border border-transparent hover:border-blue-400/10 transition-all">
-                    <div className="flex flex-col">
-                      <Link href={`/players/${p.playerId}`} className="text-xs font-bold uppercase hover:text-blue-400 transition-colors text-white">{p.name}</Link>
-                      <span className="text-[7px] font-bold text-muted-foreground/40 uppercase tracking-widest font-oswald">{p.totalGoals} GOLES EN {p.matchesPlayed} PJ</span>
                     </div>
                     <div className="text-right">
-                      <span className="text-xl font-black italic text-blue-400/80 font-bebas">{p.goalsPerMatch}</span>
-                      <p className="text-[6px] font-black uppercase text-blue-400/30 font-oswald tracking-widest">G/PJ</p>
+                      <span className="text-3xl font-black italic font-bebas text-white leading-none">{p.matchesSinceLastCaptain}</span>
+                      <p className="text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest font-oswald">PJ SIN BRAZALETE</p>
                     </div>
                   </div>
-                ))}
+                </Link>
+              ))}
+            </div>
+          </section>
+
+          <section className="space-y-6 relative z-10">
+            <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 px-1 font-oswald">ESTRELLAS DE LA ACADEMIA</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <EliteListCard title="MÁS INFLUYENTE" icon={Brain} players={topInfluential} valueFn={(p) => `${p.winPercentage}%`} label="WR" colorClass="text-primary" href="/standings" />
+              <EliteListCard title="PICHICHI" icon={Target} players={topScorers} valueFn={(p) => p.totalGoals} label="GF" colorClass="text-yellow-500" href="/standings" />
+              <EliteListCard title="MEJOR RACHA" icon={Flame} players={topStreaks} valueFn={(p) => p.bestStreak} label="WINS" colorClass="text-orange-500" href="/standings" />
+              <EliteListCard title="EL PODIO OFICIAL" icon={Trophy} players={topPodium} valueFn={(p) => p.wins * 3 + p.draws} label="PTS" colorClass="text-yellow-500" href="/standings" />
+            </div>
+          </section>
+
+          <section className="space-y-6 relative z-10">
+            <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 px-1 font-oswald">PULSO DE LA COMPETICIÓN</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Link href="/standings" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-yellow-500/20 transition-all hover-lift">
+                <Star className="h-6 w-6 text-yellow-500" />
+                <span className="text-5xl font-black italic font-bebas leading-none text-white">{maxMvpCount}</span>
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">REYES MVP</p>
+                  <p className="text-[10px] font-black uppercase text-yellow-500/60 font-oswald">RÉCORD PREMIOS</p>
+                </div>
+              </Link>
+              <div className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-orange-500/20 transition-all hover-lift">
+                <Flame className="h-6 w-6 text-orange-500" />
+                <span className="text-5xl font-black italic font-bebas leading-none text-white">{recordGoalsInMatch}</span>
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">RÉCORD GOLES</p>
+                  <p className="text-[10px] font-black uppercase text-orange-500/60 font-oswald">EN UN PARTIDO</p>
+                </div>
+              </div>
+              <Link href="/standings" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-primary/20 transition-all hover-lift">
+                <Target className="h-6 w-6 text-primary" />
+                <span className="text-5xl font-black italic font-bebas leading-none text-white">{individualRecord}</span>
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">ARTILLERO SUPREMO</p>
+                  <p className="text-[11px] font-black uppercase text-primary font-oswald truncate max-w-[140px] drop-shadow-[0_0_10px_rgba(59,130,246,0.3)]">{recordHolderText}</p>
+                </div>
+              </Link>
+              <Link href="/attendance" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-emerald-500/20 transition-all hover-lift">
+                <Users className="h-6 w-6 text-emerald-500" />
+                <span className="text-5xl font-black italic font-bebas leading-none text-white">{attendanceValue}</span>
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">INFALTABLES</p>
+                  <p className="text-[11px] font-black uppercase text-emerald-500 font-oswald truncate max-w-[140px] drop-shadow-[0_0_10px_rgba(16,185,129,0.3)]">{attendanceText}</p>
+                </div>
+              </Link>
+            </div>
+          </section>
+
+          <section className="space-y-6 relative z-10">
+            <div className="flex items-center justify-between px-1">
+              <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 font-oswald">SALA DE HUMILDAD</h2>
+              <Badge variant="outline" className="text-[7px] font-black uppercase tracking-widest border-white/5 text-muted-foreground/40 font-oswald">FILTRO: MÍNIMO 2 PJ</Badge>
+            </div>
+            
+            <div className="bg-black/20 backdrop-blur-sm rounded-[2rem] overflow-hidden border border-white/5">
+              <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-white/5 items-start">
+                <div className="p-8 space-y-6">
+                  <div className="flex items-center justify-between group">
+                    <div className="flex items-center gap-2 text-red-500/60 group-hover:text-red-500 transition-colors">
+                      <Skull className="h-4 w-4" />
+                      <span className="text-[10px] font-black uppercase tracking-widest font-oswald">IMÁN DE DERROTAS</span>
+                    </div>
+                    <Badge variant="outline" className="text-[6px] font-black bg-red-500/5 text-red-500/40 border-none uppercase px-1.5 py-0 font-oswald">RATIO DE VULNERABILIDAD</Badge>
+                  </div>
+                  <div className="space-y-5">
+                    {stats.filter(p => p.matchesPlayed >= 2).sort((a, b) => b.lossPercentage - a.lossPercentage).slice(0, 3).map(p => (
+                      <div key={p.playerId} className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex flex-col">
+                            <Link href={`/players/${p.playerId}`} className="text-xs font-bold uppercase hover:text-red-500 transition-colors leading-none text-white">{p.name}</Link>
+                            <span className="text-[7px] font-bold text-muted-foreground/40 uppercase tracking-widest font-oswald mt-1">{p.wins}V - {p.draws}E - {p.losses}D</span>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-xl font-black italic text-red-500/80 font-bebas">{p.lossPercentage}%</span>
+                            <p className="text-[6px] font-black uppercase text-red-500/30 font-oswald tracking-widest">CAÍDA</p>
+                          </div>
+                        </div>
+                        <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                          <div className="h-full bg-red-900/40" style={{ width: `${p.lossPercentage}%` }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="p-8 space-y-6">
+                  <div className="flex items-center justify-between group">
+                    <div className="flex items-center gap-2 text-blue-400/60 group-hover:text-blue-400 transition-colors">
+                      <Droplets className="h-4 w-4" />
+                      <span className="text-[10px] font-black uppercase tracking-widest font-oswald">PÓLVORA MOJADA</span>
+                    </div>
+                    <Badge variant="outline" className="text-[6px] font-black bg-blue-400/5 text-blue-400/40 border-none uppercase px-1.5 py-0 font-oswald">SOLO ROLES OFENSIVOS</Badge>
+                  </div>
+                  <div className="space-y-4">
+                    {stats.filter(p => (p.position === 'Mediocampista' || p.position === 'Delantero') && p.matchesPlayed >= 2).sort((a, b) => a.goalsPerMatch - b.goalsPerMatch).slice(0, 3).map(p => (
+                      <div key={p.playerId} className="flex items-center justify-between bg-white/5 p-3 rounded-xl border border-transparent hover:border-blue-400/10 transition-all">
+                        <div className="flex flex-col">
+                          <Link href={`/players/${p.playerId}`} className="text-xs font-bold uppercase hover:text-blue-400 transition-colors text-white">{p.name}</Link>
+                          <span className="text-[7px] font-bold text-muted-foreground/40 uppercase tracking-widest font-oswald">{p.totalGoals} GOLES EN {p.matchesPlayed} PJ</span>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-xl font-black italic text-blue-400/80 font-bebas">{p.goalsPerMatch}</span>
+                          <p className="text-[6px] font-black uppercase text-blue-400/30 font-oswald tracking-widest">G/PJ</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
+          </section>
+        </>
+      )}
     </div>
   );
 }

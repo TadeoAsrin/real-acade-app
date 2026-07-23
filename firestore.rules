@@ -10,10 +10,6 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
-    }
-
     function isAdmin() {
       return isSignedIn() && (
         request.auth.token.email == 'tadeoasrin@gmail.com' ||
@@ -22,13 +18,23 @@ service cloud.firestore {
       );
     }
 
-    // Regla para roles de administrador: Lectura pública necesaria para lógica de UI
-    match /roles_admin/{uid} {
-      allow get, list: if true;
-      allow write: if false;
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
     }
 
-    // Partidos: Lectura pública, escritura solo admin
+    // Configuración de la App: Lectura pública vital para el arranque
+    match /app_settings/{docId} {
+      allow get, list: if true;
+      allow write: if isAdmin();
+    }
+
+    // Temporadas: Lectura pública para historial y filtros
+    match /seasons/{seasonId} {
+      allow get, list: if true;
+      allow write: if isAdmin();
+    }
+
+    // Partidos: Lectura pública total para amigos y miembros
     match /matches/{matchId} {
       allow get, list: if true;
       allow write: if isAdmin();
@@ -46,28 +52,22 @@ service cloud.firestore {
       allow write: if isOwner(playerId) || isAdmin();
     }
 
-    // Pan y Queso (Drafts): Lectura pública, escritura miembros o admin
-    match /drafts/{draftId} {
+    // Roles de administrador: Lectura pública necesaria para lógica de UI
+    match /roles_admin/{uid} {
       allow get, list: if true;
-      allow write: if isSignedIn() || isAdmin();
+      allow write: if false;
     }
 
-    // Galería: Lectura pública, escritura solo admin
+    // Galería: Lectura pública de momentos de élite
     match /gallery/{itemId} {
       allow get, list: if true;
       allow write: if isAdmin();
     }
 
-    // Temporadas: Lectura pública para que todos vean el historial
-    match /seasons/{seasonId} {
+    // Pan y Queso (Drafts)
+    match /drafts/{draftId} {
       allow get, list: if true;
-      allow write: if isAdmin();
-    }
-
-    // Configuración de la App: Lectura pública para saber qué temporada está activa
-    match /app_settings/{docId} {
-      allow get, list: if true;
-      allow write: if isAdmin();
+      allow write: if isSignedIn() || isAdmin();
     }
   }
 }
