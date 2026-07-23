@@ -108,7 +108,12 @@ export default function NewMatchPage() {
             <CardContent className="p-6 space-y-6">
               <div className="space-y-2">
                 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Goles Totales</Label>
-                <Input type="number" value={teamAScore} onChange={(e) => setTeamAScore(parseInt(e.target.value))} className="bg-black/40 h-14 text-3xl font-bebas" />
+                <Input 
+                  type="number" 
+                  value={isNaN(teamAScore) ? '' : teamAScore} 
+                  onChange={(e) => setTeamAScore(parseInt(e.target.value) || 0)} 
+                  className="bg-black/40 h-14 text-3xl font-bebas" 
+                />
               </div>
               <div className="space-y-4">
                 {teamAPlayers.map((p, i) => (
@@ -126,7 +131,12 @@ export default function NewMatchPage() {
                       </select>
                     </div>
                     <div className="flex items-center gap-4">
-                      <Input type="number" value={p.goals} onChange={(e) => handlePlayerChange('A', i, 'goals', parseInt(e.target.value))} className="w-20 text-center font-bold" />
+                      <Input 
+                        type="number" 
+                        value={isNaN(p.goals) ? '' : p.goals} 
+                        onChange={(e) => handlePlayerChange('A', i, 'goals', parseInt(e.target.value) || 0)} 
+                        className="w-20 text-center font-bold" 
+                      />
                       <div className="flex items-center gap-2">
                         <Checkbox checked={p.isMvp} onCheckedChange={(val) => handlePlayerChange('A', i, 'isMvp', val)} />
                         <span className="text-[8px] font-black uppercase text-yellow-500">MVP</span>
@@ -151,7 +161,12 @@ export default function NewMatchPage() {
             <CardContent className="p-6 space-y-6">
               <div className="space-y-2">
                 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Goles Totales</Label>
-                <Input type="number" value={teamBScore} onChange={(e) => setTeamBScore(parseInt(e.target.value))} className="bg-black/40 h-14 text-3xl font-bebas" />
+                <Input 
+                  type="number" 
+                  value={isNaN(teamBScore) ? '' : teamBScore} 
+                  onChange={(e) => setTeamBScore(parseInt(e.target.value) || 0)} 
+                  className="bg-black/40 h-14 text-3xl font-bebas" 
+                />
               </div>
               <div className="space-y-4">
                 {teamBPlayers.map((p, i) => (
@@ -169,7 +184,12 @@ export default function NewMatchPage() {
                       </select>
                     </div>
                     <div className="flex items-center gap-4">
-                      <Input type="number" value={p.goals} onChange={(e) => handlePlayerChange('B', i, 'goals', parseInt(e.target.value))} className="w-20 text-center font-bold" />
+                      <Input 
+                        type="number" 
+                        value={isNaN(p.goals) ? '' : p.goals} 
+                        onChange={(e) => handlePlayerChange('B', i, 'goals', parseInt(e.target.value) || 0)} 
+                        className="w-20 text-center font-bold" 
+                      />
                       <div className="flex items-center gap-2">
                         <Checkbox checked={p.isMvp} onCheckedChange={(val) => handlePlayerChange('B', i, 'isMvp', val)} />
                         <span className="text-[8px] font-black uppercase text-yellow-500">MVP</span>

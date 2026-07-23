@@ -130,8 +130,11 @@ export default function SeasonManagementPage() {
                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Año</Label>
                     <Input 
                       type="number" 
-                      value={formData.year} 
-                      onChange={e => setFormData({...formData, year: parseInt(e.target.value)})}
+                      value={isNaN(formData.year) ? '' : formData.year} 
+                      onChange={e => {
+                        const val = parseInt(e.target.value);
+                        setFormData({...formData, year: isNaN(val) ? 0 : val});
+                      }}
                       className="bg-black/40 border-white/10 font-bold"
                     />
                   </div>
@@ -139,7 +142,7 @@ export default function SeasonManagementPage() {
                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Semestre (Half)</Label>
                     <Select 
                       value={formData.half.toString()} 
-                      onValueChange={val => setFormData({...formData, half: parseInt(val) as 1 | 2})}
+                      onValueChange={val => setFormData({...formData, half: (parseInt(val) || 1) as 1 | 2})}
                     >
                       <SelectTrigger className="bg-black/40 border-white/10 font-bold">
                         <SelectValue />
