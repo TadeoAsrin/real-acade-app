@@ -3,11 +3,10 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * REAL ACADE SECURITY MODEL - ACCESO PÚBLICO TOTAL DE LECTURA
-     * Prioridad absoluta: Lectura abierta para todo el club.
+     * REAL ACADE SECURITY MODEL
+     * Estructura consolidada para evitar ambigüedad en el motor de reglas.
      */
     
-    // Función de verificación de Administrador optimizada
     function isAdmin() {
       return request.auth != null && (
         request.auth.token.email == 'tadeoasrin@gmail.com' ||
@@ -16,31 +15,45 @@ service cloud.firestore {
       );
     }
 
-    // BLOQUE DE LECTURA PÚBLICA: Sin restricciones de autenticación
-    match /app_settings/{document=**} { allow get, list: if true; }
-    match /seasons/{document=**}      { allow get, list: if true; }
-    match /matches/{document=**}      { allow get, list: if true; }
-    match /players/{document=**}      { allow get, list: if true; }
-    match /roles_admin/{document=**}  { allow get, list: if true; }
-    match /gallery/{document=**}      { allow get, list: if true; }
-    match /drafts/{document=**}       { allow get, list: if true; }
-
-    // BLOQUE DE ESCRITURA PROTEGIDA: Solo administradores o dueños
-    match /app_settings/{id} { allow write: if isAdmin(); }
-    match /seasons/{id}      { allow write: if isAdmin(); }
-    match /matches/{id} {
+    // REGLAS CONSOLIDADAS POR RUTA
+    
+    match /app_settings/{id} {
+      allow get, list: if true;
       allow write: if isAdmin();
+    }
+    
+    match /seasons/{id} {
+      allow get, list: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /matches/{id} {
+      allow get, list: if true;
+      allow write: if isAdmin();
+      
       match /votes/{uid} {
+        allow get, list: if true;
         allow write: if request.auth != null && request.auth.uid == uid;
       }
     }
+    
     match /players/{id} {
+      allow get, list: if true;
       allow write: if isAdmin() || (request.auth != null && request.auth.uid == id);
     }
-    match /gallery/{id} {
+    
+    match /roles_admin/{id} {
+      allow get, list: if true;
       allow write: if isAdmin();
     }
+    
+    match /gallery/{id} {
+      allow get, list: if true;
+      allow write: if isAdmin();
+    }
+    
     match /drafts/{id} {
+      allow get, list: if true;
       allow write: if request.auth != null;
     }
   }

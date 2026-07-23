@@ -10,8 +10,6 @@ import {
   CollectionReference,
 } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
-import { errorEmitter } from '@/firebase/error-emitter';
-import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors';
 
 /** Utility type to add an 'id' field to a given type T. */
 export type WithId<T> = T & { id: string };
@@ -24,18 +22,6 @@ export interface UseCollectionResult<T> {
   data: WithId<T>[] | null; // Document data with ID, or null.
   isLoading: boolean;       // True if loading.
   error: FirestoreError | Error | null; // Error object, or null.
-}
-
-export interface InternalQuery extends Query<DocumentData> {
-  _query: {
-    path: {
-      canonicalString(): string;
-      toString(): string;
-    },
-    filters?: any[];
-    explicitOrderBy?: any[];
-    limit?: number;
-  }
 }
 
 /**
@@ -56,27 +42,16 @@ export function useCollection<T = any>(
     const currentUid = auth.currentUser?.uid || 'ANONYMOUS';
     
     if (!memoizedTargetRefOrQuery) {
-      console.log(`[FIRESTORE DIAGNOSTIC] useCollection: Query is NULL. Auth: ${currentUid}`);
       setData(null);
       setIsLoading(false);
       setError(null);
       return;
     }
 
-    const internal = memoizedTargetRefOrQuery as unknown as InternalQuery;
-    const path: string =
-      memoizedTargetRefOrQuery.type === 'collection'
-        ? (memoizedTargetRefOrQuery as CollectionReference).path
-        : internal._query.path.canonicalString();
-
-    // DETALLE DE LA CONSULTA (AUDITORÍA SOLICITADA)
+    // Diagnostic log using only PUBLIC properties to avoid SDK crashes
     console.log(`[FIRESTORE DIAGNOSTIC] EXECUTION START:`, {
-      path,
-      auth: currentUid,
       type: memoizedTargetRefOrQuery.type,
-      filters: internal._query.filters || [],
-      orderBy: internal._query.explicitOrderBy || [],
-      limit: internal._query.limit || 'none'
+      auth: currentUid
     });
 
     setIsLoading(true);
@@ -90,30 +65,22 @@ export function useCollection<T = any>(
           results.push({ ...(doc.data() as T), id: doc.id });
         }
         
-        console.log(`[FIRESTORE DIAGNOSTIC] SUCCESS for [${path}]. Results: ${results.length} docs.`);
+        console.log(`[FIRESTORE DIAGNOSTIC] SUCCESS. Results: ${results.length} docs.`);
         
         setData(results);
         setError(null);
         setIsLoading(false);
       },
-      async (serverError: FirestoreError) => {
-        console.log(`[FIRESTORE DIAGNOSTIC] ERROR for [${path}]:`, {
+      (serverError: FirestoreError) => {
+        // Safe logging to avoid error overlays in Dev mode while diagnosing
+        console.log(`[FIRESTORE DIAGNOSTIC] ERROR:`, {
           code: serverError.code,
           message: serverError.message,
           auth: currentUid
         });
         
-        if (serverError.code === 'permission-denied') {
-          const contextualError = new FirestorePermissionError({
-            operation: 'list',
-            path,
-          } satisfies SecurityRuleContext);
-          setError(contextualError);
-          setData([]); 
-        } else {
-          setError(serverError);
-          setData(null);
-        }
+        setError(serverError);
+        setData([]); // Return empty list on permission error to prevent infinite spinners
         setIsLoading(false);
       }
     );
