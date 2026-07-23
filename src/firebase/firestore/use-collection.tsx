@@ -10,7 +10,7 @@ import {
   CollectionReference,
 } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
-import { FirestorePermissionError } from '@/firebase/errors';
+import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors';
 
 /** Utility type to add an 'id' field to a given type T. */
 export type WithId<T> = T & { id: string };
@@ -72,31 +72,30 @@ export function useCollection<T = any>(
         setError(null);
         setIsLoading(false);
       },
-      (serverError: FirestoreError) => {
-        // Solo envolver en error de permisos si el código coincide
-        if (serverError.code !== 'permission-denied') {
+      async (serverError: FirestoreError) => {
+        if (serverError.code === 'permission-denied') {
+          const path: string =
+            memoizedTargetRefOrQuery.type === 'collection'
+              ? (memoizedTargetRefOrQuery as CollectionReference).path
+              : (memoizedTargetRefOrQuery as unknown as InternalQuery)._query.path.canonicalString();
+
+          const contextualError = new FirestorePermissionError({
+            operation: 'list',
+            path,
+          } satisfies SecurityRuleContext);
+
+          setError(contextualError);
+          setData([]); // Retornamos array vacío en caso de error para no bloquear UI
+          
+          // Emitimos solo si no es una carga de configuración inicial para evitar overlays intrusivos
+          if (!path.includes('seasons') && !path.includes('app_settings')) {
+             errorEmitter.emit('permission-error', contextualError);
+          }
+        } else {
           setError(serverError);
           setData(null);
-          setIsLoading(false);
-          return;
         }
-
-        const path: string =
-          memoizedTargetRefOrQuery.type === 'collection'
-            ? (memoizedTargetRefOrQuery as CollectionReference).path
-            : (memoizedTargetRefOrQuery as unknown as InternalQuery)._query.path.canonicalString()
-
-        const contextualError = new FirestorePermissionError({
-          operation: 'list',
-          path,
-        })
-
-        setError(contextualError)
-        setData(null)
-        setIsLoading(false)
-        
-        // No emitimos error fatal para evitar el overlay visual si es una carga pública fallida
-        // errorEmitter.emit('permission-error', contextualError);
+        setIsLoading(false);
       }
     );
 
