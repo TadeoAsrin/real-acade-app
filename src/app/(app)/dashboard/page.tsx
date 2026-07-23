@@ -10,7 +10,6 @@ import {
   Newspaper, 
   Flame, 
   Target, 
-  Users, 
   Star, 
   Skull, 
   Droplets, 
@@ -19,7 +18,8 @@ import {
   Brain, 
   ArrowRight,
   Crown,
-  Trophy
+  Trophy,
+  Users
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -160,7 +160,9 @@ function DashboardContent() {
     }
   }, [lastMatch]);
 
-  if (seasonLoading || playersLoading || matchesLoading || !selectedSeasonId || playersData === null) {
+  // Si está cargando activamente las temporadas o los jugadores principales, mostramos el loader.
+  // Pero no bloqueamos si selectedSeasonId es null una vez que seasonLoading terminó.
+  if (seasonLoading || (playersLoading && !playersData)) {
     return (
       <div className="flex h-[80vh] flex-col items-center justify-center gap-4">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />

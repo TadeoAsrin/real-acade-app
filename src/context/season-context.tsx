@@ -46,7 +46,7 @@ export function SeasonProvider({ children }: { children: React.ReactNode }) {
 
   // Ordenar las temporadas en el cliente
   const contextSeasons = React.useMemo(() => {
-    if (!seasons) return null;
+    if (!seasons) return [];
     
     return [...seasons].sort((a, b) => {
       if (b.year !== a.year) return b.year - a.year;
@@ -54,18 +54,18 @@ export function SeasonProvider({ children }: { children: React.ReactNode }) {
     });
   }, [seasons]);
 
-  const activeSeason = (contextSeasons || []).find(s => s.id === activeSeasonId) || null;
-  const selectedSeason = (contextSeasons || []).find(s => s.id === selectedSeasonId) || null;
+  const activeSeason = contextSeasons.find(s => s.id === activeSeasonId) || null;
+  const selectedSeason = contextSeasons.find(s => s.id === selectedSeasonId) || null;
 
   const value = {
-    seasons: contextSeasons || [],
+    seasons: contextSeasons,
     activeSeasonId,
     selectedSeasonId,
     selectedSeason,
     activeSeason,
     setSelectedSeasonId,
-    // Aseguramos que 'loading' sea verdadero si los datos son null (aún no han llegado o error de permiso inicial)
-    loading: settingsLoading || seasonsLoading || (seasons === null && !seasonsLoading),
+    // Simplificamos loading para evitar bloqueos por errores de permisos o datos nulos
+    loading: settingsLoading || seasonsLoading,
   };
 
   return (
