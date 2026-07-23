@@ -1,28 +1,23 @@
 'use client';
 
 import * as React from 'react';
-import { useFirestore, useCollection, useMemoFirebase, useDoc } from '@/firebase';
-import { collection, query, orderBy, where, doc } from 'firebase/firestore';
+import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, query, orderBy, where } from 'firebase/firestore';
 import { calculateAggregatedStats } from '@/lib/data';
-import type { Player, Match, AppSettings } from '@/lib/definitions';
-import { Card, CardHeader, CardDescription } from '@/components/ui/card';
+import type { Player, Match } from '@/lib/definitions';
+import { Card, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeftRight, Loader2, Swords } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getInitials, cn } from '@/lib/utils';
+import { useSeason } from '@/context/season-context';
+import { SeasonSelector } from '@/components/layout/season-selector';
 
 export default function ComparePage() {
   const firestore = useFirestore();
+  const { selectedSeasonId, loading: seasonLoading } = useSeason();
   const [player1Id, setPlayer1Id] = React.useState<string>("");
   const [player2Id, setPlayer2Id] = React.useState<string>("");
-
-  const settingsRef = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return doc(firestore, 'app_settings', 'global');
-  }, [firestore]);
-
-  const { data: settings } = useDoc<AppSettings>(settingsRef);
-  const activeSeasonId = settings?.activeSeasonId;
 
   const playersRef = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -30,13 +25,13 @@ export default function ComparePage() {
   }, [firestore]);
 
   const matchesRef = useMemoFirebase(() => {
-    if (!firestore || !activeSeasonId) return null;
+    if (!firestore || !selectedSeasonId) return null;
     return query(
       collection(firestore, 'matches'), 
-      where('seasonId', '==', activeSeasonId),
+      where('seasonId', '==', selectedSeasonId),
       orderBy('date', 'desc')
     );
-  }, [firestore, activeSeasonId]);
+  }, [firestore, selectedSeasonId]);
 
   const { data: players, isLoading: playersLoading } = useCollection<Player>(playersRef);
   const { data: matches, isLoading: matchesLoading } = useCollection<Match>(matchesRef);
@@ -49,7 +44,7 @@ export default function ComparePage() {
   const p1 = stats.find(s => s.playerId === player1Id);
   const p2 = stats.find(s => s.playerId === player2Id);
 
-  if (playersLoading || matchesLoading) {
+  if (playersLoading || matchesLoading || seasonLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -60,14 +55,17 @@ export default function ComparePage() {
 
   return (
     <div className="space-y-8 p-4 lg:p-8 animate-in fade-in duration-700">
-      <div className="space-y-1">
-        <h2 className="text-4xl lg:text-7xl font-black uppercase tracking-tighter italic text-white flex items-center gap-4">
-          <Swords className="h-8 w-8 lg:h-14 lg:w-14 text-primary shrink-0" />
-          VERSUS MODE
-        </h2>
-        <p className="text-[10px] lg:text-xs font-black uppercase tracking-[0.4em] text-primary/60 ml-1">
-          COMPARATIVA TÁCTICA DE ÉLITE
-        </p>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="space-y-1">
+          <h2 className="text-4xl lg:text-7xl font-black uppercase tracking-tighter italic text-white flex items-center gap-4">
+            <Swords className="h-8 w-8 lg:h-14 lg:w-14 text-primary shrink-0" />
+            VERSUS MODE
+          </h2>
+          <p className="text-[10px] lg:text-xs font-black uppercase tracking-[0.4em] text-primary/60 ml-1">
+            COMPARATIVA TÁCTICA DE ÉLITE
+          </p>
+        </div>
+        <SeasonSelector className="w-full md:w-64" />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

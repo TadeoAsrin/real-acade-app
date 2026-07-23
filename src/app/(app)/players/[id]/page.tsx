@@ -5,25 +5,20 @@ import { useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase
 import { doc, collection, query, orderBy, where } from 'firebase/firestore';
 import { useParams } from 'next/navigation';
 import { calculateAggregatedStats } from '@/lib/data';
-import type { Player, Match, AppSettings } from '@/lib/definitions';
+import type { Player, Match } from '@/lib/definitions';
 import { PlayerPerformanceChart } from '@/components/players/player-performance-chart';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { getInitials, cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
+import { useSeason } from '@/context/season-context';
+import { SeasonSelector } from '@/components/layout/season-selector';
 
 export default function PlayerProfilePage() {
   const { id } = useParams<{ id: string }>();
   const firestore = useFirestore();
-
-  const settingsRef = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return doc(firestore, 'app_settings', 'global');
-  }, [firestore]);
-
-  const { data: settings } = useDoc<AppSettings>(settingsRef);
-  const activeSeasonId = settings?.activeSeasonId;
+  const { selectedSeasonId, loading: seasonLoading } = useSeason();
 
   const playerRef = useMemoFirebase(() => {
     if (!firestore || !id) return null;
@@ -31,13 +26,13 @@ export default function PlayerProfilePage() {
   }, [firestore, id]);
 
   const matchesRef = useMemoFirebase(() => {
-    if (!firestore || !activeSeasonId) return null;
+    if (!firestore || !selectedSeasonId) return null;
     return query(
       collection(firestore, 'matches'), 
-      where('seasonId', '==', activeSeasonId),
+      where('seasonId', '==', selectedSeasonId),
       orderBy('date', 'desc')
     );
-  }, [firestore, activeSeasonId]);
+  }, [firestore, selectedSeasonId]);
 
   const { data: player, isLoading: playerLoading } = useDoc<Player>(playerRef);
   const { data: matches, isLoading: matchesLoading } = useCollection<Match>(matchesRef);
@@ -57,7 +52,7 @@ export default function PlayerProfilePage() {
       });
   }, [player, matches]);
 
-  if (playerLoading || matchesLoading) {
+  if (playerLoading || matchesLoading || seasonLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -96,6 +91,9 @@ export default function PlayerProfilePage() {
         </div>
 
         <div className="flex-1 space-y-8">
+           <div className="flex justify-end">
+              <SeasonSelector className="w-full md:w-64" />
+           </div>
            <PlayerPerformanceChart matchHistory={matchHistory} />
         </div>
       </div>

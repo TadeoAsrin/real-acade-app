@@ -1,10 +1,10 @@
 'use client';
 
 import * as React from 'react';
-import { useFirestore, useCollection, useMemoFirebase, useDoc } from '@/firebase';
-import { collection, query, orderBy, where, doc } from 'firebase/firestore';
+import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, query, orderBy, where } from 'firebase/firestore';
 import { calculateAggregatedStats } from '@/lib/data';
-import type { Player, Match, AppSettings } from '@/lib/definitions';
+import type { Player, Match } from '@/lib/definitions';
 import { 
   Table, 
   TableBody, 
@@ -13,22 +13,17 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
-import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { getInitials, cn } from '@/lib/utils';
-import { Trophy, Medal, Info, Loader2 } from 'lucide-react';
+import { Trophy, Medal, Loader2, Info } from 'lucide-react';
 import Link from 'next/link';
+import { useSeason } from '@/context/season-context';
+import { SeasonSelector } from '@/components/layout/season-selector';
 
 export default function StandingsPage() {
   const firestore = useFirestore();
-
-  const settingsRef = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return doc(firestore, 'app_settings', 'global');
-  }, [firestore]);
-
-  const { data: settings, isLoading: settingsLoading } = useDoc<AppSettings>(settingsRef);
-  const activeSeasonId = settings?.activeSeasonId;
+  const { selectedSeasonId, loading: seasonLoading } = useSeason();
 
   const playersRef = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -36,13 +31,13 @@ export default function StandingsPage() {
   }, [firestore]);
 
   const matchesRef = useMemoFirebase(() => {
-    if (!firestore || !activeSeasonId) return null;
+    if (!firestore || !selectedSeasonId) return null;
     return query(
       collection(firestore, 'matches'), 
-      where('seasonId', '==', activeSeasonId),
+      where('seasonId', '==', selectedSeasonId),
       orderBy('date', 'desc')
     );
-  }, [firestore, activeSeasonId]);
+  }, [firestore, selectedSeasonId]);
 
   const { data: players, isLoading: playersLoading } = useCollection<Player>(playersRef);
   const { data: matches, isLoading: matchesLoading } = useCollection<Match>(matchesRef);
@@ -57,7 +52,7 @@ export default function StandingsPage() {
       );
   }, [players, matches]);
 
-  const isLoading = settingsLoading || playersLoading || matchesLoading;
+  const isLoading = seasonLoading || playersLoading || matchesLoading;
 
   if (isLoading) {
     return (
@@ -68,13 +63,13 @@ export default function StandingsPage() {
     );
   }
 
-  if (!activeSeasonId) {
+  if (!selectedSeasonId) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-6">
         <Info className="h-12 w-12 text-muted-foreground/20 mb-4" />
         <h2 className="text-2xl font-bebas tracking-widest text-white mb-2">Temporada No Inicializada</h2>
         <p className="text-muted-foreground text-sm max-w-md">
-          El administrador debe inicializar la temporada actual para ver la clasificación.
+          Selecciona una temporada para ver la clasificación oficial.
         </p>
       </div>
     );
@@ -89,9 +84,10 @@ export default function StandingsPage() {
             Clasificación Oficial
           </h2>
           <p className="text-[10px] lg:text-xs font-black uppercase tracking-[0.3em] text-primary/60 ml-1">
-            Métricas de Élite • Temporada Actual
+            Métricas de Élite • Competición en Tiempo Real
           </p>
         </div>
+        <SeasonSelector className="w-full md:w-64" />
       </div>
 
       <Card className="competition-card border-white/5 bg-black/20 shadow-2xl overflow-hidden">

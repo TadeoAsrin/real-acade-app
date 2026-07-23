@@ -1,39 +1,33 @@
-
 'use client';
 
 import * as React from 'react';
-import { useFirestore, useCollection, useMemoFirebase, useDoc } from '@/firebase';
-import { collection, query, orderBy, where, doc } from 'firebase/firestore';
-import type { GalleryItem, AppSettings } from '@/lib/definitions';
+import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, query, orderBy, where } from 'firebase/firestore';
+import type { GalleryItem } from '@/lib/definitions';
 import { Card, CardContent } from '@/components/ui/card';
 import { Image as ImageIcon, Play, Calendar, Trophy, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useSeason } from '@/context/season-context';
+import { SeasonSelector } from '@/components/layout/season-selector';
 
 export default function GalleryPage() {
   const firestore = useFirestore();
-
-  const settingsRef = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return doc(firestore, 'app_settings', 'global');
-  }, [firestore]);
-
-  const { data: settings } = useDoc<AppSettings>(settingsRef);
-  const activeSeasonId = settings?.activeSeasonId;
+  const { selectedSeasonId, loading: seasonLoading } = useSeason();
 
   const galleryRef = useMemoFirebase(() => {
-    if (!firestore || !activeSeasonId) return null;
+    if (!firestore || !selectedSeasonId) return null;
     return query(
       collection(firestore, 'gallery'), 
-      where('seasonId', '==', activeSeasonId),
+      where('seasonId', '==', selectedSeasonId),
       orderBy('date', 'desc')
     );
-  }, [firestore, activeSeasonId]);
+  }, [firestore, selectedSeasonId]);
 
-  const { data: items, isLoading } = useCollection<GalleryItem>(galleryRef);
+  const { data: items, isLoading: galleryLoading } = useCollection<GalleryItem>(galleryRef);
 
-  if (isLoading) {
+  if (galleryLoading || seasonLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -54,6 +48,7 @@ export default function GalleryPage() {
             MOMENTOS DE ÉLITE • REAL ACADE
           </p>
         </div>
+        <SeasonSelector className="w-full md:w-64" />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
