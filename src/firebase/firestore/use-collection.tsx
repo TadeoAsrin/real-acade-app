@@ -31,7 +31,10 @@ export interface InternalQuery extends Query<DocumentData> {
     path: {
       canonicalString(): string;
       toString(): string;
-    }
+    },
+    filters?: any[];
+    explicitOrderBy?: any[];
+    limit?: number;
   }
 }
 
@@ -60,12 +63,21 @@ export function useCollection<T = any>(
       return;
     }
 
+    const internal = memoizedTargetRefOrQuery as unknown as InternalQuery;
     const path: string =
       memoizedTargetRefOrQuery.type === 'collection'
         ? (memoizedTargetRefOrQuery as CollectionReference).path
-        : (memoizedTargetRefOrQuery as unknown as InternalQuery)._query.path.canonicalString();
+        : internal._query.path.canonicalString();
 
-    console.log(`[FIRESTORE DIAGNOSTIC] useCollection: STARTING query for [${path}]. Auth: ${currentUid}`);
+    // DETALLE DE LA CONSULTA (AUDITORÍA SOLICITADA)
+    console.log(`[FIRESTORE DIAGNOSTIC] EXECUTION START:`, {
+      path,
+      auth: currentUid,
+      type: memoizedTargetRefOrQuery.type,
+      filters: internal._query.filters || [],
+      orderBy: internal._query.explicitOrderBy || [],
+      limit: internal._query.limit || 'none'
+    });
 
     setIsLoading(true);
     setError(null);
@@ -78,22 +90,24 @@ export function useCollection<T = any>(
           results.push({ ...(doc.data() as T), id: doc.id });
         }
         
-        console.log(`[FIRESTORE DIAGNOSTIC] useCollection: SUCCESS for [${path}]. Auth: ${currentUid}. Results: ${results.length} docs.`);
+        console.log(`[FIRESTORE DIAGNOSTIC] SUCCESS for [${path}]. Results: ${results.length} docs.`);
         
         setData(results);
         setError(null);
         setIsLoading(false);
       },
       async (serverError: FirestoreError) => {
-        // FIXED: Using console.log instead of console.error to keep diagnostic info without crashing the UI overlay
-        console.log(`[FIRESTORE DIAGNOSTIC] useCollection: ERROR for [${path}]. Auth: ${currentUid}. Code: ${serverError.code}. Message: ${serverError.message}`);
+        console.log(`[FIRESTORE DIAGNOSTIC] ERROR for [${path}]:`, {
+          code: serverError.code,
+          message: serverError.message,
+          auth: currentUid
+        });
         
         if (serverError.code === 'permission-denied') {
           const contextualError = new FirestorePermissionError({
             operation: 'list',
             path,
           } satisfies SecurityRuleContext);
-
           setError(contextualError);
           setData([]); 
         } else {
