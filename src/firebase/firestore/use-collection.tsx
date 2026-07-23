@@ -96,7 +96,9 @@ export function useCollection<T = any>(
           setError(contextualError);
           setData([]); 
           
-          errorEmitter.emit('permission-error', contextualError);
+          // CRITICAL: Silent diagnostic. We don't emit to the global listener to avoid crashing the UI 
+          // but we still set the error in state and log it to console as requested.
+          // errorEmitter.emit('permission-error', contextualError);
         } else {
           setError(serverError);
           setData(null);

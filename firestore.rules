@@ -4,53 +4,44 @@ service cloud.firestore {
 
     /**
      * REAL ACADE SECURITY MODEL - ACCESO PÚBLICO TOTAL DE LECTURA
-     * Se permite que cualquier persona vea los datos (get, list).
-     * La escritura (create, update, delete) queda reservada para administradores.
+     * Prioridad absoluta: Lectura abierta para todo el club.
      */
-
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
-    // Función isAdmin blindada contra usuarios nulos
+    
+    // Función de verificación de Administrador optimizada
     function isAdmin() {
-      return isSignedIn() && (
+      return request.auth != null && (
         request.auth.token.email == 'tadeoasrin@gmail.com' ||
         (exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid)) && 
          get(/databases/$(database)/documents/roles_admin/$(request.auth.uid)).data.isAdmin == true)
       );
     }
 
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
-    }
+    // BLOQUE DE LECTURA PÚBLICA: Sin restricciones de autenticación
+    match /app_settings/{document=**} { allow get, list: if true; }
+    match /seasons/{document=**}      { allow get, list: if true; }
+    match /matches/{document=**}      { allow get, list: if true; }
+    match /players/{document=**}      { allow get, list: if true; }
+    match /roles_admin/{document=**}  { allow get, list: if true; }
+    match /gallery/{document=**}      { allow get, list: if true; }
+    match /drafts/{document=**}       { allow get, list: if true; }
 
-    // REGLAS DE LECTURA PÚBLICA TOTAL (Atómicas y robustas)
-    match /app_settings/{document=**} { allow read: if true; }
-    match /seasons/{document=**}      { allow read: if true; }
-    match /matches/{document=**}      { allow read: if true; }
-    match /players/{document=**}      { allow read: if true; }
-    match /roles_admin/{document=**}  { allow read: if true; }
-    match /gallery/{document=**}      { allow read: if true; }
-    match /drafts/{document=**}       { allow read: if true; }
-
-    // REGLAS DE ESCRITURA PROTEGIDA
+    // BLOQUE DE ESCRITURA PROTEGIDA: Solo administradores o dueños
     match /app_settings/{id} { allow write: if isAdmin(); }
     match /seasons/{id}      { allow write: if isAdmin(); }
     match /matches/{id} {
       allow write: if isAdmin();
       match /votes/{uid} {
-        allow write: if isOwner(uid);
+        allow write: if request.auth != null && request.auth.uid == uid;
       }
     }
     match /players/{id} {
-      allow write: if isOwner(id) || isAdmin();
+      allow write: if isAdmin() || (request.auth != null && request.auth.uid == id);
     }
     match /gallery/{id} {
       allow write: if isAdmin();
     }
     match /drafts/{id} {
-      allow write: if isSignedIn();
+      allow write: if request.auth != null;
     }
   }
 }
