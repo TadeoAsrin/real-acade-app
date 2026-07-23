@@ -25,52 +25,32 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    // Configuración de la App: Lectura pública total
-    match /app_settings/{docId} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
+    // REGLAS DE LECTURA PÚBLICA TOTAL (Atómicas y robustas)
+    match /app_settings/{document=**} { allow read: if true; }
+    match /seasons/{document=**}      { allow read: if true; }
+    match /matches/{document=**}      { allow read: if true; }
+    match /players/{document=**}      { allow read: if true; }
+    match /roles_admin/{document=**}  { allow read: if true; }
+    match /gallery/{document=**}      { allow read: if true; }
+    match /drafts/{document=**}       { allow read: if true; }
 
-    // Temporadas: Lectura pública total
-    match /seasons/{seasonId} {
-      allow read: if true;
+    // REGLAS DE ESCRITURA PROTEGIDA
+    match /app_settings/{id} { allow write: if isAdmin(); }
+    match /seasons/{id}      { allow write: if isAdmin(); }
+    match /matches/{id} {
       allow write: if isAdmin();
-    }
-
-    // Partidos: Lectura pública total
-    match /matches/{matchId} {
-      allow read: if true;
-      allow write: if isAdmin();
-
-      // Votos para mejor gol: Solo miembros registrados pueden votar
-      match /votes/{userId} {
-        allow read: if true;
-        allow write: if isOwner(userId);
+      match /votes/{uid} {
+        allow write: if isOwner(uid);
       }
     }
-
-    // Jugadores: Lectura pública total
-    match /players/{playerId} {
-      allow read: if true;
-      allow write: if isOwner(playerId) || isAdmin();
+    match /players/{id} {
+      allow write: if isOwner(id) || isAdmin();
     }
-
-    // Roles de administrador: Lectura pública necesaria para lógica de UI
-    match /roles_admin/{uid} {
-      allow read: if true;
-      allow write: if false;
-    }
-
-    // Galería: Lectura pública total
-    match /gallery/{itemId} {
-      allow read: if true;
+    match /gallery/{id} {
       allow write: if isAdmin();
     }
-
-    // Pan y Queso (Drafts)
-    match /drafts/{draftId} {
-      allow read: if true;
-      allow write: if isSignedIn() || isAdmin();
+    match /drafts/{id} {
+      allow write: if isSignedIn();
     }
   }
 }

@@ -87,8 +87,16 @@ export function useCollection<T = any>(
           setError(contextualError);
           setData([]); // Retornamos array vacío en caso de error para no bloquear UI
           
-          // Emitimos solo si no es una carga de configuración inicial para evitar overlays intrusivos
-          if (!path.includes('seasons') && !path.includes('app_settings')) {
+          // CRITICAL: Solo emitimos el error fatal si NO es una de las colecciones públicas principales
+          // Esto evita que la app "crashee" visualmente para visitantes anónimos si hay un desajuste temporal de reglas.
+          const isPublicCollection = 
+            path.includes('matches') || 
+            path.includes('players') || 
+            path.includes('seasons') || 
+            path.includes('gallery') || 
+            path.includes('app_settings');
+
+          if (!isPublicCollection) {
              errorEmitter.emit('permission-error', contextualError);
           }
         } else {
