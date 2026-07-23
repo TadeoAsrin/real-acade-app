@@ -9,39 +9,24 @@ import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { SeasonProvider } from '@/context/season-context';
 
+/**
+ * Layout Principal: Ahora permite el acceso a usuarios no autenticados (visitantes).
+ * No redirige al login a menos que se intente acceder a una ruta protegida (manejado en las páginas).
+ */
 export default function AppLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { user, isUserLoading } = useUser();
-  const router = useRouter();
-
+  const { isUserLoading } = useUser();
   const [showLoading, setShowLoading] = React.useState(true);
 
   React.useEffect(() => {
+    // Una vez que Firebase Auth determina el estado (logueado o no), dejamos de mostrar el cargador
     if (!isUserLoading) {
-      if (!user) {
-        router.replace('/login');
-      } else {
-        setShowLoading(false);
-      }
-      return;
+      setShowLoading(false);
     }
-
-    const timer = setTimeout(() => {
-      console.warn(
-        "Firebase Auth tardó demasiado. Continuando con precaución."
-      );
-      if (!user && !isUserLoading) {
-        router.replace('/login');
-      } else {
-        setShowLoading(false);
-      }
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, [isUserLoading, user, router]);
+  }, [isUserLoading]);
 
   if (showLoading) {
     return (
@@ -54,10 +39,6 @@ export default function AppLayout({
         </div>
       </div>
     );
-  }
-
-  if (!user && !isUserLoading) {
-    return null;
   }
 
   return (

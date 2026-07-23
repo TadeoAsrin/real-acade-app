@@ -5,19 +5,19 @@ import { useRouter } from "next/navigation";
 import { useUser } from "@/firebase";
 import { Loader2 } from "lucide-react";
 
+/**
+ * Página de entrada: Ahora redirige siempre al Dashboard para permitir el acceso público.
+ */
 export default function RootPage() {
   const router = useRouter();
-  const { user, isUserLoading } = useUser();
+  const { isUserLoading } = useUser();
 
   useEffect(() => {
     if (isUserLoading) return;
-
-    if (user) {
-      router.replace("/dashboard");
-    } else {
-      router.replace("/login");
-    }
-  }, [user, isUserLoading, router]);
+    
+    // Todos los caminos llevan al Dashboard (Muro Público)
+    router.replace("/dashboard");
+  }, [isUserLoading, router]);
 
   return (
     <div className="flex h-screen w-full items-center justify-center bg-background">

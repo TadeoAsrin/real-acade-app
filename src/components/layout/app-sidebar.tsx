@@ -11,7 +11,7 @@ import {
   SidebarContent,
   useSidebar,
 } from "../ui/sidebar";
-import { Goal, BarChart3, Users, LogOut, Trophy, Dices, ArrowLeftRight, Swords, Image as ImageIcon, ShieldCheck } from "lucide-react";
+import { Goal, BarChart3, Users, LogOut, Trophy, Dices, ArrowLeftRight, Swords, Image as ImageIcon, ShieldCheck, LogIn } from "lucide-react";
 import Link from "next/link";
 import { useAuth, useUser, useFirestore, useMemoFirebase, useDoc, useCollection } from "@/firebase";
 import { signOut } from "firebase/auth";
@@ -89,7 +89,7 @@ export function AppSidebar() {
         description: "Has salido de Real Acade correctamente.",
       });
       if (isMobile) setOpenMobile(false);
-      router.push("/login");
+      router.push("/dashboard");
     } catch (error) {
       console.error("Logout error", error);
     }
@@ -206,7 +206,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-6 border-t border-white/5">
-         {user && (
+         {user ? (
            <div className="flex flex-col gap-4">
               <div className="flex items-center gap-3">
                 <Avatar className="h-9 w-9 border border-white/10">
@@ -233,6 +233,13 @@ export function AppSidebar() {
                 CERRAR SESIÓN
               </Button>
            </div>
+         ) : (
+            <Button asChild variant="outline" size="sm" className="w-full h-10 font-bebas text-lg tracking-widest border-primary/20 hover:bg-primary/10 text-primary">
+                <Link href="/login" onClick={handleNavClick}>
+                    <LogIn className="h-4 w-4 mr-2" />
+                    ACCESO ADMIN
+                </Link>
+            </Button>
          )}
       </SidebarFooter>
     </Sidebar>
