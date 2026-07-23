@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -6,12 +7,12 @@ import { AppSidebar } from "@/components/layout/app-sidebar";
 import { Header } from "@/components/layout/header";
 import { useUser } from "@/firebase";
 import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { SeasonProvider } from '@/context/season-context';
 
 /**
- * Layout Principal: Ahora permite el acceso a usuarios no autenticados (visitantes).
- * No redirige al login a menos que se intente acceder a una ruta protegida (manejado en las páginas).
+ * AppLayout: Layout principal de Real Acade.
+ * Permite el acceso público a todos los hijos (Dashboard, Standings, etc.).
+ * Solo gestiona el estado de carga inicial de Firebase Auth.
  */
 export default function AppLayout({
   children,
@@ -22,7 +23,8 @@ export default function AppLayout({
   const [showLoading, setShowLoading] = React.useState(true);
 
   React.useEffect(() => {
-    // Una vez que Firebase Auth determina el estado (logueado o no), dejamos de mostrar el cargador
+    // Cuando isUserLoading es false, Firebase ha determinado si el usuario es null o un objeto User.
+    // En ese momento, liberamos la vista para cualquier visitante.
     if (!isUserLoading) {
       setShowLoading(false);
     }
@@ -34,7 +36,7 @@ export default function AppLayout({
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-10 w-10 animate-spin text-primary" />
           <p className="font-bebas text-xl tracking-widest text-muted-foreground uppercase">
-            Preparando vestuario...
+            Accediendo a la Academia...
           </p>
         </div>
       </div>

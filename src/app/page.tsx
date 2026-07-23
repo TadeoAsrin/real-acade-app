@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect } from "react";
@@ -6,17 +7,19 @@ import { useUser } from "@/firebase";
 import { Loader2 } from "lucide-react";
 
 /**
- * Página de entrada: Ahora redirige siempre al Dashboard para permitir el acceso público.
+ * RootPage: Punto de entrada de la aplicación.
+ * Redirige siempre al Dashboard para garantizar que el acceso sea público e inmediato.
  */
 export default function RootPage() {
   const router = useRouter();
   const { isUserLoading } = useUser();
 
   useEffect(() => {
-    if (isUserLoading) return;
-    
-    // Todos los caminos llevan al Dashboard (Muro Público)
-    router.replace("/dashboard");
+    // Una vez que sabemos el estado del usuario (logueado o no),
+    // simplemente mandamos a todos al Dashboard.
+    if (!isUserLoading) {
+      router.replace("/dashboard");
+    }
   }, [isUserLoading, router]);
 
   return (
@@ -24,7 +27,7 @@ export default function RootPage() {
       <div className="flex flex-col items-center gap-4">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
         <p className="font-bebas text-xl tracking-widest text-muted-foreground uppercase">
-          Cargando Real Acade...
+          Real Acade • Cargando...
         </p>
       </div>
     </div>
