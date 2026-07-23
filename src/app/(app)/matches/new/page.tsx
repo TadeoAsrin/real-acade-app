@@ -98,11 +98,17 @@ export default function NewMatchPage() {
   const toggleCaptain = (playerId: string, team: 'A' | 'B') => {
     setPlayerMatchStates(prev => {
       const newStates = { ...prev };
-      // Quitar capitanía de otros del mismo equipo
+      const currentVal = !!prev[playerId]?.isCaptain;
+      
+      // Reset only isCaptain for others on the same team
       Object.keys(newStates).forEach(id => {
-        if (newStates[id].team === team) newStates[id].isCaptain = false;
+        if (newStates[id].team === team) {
+          newStates[id] = { ...newStates[id], isCaptain: false };
+        }
       });
-      newStates[playerId].isCaptain = !prev[playerId].isCaptain;
+      
+      // Toggle only isCaptain for selected player
+      newStates[playerId] = { ...newStates[playerId], isCaptain: !currentVal };
       return newStates;
     });
   };
@@ -110,10 +116,15 @@ export default function NewMatchPage() {
   const toggleMvp = (playerId: string) => {
     setPlayerMatchStates(prev => {
       const newStates = { ...prev };
-      const wasMvp = prev[playerId].isMvp;
-      // El MVP es único en todo el partido
-      Object.keys(newStates).forEach(id => newStates[id].isMvp = false);
-      newStates[playerId].isMvp = !wasMvp;
+      const currentVal = !!prev[playerId]?.isMvp;
+      
+      // Reset only isMvp for everyone else
+      Object.keys(newStates).forEach(id => {
+        newStates[id] = { ...newStates[id], isMvp: false };
+      });
+      
+      // Toggle only isMvp for selected player
+      newStates[playerId] = { ...newStates[playerId], isMvp: !currentVal };
       return newStates;
     });
   };
@@ -121,10 +132,15 @@ export default function NewMatchPage() {
   const toggleBestGoal = (playerId: string) => {
     setPlayerMatchStates(prev => {
       const newStates = { ...prev };
-      const wasBestGoal = prev[playerId].hasBestGoal;
-      // El mejor gol es único en todo el partido
-      Object.keys(newStates).forEach(id => newStates[id].hasBestGoal = false);
-      newStates[playerId].hasBestGoal = !wasBestGoal;
+      const currentVal = !!prev[playerId]?.hasBestGoal;
+      
+      // Reset only hasBestGoal for everyone else
+      Object.keys(newStates).forEach(id => {
+        newStates[id] = { ...newStates[id], hasBestGoal: false };
+      });
+      
+      // Toggle only hasBestGoal for selected player
+      newStates[playerId] = { ...newStates[playerId], hasBestGoal: !currentVal };
       return newStates;
     });
   };
