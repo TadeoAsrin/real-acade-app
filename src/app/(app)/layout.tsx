@@ -1,48 +1,22 @@
-
 'use client';
 
 import * as React from 'react';
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { Header } from "@/components/layout/header";
-import { useUser } from "@/firebase";
-import { Loader2 } from "lucide-react";
 import { SeasonProvider } from '@/context/season-context';
 
 /**
  * AppLayout: Layout principal de Real Acade.
- * Permite el acceso público a todos los hijos (Dashboard, Standings, etc.).
- * Solo gestiona el estado de carga inicial de Firebase Auth.
+ * Diseñado para ser 100% público. No bloquea el renderizado ni redirige al login.
+ * Los componentes internos (Header, Sidebar) se encargan de mostrar u ocultar
+ * opciones administrativas según el estado de autenticación.
  */
 export default function AppLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { isUserLoading } = useUser();
-  const [showLoading, setShowLoading] = React.useState(true);
-
-  React.useEffect(() => {
-    // Cuando isUserLoading es false, Firebase ha determinado si el usuario es null o un objeto User.
-    // En ese momento, liberamos la vista para cualquier visitante.
-    if (!isUserLoading) {
-      setShowLoading(false);
-    }
-  }, [isUserLoading]);
-
-  if (showLoading) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-10 w-10 animate-spin text-primary" />
-          <p className="font-bebas text-xl tracking-widest text-muted-foreground uppercase">
-            Accediendo a la Academia...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <SeasonProvider>
       <SidebarProvider>
