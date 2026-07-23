@@ -32,7 +32,9 @@ export function MatchAiSummary({ matchId, matchData }: MatchAiSummaryProps) {
 
   const { data: match, isLoading: matchLoading } = useDoc<Match>(matchRef);
   const { data: adminRole } = useDoc<{isAdmin: boolean}>(adminRoleRef);
-  const isAdmin = !!adminRole?.isAdmin;
+  
+  // FIXED: Explicitly check for backup admin email
+  const isAdmin = !!adminRole?.isAdmin || user?.email === 'tadeoasrin@gmail.com';
 
   async function handleGenerate() {
     if (!user || !matchRef) return;
@@ -48,7 +50,6 @@ export function MatchAiSummary({ matchId, matchData }: MatchAiSummaryProps) {
           setError('La IA de la redacción está ocupada. Reintenta pronto.');
         }
       } else if (result) {
-        // pattern: use non-blocking update
         updateDocumentNonBlocking(matchRef, {
           aiSummary: result
         });

@@ -1,9 +1,9 @@
 'use client';
 
 import * as React from 'react';
-import { useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase';
+import { useFirestore, useDoc, useCollection, useMemoFirebase, useUser } from '@/firebase';
 import { doc, collection, query, orderBy } from 'firebase/firestore';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import type { Match, Player } from '@/lib/definitions';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -12,12 +12,15 @@ import { BestGoalVote } from '@/components/matches/best-goal-vote';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { getInitials } from '@/lib/utils';
-import { Calendar, MapPin, Loader2, ArrowLeft } from 'lucide-react';
+import { Calendar, MapPin, Loader2, ArrowLeft, Edit3 } from 'lucide-react';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 export default function MatchDetailPage() {
   const { id } = useParams<{ id: string }>();
   const firestore = useFirestore();
+  const { user } = useUser();
+  const router = useRouter();
 
   const matchRef = useMemoFirebase(() => {
     if (!firestore || !id) return null;
@@ -29,8 +32,16 @@ export default function MatchDetailPage() {
     return query(collection(firestore, 'players'), orderBy('name', 'asc'));
   }, [firestore]);
 
+  const adminRoleRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'roles_admin', user.uid);
+  }, [firestore, user]);
+
   const { data: match, isLoading: matchLoading } = useDoc<Match>(matchRef);
   const { data: players, isLoading: playersLoading } = useCollection<Player>(playersRef);
+  const { data: adminRole } = useDoc<{isAdmin: boolean}>(adminRoleRef);
+
+  const isAdmin = !!adminRole?.isAdmin || user?.email === 'tadeoasrin@gmail.com';
 
   if (matchLoading || playersLoading) {
     return (
@@ -47,30 +58,43 @@ export default function MatchDetailPage() {
     date: match.date,
     teamAScore: match.teamAScore,
     teamBScore: match.teamBScore,
-    teamAPlayers: match.teamAPlayers.map(p => ({
+    teamAPlayers: (match.teamAPlayers || []).map(p => ({
       name: players?.find(pl => pl.id === p.playerId)?.name || 'N/A',
       goals: p.goals
     })),
-    teamBPlayers: match.teamBPlayers.map(p => ({
+    teamBPlayers: (match.teamBPlayers || []).map(p => ({
       name: players?.find(pl => pl.id === p.playerId)?.name || 'N/A',
       goals: p.goals
     })),
-    mvpName: players?.find(pl => pl.id === match.teamAPlayers.find(s => s.isMvp)?.playerId || match.teamBPlayers.find(s => s.isMvp)?.playerId)?.name,
+    mvpName: players?.find(pl => 
+      pl.id === match.teamAPlayers?.find(s => s.isMvp)?.playerId || 
+      pl.id === match.teamBPlayers?.find(s => s.isMvp)?.playerId
+    )?.name,
   };
 
   const goalScorers = [
-    ...match.teamAPlayers.filter(p => p.goals > 0),
-    ...match.teamBPlayers.filter(p => p.goals > 0)
+    ...(match.teamAPlayers || []).filter(p => p.goals > 0),
+    ...(match.teamBPlayers || []).filter(p => p.goals > 0)
   ].map(s => {
     const p = players?.find(pl => pl.id === s.playerId);
-    return { ...p!, goals: s.goals };
+    return { ...p!, goals: s.goals, hasBestGoal: s.hasBestGoal };
   });
 
   return (
     <div className="space-y-8 p-4 lg:p-8 animate-in fade-in duration-700 max-w-6xl mx-auto">
-      <Link href="/matches" className="flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground hover:text-primary transition-colors tracking-widest">
-        <ArrowLeft className="h-3 w-3" /> VOLVER AL HISTORIAL
-      </Link>
+      <div className="flex items-center justify-between">
+        <Link href="/matches" className="flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground hover:text-primary transition-colors tracking-widest">
+          <ArrowLeft className="h-3 w-3" /> VOLVER AL HISTORIAL
+        </Link>
+        
+        {isAdmin && (
+          <Button asChild variant="outline" size="sm" className="h-8 border-primary/20 hover:bg-primary/10 text-primary font-black uppercase text-[10px] tracking-widest">
+            <Link href={`/matches/${id}/edit`}>
+              <Edit3 className="h-3 w-3 mr-2" /> EDITAR FICHA
+            </Link>
+          </Button>
+        )}
+      </div>
 
       <Card className="competition-card overflow-hidden bg-black/40 border-white/5 shadow-2xl">
         <div className="p-8 md:p-12 flex flex-col items-center justify-center gap-8 bg-gradient-to-b from-primary/10 via-transparent to-accent/10">
@@ -109,7 +133,7 @@ export default function MatchDetailPage() {
                     <CardTitle className="text-sm font-black uppercase text-primary tracking-widest">Goleadores Azul</CardTitle>
                  </CardHeader>
                  <CardContent className="p-4 space-y-3">
-                    {match.teamAPlayers.filter(p => p.goals > 0).map(p => (
+                    {match.teamAPlayers?.filter(p => p.goals > 0).map(p => (
                       <div key={p.playerId} className="flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5">
                         <div className="flex items-center gap-3">
                            <Avatar className="h-8 w-8">
@@ -128,7 +152,7 @@ export default function MatchDetailPage() {
                     <CardTitle className="text-sm font-black uppercase text-accent tracking-widest">Goleadores Rojo</CardTitle>
                  </CardHeader>
                  <CardContent className="p-4 space-y-3">
-                    {match.teamBPlayers.filter(p => p.goals > 0).map(p => (
+                    {match.teamBPlayers?.filter(p => p.goals > 0).map(p => (
                       <div key={p.playerId} className="flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5">
                         <div className="flex items-center gap-3">
                            <Avatar className="h-8 w-8">
