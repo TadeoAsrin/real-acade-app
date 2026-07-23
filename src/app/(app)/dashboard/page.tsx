@@ -388,7 +388,7 @@ function DashboardContent() {
               <p className="text-[11px] font-black uppercase text-primary font-oswald truncate max-w-[140px] drop-shadow-[0_0_10px_rgba(59,130,246,0.3)]">{recordHolderText}</p>
             </div>
           </Link>
-          <Link href="/standings" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-emerald-500/20 transition-all hover-lift">
+          <Link href="/attendance" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-emerald-500/20 transition-all hover-lift">
             <Users className="h-6 w-6 text-emerald-500" />
             <span className="text-5xl font-black italic font-bebas leading-none text-white">{attendanceValue}</span>
             <div className="space-y-1">
