@@ -9,7 +9,6 @@ import type { Match, Player, AggregatedPlayerStats } from "@/lib/definitions";
 import { 
   Loader2, 
   Newspaper, 
-  Trophy, 
   Flame, 
   Target, 
   Users, 
@@ -364,14 +363,14 @@ function DashboardContent() {
       <section className="space-y-6 relative z-10">
         <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 px-1 font-oswald">PULSO DE LA COMPETICIÓN</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-yellow-500/20 transition-all hover-lift">
+          <Link href="/standings" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-yellow-500/20 transition-all hover-lift">
             <Star className="h-6 w-6 text-yellow-500" />
             <span className="text-5xl font-black italic font-bebas leading-none text-white">{maxMvpCount}</span>
             <div className="space-y-1">
               <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">REYES MVP</p>
               <p className="text-[10px] font-black uppercase text-yellow-500/60 font-oswald">RÉCORD PREMIOS</p>
             </div>
-          </div>
+          </Link>
           <div className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-orange-500/20 transition-all hover-lift">
             <Flame className="h-6 w-6 text-orange-500" />
             <span className="text-5xl font-black italic font-bebas leading-none text-white">{recordGoalsInMatch}</span>
@@ -388,14 +387,14 @@ function DashboardContent() {
               <p className="text-[11px] font-black uppercase text-primary font-oswald truncate max-w-[140px] drop-shadow-[0_0_10px_rgba(59,130,246,0.3)]">{recordHolderText}</p>
             </div>
           </Link>
-          <div className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-emerald-500/20 transition-all hover-lift">
+          <Link href="/standings" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-emerald-500/20 transition-all hover-lift">
             <Users className="h-6 w-6 text-emerald-500" />
             <span className="text-5xl font-black italic font-bebas leading-none text-white">{attendanceValue}</span>
             <div className="space-y-1">
               <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">INFALTABLES</p>
               <p className="text-[11px] font-black uppercase text-emerald-500 font-oswald truncate max-w-[140px] drop-shadow-[0_0_10px_rgba(16,185,129,0.3)]">{attendanceText}</p>
             </div>
-          </div>
+          </Link>
         </div>
       </section>
 
