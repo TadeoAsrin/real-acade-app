@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from 'react';
@@ -30,7 +31,6 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials, cn } from "@/lib/utils";
 import { MatchNewsModal } from '@/components/dashboard/match-news-modal';
 import { useSeason } from '@/context/season-context';
-import { SeasonSelector } from '@/components/layout/season-selector';
 
 interface EliteListCardProps {
   title: string;
@@ -221,7 +221,6 @@ function DashboardContent() {
           <h2 className="text-4xl lg:text-7xl font-black uppercase tracking-tighter italic text-white leading-none">REAL ACADE</h2>
           <p className="text-[10px] lg:text-xs font-black uppercase tracking-[0.4em] text-primary/60 ml-1 mt-2">DASHBOARD ESTRATÉGICO</p>
         </div>
-        <SeasonSelector className="w-full md:w-64" />
       </div>
 
       {/* 1. HERO SECTION */}

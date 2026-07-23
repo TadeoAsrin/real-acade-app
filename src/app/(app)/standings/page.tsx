@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -19,7 +20,6 @@ import { getInitials, cn } from '@/lib/utils';
 import { Trophy, Medal, Loader2, Info } from 'lucide-react';
 import Link from 'next/link';
 import { useSeason } from '@/context/season-context';
-import { SeasonSelector } from '@/components/layout/season-selector';
 
 export default function StandingsPage() {
   const firestore = useFirestore();
@@ -87,7 +87,6 @@ export default function StandingsPage() {
             Métricas de Élite • Competición en Tiempo Real
           </p>
         </div>
-        <SeasonSelector className="w-full md:w-64" />
       </div>
 
       <Card className="competition-card border-white/5 bg-black/20 shadow-2xl overflow-hidden">

@@ -22,6 +22,7 @@ import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { getInitials, cn } from "@/lib/utils";
 import { Fut7StatsLogo } from "@/components/icons";
+import { SeasonSelector } from "@/components/layout/season-selector";
 
 const menuItems = [
   {
@@ -103,8 +104,8 @@ export function AppSidebar() {
 
   return (
     <Sidebar className="border-r border-white/5 bg-[#0b1220]">
-      <SidebarHeader className="p-6">
-        <div className="flex items-center gap-4 group">
+      <SidebarHeader className="p-6 pb-2">
+        <div className="flex items-center gap-4 group mb-6">
           <div className="h-12 w-12 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 overflow-hidden shadow-2xl transition-transform group-hover:scale-105">
             <Fut7StatsLogo width={48} height={48} className="shrink-0" />
           </div>
@@ -112,6 +113,11 @@ export function AppSidebar() {
             <h2 className="text-xl font-black tracking-tighter text-white leading-none">REAL ACADE</h2>
             <p className="text-[8px] uppercase tracking-[0.3em] text-primary font-black mt-1">CLUB DE FULBO</p>
           </div>
+        </div>
+        
+        {/* Season Selector moved to the top of Sidebar */}
+        <div className="px-1">
+          <SeasonSelector className="w-full" />
         </div>
       </SidebarHeader>
       

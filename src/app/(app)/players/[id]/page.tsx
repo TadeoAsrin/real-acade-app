@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -13,7 +14,6 @@ import { Badge } from '@/components/ui/badge';
 import { getInitials, cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 import { useSeason } from '@/context/season-context';
-import { SeasonSelector } from '@/components/layout/season-selector';
 
 export default function PlayerProfilePage() {
   const { id } = useParams<{ id: string }>();
@@ -91,9 +91,6 @@ export default function PlayerProfilePage() {
         </div>
 
         <div className="flex-1 space-y-8">
-           <div className="flex justify-end">
-              <SeasonSelector className="w-full md:w-64" />
-           </div>
            <PlayerPerformanceChart matchHistory={matchHistory} />
         </div>
       </div>

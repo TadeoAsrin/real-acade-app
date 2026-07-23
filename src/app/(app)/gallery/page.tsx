@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -10,7 +11,6 @@ import { Badge } from '@/components/ui/badge';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useSeason } from '@/context/season-context';
-import { SeasonSelector } from '@/components/layout/season-selector';
 
 export default function GalleryPage() {
   const firestore = useFirestore();
@@ -48,7 +48,6 @@ export default function GalleryPage() {
             MOMENTOS DE ÉLITE • REAL ACADE
           </p>
         </div>
-        <SeasonSelector className="w-full md:w-64" />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

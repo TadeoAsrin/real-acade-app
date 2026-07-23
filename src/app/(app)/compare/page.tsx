@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -11,7 +12,6 @@ import { ArrowLeftRight, Loader2, Swords } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getInitials, cn } from '@/lib/utils';
 import { useSeason } from '@/context/season-context';
-import { SeasonSelector } from '@/components/layout/season-selector';
 
 export default function ComparePage() {
   const firestore = useFirestore();
@@ -65,7 +65,6 @@ export default function ComparePage() {
             COMPARATIVA TÁCTICA DE ÉLITE
           </p>
         </div>
-        <SeasonSelector className="w-full md:w-64" />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

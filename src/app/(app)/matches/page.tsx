@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -11,7 +12,6 @@ import Link from 'next/link';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useSeason } from '@/context/season-context';
-import { SeasonSelector } from '@/components/layout/season-selector';
 
 export default function MatchesPage() {
   const firestore = useFirestore();
@@ -59,7 +59,6 @@ export default function MatchesPage() {
           </p>
         </div>
         <div className="flex flex-col sm:flex-row items-end gap-4">
-          <SeasonSelector className="w-64" />
           {isAdmin && (
             <Button asChild size="lg" className="h-10 px-8 font-bebas text-xl tracking-widest shadow-lg shadow-primary/20">
               <Link href="/matches/new">
