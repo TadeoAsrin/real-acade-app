@@ -73,13 +73,6 @@ export function useCollection<T = any>(
         setIsLoading(false);
       },
       (serverError: FirestoreError) => {
-        // Log the error to the console to help diagnosis (especially index errors)
-        console.error('Firestore useCollection Error:', serverError.code, serverError.message, {
-          path: memoizedTargetRefOrQuery.type === 'collection' 
-            ? (memoizedTargetRefOrQuery as CollectionReference).path 
-            : (memoizedTargetRefOrQuery as unknown as InternalQuery)._query.path.canonicalString()
-        });
-
         // Solo envolver en error de permisos si el código coincide
         if (serverError.code !== 'permission-denied') {
           setError(serverError);
@@ -101,7 +94,9 @@ export function useCollection<T = any>(
         setError(contextualError)
         setData(null)
         setIsLoading(false)
-        errorEmitter.emit('permission-error', contextualError);
+        
+        // No emitimos error fatal para evitar el overlay visual si es una carga pública fallida
+        // errorEmitter.emit('permission-error', contextualError);
       }
     );
 

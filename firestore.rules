@@ -3,7 +3,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * REAL ACADE SECURITY MODEL - ACCESO PÚBLICO DE LECTURA
+     * REAL ACADE SECURITY MODEL - ACCESO PÚBLICO TOTAL DE LECTURA
      */
 
     function isSignedIn() {
@@ -24,49 +24,49 @@ service cloud.firestore {
 
     // Regla para roles de administrador: Lectura pública necesaria para lógica de UI
     match /roles_admin/{uid} {
-      allow read: if true;
+      allow get, list: if true;
       allow write: if false;
     }
 
     // Partidos: Lectura pública, escritura solo admin
     match /matches/{matchId} {
-      allow read: if true;
+      allow get, list: if true;
       allow write: if isAdmin();
 
       // Votos para mejor gol: Solo miembros pueden votar
       match /votes/{userId} {
-        allow read: if true;
+        allow get, list: if true;
         allow write: if isOwner(userId);
       }
     }
 
     // Jugadores: Lectura pública, escritura propia o admin
     match /players/{playerId} {
-      allow read: if true;
+      allow get, list: if true;
       allow write: if isOwner(playerId) || isAdmin();
     }
 
     // Pan y Queso (Drafts): Lectura pública, escritura miembros o admin
     match /drafts/{draftId} {
-      allow read: if true;
+      allow get, list: if true;
       allow write: if isSignedIn() || isAdmin();
     }
 
     // Galería: Lectura pública, escritura solo admin
     match /gallery/{itemId} {
-      allow read: if true;
+      allow get, list: if true;
       allow write: if isAdmin();
     }
 
     // Temporadas: Lectura pública para que todos vean el historial
     match /seasons/{seasonId} {
-      allow read: if true;
+      allow get, list: if true;
       allow write: if isAdmin();
     }
 
     // Configuración de la App: Lectura pública para saber qué temporada está activa
     match /app_settings/{docId} {
-      allow read: if true;
+      allow get, list: if true;
       allow write: if isAdmin();
     }
   }
