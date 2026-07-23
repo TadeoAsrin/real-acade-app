@@ -3,7 +3,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * REAL ACADE SECURITY MODEL - ACCESO PÚBLICO
+     * REAL ACADE SECURITY MODEL - ACCESO PÚBLICO DE LECTURA
      */
 
     function isSignedIn() {
@@ -58,13 +58,13 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Temporadas: Lectura pública, escritura solo admin
+    // Temporadas: Lectura pública para que todos vean el historial
     match /seasons/{seasonId} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
-    // Configuración de la App: Lectura pública, escritura solo admin
+    // Configuración de la App: Lectura pública para saber qué temporada está activa
     match /app_settings/{docId} {
       allow read: if true;
       allow write: if isAdmin();
