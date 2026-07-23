@@ -8,6 +8,7 @@ import {
   FirestoreError,
   DocumentSnapshot,
 } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 
@@ -26,17 +27,6 @@ export interface UseDocResult<T> {
 
 /**
  * React hook to subscribe to a single Firestore document in real-time.
- * Handles nullable references.
- * 
- * IMPORTANT! YOU MUST MEMOIZE the inputted memoizedTargetRefOrQuery or BAD THINGS WILL HAPPEN
- * use useMemo to memoize it per React guidence.  Also make sure that it's dependencies are stable
- * references
- *
- *
- * @template T Optional type for document data. Defaults to any.
- * @param {DocumentReference<DocumentData> | null | undefined} docRef -
- * The Firestore DocumentReference. Waits if null/undefined.
- * @returns {UseDocResult<T>} Object with data, isLoading, error.
  */
 export function useDoc<T = any>(
   memoizedDocRef: DocumentReference<DocumentData> | null | undefined,
@@ -48,12 +38,18 @@ export function useDoc<T = any>(
   const [error, setError] = useState<FirestoreError | Error | null>(null);
 
   useEffect(() => {
+    const auth = getAuth();
+    const currentUid = auth.currentUser?.uid || 'ANONYMOUS';
+
     if (!memoizedDocRef) {
+      console.log(`[FIRESTORE DIAGNOSTIC] useDoc: Reference is NULL. Auth: ${currentUid}`);
       setData(null);
       setIsLoading(false);
       setError(null);
       return;
     }
+
+    console.log(`[FIRESTORE DIAGNOSTIC] useDoc: STARTING fetch for [${memoizedDocRef.path}]. Auth: ${currentUid}`);
 
     setIsLoading(true);
     setError(null);
@@ -62,25 +58,29 @@ export function useDoc<T = any>(
       memoizedDocRef,
       (snapshot: DocumentSnapshot<DocumentData>) => {
         if (snapshot.exists()) {
+          console.log(`[FIRESTORE DIAGNOSTIC] useDoc: SUCCESS for [${memoizedDocRef.path}]. Auth: ${currentUid}. Document EXISTS.`);
           setData({ ...(snapshot.data() as T), id: snapshot.id });
         } else {
+          console.log(`[FIRESTORE DIAGNOSTIC] useDoc: SUCCESS (MISSING) for [${memoizedDocRef.path}]. Auth: ${currentUid}. Document NOT FOUND.`);
           setData(null);
         }
         setError(null);
         setIsLoading(false);
       },
-      (error: FirestoreError) => {
-        if (error.code === 'permission-denied') {
+      (serverError: FirestoreError) => {
+        console.error(`[FIRESTORE DIAGNOSTIC] useDoc: ERROR for [${memoizedDocRef.path}]. Auth: ${currentUid}. Code: ${serverError.code}. Message: ${serverError.message}`);
+        
+        if (serverError.code === 'permission-denied') {
           const contextualError = new FirestorePermissionError({
             operation: 'get',
             path: memoizedDocRef.path,
-          })
-          setError(contextualError)
+          });
+          setError(contextualError);
         } else {
-          setError(error);
+          setError(serverError);
         }
-        setData(null)
-        setIsLoading(false)
+        setData(null);
+        setIsLoading(false);
       }
     );
 

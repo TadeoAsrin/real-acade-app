@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { useFirestore, useCollection, useDoc, useMemoFirebase } from '@/firebase';
 import { collection, query, doc } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 import type { Season, AppSettings } from '@/lib/definitions';
 
 interface SeasonContextType {
@@ -19,6 +20,7 @@ const SeasonContext = React.createContext<SeasonContextType | undefined>(undefin
 
 export function SeasonProvider({ children }: { children: React.ReactNode }) {
   const firestore = useFirestore();
+  const auth = getAuth();
   const [selectedSeasonId, setSelectedSeasonId] = React.useState<string | null>(null);
 
   // 1. Cargar configuración global (activeSeasonId)
@@ -26,20 +28,37 @@ export function SeasonProvider({ children }: { children: React.ReactNode }) {
     if (!firestore) return null;
     return doc(firestore, 'app_settings', 'global');
   }, [firestore]);
-  const { data: settings, isLoading: settingsLoading } = useDoc<AppSettings>(settingsRef);
+  const { data: settings, isLoading: settingsLoading, error: settingsError } = useDoc<AppSettings>(settingsRef);
 
   // 2. Cargar todas las temporadas
   const seasonsRef = useMemoFirebase(() => {
     if (!firestore) return null;
     return query(collection(firestore, 'seasons'));
   }, [firestore]);
-  const { data: seasons, isLoading: seasonsLoading } = useCollection<Season>(seasonsRef);
+  const { data: seasons, isLoading: seasonsLoading, error: seasonsError } = useCollection<Season>(seasonsRef);
 
   const activeSeasonId = settings?.activeSeasonId || null;
+
+  // DIAGNOSTIC LOGGING
+  React.useEffect(() => {
+    const uid = auth.currentUser?.uid || 'ANONYMOUS';
+    console.log(`[FIRESTORE DIAGNOSTIC] SeasonProvider STATE:`, {
+      uid,
+      settingsFound: !!settings,
+      activeSeasonId,
+      seasonsFound: seasons?.length || 0,
+      selectedSeasonId,
+      settingsLoading,
+      seasonsLoading,
+      settingsError: settingsError?.message,
+      seasonsError: seasonsError?.message
+    });
+  }, [settings, seasons, selectedSeasonId, settingsLoading, seasonsLoading, settingsError, seasonsError, auth]);
 
   // 3. Inicializar selectedSeasonId con activeSeasonId la primera vez
   React.useEffect(() => {
     if (activeSeasonId && !selectedSeasonId) {
+      console.log(`[FIRESTORE DIAGNOSTIC] SeasonProvider: Auto-selecting activeSeasonId: ${activeSeasonId}`);
       setSelectedSeasonId(activeSeasonId);
     }
   }, [activeSeasonId, selectedSeasonId]);
@@ -64,7 +83,6 @@ export function SeasonProvider({ children }: { children: React.ReactNode }) {
     selectedSeason,
     activeSeason,
     setSelectedSeasonId,
-    // Simplificamos loading para evitar bloqueos por errores de permisos o datos nulos
     loading: settingsLoading || seasonsLoading,
   };
 

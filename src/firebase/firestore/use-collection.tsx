@@ -9,6 +9,7 @@ import {
   QuerySnapshot,
   CollectionReference,
 } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors';
 
@@ -25,9 +26,6 @@ export interface UseCollectionResult<T> {
   error: FirestoreError | Error | null; // Error object, or null.
 }
 
-/* Internal implementation of Query:
-  https://github.com/firebase/firebase-js-sdk/blob/c5f08a9bc5da0d2b0207802c972d53724ccef055/packages/firestore/src/lite-api/reference.ts#L143
-*/
 export interface InternalQuery extends Query<DocumentData> {
   _query: {
     path: {
@@ -51,12 +49,23 @@ export function useCollection<T = any>(
   const [error, setError] = useState<FirestoreError | Error | null>(null);
 
   useEffect(() => {
+    const auth = getAuth();
+    const currentUid = auth.currentUser?.uid || 'ANONYMOUS';
+    
     if (!memoizedTargetRefOrQuery) {
+      console.log(`[FIRESTORE DIAGNOSTIC] useCollection: Query is NULL. Auth: ${currentUid}`);
       setData(null);
       setIsLoading(false);
       setError(null);
       return;
     }
+
+    const path: string =
+      memoizedTargetRefOrQuery.type === 'collection'
+        ? (memoizedTargetRefOrQuery as CollectionReference).path
+        : (memoizedTargetRefOrQuery as unknown as InternalQuery)._query.path.canonicalString();
+
+    console.log(`[FIRESTORE DIAGNOSTIC] useCollection: STARTING query for [${path}]. Auth: ${currentUid}`);
 
     setIsLoading(true);
     setError(null);
@@ -68,37 +77,26 @@ export function useCollection<T = any>(
         for (const doc of snapshot.docs) {
           results.push({ ...(doc.data() as T), id: doc.id });
         }
+        
+        console.log(`[FIRESTORE DIAGNOSTIC] useCollection: SUCCESS for [${path}]. Auth: ${currentUid}. Results: ${results.length} docs.`);
+        
         setData(results);
         setError(null);
         setIsLoading(false);
       },
       async (serverError: FirestoreError) => {
+        console.error(`[FIRESTORE DIAGNOSTIC] useCollection: ERROR for [${path}]. Auth: ${currentUid}. Code: ${serverError.code}. Message: ${serverError.message}`);
+        
         if (serverError.code === 'permission-denied') {
-          const path: string =
-            memoizedTargetRefOrQuery.type === 'collection'
-              ? (memoizedTargetRefOrQuery as CollectionReference).path
-              : (memoizedTargetRefOrQuery as unknown as InternalQuery)._query.path.canonicalString();
-
           const contextualError = new FirestorePermissionError({
             operation: 'list',
             path,
           } satisfies SecurityRuleContext);
 
           setError(contextualError);
-          setData([]); // Retornamos array vacío en caso de error para no bloquear UI
+          setData([]); 
           
-          // CRITICAL: Solo emitimos el error fatal si NO es una de las colecciones públicas principales
-          // Esto evita que la app "crashee" visualmente para visitantes anónimos si hay un desajuste temporal de reglas.
-          const isPublicCollection = 
-            path.includes('matches') || 
-            path.includes('players') || 
-            path.includes('seasons') || 
-            path.includes('gallery') || 
-            path.includes('app_settings');
-
-          if (!isPublicCollection) {
-             errorEmitter.emit('permission-error', contextualError);
-          }
+          errorEmitter.emit('permission-error', contextualError);
         } else {
           setError(serverError);
           setData(null);

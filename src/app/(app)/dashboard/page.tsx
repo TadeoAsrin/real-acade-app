@@ -134,7 +134,10 @@ function DashboardContent() {
   }, [firestore]);
 
   const matchesQuery = useMemoFirebase(() => {
-    if (!firestore || !selectedSeasonId) return null;
+    if (!firestore || !selectedSeasonId) {
+      console.log(`[FIRESTORE DIAGNOSTIC] Dashboard: Skipping matchesQuery because firestore=${!!firestore}, selectedSeasonId=${selectedSeasonId}`);
+      return null;
+    }
     return query(
       collection(firestore, 'matches'), 
       where('seasonId', '==', selectedSeasonId)
@@ -160,8 +163,6 @@ function DashboardContent() {
     }
   }, [lastMatch]);
 
-  // Si está cargando activamente las temporadas o los jugadores principales, mostramos el loader.
-  // Pero no bloqueamos si selectedSeasonId es null una vez que seasonLoading terminó.
   if (seasonLoading || (playersLoading && !playersData)) {
     return (
       <div className="flex h-[80vh] flex-col items-center justify-center gap-4">
