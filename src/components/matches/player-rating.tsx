@@ -24,10 +24,9 @@ export function PlayerRating({ players, currentUser }: { players: Player[], curr
 
     const handleSubmit = async () => {
         setIsLoading(true);
-        // Simulate API call
+        // Simulación de guardado de calificaciones
         await new Promise(resolve => setTimeout(resolve, 1500));
         setIsLoading(false);
-        console.log("Submitted ratings:", ratings);
         toast({
             title: "Calificaciones Enviadas",
             description: "Gracias por calificar a los jugadores.",

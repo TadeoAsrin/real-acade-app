@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from 'react';
@@ -13,15 +12,14 @@ import {
   Flame, 
   Target, 
   Users, 
-  Crown, 
   Star, 
   Skull, 
   Droplets, 
   FileText, 
   ShieldCheck, 
-  Zap, 
   Brain, 
-  ArrowRight
+  ArrowRight,
+  Crown
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -180,7 +178,7 @@ function DashboardContent() {
     .sort((a, b) => 
       (b.wins * 3 + b.draws) - (a.wins * 3 + a.draws) || 
       b.efficiency - a.efficiency || 
-      b.totalGoals - a.totalGoals
+      b.goalDifference - a.goalDifference
     )
     .slice(0, 3);
 
@@ -284,7 +282,7 @@ function DashboardContent() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {ordenDeMando.map((p, idx) => (
-            <Link key={p.playerId} href="/pulse/deuda-mando" className="group">
+            <Link key={p.playerId} href="/players" className="group">
               <div className="bg-[#111827] border border-emerald-500/20 rounded-2xl p-5 flex items-center justify-between transition-all hover:bg-emerald-500/5 hover:border-emerald-500/40">
                 <div className="flex items-center gap-4">
                   <div className="relative">
@@ -322,7 +320,7 @@ function DashboardContent() {
             valueFn={(p) => `${p.winPercentage}%`}
             label="WR"
             colorClass="text-primary"
-            href="/pulse/influencer"
+            href="/standings"
           />
 
           <EliteListCard 
@@ -362,22 +360,22 @@ function DashboardContent() {
       <section className="space-y-6 relative z-10">
         <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 px-1 font-oswald">PULSO DE LA COMPETICIÓN</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Link href="/pulse/mvp" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-yellow-500/20 transition-all hover-lift">
+          <div className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-yellow-500/20 transition-all hover-lift">
             <Star className="h-6 w-6 text-yellow-500" />
             <span className="text-5xl font-black italic font-bebas leading-none text-white">{maxMvpCount}</span>
             <div className="space-y-1">
               <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">REYES MVP</p>
               <p className="text-[10px] font-black uppercase text-yellow-500/60 font-oswald">RÉCORD PREMIOS</p>
             </div>
-          </Link>
-          <Link href="/pulse/league" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-orange-500/20 transition-all hover-lift">
+          </div>
+          <div className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-orange-500/20 transition-all hover-lift">
             <Flame className="h-6 w-6 text-orange-500" />
             <span className="text-5xl font-black italic font-bebas leading-none text-white">{recordGoalsInMatch}</span>
             <div className="space-y-1">
               <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">RÉCORD GOLES</p>
               <p className="text-[10px] font-black uppercase text-orange-500/60 font-oswald">EN UN PARTIDO</p>
             </div>
-          </Link>
+          </div>
           <Link href="/standings" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-primary/20 transition-all hover-lift">
             <Target className="h-6 w-6 text-primary" />
             <span className="text-5xl font-black italic font-bebas leading-none text-white">{individualRecord}</span>
@@ -386,14 +384,14 @@ function DashboardContent() {
               <p className="text-[11px] font-black uppercase text-primary font-oswald truncate max-w-[140px] drop-shadow-[0_0_10px_rgba(59,130,246,0.3)]">{recordHolderText}</p>
             </div>
           </Link>
-          <Link href="/pulse/attendance" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-emerald-500/20 transition-all hover-lift">
+          <div className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-emerald-500/20 transition-all hover-lift">
             <Users className="h-6 w-6 text-emerald-500" />
             <span className="text-5xl font-black italic font-bebas leading-none text-white">{attendanceValue}</span>
             <div className="space-y-1">
               <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">INFALTABLES</p>
               <p className="text-[11px] font-black uppercase text-emerald-500 font-oswald truncate max-w-[140px] drop-shadow-[0_0_10px_rgba(16,185,129,0.3)]">{attendanceText}</p>
             </div>
-          </Link>
+          </div>
         </div>
       </section>
 
@@ -407,13 +405,13 @@ function DashboardContent() {
         <div className="bg-black/20 backdrop-blur-sm rounded-[2rem] overflow-hidden border border-white/5">
           <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-white/5 items-start">
             <div className="p-8 space-y-6">
-              <Link href="/pulse/iman-derrotas" className="flex items-center justify-between group">
+              <div className="flex items-center justify-between group">
                 <div className="flex items-center gap-2 text-red-500/60 group-hover:text-red-500 transition-colors">
                   <Skull className="h-4 w-4" />
                   <span className="text-[10px] font-black uppercase tracking-widest font-oswald">IMÁN DE DERROTAS</span>
                 </div>
                 <Badge variant="outline" className="text-[6px] font-black bg-red-500/5 text-red-500/40 border-none uppercase px-1.5 py-0 font-oswald">RATIO DE VULNERABILIDAD</Badge>
-              </Link>
+              </div>
               <div className="space-y-5">
                 {stats.filter(p => p.matchesPlayed >= 2).sort((a, b) => b.lossPercentage - a.lossPercentage).slice(0, 3).map(p => (
                   <div key={p.playerId} className="space-y-2">
@@ -439,13 +437,13 @@ function DashboardContent() {
             </div>
 
             <div className="p-8 space-y-6">
-              <Link href="/pulse/polvora" className="flex items-center justify-between group">
+              <div className="flex items-center justify-between group">
                 <div className="flex items-center gap-2 text-blue-400/60 group-hover:text-blue-400 transition-colors">
                   <Droplets className="h-4 w-4" />
                   <span className="text-[10px] font-black uppercase tracking-widest font-oswald">PÓLVORA MOJADA</span>
                 </div>
                 <Badge variant="outline" className="text-[6px] font-black bg-blue-400/5 text-blue-400/40 border-none uppercase px-1.5 py-0 font-oswald">SOLO ROLES OFENSIVOS</Badge>
-              </Link>
+              </div>
               <div className="space-y-4">
                 {stats.filter(p => (p.position === 'Mediocampista' || p.position === 'Delantero') && p.matchesPlayed >= 2).sort((a, b) => a.goalsPerMatch - b.goalsPerMatch).slice(0, 3).map(p => (
                   <div key={p.playerId} className="flex items-center justify-between bg-white/5 p-3 rounded-xl border border-transparent hover:border-blue-400/10 transition-all">
