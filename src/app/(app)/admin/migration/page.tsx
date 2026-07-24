@@ -4,7 +4,6 @@ import * as React from 'react';
 import { useFirestore } from '@/firebase';
 import { getMigrationPreview, runInitialMigration } from '@/lib/seasons';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Database, ShieldAlert, CheckCircle2 } from 'lucide-react';
 

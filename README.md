@@ -1,4 +1,4 @@
-# 🏆 Real Acade - Gestión de Club de Élite
+npm run build# 🏆 Real Acade - Gestión de Club de Élite
 
 ¡Bienvenido a la plataforma oficial de **Real Acade**! Tu aplicación ya está desplegada y lista para ser usada por todos los miembros del club.
 

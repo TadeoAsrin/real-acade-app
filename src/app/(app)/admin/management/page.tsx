@@ -15,21 +15,25 @@ import { Loader2, CalendarDays, Plus, CheckCircle2, AlertCircle, ShieldCheck } f
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
+/**
+ * Gestión de Club: Panel administrativo para la creación y control de temporadas.
+ */
 export default function SeasonManagementPage() {
   const firestore = useFirestore();
   const { user } = useUser();
   const { toast } = useToast();
   const { seasons, activeSeasonId, loading: seasonLoading } = useSeason();
 
-  // Admin Verification Logic
+  // Verificación de Admin
   const adminRoleRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return doc(firestore, 'roles_admin', user.uid);
   }, [firestore, user]);
+  
   const { data: adminRole } = useDoc<{isAdmin: boolean}>(adminRoleRef);
   const isAdmin = adminRole?.isAdmin || user?.email === 'tadeoasrin@gmail.com';
 
-  // Form State
+  // Estado del Formulario
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [formData, setFormData] = React.useState({
     name: '',
@@ -43,7 +47,7 @@ export default function SeasonManagementPage() {
     e.preventDefault();
     if (!firestore || !isAdmin) return;
 
-    // Validation: Year + Half uniqueness
+    // Validación de duplicados
     const alreadyExists = seasons.some(s => s.year === formData.year && s.half === formData.half);
     if (alreadyExists) {
       toast({
@@ -88,7 +92,7 @@ export default function SeasonManagementPage() {
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 p-8 text-center">
         <AlertCircle className="h-12 w-12 text-destructive" />
         <h2 className="text-2xl font-bebas tracking-widest uppercase">Acceso Denegado</h2>
-        <p className="text-muted-foreground text-sm max-w-md uppercase font-bold">Solo los administradores de Real Acade pueden gestionar las temporadas del club.</p>
+        <p className="text-muted-foreground text-sm max-w-md uppercase font-bold">Solo los administradores pueden gestionar las temporadas.</p>
       </div>
     );
   }
@@ -106,7 +110,6 @@ export default function SeasonManagementPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* FORMULARIO DE CREACIÓN */}
         <div className="lg:col-span-5 space-y-6">
           <Card className="competition-card border-primary/20 bg-primary/5">
             <CardHeader>
@@ -139,7 +142,7 @@ export default function SeasonManagementPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Semestre (Half)</Label>
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Semestre</Label>
                     <Select 
                       value={formData.half.toString()} 
                       onValueChange={val => setFormData({...formData, half: (parseInt(val) || 1) as 1 | 2})}
@@ -194,7 +197,6 @@ export default function SeasonManagementPage() {
           </Card>
         </div>
 
-        {/* LISTADO DE TEMPORADAS */}
         <div className="lg:col-span-7 space-y-6">
           <Card className="competition-card border-white/5 bg-black/20">
             <CardHeader className="flex flex-row items-center justify-between">
