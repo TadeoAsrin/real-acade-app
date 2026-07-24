@@ -2,12 +2,12 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@/components/*": ["src/components/*"],
-      "@/lib/*": ["src/lib/*"],
-      "@/hooks/*": ["src/hooks/*"],
-      "@/firebase/*": ["src/firebase/*"],
-      "@/context/*": ["src/context/*"]
+      "@/*": ["./src/*"],
+      "@/components/*": ["./src/components/*"],
+      "@/lib/*": ["./src/lib/*"],
+      "@/hooks/*": ["./src/hooks/*"],
+      "@/firebase/*": ["./src/firebase/*"],
+      "@/context/*": ["./src/context/*"]
     },
     "target": "ESNext",
     "lib": ["dom", "dom.iterable", "esnext"],
@@ -32,7 +32,8 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "src/**/*"
   ],
   "exclude": ["node_modules", ".next"]
 }

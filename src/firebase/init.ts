@@ -1,11 +1,30 @@
 'use client';
 
-import { initializeFirebase as init } from '@/firebase';
+import { firebaseConfig } from '@/firebase/config';
+import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 
-/**
- * Redundancia corregida: Este archivo ahora delega directamente a la implementación estándar
- * en src/firebase/index.ts.
- */
 export function initializeFirebase() {
-  return init();
+  if (!getApps().length) {
+    let firebaseApp;
+    try {
+      firebaseApp = initializeApp();
+    } catch (e) {
+      if (process.env.NODE_ENV === "production") {
+        console.warn('Automatic initialization failed. Falling back to firebase config object.', e);
+      }
+      firebaseApp = initializeApp(firebaseConfig);
+    }
+    return getSdks(firebaseApp);
+  }
+  return getSdks(getApp());
+}
+
+export function getSdks(firebaseApp: FirebaseApp) {
+  return {
+    firebaseApp,
+    auth: getAuth(firebaseApp),
+    firestore: getFirestore(firebaseApp)
+  };
 }

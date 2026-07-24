@@ -15,16 +15,12 @@ import { Loader2, CalendarDays, Plus, CheckCircle2, AlertCircle, ShieldCheck } f
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
-/**
- * Gestión de Club: Panel administrativo para la creación y control de temporadas.
- */
 export default function SeasonManagementPage() {
   const firestore = useFirestore();
   const { user } = useUser();
   const { toast } = useToast();
   const { seasons, activeSeasonId, loading: seasonLoading } = useSeason();
 
-  // Verificación de Admin
   const adminRoleRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return doc(firestore, 'roles_admin', user.uid);
@@ -33,7 +29,6 @@ export default function SeasonManagementPage() {
   const { data: adminRole } = useDoc<{isAdmin: boolean}>(adminRoleRef);
   const isAdmin = adminRole?.isAdmin || user?.email === 'tadeoasrin@gmail.com';
 
-  // Estado del Formulario
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [formData, setFormData] = React.useState({
     name: '',
@@ -47,7 +42,6 @@ export default function SeasonManagementPage() {
     e.preventDefault();
     if (!firestore || !isAdmin) return;
 
-    // Validación de duplicados
     const alreadyExists = seasons.some(s => s.year === formData.year && s.half === formData.half);
     if (alreadyExists) {
       toast({
