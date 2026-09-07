@@ -20,6 +20,14 @@
           "description": "Date and time the match was played.",
           "format": "date-time"
         },
+        "venue": {
+          "type": "string",
+          "description": "Optional name of the venue where the match was played."
+        },
+        "matchNumber": {
+          "type": "number",
+          "description": "Optional round number within the season."
+        },
         "teamAScore": {
           "type": "number",
           "description": "The score for team 1."

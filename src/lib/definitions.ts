@@ -26,6 +26,8 @@ export type Match = {
   id: string;
   seasonId: string;
   date: string;
+  venue?: string;
+  matchNumber?: number;
   teamAScore: number;
   teamBScore: number;
   teamAPlayers: PlayerStats[];

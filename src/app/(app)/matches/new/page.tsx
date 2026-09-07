@@ -6,6 +6,7 @@ import { collection, query, orderBy } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { useSeason } from '@/context/season-context';
 import type { Player } from '@/lib/definitions';
+import { WhatsAppMatchImport, type WhatsAppImportValue } from '@/components/matches/whatsapp-match-import';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -48,7 +49,7 @@ const initialPlayerMatchState = {
 
 export default function NewMatchPage() {
   const firestore = useFirestore();
-  const { activeSeasonId, loading: seasonLoading } = useSeason();
+  const { activeSeasonId, seasons, loading: seasonLoading } = useSeason();
   const { toast } = useToast();
   const router = useRouter();
 
@@ -60,6 +61,9 @@ export default function NewMatchPage() {
   const { data: players, isLoading: playersLoading } = useCollection<Player>(playersRef);
 
   const [date, setDate] = React.useState(new Date().toISOString().split('T')[0]);
+  const [venue, setVenue] = React.useState('');
+  const [matchNumber, setMatchNumber] = React.useState<number | null>(null);
+  const [matchSeasonId, setMatchSeasonId] = React.useState<string | null>(null);
   const [playerStates, setPlayerMatchStates] = React.useState<Record<string, typeof initialPlayerMatchState>>({});
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
@@ -77,6 +81,30 @@ export default function NewMatchPage() {
       setPlayerMatchStates(states);
     }
   }, [players]);
+
+  React.useEffect(() => {
+    if (activeSeasonId && !matchSeasonId) setMatchSeasonId(activeSeasonId);
+  }, [activeSeasonId, matchSeasonId]);
+
+  const handleWhatsAppImport = (value: WhatsAppImportValue) => {
+    const states: Record<string, typeof initialPlayerMatchState> = {};
+    players?.forEach(player => { states[player.id] = { ...initialPlayerMatchState }; });
+    value.players.forEach(player => {
+      states[player.playerId] = {
+        team: player.team,
+        goals: player.goals,
+        isCaptain: player.isCaptain,
+        isMvp: player.isMvp,
+        hasBestGoal: player.hasBestGoal,
+      };
+    });
+    setDate(value.date);
+    setVenue(value.venue);
+    setMatchNumber(value.matchNumber);
+    setMatchSeasonId(value.seasonId);
+    setPlayerMatchStates(states);
+    toast({ title: 'Importación aplicada', description: 'Revisá el formulario y guardá el partido cuando esté listo.' });
+  };
 
   const teamAPlayers = React.useMemo(() => 
     Object.entries(playerStates).filter(([_, state]) => state.team === 'A'), [playerStates]
@@ -161,7 +189,7 @@ export default function NewMatchPage() {
   };
 
   const handleSubmit = async () => {
-    if (!firestore || !activeSeasonId) return;
+    if (!firestore || !matchSeasonId) return;
 
     if (teamAPlayers.length === 0 || teamBPlayers.length === 0) {
       toast({ variant: "destructive", title: "Equipos incompletos", description: "Asigna jugadores al equipo Azul y Rojo." });
@@ -171,8 +199,10 @@ export default function NewMatchPage() {
     setIsSubmitting(true);
     try {
       const matchData = {
-        seasonId: activeSeasonId,
+        seasonId: matchSeasonId,
         date: new Date(date).toISOString(),
+        ...(venue.trim() ? { venue: venue.trim() } : {}),
+        ...(matchNumber !== null ? { matchNumber } : {}),
         teamAScore,
         teamBScore,
         teamAPlayers: teamAPlayers.map(([id, s]) => ({
@@ -220,6 +250,12 @@ export default function NewMatchPage() {
   return (
     <TooltipProvider>
       <div className="max-w-7xl mx-auto p-4 lg:p-8 space-y-8 animate-in fade-in duration-700">
+        <WhatsAppMatchImport
+          players={players || []}
+          seasons={seasons}
+          activeSeasonId={activeSeasonId}
+          onApply={handleWhatsAppImport}
+        />
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-1">
             <h2 className="text-4xl lg:text-7xl font-black uppercase tracking-tighter italic text-white flex items-center gap-4">
@@ -253,6 +289,23 @@ export default function NewMatchPage() {
           </div>
         </div>
 
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-black/40 border border-white/10 p-4 rounded-xl space-y-2">
+            <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Cancha</Label>
+            <Input value={venue} onChange={(e) => setVenue(e.target.value)} placeholder="Ej. Costa Warcalde" className="bg-transparent border-white/10" />
+          </div>
+          <div className="bg-black/40 border border-white/10 p-4 rounded-xl space-y-2">
+            <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Número de fecha</Label>
+            <Input type="number" min="1" value={matchNumber ?? ''} onChange={(e) => setMatchNumber(e.target.value ? Number(e.target.value) : null)} placeholder="Ej. 6" className="bg-transparent border-white/10" />
+          </div>
+          <div className="bg-black/40 border border-white/10 p-4 rounded-xl space-y-2">
+            <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Temporada del partido</Label>
+            <select value={matchSeasonId || ''} onChange={(e) => setMatchSeasonId(e.target.value)} className="flex h-10 w-full rounded-md border border-white/10 bg-background px-3 py-2 text-sm">
+              {seasons.map(season => <option key={season.id} value={season.id}>{season.name} ({season.year})</option>)}
+            </select>
+          </div>
+        </section>
+
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-white/5 rounded-[2.5rem] p-8 border border-white/5 shadow-2xl relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-accent/10 pointer-events-none" />
           
@@ -266,7 +319,7 @@ export default function NewMatchPage() {
              <div className="text-4xl font-light text-white/10 italic select-none">VS</div>
              <Button 
                 onClick={handleSubmit} 
-                disabled={isSubmitting || !activeSeasonId} 
+                disabled={isSubmitting || !matchSeasonId}
                 className="h-16 px-12 font-bebas text-2xl tracking-[0.2em] bg-white text-black hover:bg-white/90 shadow-[0_0_40px_rgba(255,255,255,0.2)] rounded-none transition-all active:scale-95"
              >
                 {isSubmitting ? <Loader2 className="h-6 w-6 animate-spin" /> : <><Save className="h-6 w-6 mr-2" /> GUARDAR PARTIDO</>}
@@ -561,14 +614,14 @@ export default function NewMatchPage() {
                  <div className="flex flex-col">
                     <span className="text-[8px] font-black uppercase text-muted-foreground tracking-widest">TEMPORADA ACTIVA</span>
                     <span className="text-[10px] font-bold text-white uppercase italic">
-                      {activeSeasonId ? "Ciclo Oficial en Curso" : "Sincronizando..."}
+                      {seasons.find(season => season.id === matchSeasonId)?.name || "Sincronizando..."}
                     </span>
                  </div>
               </div>
 
               <Button 
                  onClick={handleSubmit} 
-                 disabled={isSubmitting || !activeSeasonId} 
+                 disabled={isSubmitting || !matchSeasonId}
                  size="lg"
                  className="h-16 px-12 bg-primary text-white font-bebas text-2xl tracking-[0.2em] shadow-2xl shadow-primary/30 rounded-2xl hover:scale-105 active:scale-95 transition-all"
               >

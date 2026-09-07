@@ -2,8 +2,8 @@
 'use client';
 
 import * as React from 'react';
-import { useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase';
-import { doc, collection, query, orderBy, where } from 'firebase/firestore';
+import { useFirestore, useDoc, useCollection, useMemoFirebase, useUser } from '@/firebase';
+import { doc, collection, query, orderBy, where, getDocs, updateDoc } from 'firebase/firestore';
 import { useParams } from 'next/navigation';
 import { calculateAggregatedStats } from '@/lib/data';
 import type { Player, Match } from '@/lib/definitions';
@@ -11,14 +11,25 @@ import { PlayerPerformanceChart } from '@/components/players/player-performance-
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { getInitials, cn } from '@/lib/utils';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Pencil, Save } from 'lucide-react';
 import { useSeason } from '@/context/season-context';
+import { useToast } from '@/hooks/use-toast';
+import { normalizePersonName } from '@/lib/whatsapp-match-import';
 
 export default function PlayerProfilePage() {
   const { id } = useParams<{ id: string }>();
   const firestore = useFirestore();
+  const { user } = useUser();
+  const { toast } = useToast();
   const { selectedSeasonId, loading: seasonLoading } = useSeason();
+  const [editDialogOpen, setEditDialogOpen] = React.useState(false);
+  const [editedName, setEditedName] = React.useState('');
+  const [isSavingName, setIsSavingName] = React.useState(false);
 
   const playerRef = useMemoFirebase(() => {
     if (!firestore || !id) return null;
@@ -33,8 +44,45 @@ export default function PlayerProfilePage() {
     );
   }, [firestore, selectedSeasonId]);
 
+  const adminRoleRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'roles_admin', user.uid);
+  }, [firestore, user]);
+
   const { data: player, isLoading: playerLoading } = useDoc<Player>(playerRef);
   const { data: matchesRaw, isLoading: matchesLoading } = useCollection<Match>(matchesRef);
+  const { data: adminRole } = useDoc<{ isAdmin: boolean }>(adminRoleRef);
+  const isAdmin = !!adminRole?.isAdmin || user?.email === 'tadeoasrin@gmail.com';
+
+  React.useEffect(() => {
+    if (player) setEditedName(player.name);
+  }, [player]);
+
+  const handleUpdateName = async () => {
+    const nextName = editedName.trim().replace(/\s+/g, ' ');
+    if (!firestore || !playerRef || !player || !isAdmin || !nextName) return;
+
+    setIsSavingName(true);
+    try {
+      const playersSnapshot = await getDocs(query(collection(firestore, 'players'), orderBy('name', 'asc')));
+      const duplicate = playersSnapshot.docs.some(playerDoc =>
+        playerDoc.id !== player.id && normalizePersonName(String(playerDoc.data().name || '')) === normalizePersonName(nextName)
+      );
+      if (duplicate) {
+        toast({ variant: 'destructive', title: 'Nombre duplicado', description: 'Ya existe otro jugador con ese nombre.' });
+        setIsSavingName(false);
+        return;
+      }
+
+      await updateDoc(playerRef, { name: nextName });
+      toast({ title: 'Nombre actualizado', description: `${player.name} ahora figura como ${nextName}.` });
+      setEditDialogOpen(false);
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'No se pudo actualizar', description: error?.message || 'Intentá nuevamente.' });
+    } finally {
+      setIsSavingName(false);
+    }
+  };
 
   const matches = React.useMemo(() => {
     if (!matchesRaw) return [];
@@ -80,6 +128,44 @@ export default function PlayerProfilePage() {
               </div>
               <h2 className="text-2xl font-black uppercase tracking-tighter italic">{player.name}</h2>
               <p className="text-[10px] font-black uppercase tracking-widest text-primary mt-1">{player.position || 'COMODÍN'}</p>
+              {isAdmin && (
+                <Dialog open={editDialogOpen} onOpenChange={(open) => {
+                  setEditDialogOpen(open);
+                  if (open) setEditedName(player.name);
+                }}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="mt-5 border-primary/20 text-primary font-black uppercase tracking-widest text-[10px]">
+                      <Pencil className="h-3 w-3" /> Editar nombre
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Editar jugador</DialogTitle>
+                      <DialogDescription>El historial y las estadísticas conservarán el mismo jugador.</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-2 py-2 text-left">
+                      <Label htmlFor="player-name">Nombre</Label>
+                      <Input
+                        id="player-name"
+                        value={editedName}
+                        onChange={(event) => setEditedName(event.target.value)}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter' && editedName.trim() && !isSavingName) void handleUpdateName();
+                        }}
+                        autoFocus
+                        disabled={isSavingName}
+                      />
+                    </div>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setEditDialogOpen(false)} disabled={isSavingName}>Cancelar</Button>
+                      <Button onClick={() => void handleUpdateName()} disabled={!editedName.trim() || editedName.trim() === player.name || isSavingName}>
+                        {isSavingName ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                        {isSavingName ? 'Guardando…' : 'Confirmar cambio'}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              )}
               <div className="flex flex-wrap gap-2 justify-center mt-6">
                  {stats.totalMvp > 0 && <Badge className="bg-yellow-500 font-bold">{stats.totalMvp} MVP</Badge>}
                  {stats.wins > 5 && <Badge className="bg-primary font-bold">VETERANO</Badge>}

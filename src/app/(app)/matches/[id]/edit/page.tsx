@@ -72,6 +72,8 @@ export default function EditMatchPage() {
   const { data: players, isLoading: playersLoading } = useCollection<Player>(playersRef);
 
   const [date, setDate] = React.useState('');
+  const [venue, setVenue] = React.useState('');
+  const [matchNumber, setMatchNumber] = React.useState<number | null>(null);
   const [playerStates, setPlayerMatchStates] = React.useState<Record<string, typeof initialPlayerMatchState>>({});
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
@@ -116,7 +118,10 @@ export default function EditMatchPage() {
       });
 
       setPlayerMatchStates(states);
-      setDate(new Date(match.date).toISOString().split('T')[0]);
+      const matchDate = new Date(match.date);
+      setDate(`${matchDate.getFullYear()}-${String(matchDate.getMonth() + 1).padStart(2, '0')}-${String(matchDate.getDate()).padStart(2, '0')}`);
+      setVenue(match.venue || '');
+      setMatchNumber(match.matchNumber ?? null);
       setComment(match.comment || '');
       setVideoUrl(match.videoUrl || '');
       setPhotos(match.photos && match.photos.length > 0 ? match.photos : ['']);
@@ -210,6 +215,8 @@ export default function EditMatchPage() {
     try {
       const updatedMatchData = {
         date: new Date(date).toISOString(),
+        ...(venue.trim() ? { venue: venue.trim() } : {}),
+        ...(matchNumber !== null ? { matchNumber } : {}),
         teamAScore,
         teamBScore,
         teamAPlayers: teamAPlayers.map(([id, s]) => ({
@@ -292,6 +299,17 @@ export default function EditMatchPage() {
             </div>
           </div>
         </div>
+
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-black/40 border border-white/10 p-4 rounded-xl space-y-2">
+            <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Cancha</Label>
+            <Input value={venue} onChange={(e) => setVenue(e.target.value)} placeholder="Ej. Costa Warcalde" className="bg-transparent border-white/10" />
+          </div>
+          <div className="bg-black/40 border border-white/10 p-4 rounded-xl space-y-2">
+            <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Número de fecha</Label>
+            <Input type="number" min="1" value={matchNumber ?? ''} onChange={(e) => setMatchNumber(e.target.value ? Number(e.target.value) : null)} placeholder="Ej. 6" className="bg-transparent border-white/10" />
+          </div>
+        </section>
 
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-white/5 rounded-[2.5rem] p-8 border border-white/5 shadow-2xl relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-accent/10 pointer-events-none" />
