@@ -29,7 +29,7 @@ export default function MatchesPage() {
   const matchesRef = useMemoFirebase(() => {
     if (!firestore || !selectedSeasonId) return null;
     return query(
-      collection(firestore, 'matches'), 
+      collection(firestore, 'matches'),
       where('seasonId', '==', selectedSeasonId)
     );
   }, [firestore, selectedSeasonId]);
@@ -51,34 +51,61 @@ export default function MatchesPage() {
   }
 
   return (
-    <div className="space-y-8 p-4 lg:p-8 animate-in fade-in duration-700">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <div className="space-y-5 md:space-y-8 p-4 lg:p-8 animate-in fade-in duration-700">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6">
         <div className="space-y-1">
-          <h2 className="text-4xl lg:text-7xl font-black uppercase tracking-tighter italic text-white flex items-center gap-4">
-            <Goal className="h-8 w-8 lg:h-14 lg:w-14 text-primary shrink-0" />
+          <h2 className="text-3xl md:text-4xl lg:text-7xl font-black uppercase tracking-tighter italic text-white flex items-center gap-3 md:gap-4">
+            <Goal className="h-7 w-7 lg:h-14 lg:w-14 text-primary shrink-0" />
             HISTORIAL OFICIAL
           </h2>
-          <p className="text-[10px] lg:text-xs font-black uppercase tracking-[0.3em] text-primary/60 ml-1">
+          <p className="hidden md:block text-[10px] lg:text-xs font-black uppercase tracking-[0.3em] text-primary/60 ml-1">
             REGISTRO DE BATALLAS • TEMPORADA SELECCIONADA
           </p>
         </div>
-        <div className="flex flex-col sm:flex-row items-end gap-4">
-          {isAdmin && (
-            <Button asChild size="lg" className="h-10 px-8 font-bebas text-xl tracking-widest shadow-lg shadow-primary/20">
-              <Link href="/matches/new">
-                <Plus className="h-5 w-5 mr-2" />
-                REGISTRAR PARTIDO
-              </Link>
-            </Button>
-          )}
-        </div>
+        {isAdmin && (
+          <Button asChild size="lg" className="h-10 w-full md:w-auto px-8 font-bebas text-xl tracking-widest shadow-lg shadow-primary/20">
+            <Link href="/matches/new">
+              <Plus className="h-5 w-5 mr-2" />
+              REGISTRAR PARTIDO
+            </Link>
+          </Button>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 gap-6">
+      <div className="grid grid-cols-1 gap-3 md:gap-6">
         {matches?.map((match) => (
-          <Link key={match.id} href={`/matches/${match.id}`}>
+          <Link key={match.id} href={`/matches/${match.id}`} className="block">
             <Card className="competition-card official-table-row hover-lift overflow-hidden group border-white/5 bg-black/40">
-              <div className="flex flex-col md:flex-row">
+              {/* Mobile: consulta rápida, sin convertir la tarjeta desktop en una columna interminable. */}
+              <div className="md:hidden px-4 py-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.18em] text-muted-foreground/50">
+                      <Calendar className="h-3 w-3 shrink-0" />
+                      {format(parseISO(match.date), "dd MMM yyyy", { locale: es })}
+                    </div>
+                    <p className="mt-2 truncate text-[10px] font-bold italic text-white/60">
+                      {match.aiSummary?.title || 'Partido oficial'}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-3 shrink-0">
+                    <div className="text-center min-w-10">
+                      <span className="block font-bebas text-3xl leading-none text-primary">{match.teamAScore}</span>
+                      <span className="text-[7px] font-black tracking-widest text-primary/50">AZUL</span>
+                    </div>
+                    <span className="font-bebas text-sm tracking-widest text-white/20">VS</span>
+                    <div className="text-center min-w-10">
+                      <span className="block font-bebas text-3xl leading-none text-accent">{match.teamBScore}</span>
+                      <span className="text-[7px] font-black tracking-widest text-accent/50">ROJO</span>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-white/25 transition-transform group-hover:translate-x-0.5" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Desktop conserva la vista analítica existente. */}
+              <div className="hidden md:flex">
                 <div className="flex-1 p-6 md:p-8 flex items-center justify-between">
                   <div className="flex flex-col items-center gap-1 w-24">
                     <span className="text-4xl md:text-6xl font-bebas text-primary">{match.teamAScore}</span>
@@ -86,8 +113,8 @@ export default function MatchesPage() {
                   </div>
                   <div className="flex flex-col items-center gap-3">
                     <div className="flex items-center gap-2 text-muted-foreground/40 font-black text-[10px] uppercase tracking-widest">
-                       <Calendar className="h-3 w-3" />
-                       {format(parseISO(match.date), "dd MMM yyyy", { locale: es })}
+                      <Calendar className="h-3 w-3" />
+                      {format(parseISO(match.date), "dd MMM yyyy", { locale: es })}
                     </div>
                     <div className="text-xs font-bebas tracking-[0.4em] text-muted-foreground/20">VERSUS</div>
                   </div>
@@ -96,12 +123,12 @@ export default function MatchesPage() {
                     <span className="text-[10px] font-black uppercase tracking-widest text-accent/60">ROJO</span>
                   </div>
                 </div>
-                <div className="bg-white/5 md:w-48 p-6 flex flex-col justify-center gap-4 border-t md:border-t-0 md:border-l border-white/5">
+                <div className="bg-white/5 md:w-48 p-6 flex flex-col justify-center gap-4 border-l border-white/5">
                   <div className="space-y-1">
-                     <p className="text-[8px] font-black uppercase text-muted-foreground tracking-widest">CRÓNICA IA</p>
-                     <p className="text-[10px] font-bold italic line-clamp-2 text-white/80">
-                       {match.aiSummary?.title || "En redacción..."}
-                     </p>
+                    <p className="text-[8px] font-black uppercase text-muted-foreground tracking-widest">CRÓNICA IA</p>
+                    <p className="text-[10px] font-bold italic line-clamp-2 text-white/80">
+                      {match.aiSummary?.title || "En redacción..."}
+                    </p>
                   </div>
                   <Button variant="ghost" size="sm" className="w-full justify-between text-[10px] font-black uppercase tracking-widest hover:bg-white/10">
                     VER FICHA <ChevronRight className="h-3 w-3" />
