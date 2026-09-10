@@ -174,9 +174,12 @@ function DashboardContent() {
 
   const allPlayers = playersData || [];
   const stats = calculateAggregatedStats(allPlayers, allMatches);
+
+  const MIN_PARTICIPATION_RATE = 0.30;
+  const minimumEligibleMatches = Math.max(1, Math.ceil(playedMatches.length * MIN_PARTICIPATION_RATE));
   
   const topInfluential = [...stats]
-    .filter(p => p.matchesPlayed >= 1)
+    .filter(p => p.matchesPlayed >= minimumEligibleMatches)
     .sort((a, b) => b.winPercentage - a.winPercentage || b.matchesPlayed - a.matchesPlayed)
     .slice(0, 3);
 
