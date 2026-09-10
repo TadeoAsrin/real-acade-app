@@ -19,7 +19,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getInitials, cn } from '@/lib/utils';
 import { 
   Trophy, 
-  Medal, 
   Loader2, 
   Info, 
   ArrowUpDown, 
@@ -31,7 +30,6 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useSeason } from '@/context/season-context';
-import { Button } from '@/components/ui/button';
 
 type SortConfig = {
   key: keyof AggregatedPlayerStats | 'points';
@@ -66,9 +64,8 @@ export default function StandingsPage() {
   const stats = React.useMemo(() => {
     if (!players || !matches) return [];
     
-    let processed = calculateAggregatedStats(players, matches);
+    const processed = calculateAggregatedStats(players, matches);
 
-    // Sorting Logic
     return processed.sort((a, b) => {
       let aValue: any;
       let bValue: any;
@@ -81,7 +78,6 @@ export default function StandingsPage() {
         bValue = b[sortConfig.key as keyof AggregatedPlayerStats];
       }
 
-      // Tie-breaker logic (always points -> efficiency -> GD)
       if (aValue === bValue) {
         const aPts = (a.wins * 3) + a.draws;
         const bPts = (b.wins * 3) + b.draws;
@@ -124,20 +120,94 @@ export default function StandingsPage() {
   }
 
   return (
-    <div className="space-y-8 p-4 lg:p-8 animate-in fade-in duration-700 max-w-7xl mx-auto">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <div className="space-y-5 md:space-y-8 p-3 sm:p-4 lg:p-8 animate-in fade-in duration-700 max-w-7xl mx-auto">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6">
         <div className="space-y-1">
-          <h2 className="text-4xl lg:text-7xl font-black uppercase tracking-tighter italic text-white flex items-center gap-4">
-            <Trophy className="h-8 w-8 lg:h-14 lg:w-14 text-yellow-500 shrink-0" />
+          <h2 className="text-3xl sm:text-4xl lg:text-7xl font-black uppercase tracking-tighter italic text-white flex items-center gap-3 lg:gap-4">
+            <Trophy className="h-7 w-7 sm:h-8 sm:w-8 lg:h-14 lg:w-14 text-yellow-500 shrink-0" />
             CLASIFICACIÓN
           </h2>
-          <p className="text-[10px] lg:text-xs font-black uppercase tracking-[0.4em] text-primary/60 ml-1">
+          <p className="text-[9px] lg:text-xs font-black uppercase tracking-[0.32em] lg:tracking-[0.4em] text-primary/60 ml-1">
             MÉTRICAS DE ÉLITE • REAL ACADE
           </p>
         </div>
       </div>
 
-      <Card className="competition-card border-white/5 bg-black/20 shadow-2xl overflow-hidden">
+      <div className="md:hidden space-y-2">
+        {stats.map((player, index) => {
+          const isLeader = index === 0;
+          const isPodium = index < 3;
+          const leaguePoints = (player.wins * 3) + player.draws;
+
+          return (
+            <Link
+              key={player.playerId}
+              href={`/players/${player.playerId}`}
+              className={cn(
+                "relative grid grid-cols-[44px_52px_minmax(0,1fr)_58px] items-center gap-2 rounded-2xl border bg-[#111827] px-3 py-3.5 transition-colors active:bg-white/5",
+                isLeader && "border-yellow-500/25 bg-yellow-500/[0.04]",
+                index === 1 && "border-slate-400/15",
+                index === 2 && "border-orange-700/20",
+                index > 2 && "border-white/5"
+              )}
+            >
+              <div className="flex items-center justify-center">
+                <span className={cn(
+                  "font-bebas text-2xl leading-none",
+                  isPodium ? "text-white" : "text-muted-foreground/35"
+                )}>
+                  #{index + 1}
+                </span>
+              </div>
+
+              <div className="relative">
+                <Avatar className={cn(
+                  "h-11 w-11 border-2",
+                  isLeader ? "border-yellow-500" : "border-white/10"
+                )}>
+                  <AvatarImage src={player.avatar} />
+                  <AvatarFallback className="bg-zinc-900 font-bebas text-base text-primary">
+                    {getInitials(player.name)}
+                  </AvatarFallback>
+                </Avatar>
+                {isLeader && (
+                  <div className="absolute -top-1.5 -right-1.5 bg-yellow-500 text-black p-0.5 rounded-full shadow-lg">
+                    <Crown className="h-2.5 w-2.5 fill-current" />
+                  </div>
+                )}
+              </div>
+
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span className="font-black text-sm uppercase tracking-tight text-white truncate">
+                    {player.name}
+                  </span>
+                  <ChevronRight className="h-3.5 w-3.5 shrink-0 text-white/20" />
+                </div>
+                <span className="block text-[8px] font-black uppercase text-muted-foreground/40 tracking-[0.14em] truncate">
+                  {player.position || 'COMODÍN'}
+                </span>
+                <div className="mt-1.5 flex items-center gap-2 text-[9px] font-black uppercase tracking-wider">
+                  <span className="text-white/55">{player.matchesPlayed} PJ</span>
+                  <span className="h-1 w-1 rounded-full bg-white/15" />
+                  <span className="text-primary/80">{player.efficiency}% EFIC</span>
+                </div>
+              </div>
+
+              <div className="text-right">
+                <span className="block font-bebas text-3xl italic leading-none text-primary">
+                  {leaguePoints}
+                </span>
+                <span className="block mt-0.5 text-[7px] font-black uppercase tracking-[0.12em] text-primary/40">
+                  PTS
+                </span>
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+
+      <Card className="hidden md:block competition-card border-white/5 bg-black/20 shadow-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader className="bg-white/5">
@@ -266,7 +336,7 @@ export default function StandingsPage() {
         </div>
       </Card>
       
-      <div className="flex items-center justify-center gap-8 py-4 opacity-40">
+      <div className="hidden md:flex items-center justify-center gap-8 py-4 opacity-40">
          <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-emerald-500" />
             <span className="text-[8px] font-black uppercase tracking-widest">3 PTS</span>
