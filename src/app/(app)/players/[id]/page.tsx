@@ -3,19 +3,19 @@
 
 import * as React from 'react';
 import { useFirestore, useDoc, useCollection, useMemoFirebase, useUser } from '@/firebase';
-import { doc, collection, query, orderBy, where, getDocs, updateDoc } from 'firebase/firestore';
+import { doc, collection, query, orderBy, where, getDocs, updateDoc, deleteField } from 'firebase/firestore';
 import { useParams } from 'next/navigation';
 import { calculateAggregatedStats } from '@/lib/data';
 import type { Player, Match } from '@/lib/definitions';
 import { PlayerPerformanceChart } from '@/components/players/player-performance-chart';
 import { Card, CardContent } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { getInitials, cn } from '@/lib/utils';
+import { getInitials } from '@/lib/utils';
 import { Loader2, Pencil, Save } from 'lucide-react';
 import { useSeason } from '@/context/season-context';
 import { useToast } from '@/hooks/use-toast';
@@ -29,7 +29,8 @@ export default function PlayerProfilePage() {
   const { selectedSeasonId, loading: seasonLoading } = useSeason();
   const [editDialogOpen, setEditDialogOpen] = React.useState(false);
   const [editedName, setEditedName] = React.useState('');
-  const [isSavingName, setIsSavingName] = React.useState(false);
+  const [editedJerseyNumber, setEditedJerseyNumber] = React.useState('');
+  const [isSavingPlayer, setIsSavingPlayer] = React.useState(false);
 
   const playerRef = useMemoFirebase(() => {
     if (!firestore || !id) return null;
@@ -39,7 +40,7 @@ export default function PlayerProfilePage() {
   const matchesRef = useMemoFirebase(() => {
     if (!firestore || !selectedSeasonId) return null;
     return query(
-      collection(firestore, 'matches'), 
+      collection(firestore, 'matches'),
       where('seasonId', '==', selectedSeasonId)
     );
   }, [firestore, selectedSeasonId]);
@@ -55,32 +56,57 @@ export default function PlayerProfilePage() {
   const isAdmin = !!adminRole?.isAdmin || user?.email === 'tadeoasrin@gmail.com';
 
   React.useEffect(() => {
-    if (player) setEditedName(player.name);
+    if (player) {
+      setEditedName(player.name);
+      setEditedJerseyNumber(player.jerseyNumber?.toString() ?? '');
+    }
   }, [player]);
 
-  const handleUpdateName = async () => {
+  const handleUpdatePlayer = async () => {
     const nextName = editedName.trim().replace(/\s+/g, ' ');
-    if (!firestore || !playerRef || !player || !isAdmin || !nextName) return;
+    const numberText = editedJerseyNumber.trim();
+    const nextNumber = numberText === '' ? null : Number(numberText);
 
-    setIsSavingName(true);
+    if (!firestore || !playerRef || !player || !isAdmin || !nextName) return;
+    if (nextNumber !== null && (!Number.isInteger(nextNumber) || nextNumber < 0 || nextNumber > 99)) {
+      toast({ variant: 'destructive', title: 'Dorsal inválido', description: 'Usá un número entero entre 0 y 99.' });
+      return;
+    }
+
+    setIsSavingPlayer(true);
     try {
       const playersSnapshot = await getDocs(query(collection(firestore, 'players'), orderBy('name', 'asc')));
-      const duplicate = playersSnapshot.docs.some(playerDoc =>
+      const duplicateName = playersSnapshot.docs.some(playerDoc =>
         playerDoc.id !== player.id && normalizePersonName(String(playerDoc.data().name || '')) === normalizePersonName(nextName)
       );
-      if (duplicate) {
+      if (duplicateName) {
         toast({ variant: 'destructive', title: 'Nombre duplicado', description: 'Ya existe otro jugador con ese nombre.' });
-        setIsSavingName(false);
+        setIsSavingPlayer(false);
         return;
       }
 
-      await updateDoc(playerRef, { name: nextName });
-      toast({ title: 'Nombre actualizado', description: `${player.name} ahora figura como ${nextName}.` });
+      const duplicateNumber = nextNumber !== null && playersSnapshot.docs.some(playerDoc =>
+        playerDoc.id !== player.id && Number(playerDoc.data().jerseyNumber) === nextNumber
+      );
+      if (duplicateNumber) {
+        toast({ variant: 'destructive', title: 'Dorsal ocupado', description: `El número ${nextNumber} ya pertenece a otro jugador.` });
+        setIsSavingPlayer(false);
+        return;
+      }
+
+      await updateDoc(playerRef, {
+        name: nextName,
+        jerseyNumber: nextNumber === null ? deleteField() : nextNumber,
+      });
+      toast({
+        title: 'Jugador actualizado',
+        description: nextNumber === null ? `${nextName} quedó sin dorsal.` : `${nextName} ahora usa el dorsal ${nextNumber}.`,
+      });
       setEditDialogOpen(false);
     } catch (error: any) {
       toast({ variant: 'destructive', title: 'No se pudo actualizar', description: error?.message || 'Intentá nuevamente.' });
     } finally {
-      setIsSavingName(false);
+      setIsSavingPlayer(false);
     }
   };
 
@@ -119,48 +145,70 @@ export default function PlayerProfilePage() {
     <div className="space-y-8 p-4 lg:p-8 animate-in fade-in duration-700 max-w-7xl mx-auto">
       <div className="flex flex-col lg:flex-row gap-8 items-start">
         <div className="w-full lg:w-80 space-y-6">
-           <Card className="competition-card border-white/5 bg-black/40 overflow-hidden text-center p-8">
-              <div className="relative mx-auto w-32 h-32 mb-6">
-                <Avatar className="h-full w-full border-4 border-primary shadow-[0_0_30px_rgba(59,130,246,0.2)]">
-                  <AvatarImage src={player.avatar} alt={player.name} />
-                  <AvatarFallback className="text-4xl font-bebas bg-surface-900">{getInitials(player.name)}</AvatarFallback>
+           <Card className="competition-card border-white/5 bg-black/40 overflow-hidden text-center p-6 lg:p-8">
+              <div className="relative mx-auto w-28 h-28 lg:w-32 lg:h-32 mb-5 lg:mb-6">
+                <Avatar className="h-full w-full border-4 border-primary bg-zinc-950 shadow-[0_0_30px_rgba(59,130,246,0.2)]">
+                  <AvatarFallback className="text-5xl lg:text-6xl font-bebas italic bg-zinc-950 text-primary">
+                    {player.jerseyNumber ?? getInitials(player.name)}
+                  </AvatarFallback>
                 </Avatar>
               </div>
               <h2 className="text-2xl font-black uppercase tracking-tighter italic">{player.name}</h2>
-              <p className="text-[10px] font-black uppercase tracking-widest text-primary mt-1">{player.position || 'COMODÍN'}</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-primary mt-1">
+                {player.position || 'COMODÍN'}{player.jerseyNumber != null ? ` • DORSAL ${player.jerseyNumber}` : ''}
+              </p>
               {isAdmin && (
                 <Dialog open={editDialogOpen} onOpenChange={(open) => {
                   setEditDialogOpen(open);
-                  if (open) setEditedName(player.name);
+                  if (open) {
+                    setEditedName(player.name);
+                    setEditedJerseyNumber(player.jerseyNumber?.toString() ?? '');
+                  }
                 }}>
                   <DialogTrigger asChild>
                     <Button variant="outline" size="sm" className="mt-5 border-primary/20 text-primary font-black uppercase tracking-widest text-[10px]">
-                      <Pencil className="h-3 w-3" /> Editar nombre
+                      <Pencil className="h-3 w-3" /> Editar jugador
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
                       <DialogTitle>Editar jugador</DialogTitle>
-                      <DialogDescription>El historial y las estadísticas conservarán el mismo jugador.</DialogDescription>
+                      <DialogDescription>Podés cambiar el nombre y asignar el dorsal sin alterar su historial ni estadísticas.</DialogDescription>
                     </DialogHeader>
-                    <div className="space-y-2 py-2 text-left">
-                      <Label htmlFor="player-name">Nombre</Label>
-                      <Input
-                        id="player-name"
-                        value={editedName}
-                        onChange={(event) => setEditedName(event.target.value)}
-                        onKeyDown={(event) => {
-                          if (event.key === 'Enter' && editedName.trim() && !isSavingName) void handleUpdateName();
-                        }}
-                        autoFocus
-                        disabled={isSavingName}
-                      />
+                    <div className="space-y-4 py-2 text-left">
+                      <div className="space-y-2">
+                        <Label htmlFor="player-name">Nombre</Label>
+                        <Input
+                          id="player-name"
+                          value={editedName}
+                          onChange={(event) => setEditedName(event.target.value)}
+                          disabled={isSavingPlayer}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="player-number">Dorsal</Label>
+                        <Input
+                          id="player-number"
+                          type="number"
+                          min="0"
+                          max="99"
+                          inputMode="numeric"
+                          placeholder="Ej: 10"
+                          value={editedJerseyNumber}
+                          onChange={(event) => setEditedJerseyNumber(event.target.value)}
+                          onKeyDown={(event) => {
+                            if (event.key === 'Enter' && editedName.trim() && !isSavingPlayer) void handleUpdatePlayer();
+                          }}
+                          disabled={isSavingPlayer}
+                        />
+                        <p className="text-[10px] text-muted-foreground">Dejalo vacío si todavía no tiene número.</p>
+                      </div>
                     </div>
                     <DialogFooter>
-                      <Button variant="outline" onClick={() => setEditDialogOpen(false)} disabled={isSavingName}>Cancelar</Button>
-                      <Button onClick={() => void handleUpdateName()} disabled={!editedName.trim() || editedName.trim() === player.name || isSavingName}>
-                        {isSavingName ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                        {isSavingName ? 'Guardando…' : 'Confirmar cambio'}
+                      <Button variant="outline" onClick={() => setEditDialogOpen(false)} disabled={isSavingPlayer}>Cancelar</Button>
+                      <Button onClick={() => void handleUpdatePlayer()} disabled={!editedName.trim() || isSavingPlayer}>
+                        {isSavingPlayer ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                        {isSavingPlayer ? 'Guardando…' : 'Guardar jugador'}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
