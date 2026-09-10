@@ -4,6 +4,7 @@ export type Player = {
   id: string;
   name: string;
   avatar?: string;
+  jerseyNumber?: number;
   role: 'admin' | 'player';
   position?: PlayerPosition;
 };
@@ -42,6 +43,7 @@ export type AggregatedPlayerStats = {
   playerId: string;
   name: string;
   avatar?: string;
+  jerseyNumber?: number;
   position?: PlayerPosition;
   matchesPlayed: number;
   totalGoals: number;
