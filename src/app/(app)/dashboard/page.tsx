@@ -55,48 +55,46 @@ function EliteListCard({ title, icon: Icon, players, valueFn, label, colorClass,
             const isFirst = idx === 0;
             return (
               <div key={player.playerId} className={cn(
-                "flex items-center justify-between",
+                "grid grid-cols-[auto_auto_minmax(0,1fr)_auto] items-center gap-x-2 md:gap-x-2.5",
                 isFirst ? "pb-3 md:pb-4 border-b border-white/[0.06] mb-3 md:mb-4" : ""
               )}>
-                <div className="flex items-center gap-3 min-w-0">
-                  <span className={cn(
-                    "text-sm font-bold tabular-nums w-5 shrink-0",
-                    isFirst ? colorClass : "text-muted-foreground/40"
-                  )}>#{idx + 1}</span>
+                <span className={cn(
+                  "text-sm font-bold tabular-nums w-6 shrink-0",
+                  isFirst ? colorClass : "text-muted-foreground/40"
+                )}>#{idx + 1}</span>
 
-                  <div className="relative">
-                    <Avatar className={cn(
-                      isFirst ? "h-10 w-10 md:h-12 md:w-12 border-2" : "h-7 w-7 md:h-8 md:w-8 border",
-                      isFirst ? colorClass.replace('text-', 'border-').concat('/50') : "border-white/10"
-                    )}>
-                      <AvatarFallback className="bg-white/5 text-white font-bold text-[10px] flex items-center justify-center leading-none">
-                        {player.jerseyNumber ?? getInitials(player.name)}
-                      </AvatarFallback>
-                    </Avatar>
-                    {isFirst && (
-                      <div className={cn("absolute -top-1 -right-1 rounded-full p-0.5 border-2 border-[#111827]", colorClass.replace('text-', 'bg-'))}>
-                        <Star className="h-2 w-2 text-black" />
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="min-w-0 flex-1">
-                    <span className={cn(
-                      "font-semibold uppercase truncate block tracking-tight",
-                      isFirst ? "text-sm text-white" : "text-[10px] text-muted-foreground"
-                    )}>{player.name.split(' ')[0]}</span>
-                    {isFirst && (
-                      <p className="text-[7px] font-medium text-muted-foreground uppercase tracking-[0.1em] leading-none mt-1">
-                        {player.position || 'Comodín'}
-                      </p>
-                    )}
-                  </div>
+                <div className="relative shrink-0">
+                  <Avatar className={cn(
+                    isFirst ? "h-9 w-9 md:h-10 md:w-10 border" : "h-7 w-7 md:h-8 md:w-8 border",
+                    isFirst ? colorClass.replace('text-', 'border-').concat('/40') : "border-white/10"
+                  )}>
+                    <AvatarFallback className="bg-white/5 text-white font-bold text-[10px] flex items-center justify-center leading-none">
+                      {player.jerseyNumber ?? getInitials(player.name)}
+                    </AvatarFallback>
+                  </Avatar>
+                  {isFirst && (
+                    <div className={cn("absolute -top-1 -right-1 rounded-full p-0.5 border-2 border-[#111827]", colorClass.replace('text-', 'bg-'))}>
+                      <Star className="h-2 w-2 text-black" />
+                    </div>
+                  )}
                 </div>
 
-                <div className="text-right shrink-0 ml-2">
+                <div className="min-w-0 pr-1">
+                  <span className={cn(
+                    "font-semibold uppercase block tracking-tight whitespace-nowrap overflow-hidden text-ellipsis",
+                    isFirst ? "text-sm text-white" : "text-[10px] text-muted-foreground"
+                  )}>{player.name.split(' ')[0]}</span>
+                  {isFirst && (
+                    <p className="text-[7px] font-medium text-muted-foreground uppercase tracking-[0.08em] leading-tight mt-1 truncate">
+                      {player.position || 'Comodín'}
+                    </p>
+                  )}
+                </div>
+
+                <div className="text-right shrink-0 pl-1 whitespace-nowrap">
                   <span className={cn(
                     "font-bold tabular-nums tracking-tight",
-                    isFirst ? "text-2xl md:text-3xl" : "text-lg md:text-xl text-white/60",
+                    isFirst ? "text-xl md:text-2xl" : "text-lg md:text-xl text-white/60",
                     isFirst ? colorClass : ""
                   )}>{valueFn(player)}</span>
                   <span className="text-[7px] font-semibold uppercase text-muted-foreground/40 ml-1 tracking-[0.08em]">{label}</span>
