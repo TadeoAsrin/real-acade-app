@@ -12,6 +12,7 @@ export const calculateAggregatedStats = (allPlayers: Player[], allMatches: Match
       playerId: player.id,
       name: player.name,
       avatar: player.avatar,
+      jerseyNumber: player.jerseyNumber,
       position: player.position,
       matchesPlayed: 0,
       totalGoals: 0,
@@ -216,55 +217,4 @@ export const getChemistryRankings = (players: Player[], matches: Match[], minMat
     })
     .filter((pair): pair is ChemistryPair => pair !== null && pair.matches >= minMatchesThreshold)
     .sort((a, b) => b.winRate - a.winRate || b.matches - a.matches);
-};
-
-export const getSpiciestMatch = (matches: Match[]) => {
-  const playedMatches = matches.filter(m => m.teamAScore > 0 || m.teamBScore > 0);
-  if (playedMatches.length === 0) return null;
-  return [...playedMatches].sort((a, b) => (b.teamAScore + b.teamBScore) - (a.teamAScore + a.teamBScore))[0];
-};
-
-export const getTopScorerRecord = (matches: Match[], players: Player[]) => {
-  let maxGoals = 0;
-  let holders: Player[] = [];
-
-  matches.forEach(match => {
-    const allMatchStats = [...match.teamAPlayers, ...match.teamBPlayers];
-    allMatchStats.forEach(stat => {
-      if (stat.goals > maxGoals) {
-        maxGoals = stat.goals;
-        const p = players.find(pl => pl.id === stat.playerId);
-        if (p) holders = [p];
-      } else if (stat.goals === maxGoals && maxGoals > 0) {
-        const p = players.find(pl => pl.id === stat.playerId);
-        if (p && !holders.find(h => h.id === p.id)) holders.push(p);
-      }
-    });
-  });
-
-  return { maxGoals, holders };
-};
-
-/**
- * Balance teams using current stats. 
- * Temporarily uses totalGoals as ranking factor to avoid build errors.
- */
-export const balanceTeams = (selectedPlayers: AggregatedPlayerStats[]) => {
-  const goalkeepers = selectedPlayers.filter(p => p.position === 'Arquero');
-  const outfieldPlayers = selectedPlayers.filter(p => p.position !== 'Arquero');
-  const teamA: AggregatedPlayerStats[] = [];
-  const teamB: AggregatedPlayerStats[] = [];
-  let scoreA = 0; let scoreB = 0;
-
-  [...goalkeepers].sort((a, b) => b.totalGoals - a.totalGoals).forEach(gk => {
-    if (scoreA <= scoreB) { teamA.push(gk); scoreA += gk.totalGoals; }
-    else { teamB.push(gk); scoreB += gk.totalGoals; }
-  });
-
-  [...outfieldPlayers].sort((a, b) => b.totalGoals - a.totalGoals).forEach(p => {
-    if (scoreA <= scoreB) { teamA.push(p); scoreA += p.totalGoals; }
-    else { teamB.push(p); scoreB += p.totalGoals; }
-  });
-
-  return { teamA, teamB, scoreA, scoreB };
 };
