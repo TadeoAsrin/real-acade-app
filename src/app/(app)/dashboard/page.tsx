@@ -44,19 +44,19 @@ interface EliteListCardProps {
 function EliteListCard({ title, icon: Icon, players, valueFn, label, colorClass, href }: EliteListCardProps) {
   return (
     <Link href={href} className="group h-full block">
-      <div className="bg-[#111827] rounded-2xl p-6 border border-white/5 flex flex-col h-full hover:border-white/20 transition-all hover-lift relative overflow-hidden">
-        <div className={cn("flex items-center gap-2 mb-6", colorClass)}>
+      <div className="bg-[#111827] rounded-2xl p-4 md:p-6 border border-white/5 flex flex-col h-full hover:border-white/20 transition-all hover-lift relative overflow-hidden">
+        <div className={cn("flex items-center gap-2 mb-4 md:mb-6", colorClass)}>
           <Icon className="h-4 w-4" />
           <span className="text-[10px] font-black uppercase tracking-[0.2em] font-oswald">{title}</span>
         </div>
         
-        <div className="space-y-4 flex-1">
+        <div className="space-y-3 md:space-y-4 flex-1">
           {players.map((player, idx) => {
             const isFirst = idx === 0;
             return (
               <div key={player.playerId} className={cn(
                 "flex items-center justify-between",
-                isFirst ? "pb-4 border-b border-white/5 mb-4" : ""
+                isFirst ? "pb-3 md:pb-4 border-b border-white/5 mb-3 md:mb-4" : ""
               )}>
                 <div className="flex items-center gap-3 min-w-0">
                   <span className={cn(
@@ -66,7 +66,7 @@ function EliteListCard({ title, icon: Icon, players, valueFn, label, colorClass,
                   
                   <div className="relative">
                     <Avatar className={cn(
-                      isFirst ? "h-12 w-12 border-2" : "h-8 w-8 border",
+                      isFirst ? "h-10 w-10 md:h-12 md:w-12 border-2" : "h-7 w-7 md:h-8 md:w-8 border",
                       isFirst ? colorClass.replace('text-', 'border-').concat('/50') : "border-white/10"
                     )}>
                       <AvatarFallback className="bg-white/5 text-white font-black text-[10px]">
@@ -96,7 +96,7 @@ function EliteListCard({ title, icon: Icon, players, valueFn, label, colorClass,
                 <div className="text-right shrink-0 ml-2">
                   <span className={cn(
                     "font-bebas italic",
-                    isFirst ? "text-3xl" : "text-xl text-white/60",
+                    isFirst ? "text-2xl md:text-3xl" : "text-lg md:text-xl text-white/60",
                     isFirst ? colorClass : ""
                   )}>{valueFn(player)}</span>
                   <span className="text-[7px] font-black uppercase text-muted-foreground/40 ml-1 font-oswald">{label}</span>
@@ -222,7 +222,7 @@ function DashboardContent() {
   const matchForModal = forcedMatch || (lastMatch?.aiSummary ? lastMatch : null);
 
   return (
-    <div className="flex flex-col gap-10 max-w-7xl mx-auto pb-20 p-4 lg:p-8">
+    <div className="flex flex-col gap-6 md:gap-10 max-w-7xl mx-auto pb-20 p-4 lg:p-8">
       <div className="fixed inset-0 bg-dot-pattern pointer-events-none opacity-20 z-0" />
 
       {matchForModal && (
@@ -233,58 +233,58 @@ function DashboardContent() {
         />
       )}
 
-      <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
         <div>
-          <h2 className="text-4xl lg:text-7xl font-black uppercase tracking-tighter italic text-white leading-none">REAL ACADE</h2>
-          <p className="text-[10px] lg:text-xs font-black uppercase tracking-[0.4em] text-primary/60 ml-1 mt-2">DASHBOARD ESTRATÉGICO</p>
+          <h2 className="text-3xl md:text-4xl lg:text-7xl font-black uppercase tracking-tighter italic text-white leading-none">REAL ACADE</h2>
+          <p className="text-[9px] lg:text-xs font-black uppercase tracking-[0.35em] md:tracking-[0.4em] text-primary/60 ml-1 mt-2">DASHBOARD ESTRATÉGICO</p>
         </div>
       </div>
 
       {lastMatch ? (
         <section className="relative z-10">
-          <div className="cinematic-banner p-8 md:p-16 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div className="cinematic-banner p-5 md:p-16 grid grid-cols-1 lg:grid-cols-12 gap-5 md:gap-8 items-center">
             <div className="absolute inset-0 bg-black/40 pointer-events-none" />
-            <div className="lg:col-span-8 space-y-8 relative z-10">
+            <div className="lg:col-span-8 space-y-4 md:space-y-8 relative z-10">
               <div className="flex items-center gap-3">
-                <Badge className="bg-primary text-primary-foreground font-bebas tracking-widest px-4 py-1.5 text-sm rounded-none shadow-lg shadow-primary/20">EDICIÓN ESPECIAL</Badge>
+                <Badge className="bg-primary text-primary-foreground font-bebas tracking-widest px-3 md:px-4 py-1 md:py-1.5 text-xs md:text-sm rounded-none shadow-lg shadow-primary/20">EDICIÓN ESPECIAL</Badge>
                 {formattedLastMatchDate && (
-                  <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] font-oswald">
+                  <span className="text-[8px] md:text-[10px] font-black text-white/40 uppercase tracking-[0.25em] md:tracking-[0.3em] font-oswald">
                     {formattedLastMatchDate}
                   </span>
                 )}
               </div>
-              <h1 className="text-5xl md:text-[5.5rem] font-bebas text-white tracking-wider leading-[0.85] uppercase">
+              <h1 className="text-3xl md:text-[5.5rem] font-bebas text-white tracking-wider leading-[0.9] md:leading-[0.85] uppercase">
                 {lastMatch.aiSummary?.title || "CRÓNICA DE LA JORNADA"}
               </h1>
-              <p className="text-xl md:text-2xl text-muted-foreground font-lora italic max-w-2xl leading-relaxed">
+              <p className="text-sm md:text-2xl text-muted-foreground font-lora italic max-w-2xl leading-relaxed line-clamp-2 md:line-clamp-none">
                 {lastMatch.aiSummary?.subtitle || "Exhibición de fútbol y mística en el último encuentro del club."}
               </p>
-              <div className="flex flex-wrap gap-4 pt-6">
-                <Button asChild size="lg" className="h-16 px-10 font-bebas text-2xl tracking-[0.2em] bg-white text-black hover:bg-white/90 shadow-[0_0_40px_rgba(255,255,255,0.25)] rounded-none transition-all">
-                  <Link href={`/dashboard?gaceta=${lastMatch.id}`} className="flex items-center gap-3">
-                    <Newspaper className="h-6 w-6" /> LEER EL DIARIO
+              <div className="flex flex-wrap gap-2 md:gap-4 pt-2 md:pt-6">
+                <Button asChild size="lg" className="h-11 md:h-16 px-5 md:px-10 font-bebas text-lg md:text-2xl tracking-[0.15em] md:tracking-[0.2em] bg-white text-black hover:bg-white/90 shadow-[0_0_40px_rgba(255,255,255,0.25)] rounded-none transition-all">
+                  <Link href={`/dashboard?gaceta=${lastMatch.id}`} className="flex items-center gap-2 md:gap-3">
+                    <Newspaper className="h-5 w-5 md:h-6 md:w-6" /> LEER EL DIARIO
                   </Link>
                 </Button>
-                <Button asChild variant="outline" size="lg" className="border-white/10 hover:bg-white/5 font-black uppercase italic px-10 h-16 text-sm rounded-none text-white">
+                <Button asChild variant="outline" size="lg" className="border-white/10 hover:bg-white/5 font-black uppercase italic px-5 md:px-10 h-11 md:h-16 text-[10px] md:text-sm rounded-none text-white">
                   <Link href={`/matches/${lastMatch.id}`} className="flex items-center gap-2">
-                    <FileText className="h-5 w-5" /> FICHA TÉCNICA
+                    <FileText className="h-4 w-4 md:h-5 md:w-5" /> FICHA TÉCNICA
                   </Link>
                 </Button>
               </div>
             </div>
             
             <div className="lg:col-span-4 flex justify-center lg:justify-end relative z-10">
-              <div className="bg-black/60 backdrop-blur-xl p-10 rounded-none border border-white/10 shadow-[0_30px_60px_rgba(0,0,0,0.5)] text-center space-y-6 min-w-[280px] transform lg:rotate-3 hover:rotate-0 transition-transform duration-700">
-                <p className="text-[10px] font-black uppercase text-white/40 tracking-[0.4em] font-oswald">RESULTADO FINAL</p>
-                <div className="flex items-center justify-center gap-8">
+              <div className="bg-black/60 backdrop-blur-xl p-5 md:p-10 rounded-none border border-white/10 shadow-[0_30px_60px_rgba(0,0,0,0.5)] text-center space-y-3 md:space-y-6 min-w-[220px] md:min-w-[280px] transform lg:rotate-3 hover:rotate-0 transition-transform duration-700">
+                <p className="text-[8px] md:text-[10px] font-black uppercase text-white/40 tracking-[0.3em] md:tracking-[0.4em] font-oswald">RESULTADO FINAL</p>
+                <div className="flex items-center justify-center gap-6 md:gap-8">
                   <div className="flex flex-col items-center">
-                    <span className="text-8xl font-bebas text-primary leading-none drop-shadow-[0_0_20px_rgba(59,130,246,0.6)]">{lastMatch.teamAScore}</span>
-                    <span className="text-[10px] font-black text-primary uppercase mt-3 tracking-widest font-oswald">AZUL</span>
+                    <span className="text-5xl md:text-8xl font-bebas text-primary leading-none drop-shadow-[0_0_20px_rgba(59,130,246,0.6)]">{lastMatch.teamAScore}</span>
+                    <span className="text-[9px] md:text-[10px] font-black text-primary uppercase mt-2 md:mt-3 tracking-widest font-oswald">AZUL</span>
                   </div>
-                  <div className="h-16 w-[1px] bg-white/10" />
+                  <div className="h-12 md:h-16 w-[1px] bg-white/10" />
                   <div className="flex flex-col items-center">
-                    <span className="text-8xl font-bebas text-accent leading-none drop-shadow-[0_0_20px_rgba(244,63,94,0.6)]">{lastMatch.teamBScore}</span>
-                    <span className="text-[10px] font-black text-accent uppercase mt-3 tracking-widest font-oswald">ROJO</span>
+                    <span className="text-5xl md:text-8xl font-bebas text-accent leading-none drop-shadow-[0_0_20px_rgba(244,63,94,0.6)]">{lastMatch.teamBScore}</span>
+                    <span className="text-[9px] md:text-[10px] font-black text-accent uppercase mt-2 md:mt-3 tracking-widest font-oswald">ROJO</span>
                   </div>
                 </div>
               </div>
@@ -292,10 +292,10 @@ function DashboardContent() {
           </div>
         </section>
       ) : (
-        <section className="bg-white/5 border border-dashed border-white/10 rounded-[2rem] p-20 text-center space-y-4">
-          <Trophy className="h-16 w-16 text-muted-foreground/20 mx-auto" />
-          <h3 className="font-bebas text-4xl uppercase tracking-widest text-muted-foreground/40">Sin Partidos en esta Temporada</h3>
-          <p className="text-xs font-black uppercase text-muted-foreground/20 tracking-[0.3em]">Selecciona otra temporada o espera a que el Admin registre la primera batalla.</p>
+        <section className="bg-white/5 border border-dashed border-white/10 rounded-[2rem] p-10 md:p-20 text-center space-y-4">
+          <Trophy className="h-12 w-12 md:h-16 md:w-16 text-muted-foreground/20 mx-auto" />
+          <h3 className="font-bebas text-3xl md:text-4xl uppercase tracking-widest text-muted-foreground/40">Sin Partidos en esta Temporada</h3>
+          <p className="text-[10px] md:text-xs font-black uppercase text-muted-foreground/20 tracking-[0.25em] md:tracking-[0.3em]">Selecciona otra temporada o espera a que el Admin registre la primera batalla.</p>
         </section>
       )}
 
@@ -307,13 +307,13 @@ function DashboardContent() {
               <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-500 font-oswald">ORDEN DE MANDO</h2>
               <div className="h-px flex-1 bg-emerald-500/10" />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
               {ordenDeMando.map((p, idx) => (
                 <Link key={p.playerId} href="/hierarchy" className="group">
-                  <div className="bg-[#111827] border border-emerald-500/20 rounded-2xl p-5 flex items-center justify-between transition-all hover:bg-emerald-500/5 hover:border-emerald-500/40">
-                    <div className="flex items-center gap-4">
+                  <div className="bg-[#111827] border border-emerald-500/20 rounded-2xl p-4 md:p-5 flex items-center justify-between transition-all hover:bg-emerald-500/5 hover:border-emerald-500/40">
+                    <div className="flex items-center gap-3 md:gap-4">
                       <div className="relative">
-                        <Avatar className="h-12 w-12 border-2 border-emerald-500/20">
+                        <Avatar className="h-10 w-10 md:h-12 md:w-12 border-2 border-emerald-500/20">
                           <AvatarFallback className="bg-emerald-500/10 text-emerald-500 font-black">{getInitials(p.name)}</AvatarFallback>
                         </Avatar>
                         <div className="absolute -bottom-1 -right-1 bg-emerald-500 rounded-full p-1 shadow-lg ring-2 ring-[#111827]">
@@ -322,12 +322,12 @@ function DashboardContent() {
                       </div>
                       <div>
                         <p className="text-[8px] font-black text-emerald-500/60 uppercase tracking-widest font-oswald mb-0.5">CANDIDATO #{idx + 1}</p>
-                        <h3 className="text-xl font-black italic uppercase text-white group-hover:text-emerald-500 transition-colors leading-none">{p.name}</h3>
+                        <h3 className="text-lg md:text-xl font-black italic uppercase text-white group-hover:text-emerald-500 transition-colors leading-none">{p.name}</h3>
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className="text-3xl font-black italic font-bebas text-white leading-none">{p.matchesSinceLastCaptain}</span>
-                      <p className="text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest font-oswald">PJ SIN BRAZALETE</p>
+                      <span className="text-2xl md:text-3xl font-black italic font-bebas text-white leading-none">{p.matchesSinceLastCaptain}</span>
+                      <p className="text-[7px] md:text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest font-oswald">PJ SIN BRAZALETE</p>
                     </div>
                   </div>
                 </Link>
@@ -335,9 +335,9 @@ function DashboardContent() {
             </div>
           </section>
 
-          <section className="space-y-6 relative z-10">
+          <section className="space-y-4 md:space-y-6 relative z-10">
             <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 px-1 font-oswald">ESTRELLAS DE LA ACADEMIA</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
               <EliteListCard title="MÁS INFLUYENTE" icon={Brain} players={topInfluential} valueFn={(p) => `${p.winPercentage}%`} label="WR" colorClass="text-primary" href="/standings" />
               <EliteListCard title="PICHICHI" icon={Target} players={topScorers} valueFn={(p) => p.totalGoals} label="GF" colorClass="text-yellow-500" href="/standings" />
               <EliteListCard title="MEJOR RACHA" icon={Flame} players={topStreaks} valueFn={(p) => p.bestStreak} label="WINS" colorClass="text-orange-500" href="/standings" />
@@ -345,45 +345,45 @@ function DashboardContent() {
             </div>
           </section>
 
-          <section className="space-y-6 relative z-10">
+          <section className="space-y-4 md:space-y-6 relative z-10">
             <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 px-1 font-oswald">PULSO DE LA COMPETICIÓN</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Link href="/standings" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-yellow-500/20 transition-all hover-lift">
-                <Star className="h-6 w-6 text-yellow-500" />
-                <span className="text-5xl font-black italic font-bebas leading-none text-white">{maxMvpCount}</span>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+              <Link href="/standings" className="bg-[#111827] p-5 md:p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-2 md:gap-3 hover:border-yellow-500/20 transition-all hover-lift">
+                <Star className="h-5 w-5 md:h-6 md:w-6 text-yellow-500" />
+                <span className="text-4xl md:text-5xl font-black italic font-bebas leading-none text-white">{maxMvpCount}</span>
                 <div className="space-y-1">
-                  <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">REYES MVP</p>
-                  <p className="text-[10px] font-black uppercase text-yellow-500/60 font-oswald">RÉCORD PREMIOS</p>
+                  <p className="text-[9px] md:text-[10px] font-black uppercase text-white font-oswald tracking-widest">REYES MVP</p>
+                  <p className="text-[8px] md:text-[10px] font-black uppercase text-yellow-500/60 font-oswald">RÉCORD PREMIOS</p>
                 </div>
               </Link>
-              <div className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-orange-500/20 transition-all hover-lift">
-                <Flame className="h-6 w-6 text-orange-500" />
-                <span className="text-5xl font-black italic font-bebas leading-none text-white">{recordGoalsInMatch}</span>
+              <div className="bg-[#111827] p-5 md:p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-2 md:gap-3 hover:border-orange-500/20 transition-all hover-lift">
+                <Flame className="h-5 w-5 md:h-6 md:w-6 text-orange-500" />
+                <span className="text-4xl md:text-5xl font-black italic font-bebas leading-none text-white">{recordGoalsInMatch}</span>
                 <div className="space-y-1">
-                  <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">RÉCORD GOLES</p>
-                  <p className="text-[10px] font-black uppercase text-orange-500/60 font-oswald">EN UN PARTIDO</p>
+                  <p className="text-[9px] md:text-[10px] font-black uppercase text-white font-oswald tracking-widest">RÉCORD GOLES</p>
+                  <p className="text-[8px] md:text-[10px] font-black uppercase text-orange-500/60 font-oswald">EN UN PARTIDO</p>
                 </div>
               </div>
-              <Link href="/standings" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-primary/20 transition-all hover-lift">
-                <Target className="h-6 w-6 text-primary" />
-                <span className="text-5xl font-black italic font-bebas leading-none text-white">{individualRecord}</span>
+              <Link href="/standings" className="bg-[#111827] p-5 md:p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-2 md:gap-3 hover:border-primary/20 transition-all hover-lift">
+                <Target className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+                <span className="text-4xl md:text-5xl font-black italic font-bebas leading-none text-white">{individualRecord}</span>
                 <div className="space-y-1">
-                  <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">ARTILLERO SUPREMO</p>
-                  <p className="text-[11px] font-black uppercase text-primary font-oswald truncate max-w-[140px] drop-shadow-[0_0_10px_rgba(59,130,246,0.3)]">{recordHolderText}</p>
+                  <p className="text-[9px] md:text-[10px] font-black uppercase text-white font-oswald tracking-widest">ARTILLERO SUPREMO</p>
+                  <p className="text-[9px] md:text-[11px] font-black uppercase text-primary font-oswald truncate max-w-[120px] md:max-w-[140px] drop-shadow-[0_0_10px_rgba(59,130,246,0.3)]">{recordHolderText}</p>
                 </div>
               </Link>
-              <Link href="/attendance" className="bg-[#111827] p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-3 hover:border-emerald-500/20 transition-all hover-lift">
-                <Users className="h-6 w-6 text-emerald-500" />
-                <span className="text-5xl font-black italic font-bebas leading-none text-white">{attendanceValue}</span>
+              <Link href="/attendance" className="bg-[#111827] p-5 md:p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center gap-2 md:gap-3 hover:border-emerald-500/20 transition-all hover-lift">
+                <Users className="h-5 w-5 md:h-6 md:w-6 text-emerald-500" />
+                <span className="text-4xl md:text-5xl font-black italic font-bebas leading-none text-white">{attendanceValue}</span>
                 <div className="space-y-1">
-                  <p className="text-[10px] font-black uppercase text-white font-oswald tracking-widest">INFALTABLES</p>
-                  <p className="text-[11px] font-black uppercase text-emerald-500 font-oswald truncate max-w-[140px] drop-shadow-[0_0_10px_rgba(16,185,129,0.3)]">{attendanceText}</p>
+                  <p className="text-[9px] md:text-[10px] font-black uppercase text-white font-oswald tracking-widest">INFALTABLES</p>
+                  <p className="text-[9px] md:text-[11px] font-black uppercase text-emerald-500 font-oswald truncate max-w-[120px] md:max-w-[140px] drop-shadow-[0_0_10px_rgba(16,185,129,0.3)]">{attendanceText}</p>
                 </div>
               </Link>
             </div>
           </section>
 
-          <section className="space-y-6 relative z-10">
+          <section className="space-y-6 relative z-10 hidden md:block">
             <div className="flex items-center justify-between px-1">
               <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 font-oswald">SALA DE HUMILDAD</h2>
               <Badge variant="outline" className="text-[7px] font-black uppercase tracking-widest border-white/5 text-muted-foreground/40 font-oswald">FILTRO: MÍNIMO 1 PJ</Badge>
