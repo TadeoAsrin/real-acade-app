@@ -4,63 +4,75 @@
 
 @layer base {
   :root {
-    --background: 222 47% 6%; /* #0b1220 */
+    --background: 222 47% 6%;
     --foreground: 210 40% 98%;
-    
-    --card: 222 47% 11%; /* #111827 */
+    --card: 222 47% 10%;
     --card-foreground: 210 40% 98%;
-    
-    --popover: 222 47% 6%;
+    --popover: 222 47% 7%;
     --popover-foreground: 210 40% 98%;
-    
-    --primary: 221 83% 53%; /* Blue */
+    --primary: 221 83% 53%;
     --primary-foreground: 210 40% 98%;
-    
     --secondary: 217 33% 17%;
     --secondary-foreground: 210 40% 98%;
-    
     --muted: 217 33% 17%;
     --muted-foreground: 215 20% 65%;
-    
-    --accent: 0 73% 41%; /* Red */
+    --accent: 0 73% 41%;
     --accent-foreground: 210 40% 98%;
-    
     --destructive: 0 63% 46%;
     --destructive-foreground: 210 40% 98%;
-    
     --border: 217 33% 15%;
     --input: 217 33% 15%;
     --ring: 221 83% 53%;
-    --radius: 14px;
+    --radius: 16px;
   }
 }
 
 @layer base {
   * { @apply border-border; }
-  body { 
+
+  body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: var(--font-inter), Inter, system-ui, sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 
-  h1, h2, h3 { @apply font-bold tracking-tight; }
+  h1, h2, h3 {
+    @apply font-bold tracking-tight;
+  }
+
+  button, input, select, textarea {
+    font: inherit;
+  }
 }
 
 @layer components {
   .competition-card {
-    @apply bg-card text-card-foreground shadow-lg border border-white/5 rounded-[var(--radius)] overflow-hidden transition-all duration-200;
+    @apply bg-card text-card-foreground border border-white/[0.06] rounded-2xl overflow-hidden transition-all duration-200;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.18);
   }
 
   .bg-dot-pattern {
-    background-image: radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-image: radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px);
     background-size: 24px 24px;
   }
 
   .cinematic-banner {
-    @apply relative overflow-hidden rounded-[2rem] bg-gradient-to-r from-primary/20 via-background to-accent/20 border border-white/5 shadow-2xl transition-all duration-500 hover:scale-[1.005];
+    @apply relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary/15 via-background to-accent/15 border border-white/[0.07];
+    box-shadow: 0 24px 70px rgba(0,0,0,0.28);
   }
 
   .official-table-row {
-    @apply transition-colors hover:bg-white/5 border-white/5;
+    @apply transition-colors hover:bg-white/[0.035] border-white/5;
+  }
+
+  .section-kicker {
+    @apply text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground/55;
+  }
+
+  .sport-number {
+    font-family: var(--font-bebas), Impact, sans-serif;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
   }
 
   .podium-1 { @apply bg-gradient-to-r from-yellow-500/10 via-yellow-500/5 to-transparent border-l-4 border-l-yellow-500; }
@@ -69,7 +81,7 @@
 }
 
 .score-display {
-  @apply font-extrabold tracking-tighter tabular-nums;
+  @apply font-extrabold tracking-tighter tabular-nums leading-none;
 }
 
 .hover-lift {
@@ -77,5 +89,7 @@
 }
 
 .hover-lift:hover {
-  @apply -translate-y-1 shadow-[0_15px_30px_rgba(0,0,0,0.5)] border-white/10;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.28);
+  border-color: rgba(255,255,255,0.11);
 }
