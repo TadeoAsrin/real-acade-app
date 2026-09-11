@@ -77,7 +77,7 @@ function SeasonExpanded({ seasonId }: { seasonId: string }) {
         </section>
 
         <section className="px-5 py-6 md:col-span-2 md:px-8">
-          <div className="mb-4 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-sky-400"><Snowflake className="h-4 w-4" /> La silla eléctrica</div>
+          <div className="mb-4 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-sky-400"><Snowflake className="h-4 w-4" /> Está fresco por acá</div>
           {coldStories.length > 0 ? (
             <div className="grid gap-5 md:grid-cols-2">
               {coldStories.map(story => (
@@ -87,7 +87,7 @@ function SeasonExpanded({ seasonId }: { seasonId: string }) {
                 </div>
               ))}
             </div>
-          ) : <p className="text-sm text-slate-400">Por ahora nadie hizo méritos suficientes para sentarse acá. Una pena para el espectáculo.</p>}
+          ) : <p className="text-sm text-slate-400">Por ahora no corre tanto frío por acá. Nadie viene lo suficientemente torcido para entrar en esta sección.</p>}
         </section>
       </div>
     </article>
