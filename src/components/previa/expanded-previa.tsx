@@ -30,31 +30,18 @@ function storySentence(story: EditorialStory) {
   return `${story.playerName} llega con ${facts[0]}${facts[1] ? ` y ${facts[1]}` : ''}${facts[2] ? `. Además, ${facts[2]}` : ''}.`;
 }
 
-function badness(story: EditorialStory) {
-  return story.signals.reduce((score, signal) => {
-    if (signal.kind === 'losing-streak') return score + 100 + n(signal, 'streak') * 10;
-    if (signal.kind === 'recent-form') return score + n(signal, 'losses') * 8 - n(signal, 'wins') * 4;
-    return score;
-  }, 0);
-}
-
 function SeasonExpanded({ seasonId }: { seasonId: string }) {
   const firestore = useFirestore();
   const [edition, setEdition] = useState<PublishedPrevia | null>(null);
-  const [draft, setDraft] = useState<{ stories?: EditorialStory[] } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
       try {
-        const [published, internal] = await Promise.all([
-          getDoc(doc(firestore, 'published_previas', seasonId)),
-          getDoc(doc(firestore, 'previa_drafts', seasonId)),
-        ]);
+        const published = await getDoc(doc(firestore, 'published_previas', seasonId));
         if (cancelled || !published.exists()) return;
         const data = published.data() as PublishedPrevia;
         if (data.status === 'published') setEdition(data);
-        if (internal.exists()) setDraft(internal.data() as { stories?: EditorialStory[] });
       } catch (error) {
         console.error('No se pudo cargar La Previa ampliada:', error);
       }
@@ -64,12 +51,7 @@ function SeasonExpanded({ seasonId }: { seasonId: string }) {
   }, [firestore, seasonId]);
 
   if (!edition) return null;
-
-  const publishedIds = new Set([edition.headline.id, ...edition.secondary.map(story => story.id)]);
-  const coldStories = [...(draft?.stories ?? [])]
-    .filter(story => !publishedIds.has(story.id) && badness(story) > 0)
-    .sort((a, b) => badness(b) - badness(a))
-    .slice(0, 2);
+  const coldStories = edition.coldStories ?? [];
 
   return (
     <article className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0d1422]">
