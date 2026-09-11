@@ -3,7 +3,7 @@ import { STORY_KINDS, type StoryCandidate, type StoryEngineResult } from './stor
 import { generatePicante } from './picante-engine';
 import type { ColdFormEntry } from './cold-form';
 
-export const PREVIA_GENERATION_VERSION = 6;
+export const PREVIA_GENERATION_VERSION = 7;
 
 export type EditorialChoice = 'headline' | 'secondary' | 'available' | 'discarded';
 export type EditorialStory = StoryCandidate & { choice: EditorialChoice };
@@ -47,12 +47,14 @@ const storySchema = z.object({
 const coldStorySchema = z.object({
   playerId: text(200),
   playerName: text(200),
-  appearances: z.number().int().min(0).max(5),
+  appearances: z.number().int().nonnegative(),
+  minimumRequired: z.number().int().min(3),
   wins: z.number().int().nonnegative(),
   draws: z.number().int().nonnegative(),
   losses: z.number().int().nonnegative(),
   points: z.number().int().nonnegative(),
   pointsPerGame: z.number().finite().nonnegative(),
+  lossPercentage: z.number().finite().min(0).max(100),
   losingStreak: z.number().int().nonnegative(),
   score: z.number().finite().nonnegative(),
   eligible: z.boolean(),
