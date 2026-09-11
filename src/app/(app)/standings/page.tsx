@@ -15,7 +15,7 @@ import {
   TableRow 
 } from '@/components/ui/table';
 import { Card } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { getInitials, cn } from '@/lib/utils';
 import { 
   Trophy, 
@@ -35,6 +35,24 @@ type SortConfig = {
   key: keyof AggregatedPlayerStats | 'points';
   direction: 'asc' | 'desc';
 };
+
+function StandingPlayerAvatar({ player, leader = false, mobile = false }: { player: AggregatedPlayerStats; leader?: boolean; mobile?: boolean }) {
+  return (
+    <Avatar className={cn(
+      mobile ? 'h-11 w-11' : 'h-12 w-12',
+      'border bg-zinc-950 shadow-inner transition-transform',
+      leader ? 'border-yellow-500' : 'border-primary/45',
+      !mobile && 'group-hover/player:scale-110'
+    )}>
+      <AvatarFallback className={cn(
+        'bg-zinc-950 font-extrabold tabular-nums tracking-[-0.04em] text-primary flex items-center justify-center leading-none pt-[1px]',
+        mobile ? 'text-lg' : 'text-xl'
+      )}>
+        {player.jerseyNumber ?? getInitials(player.name)}
+      </AvatarFallback>
+    </Avatar>
+  );
+}
 
 export default function StandingsPage() {
   const firestore = useFirestore();
@@ -161,15 +179,7 @@ export default function StandingsPage() {
               </div>
 
               <div className="relative">
-                <Avatar className={cn(
-                  "h-11 w-11 border-2",
-                  isLeader ? "border-yellow-500" : "border-white/10"
-                )}>
-                  <AvatarImage src={player.avatar} />
-                  <AvatarFallback className="bg-zinc-900 font-bebas text-base text-primary">
-                    {getInitials(player.name)}
-                  </AvatarFallback>
-                </Avatar>
+                <StandingPlayerAvatar player={player} leader={isLeader} mobile />
                 {isLeader && (
                   <div className="absolute -top-1.5 -right-1.5 bg-yellow-500 text-black p-0.5 rounded-full shadow-lg">
                     <Crown className="h-2.5 w-2.5 fill-current" />
@@ -257,15 +267,7 @@ export default function StandingsPage() {
                     <TableCell>
                       <Link href={`/players/${player.playerId}`} className="flex items-center gap-4 group/player">
                         <div className="relative">
-                          <Avatar className={cn(
-                            "h-12 w-12 border-2 transition-transform group-hover/player:scale-110",
-                            isLeader ? "border-yellow-500" : "border-white/10"
-                          )}>
-                            <AvatarImage src={player.avatar} />
-                            <AvatarFallback className="bg-zinc-900 font-bebas text-lg text-primary">
-                              {getInitials(player.name)}
-                            </AvatarFallback>
-                          </Avatar>
+                          <StandingPlayerAvatar player={player} leader={isLeader} />
                           {isLeader && (
                             <div className="absolute -top-2 -right-2 bg-yellow-500 text-black p-1 rounded-full shadow-lg">
                               <Crown className="h-3 w-3 fill-current" />
