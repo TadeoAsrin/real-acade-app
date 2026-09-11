@@ -12,7 +12,7 @@ npm run build# 🏆 Real Acade - Gestión de Club de Élite
 *   **Versus Mode**: Compara a dos leyendas del club cara a cara con métricas visuales.
 *   **Pizarra Táctica (3-2-1)**: Visualización del último partido con dorsales clásicos (1, 8, 10, 9...) y detección automática de portero por posición (¡con iconos de guantes!).
 *   **Power Ranking & Clasificación**: Tabla de liga oficial (3pts victoria / 1pt empate) y racha de forma de los últimos 5 partidos.
-*   **Crónicas con IA**: Resúmenes automáticos de cada encuentro con estilo periodístico.
+*   **La Previa**: Historias deterministas de temporada, con selección y edición administrativa, borrador privado y publicación explícita. Ver [guía de La Previa](docs/la-previa.md).
 *   **Votación de Mejor Gol**: Sistema de participación para que los jugadores elijan la joya de la jornada.
 
 ## 🛠️ Soporte y Actualizaciones

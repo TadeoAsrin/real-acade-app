@@ -17,6 +17,7 @@ export type PlayerStats = {
   hasBestGoal?: boolean;
 };
 
+/** Legacy persisted data only. La Previa never reads or writes this field. */
 export type MatchAiSummary = {
   title: string;
   subtitle: string;

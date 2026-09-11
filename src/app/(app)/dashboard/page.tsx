@@ -1,13 +1,11 @@
 "use client";
 
 import * as React from 'react';
-import { useSearchParams } from 'next/navigation';
 import { useCollection, useMemoFirebase, useFirestore } from "@/firebase";
 import { collection, query, orderBy, where } from "firebase/firestore";
 import type { Match, Player, AggregatedPlayerStats } from "@/lib/definitions";
 import {
   Loader2,
-  Newspaper,
   Flame,
   Target,
   Star,
@@ -21,13 +19,13 @@ import {
   Trophy,
   Users
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { calculateAggregatedStats, getTopScorerRecord } from "@/lib/data";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getInitials, cn } from "@/lib/utils";
-import { MatchNewsModal } from '@/components/dashboard/match-news-modal';
+import { PublishedPrevia } from '@/components/previa/published-previa';
 import { useSeason } from '@/context/season-context';
 import type { LucideIcon } from 'lucide-react';
 
@@ -120,11 +118,8 @@ function EliteListCard({ title, icon: Icon, players, valueFn, label, colorClass,
 }
 
 function DashboardContent() {
-  const searchParams = useSearchParams();
-  const gacetaMatchId = searchParams.get('gaceta');
   const firestore = useFirestore();
   const { selectedSeasonId, loading: seasonLoading } = useSeason();
-  const [formattedLastMatchDate, setFormattedLastMatchDate] = React.useState<string | null>(null);
 
   const playersQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -149,12 +144,6 @@ function DashboardContent() {
 
   const playedMatches = React.useMemo(() => allMatches.filter(m => m.teamAScore > 0 || m.teamBScore > 0), [allMatches]);
   const lastMatch = playedMatches[0];
-
-  React.useEffect(() => {
-    if (lastMatch?.date) {
-      setFormattedLastMatchDate(new Date(lastMatch.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' }));
-    }
-  }, [lastMatch]);
 
   if (seasonLoading || (playersLoading && !playersData)) {
     return (
@@ -207,14 +196,10 @@ function DashboardContent() {
     .sort((a, b) => b.captaincyPriorityScore - a.captaincyPriorityScore || b.matchesPlayed - a.matchesPlayed)
     .slice(0, 2);
 
-  const forcedMatch = gacetaMatchId ? allMatches.find(m => m.id === gacetaMatchId) : null;
-  const matchForModal = forcedMatch || (lastMatch?.aiSummary ? lastMatch : null);
-
   return (
     <div className="flex flex-col gap-6 md:gap-10 max-w-7xl mx-auto pb-20 p-4 lg:p-8">
       <div className="fixed inset-0 bg-dot-pattern pointer-events-none opacity-20 z-0" />
 
-      {matchForModal && <MatchNewsModal match={matchForModal} allPlayers={allPlayers} forceOpen={!!forcedMatch} />}
 
       <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
         <div className="space-y-2">
@@ -223,62 +208,12 @@ function DashboardContent() {
         </div>
       </div>
 
-      {lastMatch ? (
-        <section className="relative z-10">
-          <div className="cinematic-banner p-5 md:p-12 lg:p-14 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-center">
-            <div className="absolute inset-0 bg-black/30 pointer-events-none" />
-            <div className="lg:col-span-8 space-y-4 md:space-y-6 relative z-10">
-              <div className="flex items-center gap-3">
-                <Badge className="bg-primary text-primary-foreground font-semibold tracking-[0.08em] px-3.5 py-1.5 text-[10px] rounded-lg shadow-lg shadow-primary/15">EDICIÓN ESPECIAL</Badge>
-                {formattedLastMatchDate && (
-                  <span className="text-[9px] font-semibold text-white/40 uppercase tracking-[0.12em]">{formattedLastMatchDate}</span>
-                )}
-              </div>
-              <h1 className="text-3xl md:text-6xl lg:text-7xl font-extrabold text-white tracking-[-0.05em] leading-[0.95] uppercase max-w-3xl">
-                {lastMatch.aiSummary?.title || "CRÓNICA DE LA JORNADA"}
-              </h1>
-              <p className="text-sm md:text-xl text-muted-foreground max-w-2xl leading-relaxed line-clamp-2 md:line-clamp-none">
-                {lastMatch.aiSummary?.subtitle || "Exhibición de fútbol y mística en el último encuentro del club."}
-              </p>
-              <div className="flex flex-wrap gap-2 md:gap-3 pt-2 md:pt-4">
-                <Button asChild size="lg" className="h-11 md:h-12 px-5 md:px-7 text-sm font-semibold tracking-wide bg-white text-black hover:bg-white/90 rounded-xl shadow-lg shadow-black/15">
-                  <Link href={`/dashboard?gaceta=${lastMatch.id}`} className="flex items-center gap-2">
-                    <Newspaper className="h-5 w-5" /> LEER EL DIARIO
-                  </Link>
-                </Button>
-                <Button asChild variant="outline" size="lg" className="border-white/10 bg-white/[0.02] hover:bg-white/[0.06] font-semibold uppercase px-5 md:px-7 h-11 md:h-12 text-[10px] md:text-xs rounded-xl text-white">
-                  <Link href={`/matches/${lastMatch.id}`} className="flex items-center gap-2">
-                    <FileText className="h-4 w-4" /> FICHA TÉCNICA
-                  </Link>
-                </Button>
-              </div>
-            </div>
+      <PublishedPrevia />
 
-            <div className="lg:col-span-4 flex justify-center lg:justify-end relative z-10">
-              <div className="bg-black/45 backdrop-blur-xl p-5 md:p-8 rounded-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.28)] text-center space-y-3 md:space-y-5 min-w-[220px] md:min-w-[280px]">
-                <p className="text-[9px] font-semibold uppercase text-white/40 tracking-[0.14em]">RESULTADO FINAL</p>
-                <div className="flex items-center justify-center gap-6 md:gap-8">
-                  <div className="flex flex-col items-center">
-                    <span className="sport-number text-5xl md:text-7xl text-primary drop-shadow-[0_0_18px_rgba(59,130,246,0.35)]">{lastMatch.teamAScore}</span>
-                    <span className="text-[9px] font-semibold text-primary uppercase mt-2 tracking-[0.1em]">AZUL</span>
-                  </div>
-                  <div className="h-12 md:h-16 w-px bg-white/10" />
-                  <div className="flex flex-col items-center">
-                    <span className="sport-number text-5xl md:text-7xl text-accent drop-shadow-[0_0_18px_rgba(244,63,94,0.3)]">{lastMatch.teamBScore}</span>
-                    <span className="text-[9px] font-semibold text-accent uppercase mt-2 tracking-[0.1em]">ROJO</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      ) : (
-        <section className="bg-white/[0.03] border border-dashed border-white/10 rounded-3xl p-10 md:p-20 text-center space-y-4">
-          <Trophy className="h-12 w-12 md:h-16 md:w-16 text-muted-foreground/20 mx-auto" />
-          <h3 className="text-2xl md:text-3xl font-bold uppercase tracking-tight text-muted-foreground/40">Sin Partidos en esta Temporada</h3>
-          <p className="text-[10px] md:text-xs font-medium uppercase text-muted-foreground/30 tracking-[0.1em]">Selecciona otra temporada o espera a que el Admin registre la primera batalla.</p>
-        </section>
-      )}
+      {lastMatch && <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-[#111827] p-5">
+        <p className="text-sm text-muted-foreground">Último resultado · <span className="font-bold text-primary">Azul {lastMatch.teamAScore}</span> — <span className="font-bold text-accent">Rojo {lastMatch.teamBScore}</span></p>
+        <Button asChild variant="outline"><Link href={`/matches/${lastMatch.id}`}><FileText className="mr-2 h-4 w-4" />Ficha técnica</Link></Button>
+      </div>}
 
       {playedMatches.length > 0 && (
         <>

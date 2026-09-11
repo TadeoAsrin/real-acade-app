@@ -60,7 +60,7 @@ export default function GalleryPage() {
               seasonId: match.seasonId,
               type: 'image',
               url: photoUrl,
-              description: match.aiSummary?.title || `Momento del partido del ${format(parseISO(match.date), 'dd/MM')}`,
+              description: `Momento del partido del ${format(parseISO(match.date), 'dd/MM')}`,
               date: match.date,
               matchId: match.id
             } as GalleryItem);
@@ -141,7 +141,7 @@ export default function GalleryPage() {
                       href={`/matches/${item.matchId}`} 
                       className="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-primary hover:text-white transition-colors pt-2 border-t border-white/5 w-full"
                     >
-                      VER CRÓNICA COMPLETA <ChevronRight className="h-3 w-3" />
+                      VER FICHA DEL PARTIDO <ChevronRight className="h-3 w-3" />
                     </Link>
                   )}
                </div>

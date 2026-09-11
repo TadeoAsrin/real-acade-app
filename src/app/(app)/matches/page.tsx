@@ -85,7 +85,7 @@ export default function MatchesPage() {
                       {format(parseISO(match.date), "dd MMM yyyy", { locale: es })}
                     </div>
                     <p className="mt-2 truncate text-[10px] font-bold italic text-white/60">
-                      {match.aiSummary?.title || 'Partido oficial'}
+                      {match.venue || 'Partido oficial'}
                     </p>
                   </div>
 
@@ -125,9 +125,9 @@ export default function MatchesPage() {
                 </div>
                 <div className="bg-white/5 md:w-48 p-6 flex flex-col justify-center gap-4 border-l border-white/5">
                   <div className="space-y-1">
-                    <p className="text-[8px] font-black uppercase text-muted-foreground tracking-widest">CRÓNICA IA</p>
+                    <p className="text-[8px] font-black uppercase text-muted-foreground tracking-widest">PARTIDO OFICIAL</p>
                     <p className="text-[10px] font-bold italic line-clamp-2 text-white/80">
-                      {match.aiSummary?.title || "En redacción..."}
+                      {match.venue || "Ver resultado y jugadores"}
                     </p>
                   </div>
                   <Button variant="ghost" size="sm" className="w-full justify-between text-[10px] font-black uppercase tracking-widest hover:bg-white/10">

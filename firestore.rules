@@ -30,6 +30,30 @@ service cloud.firestore {
     match /gallery/{document=**}      { allow read: if true; allow write: if isAdmin(); }
     match /roles_admin/{document=**}  { allow read: if isAdmin(); allow write: if false; }
 
+    // La Previa: drafts are private; only published snapshots are public.
+    match /previa_drafts/{seasonId} {
+      allow read: if isAdmin();
+      allow create, update: if isAdmin()
+        && request.resource.data.seasonId == seasonId
+        && request.resource.data.status in ['draft', 'published']
+        && request.resource.data.revision is int
+        && request.resource.data.stories is list
+        && request.resource.data.picante is string;
+      allow delete: if isAdmin();
+    }
+    match /published_previas/{seasonId} {
+      allow read: if true;
+      allow create, update: if isAdmin()
+        && request.resource.data.seasonId == seasonId
+        && request.resource.data.status == 'published'
+        && request.resource.data.revision is int
+        && request.resource.data.headline is map
+        && request.resource.data.secondary is list
+        && request.resource.data.secondary.size() <= 3
+        && request.resource.data.picante is string;
+      allow delete: if isAdmin();
+    }
+
     // Votación de Goles (Público puede leer, solo dueños pueden escribir)
     match /matches/{matchId}/votes/{userId} {
       allow read: if true;

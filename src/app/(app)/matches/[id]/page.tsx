@@ -7,7 +7,6 @@ import { useParams, useRouter } from 'next/navigation';
 import type { Match, Player } from '@/lib/definitions';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { MatchAiSummary } from '@/components/matches/match-ai-summary';
 import { BestGoalVote } from '@/components/matches/best-goal-vote';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -86,30 +85,12 @@ export default function MatchDetailPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
-        <p className="font-bebas text-xl tracking-widest text-muted-foreground uppercase">Abriendo crónica oficial...</p>
+        <p className="font-bebas text-xl tracking-widest text-muted-foreground uppercase">Abriendo ficha del partido...</p>
       </div>
     );
   }
 
   if (!match) return <div className="p-8 text-center text-muted-foreground uppercase font-black">Partido no encontrado</div>;
-
-  const matchDataForAi = {
-    date: match.date,
-    teamAScore: match.teamAScore,
-    teamBScore: match.teamBScore,
-    teamAPlayers: (match.teamAPlayers || []).map(p => ({
-      name: players?.find(pl => pl.id === p.playerId)?.name || 'N/A',
-      goals: p.goals
-    })),
-    teamBPlayers: (match.teamBPlayers || []).map(p => ({
-      name: players?.find(pl => pl.id === p.playerId)?.name || 'N/A',
-      goals: p.goals
-    })),
-    mvpName: players?.find(pl => 
-      pl.id === match.teamAPlayers?.find(s => s.isMvp)?.playerId || 
-      pl.id === match.teamBPlayers?.find(s => s.isMvp)?.playerId
-    )?.name,
-  };
 
   const goalScorers = [
     ...(match.teamAPlayers || []).filter(p => p.goals > 0),
@@ -164,7 +145,6 @@ export default function MatchDetailPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
-           <MatchAiSummary matchId={match.id} matchData={matchDataForAi} />
            
            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <Card className="competition-card border-primary/10">

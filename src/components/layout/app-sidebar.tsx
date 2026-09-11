@@ -11,7 +11,7 @@ import {
   SidebarContent,
   useSidebar,
 } from "../ui/sidebar";
-import { Goal, BarChart3, Users, LogOut, Trophy, Dices, ArrowLeftRight, Swords, Image as ImageIcon, ShieldCheck, LogIn } from "lucide-react";
+import { Newspaper, Goal, BarChart3, Users, LogOut, Trophy, Dices, ArrowLeftRight, Swords, Image as ImageIcon, ShieldCheck, LogIn } from "lucide-react";
 import Link from "next/link";
 import { useAuth, useUser, useFirestore, useMemoFirebase, useDoc, useCollection } from "@/firebase";
 import { signOut } from "firebase/auth";
@@ -24,6 +24,7 @@ import { Fut7StatsLogo } from "@/components/icons";
 import { SeasonSelector } from "@/components/layout/season-selector";
 
 const menuItems = [
+  { href: "/previa", label: "LA PREVIA", icon: Newspaper },
   { href: "/dashboard", label: "PANEL DE CONTROL", icon: BarChart3 },
   { href: "/standings", label: "CLASIFICACIÓN", icon: Trophy },
   { href: "/matches", label: "PARTIDOS", icon: Goal },
@@ -33,6 +34,7 @@ const menuItems = [
 ];
 
 const tacticalItems = [
+  { href: "/admin/previa", label: "EDITAR LA PREVIA", icon: Newspaper },
   { href: "/hierarchy", label: "ORDEN DE MANDO", icon: ShieldCheck },
   { href: "/admin/management", label: "GESTIÓN DE CLUB", icon: ShieldCheck },
   { href: "/drafts/new", label: "PAN Y QUESO", icon: Swords },
