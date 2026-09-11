@@ -5,7 +5,7 @@ import { collection, doc, getDoc, getDocs, orderBy, query } from 'firebase/fires
 import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { useSeason } from '@/context/season-context';
 import type { Match, Player } from '@/lib/definitions';
-import type { PreviaDraft } from '@/lib/previa/edition';
+import { PREVIA_GENERATION_VERSION, type PreviaDraft } from '@/lib/previa/edition';
 import { regenerateAndPublishPrevia } from '@/lib/previa/repository';
 
 const sameIds = (a: string[], b: string[]) =>
@@ -79,11 +79,11 @@ export function AutoPreviaPublisher() {
           if (!sourceMatchIds.length) continue;
 
           const draftSnapshot = await getDoc(doc(firestore, 'previa_drafts', season.id));
-          const currentIds = draftSnapshot.exists()
-            ? ((draftSnapshot.data() as PreviaDraft).sourceMatchIds ?? [])
-            : [];
+          const currentDraft = draftSnapshot.exists() ? draftSnapshot.data() as PreviaDraft : null;
+          const currentIds = currentDraft?.sourceMatchIds ?? [];
+          const isCurrentEngine = currentDraft?.generationVersion === PREVIA_GENERATION_VERSION;
 
-          if (sameIds(sourceMatchIds, currentIds)) continue;
+          if (isCurrentEngine && sameIds(sourceMatchIds, currentIds)) continue;
 
           await regenerateAndPublishPrevia(firestore, players, matches, season);
         }
