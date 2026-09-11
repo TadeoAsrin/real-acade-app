@@ -16,7 +16,23 @@ function firstPunch(body: string) {
   return parts.slice(0, 2).join(' · ').replace(/\.\s*·/g, ' ·').replace(/\.$/, '');
 }
 
+/**
+ * The headline already spends the strongest fact in its title. Its subtitle
+ * must earn its place with a different signal instead of translating the same
+ * stat ("6 al hilo" -> "6 consecutivas"). Secondary stories keep both facts
+ * because their title is not rendered in the compact list.
+ */
+function headlineSupport(edition: PublishedPrevia): string {
+  const supportingSignals = edition.headline.signals.slice(1);
+  if (supportingSignals.length) {
+    return firstPunch(supportingSignals.slice(0, 2).map(signal => signal.body).join(' '));
+  }
+  return '';
+}
+
 export function EditionView({ edition }: { edition: PublishedPrevia }) {
+  const support = headlineSupport(edition);
+
   return (
     <article aria-label="La Previa publicada" className="relative z-10 overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0d1422]">
       <div className="flex items-center justify-between gap-3 border-b border-white/[0.07] px-5 py-3">
@@ -31,7 +47,7 @@ export function EditionView({ edition }: { edition: PublishedPrevia }) {
         <section className="px-5 py-5 md:px-7">
           <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-orange-400">🔥 Historia de la fecha</p>
           <h2 className="text-2xl font-black uppercase leading-none tracking-tight text-white md:text-3xl">{edition.headline.title}</h2>
-          <p className="mt-3 text-base font-bold leading-snug text-slate-300">{firstPunch(edition.headline.body)}</p>
+          {support && <p className="mt-3 text-base font-bold leading-snug text-slate-300">{support}</p>}
         </section>
 
         <section className="border-t border-white/[0.07] bg-white/[0.018] px-5 py-5 lg:border-l lg:border-t-0">
