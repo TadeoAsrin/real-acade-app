@@ -11,13 +11,13 @@ import {
   Star,
   Skull,
   Droplets,
-  FileText,
   ShieldCheck,
   Brain,
   ArrowRight,
   Crown,
   Trophy,
-  Users
+  Users,
+  CalendarDays
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -200,7 +200,6 @@ function DashboardContent() {
     <div className="flex flex-col gap-6 md:gap-10 max-w-7xl mx-auto pb-20 p-4 lg:p-8">
       <div className="fixed inset-0 bg-dot-pattern pointer-events-none opacity-20 z-0" />
 
-
       <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
         <div className="space-y-2">
           <h2 className="text-3xl md:text-4xl lg:text-6xl font-extrabold uppercase tracking-[-0.045em] text-white leading-none">REAL ACADE</h2>
@@ -210,10 +209,40 @@ function DashboardContent() {
 
       <PublishedPrevia />
 
-      {lastMatch && <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-[#111827] p-5">
-        <p className="text-sm text-muted-foreground">Último resultado · <span className="font-bold text-primary">Azul {lastMatch.teamAScore}</span> — <span className="font-bold text-accent">Rojo {lastMatch.teamBScore}</span></p>
-        <Button asChild variant="outline"><Link href={`/matches/${lastMatch.id}`}><FileText className="mr-2 h-4 w-4" />Ficha técnica</Link></Button>
-      </div>}
+      {lastMatch && (
+        <section className="relative z-10 overflow-hidden rounded-2xl border border-white/[0.08] bg-[#111827]">
+          <div className="flex flex-col gap-5 px-5 py-5 md:flex-row md:items-center md:justify-between md:px-7">
+            <div className="min-w-0">
+              <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+                <span className="text-white/55">Último partido</span>
+                {lastMatch.matchNumber && <><span className="text-white/20">·</span><span>Fecha {lastMatch.matchNumber}</span></>}
+                <span className="text-white/20">·</span>
+                <span className="flex items-center gap-1.5"><CalendarDays className="h-3 w-3" />{new Date(lastMatch.date).toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Cordoba' })}</span>
+              </div>
+
+              <div className="flex items-center gap-3 md:gap-5">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-xs font-black uppercase tracking-[0.14em] text-blue-400">Azul</span>
+                  <span className="text-3xl font-black tabular-nums text-blue-400 md:text-4xl">{lastMatch.teamAScore}</span>
+                </div>
+                <span className="text-xl font-light text-white/20">—</span>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-black tabular-nums text-red-400 md:text-4xl">{lastMatch.teamBScore}</span>
+                  <span className="text-xs font-black uppercase tracking-[0.14em] text-red-400">Rojo</span>
+                </div>
+              </div>
+
+              <p className="mt-2 text-xs font-semibold text-slate-400">
+                {lastMatch.teamAScore === lastMatch.teamBScore ? 'Partido terminado en empate' : `Ganó ${lastMatch.teamAScore > lastMatch.teamBScore ? 'Azul' : 'Rojo'}`}
+              </p>
+            </div>
+
+            <Button asChild variant="ghost" className="h-9 self-start border border-white/[0.08] bg-white/[0.025] px-3 text-xs font-semibold text-slate-300 hover:bg-white/[0.06] hover:text-white md:self-center">
+              <Link href={`/matches/${lastMatch.id}`}>Ver partido <ArrowRight className="ml-2 h-3.5 w-3.5" /></Link>
+            </Button>
+          </div>
+        </section>
+      )}
 
       {playedMatches.length > 0 && (
         <>
