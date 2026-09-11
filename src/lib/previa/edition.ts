@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { STORY_KINDS, type StoryCandidate, type StoryEngineResult } from './story-engine';
 import { generatePicante } from './picante-engine';
 
-export const PREVIA_GENERATION_VERSION = 2;
+export const PREVIA_GENERATION_VERSION = 3;
 
 export type EditorialChoice = 'headline' | 'secondary' | 'available' | 'discarded';
 export type EditorialStory = StoryCandidate & { choice: EditorialChoice };
