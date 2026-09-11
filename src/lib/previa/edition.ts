@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { STORY_KINDS, type StoryCandidate, type StoryEngineResult } from './story-engine';
+import { generatePicante } from './picante-engine';
 
 export type EditorialChoice = 'headline' | 'secondary' | 'available' | 'discarded';
 export type EditorialStory = StoryCandidate & { choice: EditorialChoice };
@@ -55,7 +56,7 @@ export function createDraft(result: StoryEngineResult, seasonName: string, now: 
     seasonId: result.seasonId, seasonName, status: 'draft', revision, generatedAt: now, updatedAt: now,
     sourceMatchIds: [...result.sourceMatchIds], minimumEligibleMatches: result.minimumEligibleMatches,
     stories: result.candidates.map(s => ({ ...s, choice: s.id === result.headlineId ? 'headline' : result.secondaryIds.includes(s.id) ? 'secondary' : 'available' })),
-    picante: '',
+    picante: generatePicante(result),
   };
 }
 export function chooseStory(draft: PreviaDraft, id: string, choice: EditorialChoice): PreviaDraft {
