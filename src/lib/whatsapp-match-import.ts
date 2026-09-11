@@ -31,11 +31,29 @@ export type PlayerResolution = {
 const INVISIBLE = /[\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF]/g;
 const VARIATION_SELECTORS = /[\uFE0E\uFE0F]/g;
 
-// Real Acade can use different visual markers for pan-y-queso without forcing
-// everyone to type the same emoji every week. Keep this list explicit: color is
-// not a reliable Unicode property, so unknown symbols are never guessed.
-const DEFAULT_BLUE_MARKERS = ['🔵', '💙', '🟦'];
-const DEFAULT_RED_MARKERS = ['🔴', '❤️', '❤', '🟥', '🔺'];
+// Curated, high-confidence Unicode markers that read visually as blue/red.
+// We deliberately avoid flags, people, vehicles and objects whose rendered
+// colour can vary by platform. Unknown symbols can still be learned from the
+// explicit "Azul ... - Rojo ..." score line in each WhatsApp message.
+const DEFAULT_BLUE_MARKERS = [
+  '🔵', // blue circle
+  '💙', // blue heart
+  '🟦', // blue square
+  '🔷', // large blue diamond
+  '🔹', // small blue diamond
+  '💠', // diamond with a dot
+];
+
+const DEFAULT_RED_MARKERS = [
+  '🔴', // red circle
+  '❤️', '❤', // red heart (emoji/text variants)
+  '🟥', // red square
+  '🔺', // red triangle up
+  '🔻', // red triangle down
+  '♦️', '♦', // diamond suit
+  '❣️', '❣', // heart exclamation
+  '♥️', '♥', // heart suit
+];
 
 function normalizeMarker(value: string): string {
   return value.replace(VARIATION_SELECTORS, '').trim();
