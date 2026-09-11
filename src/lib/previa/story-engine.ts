@@ -25,7 +25,7 @@ export const DEFAULT_STORY_RULES: StoryRules = {
   recencyBonus: 10,
   supportingBonus: 4,
   supportingCap: 12,
-  secondaryCount: 3,
+  secondaryCount: 2,
 };
 export type StorySignal = {
   kind: StoryKind;
@@ -60,7 +60,6 @@ export function percentageEligibility(seasonMatches: number): number {
   return Math.max(3, Math.ceil(seasonMatches * 0.4));
 }
 const compareId = (a: string, b: string) => a < b ? -1 : a > b ? 1 : 0;
-// Identical sporting criteria to the default standings: points, efficiency, goal difference.
 const compareStanding = (a: AggregatedPlayerStats, b: AggregatedPlayerStats) =>
   (b.wins * 3 + b.draws) - (a.wins * 3 + a.draws) || b.efficiency - a.efficiency || b.goalDifference - a.goalDifference;
 function positions(stats: AggregatedPlayerStats[]) {
@@ -116,7 +115,7 @@ export function generateStories(players: Player[], matches: Match[], seasonId: s
       const winning = latest.result === 'W';
       add(winning ? 'winning-streak' : 'losing-streak', streak,
         `${p.name}: ${streak} ${winning ? 'victorias' : 'derrotas'} al hilo`,
-        `Acumula ${streak} ${winning ? 'victorias' : 'derrotas'} consecutivas en sus participaciones de esta temporada.`,
+        `${streak} ${winning ? 'victorias' : 'derrotas'} consecutivas.`,
         { streak }, appearances.slice(-streak).map(a => a.match.id));
     }
     const wins = recent.filter(a => a.result === 'W').length;
@@ -124,42 +123,45 @@ export function generateStories(players: Player[], matches: Match[], seasonId: s
     const losses = recent.length - wins - draws;
     if (recent.length >= 3 && (wins >= 3 || losses >= 3 || losses === 0)) {
       add('recent-form', Math.max(wins, losses, draws), `${p.name}: ${losses === 0 ? 'presente invicto' : wins >= 3 ? 'buen presente' : 'busca recuperarse'}`,
-        `En las últimas cinco fechas jugadas participó ${recent.length} veces: ${wins} victorias, ${draws} empates y ${losses} derrotas.`,
+        `${wins}G · ${draws}E · ${losses}P en sus últimas ${recent.length}.`,
         { appearances: recent.length, wins, draws, losses }, recent.map(a => a.match.id));
     }
     const goals = recent.reduce((sum, a) => sum + a.entry.goals, 0);
     if (goals >= 3) add('recent-goals', goals, `${p.name} llega con ${goals} goles recientes`,
-      `Marcó ${goals} goles en ${recent.length} participaciones dentro de las últimas cinco fechas jugadas.`,
+      `${goals} goles en sus últimas ${recent.length} apariciones.`,
       { goals, appearances: recent.length }, recent.map(a => a.match.id));
-    // Match the existing statistics engine's legacy MVP flag compatibility.
     const mvps = recent.filter(a => a.entry.isMvp === true || String(a.entry.isMvp) === 'true' || Number(a.entry.isMvp) === 1);
-    if (mvps.length >= 2) add('mvp-form', mvps.length, `${p.name}, ${mvps.length} veces MVP en las últimas cinco fechas`,
-      `Recibió ${mvps.length} premios MVP en sus ${recent.length} participaciones de ese período.`,
+    if (mvps.length >= 2) add('mvp-form', mvps.length, `${p.name}, ${mvps.length} veces MVP`,
+      `${mvps.length} MVP en sus últimas ${recent.length} apariciones.`,
       { mvps: mvps.length, appearances: recent.length }, mvps.map(a => a.match.id));
     const rank = currentPositions.get(p.playerId)!;
-    if (rank <= 3) add('ranking-position', 4 - rank, `${p.name} ocupa el puesto ${rank} de la clasificación`,
-      `Está en el puesto ${rank} con ${p.wins * 3 + p.draws} puntos; los empates completos comparten posición.`,
+    if (rank <= 3) add('ranking-position', 4 - rank, `${p.name} está #${rank}`,
+      `Puesto ${rank} · ${p.wins * 3 + p.draws} puntos.`,
       { rank, points: p.wins * 3 + p.draws }, played.map(m => m.id));
     const previous = previousPositions.get(p.playerId);
     if (previous !== undefined && previous !== rank) {
       const movement = previous - rank;
       add('ranking-movement', Math.abs(movement), `${p.name} ${movement > 0 ? 'sube' : 'baja'} ${Math.abs(movement)} ${Math.abs(movement) === 1 ? 'puesto' : 'puestos'}`,
-        `Tras la última fecha pasó del puesto ${previous} al ${rank} de la clasificación.`,
+        `Del #${previous} al #${rank} tras la última fecha.`,
         { previousRank: previous, rank, movement }, played.slice(-1).map(m => m.id));
     }
     if (p.matchesPlayed >= minimumEligibleMatches && p.winPercentage >= 60) {
-      add('win-rate', p.winPercentage, `${p.name} gana el ${p.winPercentage}% de sus partidos`,
-        `Suma ${p.wins} victorias en ${p.matchesPlayed} partidos de temporada. El mínimo para esta comparación es ${minimumEligibleMatches} participaciones.`,
+      add('win-rate', p.winPercentage, `${p.name}: ${p.winPercentage}% de victorias`,
+        `${p.wins} triunfos en ${p.matchesPlayed} partidos.`,
         { wins: p.wins, appearances: p.matchesPlayed, winPercentage: p.winPercentage, minimumEligibleMatches }, appearances.map(a => a.match.id));
     }
     if (!signals.length) continue;
     signals.sort((a, b) => b.score - a.score || compareId(a.kind, b.kind));
-    // One candidate per player and edition context; preserve all evidence for editorial review.
     const lead = signals[0];
     const context = played.at(-1)!.id;
+    // Supporting signals still improve StoryScore, but the public copy only exposes
+    // the lead plus the single strongest complementary fact. This keeps La Previa
+    // editorial instead of turning each story into a statistics report.
+    const support = signals.slice(1).find(signal => signal.kind !== lead.kind);
+    const body = [lead.body, support?.body].filter(Boolean).join(' ');
     candidates.push({
       id: `${seasonId}:${context}:${p.playerId}`, seasonId, playerId: p.playerId, playerName: p.name, context,
-      title: lead.title, body: signals.map(s => s.body).join(' '), signals,
+      title: lead.title, body, signals,
       score: Math.round((lead.score + Math.min(rules.supportingCap, (signals.length - 1) * rules.supportingBonus)) * 100) / 100,
     });
   }
