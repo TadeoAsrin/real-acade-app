@@ -16,18 +16,37 @@ function firstPunch(body: string) {
   return parts.slice(0, 2).join(' · ').replace(/\.\s*·/g, ' ·').replace(/\.$/, '');
 }
 
-/**
- * The headline already spends the strongest fact in its title. Its subtitle
- * must earn its place with a different signal instead of translating the same
- * stat ("6 al hilo" -> "6 consecutivas"). Secondary stories keep both facts
- * because their title is not rendered in the compact list.
- */
 function headlineSupport(edition: PublishedPrevia): string {
   const supportingSignals = edition.headline.signals.slice(1);
   if (supportingSignals.length) {
     return firstPunch(supportingSignals.slice(0, 2).map(signal => signal.body).join(' '));
   }
   return '';
+}
+
+function HeadlineTitle({ playerName, title }: { playerName: string; title: string }) {
+  const prefix = `${playerName}:`;
+  if (!title.toLocaleLowerCase('es-AR').startsWith(prefix.toLocaleLowerCase('es-AR'))) {
+    return <>{title}</>;
+  }
+  return (
+    <>
+      <span className="text-primary">{title.slice(0, prefix.length)}</span>
+      {title.slice(prefix.length)}
+    </>
+  );
+}
+
+function PicanteCopy({ playerName, text }: { playerName: string; text: string }) {
+  const index = text.toLocaleLowerCase('es-AR').indexOf(playerName.toLocaleLowerCase('es-AR'));
+  if (index < 0) return <>{text}</>;
+  return (
+    <>
+      {text.slice(0, index)}
+      <span className="font-bold text-primary">{text.slice(index, index + playerName.length)}</span>
+      {text.slice(index + playerName.length)}
+    </>
+  );
 }
 
 export function EditionView({ edition }: { edition: PublishedPrevia }) {
@@ -46,7 +65,9 @@ export function EditionView({ edition }: { edition: PublishedPrevia }) {
       <div className="grid gap-0 lg:grid-cols-[1.45fr_1fr]">
         <section className="px-5 py-5 md:px-7">
           <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-orange-400">🔥 Historia de la fecha</p>
-          <h2 className="text-2xl font-black uppercase leading-none tracking-tight text-white md:text-3xl">{edition.headline.title}</h2>
+          <h2 className="text-2xl font-black uppercase leading-none tracking-tight text-white md:text-3xl">
+            <HeadlineTitle playerName={edition.headline.playerName} title={edition.headline.title} />
+          </h2>
           {support && <p className="mt-3 text-base font-bold leading-snug text-slate-300">{support}</p>}
         </section>
 
@@ -56,7 +77,7 @@ export function EditionView({ edition }: { edition: PublishedPrevia }) {
             {edition.secondary.slice(0, 2).map(story => (
               <div key={story.id} className="flex items-start gap-2">
                 <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                <p className="text-sm font-semibold leading-snug text-slate-200"><span className="text-white">{story.playerName}</span> · {firstPunch(story.body)}</p>
+                <p className="text-sm font-semibold leading-snug text-slate-200"><span className="font-bold text-primary">{story.playerName}</span> · {firstPunch(story.body)}</p>
               </div>
             ))}
           </div>
@@ -68,7 +89,7 @@ export function EditionView({ edition }: { edition: PublishedPrevia }) {
           <Flame className="mt-0.5 h-4 w-4 shrink-0 text-red-400" />
           <div className="min-w-0">
             <span className="mr-2 text-[10px] font-black uppercase tracking-[0.16em] text-red-400">🌶️ Picante</span>
-            <span className="text-sm font-semibold text-slate-200">{edition.picante}</span>
+            <span className="text-sm font-semibold text-slate-200"><PicanteCopy playerName={edition.headline.playerName} text={edition.picante} /></span>
           </div>
         </aside>
       )}
