@@ -81,9 +81,12 @@ function SeasonExpanded({ seasonId }: { seasonId: string }) {
           {coldStories.length > 0 ? (
             <div className="grid gap-5 md:grid-cols-2">
               {coldStories.map(story => (
-                <div key={story.id} className="rounded-xl border border-sky-400/10 bg-sky-400/[0.025] p-4">
+                <div key={story.playerId} className="rounded-xl border border-sky-400/10 bg-sky-400/[0.025] p-4">
                   <h2 className="text-lg font-black uppercase text-white"><span className="text-sky-400">{story.playerName}</span> necesita reaccionar</h2>
-                  <p className="mt-2 text-sm leading-7 text-slate-300">{storySentence(story)} La próxima fecha es una buena oportunidad para cortar la malaria antes de que la racha empiece a pesar de verdad.</p>
+                  <p className="mt-2 text-sm leading-7 text-slate-300">
+                    {story.playerName} sumó {story.points} {story.points === 1 ? 'punto' : 'puntos'} en sus últimas {story.appearances} apariciones, con {story.losses} {story.losses === 1 ? 'derrota' : 'derrotas'}.
+                    {story.losingStreak >= 2 ? ` Además, arrastra ${story.losingStreak} derrotas consecutivas.` : ''} La próxima fecha es una buena oportunidad para cortar la malaria.
+                  </p>
                 </div>
               ))}
             </div>
