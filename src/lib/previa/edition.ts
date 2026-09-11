@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { STORY_KINDS, type StoryCandidate, type StoryEngineResult } from './story-engine';
+import { STORY_KINDS, type StoryCandidate, type StoryEngineResult, type StorySignal } from './story-engine';
 import { generatePicante } from './picante-engine';
 
-export const PREVIA_GENERATION_VERSION = 4;
+export const PREVIA_GENERATION_VERSION = 5;
 
 export type EditorialChoice = 'headline' | 'secondary' | 'available' | 'discarded';
 export type EditorialStory = StoryCandidate & { choice: EditorialChoice };
@@ -28,6 +28,7 @@ export type PublishedPrevia = {
   publishedAt: string;
   headline: EditorialStory;
   secondary: EditorialStory[];
+  coldStories?: EditorialStory[];
   picante: string;
 };
 const text = (max: number) => z.string().trim().min(1).max(max);
@@ -72,6 +73,16 @@ export function chooseStory(draft: PreviaDraft, id: string, choice: EditorialCho
     stories: draft.stories.map(s => s.id === id ? { ...s, choice } : choice === 'headline' && s.choice === 'headline' ? { ...s, choice: 'available' } : s),
   };
 }
+
+const signalNumber = (signal: StorySignal, key: string) => Number(signal.facts[key] ?? 0);
+function badness(story: EditorialStory) {
+  return story.signals.reduce((score, signal) => {
+    if (signal.kind === 'losing-streak') return score + 100 + signalNumber(signal, 'streak') * 10;
+    if (signal.kind === 'recent-form') return score + signalNumber(signal, 'losses') * 8 - signalNumber(signal, 'wins') * 4;
+    return score;
+  }, 0);
+}
+
 export function prepareEdition(draft: PreviaDraft, expectedRevision: number, currentRevision: number, action: 'save' | 'publish', now: string) {
   if (expectedRevision !== currentRevision) throw new Error('Otra sesión actualizó esta edición. Recargá el borrador antes de guardar.');
   const validated = draftSchema.parse(draft);
@@ -84,9 +95,15 @@ export function prepareEdition(draft: PreviaDraft, expectedRevision: number, cur
   if (action === 'save') return { draft: saved, published: null };
   const headline = saved.stories.find(s => s.choice === 'headline');
   if (!headline) throw new Error('Seleccioná un titular antes de publicar.');
+  const secondary = saved.stories.filter(s => s.choice === 'secondary');
+  const publishedIds = new Set([headline.id, ...secondary.map(story => story.id)]);
+  const coldStories = saved.stories
+    .filter(story => !publishedIds.has(story.id) && badness(story) > 0)
+    .sort((a, b) => badness(b) - badness(a))
+    .slice(0, 2);
   const published: PublishedPrevia = {
     seasonId: saved.seasonId, seasonName: saved.seasonName, status: 'published', revision: saved.revision, publishedAt: now,
-    headline, secondary: saved.stories.filter(s => s.choice === 'secondary'), picante: saved.picante,
+    headline, secondary, coldStories, picante: saved.picante,
   };
   return { draft: saved, published };
 }
