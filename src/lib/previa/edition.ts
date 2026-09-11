@@ -2,6 +2,8 @@ import { z } from 'zod';
 import { STORY_KINDS, type StoryCandidate, type StoryEngineResult } from './story-engine';
 import { generatePicante } from './picante-engine';
 
+export const PREVIA_GENERATION_VERSION = 2;
+
 export type EditorialChoice = 'headline' | 'secondary' | 'available' | 'discarded';
 export type EditorialStory = StoryCandidate & { choice: EditorialChoice };
 export type PreviaDraft = {
@@ -9,6 +11,7 @@ export type PreviaDraft = {
   seasonName: string;
   status: 'draft' | 'published';
   revision: number;
+  generationVersion?: number;
   generatedAt: string;
   updatedAt: string;
   sourceMatchIds: string[];
@@ -38,7 +41,8 @@ const storySchema = z.object({
 });
 const draftSchema = z.object({
   seasonId: text(200), seasonName: text(200), status: z.enum(['draft', 'published']),
-  revision: z.number().int().nonnegative(), generatedAt: z.string().datetime(), updatedAt: z.string().datetime(),
+  revision: z.number().int().nonnegative(), generationVersion: z.number().int().positive().optional(),
+  generatedAt: z.string().datetime(), updatedAt: z.string().datetime(),
   sourceMatchIds: z.array(z.string()), minimumEligibleMatches: z.number().int().min(3),
   stories: z.array(storySchema).max(300), picante: z.string().trim().max(600),
 });
@@ -53,7 +57,8 @@ export function validateDraft(draft: PreviaDraft): PreviaDraft {
 }
 export function createDraft(result: StoryEngineResult, seasonName: string, now: string, revision = 0): PreviaDraft {
   return {
-    seasonId: result.seasonId, seasonName, status: 'draft', revision, generatedAt: now, updatedAt: now,
+    seasonId: result.seasonId, seasonName, status: 'draft', revision, generationVersion: PREVIA_GENERATION_VERSION,
+    generatedAt: now, updatedAt: now,
     sourceMatchIds: [...result.sourceMatchIds], minimumEligibleMatches: result.minimumEligibleMatches,
     stories: result.candidates.map(s => ({ ...s, choice: s.id === result.headlineId ? 'headline' : result.secondaryIds.includes(s.id) ? 'secondary' : 'available' })),
     picante: generatePicante(result),
