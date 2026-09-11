@@ -18,7 +18,7 @@ function signalText(signal: StorySignal): string {
     case 'mvp-form': return `${n(signal, 'mvps')} MVP en ${n(signal, 'appearances')} partidos`;
     case 'win-rate': return `${n(signal, 'wins')} triunfos en ${n(signal, 'appearances')} partidos`;
     case 'ranking-position': return n(signal, 'rank') === 1 ? `líder con ${n(signal, 'points')} puntos` : `puesto ${n(signal, 'rank')} con ${n(signal, 'points')} puntos`;
-    case 'ranking-movement': return `subió del #${n(signal, 'previousRank')} al #${n(signal, 'rank')}`;
+    case 'ranking-movement': return `pasó del #${n(signal, 'previousRank')} al #${n(signal, 'rank')}`;
     case 'recent-form': return `${n(signal, 'wins')} victorias, ${n(signal, 'draws')} empates y ${n(signal, 'losses')} derrotas en sus últimas ${n(signal, 'appearances')} apariciones`;
     default: return signal.body.replace(/\.$/, '');
   }
@@ -66,16 +66,17 @@ function SeasonExpanded({ seasonId }: { seasonId: string }) {
   if (!edition) return null;
 
   const publishedIds = new Set([edition.headline.id, ...edition.secondary.map(story => story.id)]);
-  const cold = [...(draft?.stories ?? [])]
+  const coldStories = [...(draft?.stories ?? [])]
     .filter(story => !publishedIds.has(story.id) && badness(story) > 0)
-    .sort((a, b) => badness(b) - badness(a))[0];
+    .sort((a, b) => badness(b) - badness(a))
+    .slice(0, 2);
 
   return (
     <article className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0d1422]">
       <header className="border-b border-white/[0.07] px-5 py-5 md:px-8">
         <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-primary"><Newspaper className="h-4 w-4" /> La Previa · {edition.seasonName}</div>
         <h1 className="mt-3 text-2xl font-black uppercase tracking-tight text-white md:text-4xl">Todo listo para la próxima batalla</h1>
-        <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-400">Los que llegan volando, los que vienen haciendo ruido y también el que necesita cortar la malaria.</p>
+        <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-400">Los que llegan volando, los que vienen haciendo ruido y también los que necesitan cortar la malaria.</p>
       </header>
 
       <div className="grid md:grid-cols-2">
@@ -83,6 +84,7 @@ function SeasonExpanded({ seasonId }: { seasonId: string }) {
           <div className="mb-3 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-yellow-500"><Flame className="h-4 w-4" /> El que llega prendido</div>
           <h2 className="text-xl font-black uppercase text-white md:text-2xl"><span className="text-yellow-500">{edition.headline.playerName}</span>: {edition.headline.title.replace(new RegExp(`^${edition.headline.playerName}:?\\s*`, 'i'), '')}</h2>
           <p className="mt-3 text-sm font-medium leading-7 text-slate-300">{storySentence(edition.headline)} Ya no alcanza con decir que está en buen momento: llega a la fecha como el nombre que todos van a querer bajar.</p>
+          {edition.picante && <div className="mt-4 flex items-start gap-2 border-t border-red-500/15 pt-3"><Flame className="mt-0.5 h-3.5 w-3.5 shrink-0 text-red-400" /><p className="text-sm font-semibold leading-6 text-slate-200">{edition.picante}</p></div>}
         </section>
 
         <section className="border-b border-white/[0.07] bg-orange-500/[0.025] px-5 py-6 md:px-8">
@@ -92,13 +94,20 @@ function SeasonExpanded({ seasonId }: { seasonId: string }) {
           </div>
         </section>
 
-        <section className="border-b border-white/[0.07] px-5 py-6 md:col-span-2 md:px-8">
-          <div className="mb-3 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-sky-400"><Snowflake className="h-4 w-4" /> La silla eléctrica</div>
-          {cold ? <><h2 className="text-xl font-black uppercase text-white"><span className="text-sky-400">{cold.playerName}</span> necesita reaccionar</h2><p className="mt-2 max-w-4xl text-sm leading-7 text-slate-300">{storySentence(cold)} La próxima fecha es una buena oportunidad para cortar la malaria antes de que la racha empiece a pesar de verdad.</p></> : <p className="text-sm text-slate-400">Por ahora nadie hizo méritos suficientes para sentarse acá. Una pena para el espectáculo.</p>}
+        <section className="px-5 py-6 md:col-span-2 md:px-8">
+          <div className="mb-4 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-sky-400"><Snowflake className="h-4 w-4" /> La silla eléctrica</div>
+          {coldStories.length > 0 ? (
+            <div className="grid gap-5 md:grid-cols-2">
+              {coldStories.map(story => (
+                <div key={story.id} className="rounded-xl border border-sky-400/10 bg-sky-400/[0.025] p-4">
+                  <h2 className="text-lg font-black uppercase text-white"><span className="text-sky-400">{story.playerName}</span> necesita reaccionar</h2>
+                  <p className="mt-2 text-sm leading-7 text-slate-300">{storySentence(story)} La próxima fecha es una buena oportunidad para cortar la malaria antes de que la racha empiece a pesar de verdad.</p>
+                </div>
+              ))}
+            </div>
+          ) : <p className="text-sm text-slate-400">Por ahora nadie hizo méritos suficientes para sentarse acá. Una pena para el espectáculo.</p>}
         </section>
       </div>
-
-      {edition.picante && <footer className="border-t border-red-500/15 bg-red-500/[0.045] px-5 py-5 md:px-8"><div className="flex items-start gap-3"><Flame className="mt-0.5 h-4 w-4 shrink-0 text-red-400" /><p className="text-sm font-semibold leading-6 text-slate-200">{edition.picante}</p></div></footer>}
     </article>
   );
 }
