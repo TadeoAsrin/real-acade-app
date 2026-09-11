@@ -9,16 +9,16 @@ import type { StoryCandidate, StoryEngineResult, StorySignal } from './story-eng
  * new context, Picante = reaction.
  */
 
-const stableIndex = (key: string, length: number) => {
+const stableIndex = (key: string, length: number, variant = 0) => {
   let hash = 0;
   for (let index = 0; index < key.length; index++) hash = ((hash << 5) - hash + key.charCodeAt(index)) | 0;
-  return Math.abs(hash) % length;
+  return (Math.abs(hash) + Math.abs(variant)) % length;
 };
 
-const pick = (key: string, options: string[]) => options[stableIndex(key, options.length)];
+const pick = (key: string, options: string[], variant = 0) => options[stableIndex(key, options.length, variant)];
 const factNumber = (signal: StorySignal, key: string) => Number(signal.facts[key] ?? 0);
 
-function fromSignal(story: StoryCandidate, signal: StorySignal): string {
+function fromSignal(story: StoryCandidate, signal: StorySignal, variant = 0): string {
   const name = story.playerName;
   const key = `${story.id}:${signal.kind}:reaction-v2`;
 
@@ -28,47 +28,47 @@ function fromSignal(story: StoryCandidate, signal: StorySignal): string {
         `¿Quién le corta el mambo a ${name}?`,
         `${name} no afloja. Ya se está poniendo medio gede esto.`,
         `Que alguno avise cuando ${name} piense perder.`,
-      ]);
+      ], variant);
     case 'losing-streak':
       return pick(key, [
         `${name} necesita encontrar el botón de reinicio urgente.`,
         `La próxima para ${name} ya viene con olor a final.`,
         `${name} está para resurrección o más leña al fuego.`,
-      ]);
+      ], variant);
     case 'recent-goals':
       return pick(key, [
         `${name} anda con la mira calibrada. No le den medio metro.`,
         `${name} la está viendo bastante grande. Arquero avisado vale por dos.`,
         `${name} viene facturando lindo. Mejor no regalarle una.`,
-      ]);
+      ], variant);
     case 'mvp-form':
       return pick(key, [
         `${name} está pidiendo cámara propia.`,
         `Perfil bajo para ${name}, justamente, no estaría siendo.`,
         `${name} se acostumbró a salir en la foto. Meeeeta figura.`,
-      ]);
+      ], variant);
     case 'ranking-movement': {
       const movement = factNumber(signal, 'movement');
       return movement > 0
         ? pick(key, [
             `${name} apareció por el retrovisor. Permiso, que viene subiendo.`,
             `${name} viene metiendo presión desde abajo. Se picó la tabla.`,
-          ])
+          ], variant)
         : pick(key, [
             `${name} perdió terreno. La tabla no espera a nadie.`,
             `${name} quedó para remar, hermano.`,
-          ]);
+          ], variant);
     }
     case 'ranking-position':
       return pick(key, [
         `El que quiera bajar a ${name} va a tener que ir a buscarlo.`,
         `${name} tiene a varios mirando para arriba. Linda presión para la próxima.`,
-      ]);
+      ], variant);
     case 'win-rate':
       return pick(key, [
         `Bastante incómodo tener a ${name} enfrente últimamente.`,
         `Los numeritos de ${name} ya empiezan a meter miedo.`,
-      ]);
+      ], variant);
     case 'recent-form': {
       const losses = factNumber(signal, 'losses');
       const wins = factNumber(signal, 'wins');
@@ -83,9 +83,9 @@ function fromSignal(story: StoryCandidate, signal: StorySignal): string {
   }
 }
 
-export function generatePicante(result: StoryEngineResult): string {
+export function generatePicante(result: StoryEngineResult, variant = 0): string {
   if (!result.headlineId) return '';
   const headline = result.candidates.find(candidate => candidate.id === result.headlineId);
   if (!headline?.signals.length) return '';
-  return fromSignal(headline, headline.signals[0]);
+  return fromSignal(headline, headline.signals[0], variant);
 }
