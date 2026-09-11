@@ -1,38 +1,92 @@
 import { Eye, Flame, Newspaper } from 'lucide-react';
 import type { PublishedPrevia } from '@/lib/previa/edition';
+import type { StorySignal } from '@/lib/previa/story-engine';
 
-function compactFact(text: string) {
-  return text
-    .replace(/^Acumula\s+/i, '')
-    .replace(/\s+en sus participaciones de esta temporada\.?/i, '')
-    .replace(/Recibió\s+(\d+)\s+premios? MVP en sus\s+(\d+)\s+participaciones de ese período\.?/i, '$1 MVP en las últimas $2.')
-    .replace(/Marcó\s+(\d+)\s+goles en\s+(\d+)\s+participaciones dentro de las últimas cinco fechas jugadas\.?/i, '$1 goles en las últimas $2.')
-    .replace(/En las últimas cinco fechas jugadas participó\s+(\d+)\s+veces:\s*(\d+)\s+victorias?,\s*(\d+)\s+empates? y\s*(\d+)\s+derrotas?\.?/i, '$2G · $3E · $4P en las últimas $1.')
-    .trim();
+function factNumber(signal: StorySignal, key: string): number {
+  return Number(signal.facts[key] ?? 0);
 }
 
-function firstPunch(body: string) {
-  const parts = body.split(/(?<=\.)\s+/).map(compactFact).filter(Boolean);
-  return parts.slice(0, 2).join(' · ').replace(/\.\s*·/g, ' ·').replace(/\.$/, '');
-}
-
-function headlineSupport(edition: PublishedPrevia): string {
-  const supportingSignals = edition.headline.signals.slice(1);
-  if (supportingSignals.length) {
-    return firstPunch(supportingSignals.slice(0, 2).map(signal => signal.body).join(' '));
+function signalCopy(signal: StorySignal): string {
+  switch (signal.kind) {
+    case 'winning-streak':
+      return `${factNumber(signal, 'streak')} victorias seguidas`;
+    case 'losing-streak':
+      return `${factNumber(signal, 'streak')} derrotas seguidas`;
+    case 'recent-form': {
+      const appearances = factNumber(signal, 'appearances');
+      return `${factNumber(signal, 'wins')}G · ${factNumber(signal, 'draws')}E · ${factNumber(signal, 'losses')}P en ${appearances}`;
+    }
+    case 'recent-goals':
+      return `${factNumber(signal, 'goals')} goles en ${factNumber(signal, 'appearances')} partidos`;
+    case 'mvp-form':
+      return `${factNumber(signal, 'mvps')} MVP en ${factNumber(signal, 'appearances')} partidos`;
+    case 'ranking-position': {
+      const rank = factNumber(signal, 'rank');
+      const points = factNumber(signal, 'points');
+      return rank === 1 ? `Líder · ${points} pts` : `#${rank} en la tabla · ${points} pts`;
+    }
+    case 'ranking-movement': {
+      const previous = factNumber(signal, 'previousRank');
+      const rank = factNumber(signal, 'rank');
+      return `#${previous} → #${rank}`;
+    }
+    case 'win-rate':
+      return `${factNumber(signal, 'wins')} triunfos en ${factNumber(signal, 'appearances')} partidos`;
+    default:
+      return signal.body.replace(/\.$/, '');
   }
-  return '';
+}
+
+function uniqueFacts(signals: StorySignal[], limit = 2): string[] {
+  const seen = new Set<string>();
+  const facts: string[] = [];
+  for (const signal of signals) {
+    const copy = signalCopy(signal);
+    const key = copy.toLocaleLowerCase('es-AR');
+    if (seen.has(key)) continue;
+    seen.add(key);
+    facts.push(copy);
+    if (facts.length === limit) break;
+  }
+  return facts;
+}
+
+function HighlightNumbers({ text }: { text: string }) {
+  const parts = text.split(/(#?\d+(?:[.,]\d+)?%?)/g);
+  return (
+    <>
+      {parts.map((part, index) =>
+        /#?\d/.test(part)
+          ? <span key={`${part}-${index}`} className="font-extrabold text-orange-300">{part}</span>
+          : <span key={`${part}-${index}`}>{part}</span>
+      )}
+    </>
+  );
+}
+
+function FactLine({ facts, className = '' }: { facts: string[]; className?: string }) {
+  return (
+    <span className={className}>
+      {facts.map((fact, index) => (
+        <span key={`${fact}-${index}`}>
+          {index > 0 && <span className="mx-1.5 text-slate-600">·</span>}
+          <HighlightNumbers text={fact} />
+        </span>
+      ))}
+    </span>
+  );
 }
 
 function HeadlineTitle({ playerName, title }: { playerName: string; title: string }) {
-  const prefix = `${playerName}:`;
-  if (!title.toLocaleLowerCase('es-AR').startsWith(prefix.toLocaleLowerCase('es-AR'))) {
-    return <>{title}</>;
-  }
+  const lowerTitle = title.toLocaleLowerCase('es-AR');
+  const lowerName = playerName.toLocaleLowerCase('es-AR');
+  if (!lowerTitle.startsWith(lowerName)) return <>{title}</>;
+
+  const rest = title.slice(playerName.length);
   return (
     <>
-      <span className="text-orange-300">{title.slice(0, prefix.length)}</span>
-      {title.slice(prefix.length)}
+      <span className="text-orange-300">{title.slice(0, playerName.length)}</span>
+      <span className="text-white">{rest}</span>
     </>
   );
 }
@@ -50,7 +104,7 @@ function PicanteCopy({ playerName, text }: { playerName: string; text: string })
 }
 
 export function EditionView({ edition }: { edition: PublishedPrevia }) {
-  const support = headlineSupport(edition);
+  const headlineFacts = uniqueFacts(edition.headline.signals.slice(1), 2);
 
   return (
     <article aria-label="La Previa publicada" className="relative z-10 overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0d1422]">
@@ -68,18 +122,28 @@ export function EditionView({ edition }: { edition: PublishedPrevia }) {
           <h2 className="text-2xl font-black uppercase leading-none tracking-tight text-white md:text-3xl">
             <HeadlineTitle playerName={edition.headline.playerName} title={edition.headline.title} />
           </h2>
-          {support && <p className="mt-3 text-base font-bold leading-snug text-slate-300">{support}</p>}
+          {headlineFacts.length > 0 && (
+            <p className="mt-3 text-base font-bold leading-snug text-slate-300">
+              <FactLine facts={headlineFacts} />
+            </p>
+          )}
         </section>
 
         <section className="border-t border-white/[0.07] bg-white/[0.018] px-5 py-5 lg:border-l lg:border-t-0">
           <div className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500"><Eye className="h-3.5 w-3.5" /> Ojo con estos</div>
           <div className="space-y-3">
-            {edition.secondary.slice(0, 2).map(story => (
-              <div key={story.id} className="flex items-start gap-2">
-                <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                <p className="text-sm font-semibold leading-snug text-slate-200"><span className="font-bold text-orange-300">{story.playerName}</span> · {firstPunch(story.body)}</p>
-              </div>
-            ))}
+            {edition.secondary.slice(0, 2).map(story => {
+              const facts = uniqueFacts(story.signals, 2);
+              return (
+                <div key={story.id} className="flex items-start gap-2">
+                  <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-orange-400/80" />
+                  <p className="text-sm font-semibold leading-snug text-slate-200">
+                    <span className="font-bold text-orange-300">{story.playerName}</span>
+                    {facts.length > 0 && <><span className="mx-1.5 text-slate-600">·</span><FactLine facts={facts} /></>}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         </section>
       </div>
