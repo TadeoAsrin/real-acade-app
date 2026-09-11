@@ -11,7 +11,7 @@ import {
   SidebarContent,
   useSidebar,
 } from "../ui/sidebar";
-import { Newspaper, Goal, BarChart3, Users, LogOut, Trophy, Dices, ArrowLeftRight, Swords, Image as ImageIcon, ShieldCheck, LogIn } from "lucide-react";
+import { Newspaper, Goal, BarChart3, Users, LogOut, Trophy, ArrowLeftRight, Image as ImageIcon, ShieldCheck, LogIn } from "lucide-react";
 import Link from "next/link";
 import { useAuth, useUser, useFirestore, useMemoFirebase, useDoc, useCollection } from "@/firebase";
 import { signOut } from "firebase/auth";
@@ -34,11 +34,27 @@ const menuItems = [
 ];
 
 const tacticalItems = [
-  { href: "/admin/previa", label: "EDITAR LA PREVIA", icon: Newspaper },
-  { href: "/hierarchy", label: "ORDEN DE MANDO", icon: ShieldCheck },
-  { href: "/admin/management", label: "GESTIÓN DE CLUB", icon: ShieldCheck },
-  { href: "/drafts/new", label: "PAN Y QUESO", icon: Swords },
-  { href: "/generator", label: "EQUILIBRADOR PRO", icon: Dices },
+  {
+    href: "/admin/previa",
+    label: "EDITAR LA PREVIA",
+    icon: Newspaper,
+    color: "text-orange-400 hover:text-orange-300",
+    active: "bg-orange-500/10 text-orange-400",
+  },
+  {
+    href: "/hierarchy",
+    label: "ORDEN DE MANDO",
+    icon: ShieldCheck,
+    color: "text-emerald-400 hover:text-emerald-300",
+    active: "bg-emerald-500/10 text-emerald-400",
+  },
+  {
+    href: "/admin/management",
+    label: "GESTIÓN DE CLUB",
+    icon: ShieldCheck,
+    color: "text-amber-400 hover:text-amber-300",
+    active: "bg-amber-500/10 text-amber-400",
+  },
 ];
 
 export function AppSidebar() {
@@ -130,7 +146,14 @@ export function AppSidebar() {
                 const active = pathname.startsWith(item.href);
                 return (
                   <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton asChild isActive={active} className={navClasses(active)}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={active}
+                      className={cn(
+                        "py-5 px-4 rounded-xl transition-all duration-200 hover:bg-white/[0.045]",
+                        active ? item.active : item.color
+                      )}
+                    >
                       <Link href={item.href} onClick={handleNavClick}>
                         <item.icon className="h-4 w-4" />
                         <span className="font-semibold text-[10px] tracking-[0.12em] uppercase">{item.label}</span>
