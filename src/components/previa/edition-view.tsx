@@ -85,7 +85,7 @@ function HeadlineTitle({ playerName, title }: { playerName: string; title: strin
   const rest = title.slice(playerName.length);
   return (
     <>
-      <span className="text-emerald-400">{title.slice(0, playerName.length)}</span>
+      <span className="text-yellow-500">{title.slice(0, playerName.length)}</span>
       <span className="text-white">{rest}</span>
     </>
   );
@@ -118,28 +118,28 @@ export function EditionView({ edition }: { edition: PublishedPrevia }) {
 
       <div className="grid gap-0 lg:grid-cols-[1.45fr_1fr]">
         <section className="px-5 py-5 md:px-7">
-          <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-400">🔥 Historia de la fecha</p>
+          <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-yellow-500">🔥 Historia de la fecha</p>
           <h2 className="text-2xl font-black uppercase leading-none tracking-tight text-white md:text-3xl">
             <HeadlineTitle playerName={edition.headline.playerName} title={edition.headline.title} />
           </h2>
           {headlineFacts.length > 0 && (
             <p className="mt-3 text-base font-bold leading-snug text-slate-300">
-              <FactLine facts={headlineFacts} accentClass="text-emerald-400" />
+              <FactLine facts={headlineFacts} accentClass="text-yellow-500" />
             </p>
           )}
         </section>
 
-        <section className="border-t border-white/[0.07] bg-violet-500/[0.025] px-5 py-5 lg:border-l lg:border-t-0">
-          <div className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-violet-400"><Eye className="h-3.5 w-3.5" /> Ojo con estos</div>
+        <section className="border-t border-white/[0.07] bg-orange-500/[0.025] px-5 py-5 lg:border-l lg:border-t-0">
+          <div className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-orange-500"><Eye className="h-3.5 w-3.5" /> Ojo con estos</div>
           <div className="space-y-3">
             {edition.secondary.slice(0, 2).map(story => {
               const facts = uniqueFacts(story.signals, 2);
               return (
                 <div key={story.id} className="flex items-start gap-2">
-                  <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-violet-400" />
+                  <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-orange-500" />
                   <p className="text-sm font-semibold leading-snug text-slate-200">
-                    <span className="font-bold text-violet-300">{story.playerName}</span>
-                    {facts.length > 0 && <><span className="mx-1.5 text-slate-600">·</span><FactLine facts={facts} accentClass="text-violet-300" /></>}
+                    <span className="font-bold text-orange-500">{story.playerName}</span>
+                    {facts.length > 0 && <><span className="mx-1.5 text-slate-600">·</span><FactLine facts={facts} accentClass="text-orange-500" /></>}
                   </p>
                 </div>
               );
