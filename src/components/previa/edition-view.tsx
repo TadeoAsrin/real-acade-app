@@ -1,58 +1,61 @@
 import { Eye, Flame, Newspaper } from 'lucide-react';
 import type { PublishedPrevia } from '@/lib/previa/edition';
 
+function compactFact(text: string) {
+  return text
+    .replace(/^Acumula\s+/i, '')
+    .replace(/\s+en sus participaciones de esta temporada\.?/i, '')
+    .replace(/Recibió\s+(\d+)\s+premios? MVP en sus\s+(\d+)\s+participaciones de ese período\.?/i, '$1 MVP en las últimas $2.')
+    .replace(/Marcó\s+(\d+)\s+goles en\s+(\d+)\s+participaciones dentro de las últimas cinco fechas jugadas\.?/i, '$1 goles en las últimas $2.')
+    .replace(/En las últimas cinco fechas jugadas participó\s+(\d+)\s+veces:\s*(\d+)\s+victorias?,\s*(\d+)\s+empates? y\s*(\d+)\s+derrotas?\.?/i, '$2G · $3E · $4P en las últimas $1.')
+    .trim();
+}
+
+function firstPunch(body: string) {
+  const parts = body.split(/(?<=\.)\s+/).map(compactFact).filter(Boolean);
+  return parts.slice(0, 2).join(' · ').replace(/\.\s*·/g, ' ·').replace(/\.$/, '');
+}
+
 export function EditionView({ edition }: { edition: PublishedPrevia }) {
   return (
-    <section aria-label="La Previa publicada" className="relative z-10 space-y-4">
-      <article className="overflow-hidden rounded-3xl border border-white/[0.08] bg-[#0d1422] shadow-2xl">
-        <div className="border-b border-white/[0.07] px-5 py-4 md:px-7">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-primary">
-              <Newspaper className="h-4 w-4" />
-              <span>La Previa · {edition.seasonName}</span>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {new Date(edition.publishedAt).toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Cordoba' })}
-            </p>
-          </div>
+    <article aria-label="La Previa publicada" className="relative z-10 overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0d1422]">
+      <div className="flex items-center justify-between gap-3 border-b border-white/[0.07] px-5 py-3">
+        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+          <Newspaper className="h-3.5 w-3.5" />
+          <span>La Previa · {edition.seasonName}</span>
         </div>
+        <span className="text-[10px] text-muted-foreground">{new Date(edition.publishedAt).toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Cordoba' })}</span>
+      </div>
 
-        <div className="space-y-4 px-5 py-7 md:px-8 md:py-9">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-orange-400">🔥 Historia de la fecha</p>
-          <h2 className="max-w-4xl text-3xl font-black uppercase leading-[0.96] tracking-tight text-white md:text-5xl">
-            {edition.headline.title}
-          </h2>
-          <p className="max-w-3xl text-lg font-medium leading-relaxed text-slate-300 md:text-xl">
-            {edition.headline.body}
-          </p>
-        </div>
+      <div className="grid gap-0 lg:grid-cols-[1.45fr_1fr]">
+        <section className="px-5 py-5 md:px-7">
+          <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-orange-400">🔥 Historia de la fecha</p>
+          <h2 className="text-2xl font-black uppercase leading-none tracking-tight text-white md:text-3xl">{edition.headline.title}</h2>
+          <p className="mt-3 text-base font-bold leading-snug text-slate-300">{firstPunch(edition.headline.body)}</p>
+        </section>
 
-        {!!edition.secondary.length && (
-          <div className="border-t border-white/[0.07] bg-white/[0.02] px-5 py-5 md:px-8">
-            <div className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
-              <Eye className="h-4 w-4" /> Para mirar esta fecha
-            </div>
-            <div className="grid gap-3 md:grid-cols-2">
-              {edition.secondary.slice(0, 2).map(story => (
-                <article key={story.id} className="rounded-2xl border border-white/[0.07] bg-black/10 p-4">
-                  <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-primary">{story.playerName}</p>
-                  <h3 className="text-base font-extrabold text-white">{story.title}</h3>
-                  <p className="mt-1 text-sm leading-relaxed text-slate-400">{story.body}</p>
-                </article>
-              ))}
-            </div>
+        <section className="border-t border-white/[0.07] bg-white/[0.018] px-5 py-5 lg:border-l lg:border-t-0">
+          <div className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500"><Eye className="h-3.5 w-3.5" /> Ojo con estos</div>
+          <div className="space-y-3">
+            {edition.secondary.slice(0, 2).map(story => (
+              <div key={story.id} className="flex items-start gap-2">
+                <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                <p className="text-sm font-semibold leading-snug text-slate-200"><span className="text-white">{story.playerName}</span> · {firstPunch(story.body)}</p>
+              </div>
+            ))}
           </div>
-        )}
-      </article>
+        </section>
+      </div>
 
       {edition.picante && (
-        <aside className="rounded-2xl border border-red-500/20 bg-red-500/[0.05] p-5">
-          <h3 className="mb-2 flex items-center gap-2 font-bold text-red-400">
-            <Flame className="h-5 w-5" /> 🌶️ Picante de la Fecha
-          </h3>
-          <p className="text-sm font-medium leading-relaxed text-slate-200">{edition.picante}</p>
+        <aside className="flex items-start gap-3 border-t border-red-500/15 bg-red-500/[0.045] px-5 py-4 md:px-7">
+          <Flame className="mt-0.5 h-4 w-4 shrink-0 text-red-400" />
+          <div className="min-w-0">
+            <span className="mr-2 text-[10px] font-black uppercase tracking-[0.16em] text-red-400">🌶️ Picante</span>
+            <span className="text-sm font-semibold text-slate-200">{edition.picante}</span>
+          </div>
         </aside>
       )}
-    </section>
+    </article>
   );
 }
