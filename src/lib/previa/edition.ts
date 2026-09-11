@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { STORY_KINDS, type StoryCandidate, type StoryEngineResult } from './story-engine';
 import { generatePicante } from './picante-engine';
 
-export const PREVIA_GENERATION_VERSION = 3;
+export const PREVIA_GENERATION_VERSION = 4;
 
 export type EditorialChoice = 'headline' | 'secondary' | 'available' | 'discarded';
 export type EditorialStory = StoryCandidate & { choice: EditorialChoice };
@@ -15,6 +15,7 @@ export type PreviaDraft = {
   generatedAt: string;
   updatedAt: string;
   sourceMatchIds: string[];
+  sourceFingerprint?: string;
   minimumEligibleMatches: number;
   stories: EditorialStory[];
   picante: string;
@@ -43,7 +44,7 @@ const draftSchema = z.object({
   seasonId: text(200), seasonName: text(200), status: z.enum(['draft', 'published']),
   revision: z.number().int().nonnegative(), generationVersion: z.number().int().positive().optional(),
   generatedAt: z.string().datetime(), updatedAt: z.string().datetime(),
-  sourceMatchIds: z.array(z.string()), minimumEligibleMatches: z.number().int().min(3),
+  sourceMatchIds: z.array(z.string()), sourceFingerprint: z.string().optional(), minimumEligibleMatches: z.number().int().min(3),
   stories: z.array(storySchema).max(300), picante: z.string().trim().max(600),
 });
 export function validateDraft(draft: PreviaDraft): PreviaDraft {
@@ -73,7 +74,12 @@ export function chooseStory(draft: PreviaDraft, id: string, choice: EditorialCho
 }
 export function prepareEdition(draft: PreviaDraft, expectedRevision: number, currentRevision: number, action: 'save' | 'publish', now: string) {
   if (expectedRevision !== currentRevision) throw new Error('Otra sesión actualizó esta edición. Recargá el borrador antes de guardar.');
-  const validated = validateDraft(draft);
+  const validated = draftSchema.parse(draft);
+  if (new Set(validated.stories.map(s => s.id)).size !== validated.stories.length) throw new Error('Hay historias duplicadas.');
+  if (new Set(validated.stories.map(s => `${s.playerId}:${s.context}`)).size !== validated.stories.length) throw new Error('Hay historias superpuestas.');
+  if (validated.stories.some(s => s.seasonId !== validated.seasonId)) throw new Error('Las historias deben pertenecer a esta temporada.');
+  if (validated.stories.filter(s => s.choice === 'headline').length > 1) throw new Error('Seleccioná un único titular.');
+  if (validated.stories.filter(s => s.choice === 'secondary').length > 3) throw new Error('Podés elegir hasta tres historias secundarias.');
   const saved: PreviaDraft = { ...validated, revision: currentRevision + 1, updatedAt: now, status: action === 'publish' ? 'published' : 'draft' };
   if (action === 'save') return { draft: saved, published: null };
   const headline = saved.stories.find(s => s.choice === 'headline');
