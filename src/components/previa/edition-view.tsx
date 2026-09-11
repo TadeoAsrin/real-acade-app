@@ -31,7 +31,7 @@ function HeadlineTitle({ playerName, title }: { playerName: string; title: strin
   }
   return (
     <>
-      <span className="text-primary">{title.slice(0, prefix.length)}</span>
+      <span className="text-orange-300">{title.slice(0, prefix.length)}</span>
       {title.slice(prefix.length)}
     </>
   );
@@ -43,7 +43,7 @@ function PicanteCopy({ playerName, text }: { playerName: string; text: string })
   return (
     <>
       {text.slice(0, index)}
-      <span className="font-bold text-primary">{text.slice(index, index + playerName.length)}</span>
+      <span className="font-bold text-orange-300">{text.slice(index, index + playerName.length)}</span>
       {text.slice(index + playerName.length)}
     </>
   );
@@ -77,7 +77,7 @@ export function EditionView({ edition }: { edition: PublishedPrevia }) {
             {edition.secondary.slice(0, 2).map(story => (
               <div key={story.id} className="flex items-start gap-2">
                 <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                <p className="text-sm font-semibold leading-snug text-slate-200"><span className="font-bold text-primary">{story.playerName}</span> · {firstPunch(story.body)}</p>
+                <p className="text-sm font-semibold leading-snug text-slate-200"><span className="font-bold text-orange-300">{story.playerName}</span> · {firstPunch(story.body)}</p>
               </div>
             ))}
           </div>
