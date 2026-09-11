@@ -4,6 +4,7 @@ import * as React from 'react';
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { Header } from "@/components/layout/header";
+import { AutoPreviaPublisher } from '@/components/previa/auto-previa-publisher';
 import { SeasonProvider } from '@/context/season-context';
 
 /**
@@ -19,6 +20,7 @@ export default function AppLayout({
 }) {
   return (
     <SeasonProvider>
+      <AutoPreviaPublisher />
       <SidebarProvider>
         <div className="flex h-screen w-full overflow-hidden bg-background">
           <AppSidebar />
