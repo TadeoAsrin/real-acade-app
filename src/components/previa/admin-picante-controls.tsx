@@ -21,7 +21,6 @@ export function AdminPicanteControls() {
   const [text, setText] = React.useState('');
   const [busy, setBusy] = React.useState(false);
   const [message, setMessage] = React.useState('');
-  const [variant, setVariant] = React.useState(1);
 
   React.useEffect(() => {
     let active = true;
@@ -65,10 +64,18 @@ export function AdminPicanteControls() {
       const players = playersSnapshot.docs.map(item => ({ id: item.id, ...item.data() } as Player));
       const matches = matchesSnapshot.docs.map(item => ({ id: item.id, ...item.data() } as Match));
       const generation = generateStories(players, matches, selectedSeasonId);
-      const nextPicante = generatePicante(generation, variant);
-      if (!nextPicante) throw new Error('No se pudo generar otra frase.');
+
+      let nextPicante = '';
+      for (let variant = 1; variant <= 12; variant++) {
+        const candidate = generatePicante(generation, variant);
+        if (candidate && candidate !== draft.picante) {
+          nextPicante = candidate;
+          break;
+        }
+      }
+      if (!nextPicante) throw new Error('No hay otra frase disponible para esta historia.');
+
       const saved = await savePrevia(firestore, { ...draft, picante: nextPicante }, 'publish');
-      setVariant(value => value + 1);
       setText(saved.picante);
       setMessage('Picante actualizado.');
       window.location.reload();
