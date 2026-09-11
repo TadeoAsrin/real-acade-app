@@ -2,8 +2,6 @@
 
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { createDraft, prepareEdition, type PreviaDraft } from '@/lib/previa/edition';
 import { generateStories } from '@/lib/previa/story-engine';
@@ -45,9 +43,7 @@ export function PreviaEditor({ seasonId, seasonName, players, matches, initialDr
   }
 
   function refreshFromData() {
-    const generated = createDraft(generation, seasonName, new Date().toISOString(), draft?.revision ?? 0);
-    generated.picante = draft?.picante ?? '';
-    edit(generated);
+    edit(createDraft(generation, seasonName, new Date().toISOString(), draft?.revision ?? 0));
   }
 
   async function save(action: 'save' | 'publish') {
@@ -85,7 +81,7 @@ export function PreviaEditor({ seasonId, seasonName, players, matches, initialDr
           <div>
             <h1 className="text-3xl font-extrabold uppercase tracking-tight md:text-5xl">La Previa</h1>
             <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-              Real Acade analiza la temporada y arma automáticamente la mejor previa disponible. Vos solo agregás el Picante y publicás.
+              Real Acade elige la mejor historia y genera también el Picante con su propia voz. Al cargar un partido, la edición se actualiza y publica automáticamente.
             </p>
           </div>
           <Badge variant="outline">{dirty ? 'Cambios sin guardar' : draft?.status === 'published' ? 'Publicada' : 'Lista para revisar'}</Badge>
@@ -103,24 +99,8 @@ export function PreviaEditor({ seasonId, seasonName, players, matches, initialDr
 
       {previewEdition && <EditionView edition={previewEdition} />}
 
-      {draft && (
-        <div className="rounded-2xl border border-red-500/20 bg-red-500/[0.04] p-5 space-y-3">
-          <Label htmlFor="picante" className="text-lg font-semibold text-red-400">🌶️ Picante de la Fecha</Label>
-          <p className="text-xs text-muted-foreground">Comentario manual y opcional. Acá entra lo que solo sabe el grupo.</p>
-          <Textarea
-            id="picante"
-            rows={3}
-            maxLength={280}
-            value={draft.picante}
-            placeholder="Ej: Hoy la pelota no se esconde..."
-            onChange={e => edit({ ...draft, picante: e.target.value })}
-          />
-          <p className="text-right text-xs text-muted-foreground">{draft.picante.length}/280</p>
-        </div>
-      )}
-
       <div className="flex flex-wrap gap-3">
-        <Button variant="outline" disabled={busy} onClick={refreshFromData}>Actualizar con datos</Button>
+        <Button variant="outline" disabled={busy} onClick={refreshFromData}>Regenerar ahora</Button>
         <Button variant="outline" disabled={!draft || busy} onClick={() => void save('save')}>Guardar borrador</Button>
         <Button disabled={!previewEdition || busy} onClick={() => void save('publish')}>
           {busy ? 'Publicando...' : 'Publicar La Previa'}
