@@ -151,10 +151,7 @@ export function EditionView({ edition }: { edition: PublishedPrevia }) {
       {edition.picante && (
         <aside className="flex items-start gap-3 border-t border-red-500/15 bg-red-500/[0.045] px-5 py-4 md:px-7">
           <Flame className="mt-0.5 h-4 w-4 shrink-0 text-red-400" />
-          <div className="min-w-0">
-            <span className="mr-2 text-[10px] font-black uppercase tracking-[0.16em] text-red-400">🌶️ Picante</span>
-            <span className="text-sm font-semibold text-slate-200"><PicanteCopy playerName={edition.headline.playerName} text={edition.picante} /></span>
-          </div>
+          <span className="text-sm font-semibold text-slate-200"><PicanteCopy playerName={edition.headline.playerName} text={edition.picante} /></span>
         </aside>
       )}
     </article>
