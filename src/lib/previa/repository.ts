@@ -2,6 +2,7 @@ import { doc, runTransaction, type Firestore } from 'firebase/firestore';
 import type { Match, Player, Season } from '../definitions';
 import { createDraft, prepareEdition, type PreviaDraft } from './edition';
 import { generateStories } from './story-engine';
+import { selectColdPlayers } from './cold-form';
 
 export function buildPreviaSourceFingerprint(matches: Match[], seasonId: string): string {
   const normalized = matches
@@ -68,6 +69,7 @@ export async function regenerateAndPublishPrevia(
     const generated = {
       ...createDraft(result, season.name, now, revision),
       sourceFingerprint: buildPreviaSourceFingerprint(matches, season.id),
+      coldStories: selectColdPlayers(players, matches, season.id, 2),
     };
     const prepared = prepareEdition(generated, revision, revision, 'publish', now);
 
