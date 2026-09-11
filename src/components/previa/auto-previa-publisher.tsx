@@ -6,10 +6,7 @@ import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebas
 import { useSeason } from '@/context/season-context';
 import type { Match, Player } from '@/lib/definitions';
 import { PREVIA_GENERATION_VERSION, type PreviaDraft } from '@/lib/previa/edition';
-import { regenerateAndPublishPrevia } from '@/lib/previa/repository';
-
-const sameIds = (a: string[], b: string[]) =>
-  a.length === b.length && a.every((id, index) => id === b[index]);
+import { buildPreviaSourceFingerprint, regenerateAndPublishPrevia } from '@/lib/previa/repository';
 
 /**
  * Background editorial worker for admins.
@@ -71,19 +68,16 @@ export function AutoPreviaPublisher() {
         for (const season of seasons) {
           if (!active) return;
 
-          const sourceMatchIds = matches
-            .filter(match => match.seasonId === season.id && (match.teamAScore > 0 || match.teamBScore > 0))
-            .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime() || (a.matchNumber ?? 0) - (b.matchNumber ?? 0) || a.id.localeCompare(b.id))
-            .map(match => match.id);
+          const seasonMatches = matches.filter(match => match.seasonId === season.id && (match.teamAScore > 0 || match.teamBScore > 0));
+          if (!seasonMatches.length) continue;
 
-          if (!sourceMatchIds.length) continue;
-
+          const currentFingerprint = buildPreviaSourceFingerprint(matches, season.id);
           const draftSnapshot = await getDoc(doc(firestore, 'previa_drafts', season.id));
           const currentDraft = draftSnapshot.exists() ? draftSnapshot.data() as PreviaDraft : null;
-          const currentIds = currentDraft?.sourceMatchIds ?? [];
           const isCurrentEngine = currentDraft?.generationVersion === PREVIA_GENERATION_VERSION;
+          const isCurrentData = currentDraft?.sourceFingerprint === currentFingerprint;
 
-          if (isCurrentEngine && sameIds(sourceMatchIds, currentIds)) continue;
+          if (isCurrentEngine && isCurrentData) continue;
 
           await regenerateAndPublishPrevia(firestore, players, matches, season);
         }
