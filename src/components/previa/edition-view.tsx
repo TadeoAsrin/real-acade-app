@@ -1,4 +1,4 @@
-import { Eye, Flame, Newspaper } from 'lucide-react';
+import { Eye, Newspaper } from 'lucide-react';
 import type { PublishedPrevia } from '@/lib/previa/edition';
 import type { StorySignal } from '@/lib/previa/story-engine';
 
@@ -91,18 +91,6 @@ function HeadlineTitle({ playerName, title }: { playerName: string; title: strin
   );
 }
 
-function PicanteCopy({ playerName, text }: { playerName: string; text: string }) {
-  const index = text.toLocaleLowerCase('es-AR').indexOf(playerName.toLocaleLowerCase('es-AR'));
-  if (index < 0) return <>{text}</>;
-  return (
-    <>
-      {text.slice(0, index)}
-      <span className="font-extrabold text-red-400">{text.slice(index, index + playerName.length)}</span>
-      {text.slice(index + playerName.length)}
-    </>
-  );
-}
-
 export function EditionView({ edition }: { edition: PublishedPrevia }) {
   const headlineFacts = uniqueFacts(edition.headline.signals.slice(1), 2);
 
@@ -147,13 +135,6 @@ export function EditionView({ edition }: { edition: PublishedPrevia }) {
           </div>
         </section>
       </div>
-
-      {edition.picante && (
-        <aside className="flex items-start gap-3 border-t border-red-500/15 bg-red-500/[0.045] px-5 py-4 md:px-7">
-          <Flame className="mt-0.5 h-4 w-4 shrink-0 text-red-400" />
-          <span className="text-sm font-semibold text-slate-200"><PicanteCopy playerName={edition.headline.playerName} text={edition.picante} /></span>
-        </aside>
-      )}
     </article>
   );
 }
