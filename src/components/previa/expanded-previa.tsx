@@ -66,7 +66,6 @@ function SeasonExpanded({ seasonId }: { seasonId: string }) {
           <div className="mb-3 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-yellow-500"><Flame className="h-4 w-4" /> El que llega prendido</div>
           <h2 className="text-xl font-black uppercase text-white md:text-2xl"><span className="text-yellow-500">{edition.headline.playerName}</span>: {edition.headline.title.replace(new RegExp(`^${edition.headline.playerName}:?\\s*`, 'i'), '')}</h2>
           <p className="mt-3 text-sm font-medium leading-7 text-slate-300">{storySentence(edition.headline)} Ya no alcanza con decir que está en buen momento: llega a la fecha como el nombre que todos van a querer bajar.</p>
-          {edition.picante && <div className="mt-4 flex items-start gap-2 border-t border-red-500/15 pt-3"><Flame className="mt-0.5 h-3.5 w-3.5 shrink-0 text-red-400" /><p className="text-sm font-semibold leading-6 text-slate-200">{edition.picante}</p></div>}
         </section>
 
         <section className="border-b border-white/[0.07] bg-orange-500/[0.025] px-5 py-6 md:px-8">
