@@ -81,7 +81,7 @@ export function PreviaEditor({ seasonId, seasonName, players, matches, initialDr
           <div>
             <h1 className="text-3xl font-extrabold uppercase tracking-tight md:text-5xl">La Previa</h1>
             <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-              Real Acade elige la mejor historia y genera también el Picante con su propia voz. Al cargar un partido, la edición se actualiza y publica automáticamente.
+              Real Acade elige la mejor historia de la fecha. Al cargar un partido, la edición se actualiza y publica automáticamente.
             </p>
           </div>
           <Badge variant="outline">{dirty ? 'Cambios sin guardar' : draft?.status === 'published' ? 'Publicada' : 'Lista para revisar'}</Badge>
